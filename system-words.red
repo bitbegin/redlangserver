@@ -1,13 +1,11 @@
 Red [
-	Title:   "Red parse for Red language server"
+	Title:   "Red system-words for Red language server"
 	Author:  "bitbegin"
-	File: 	 %parse.red
+	File: 	 %system-words.red
 	Tabs:	 4
 	Rights:  "Copyright (C) 2011-2019 Red Foundation. All rights reserved."
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
-
-#include %error.red
 
 system-words: context [
 	get-words: has [sys words] [
@@ -21,8 +19,6 @@ system-words: context [
 		words
 	]
 	system-words: get-words
-
-	throw-error: register-error 'system-words
 
 	get-word-info: func [word [word!]][
 		either find system-words word [
@@ -41,20 +37,25 @@ system-words: context [
 		forall info [
 			trim/head info/1
 			if parse info/1 [to word-char copy type thru #"!" e: thru end][
-				append out to word! type
+				unless empty? type [
+					append out to word! type
+				]
 			]
 		]
 		out
 	]
 
-	get-typeset: func [type [word!] /local info out][
+	get-typeset: func [type [word!] /local info out types blk][
 		info: get-word-info type
 		out: make block! 30
-		if parse info [thru "make typeset! [" copy types to "]" thru end][
-			types: split types ws
-			forall types [
-				append out to word! types/1
-			]
+		parse info [thru "make typeset! [" copy types to "]" thru end
+			(blk: split types ws
+				forall blk [
+					unless empty? blk/1 [
+						append out to word! blk/1
+					]
+				]
+			)
 		]
 		out
 	]
@@ -112,31 +113,34 @@ system-words: context [
 		reduce [info args refines returns]
 	]
 
-	get-completions: func [str [string!] /local result sys-word][
+	get-completions: func [str [string! none!] /local result sys-word ptr][
 		result: make block! 4
-		unless empty? str [
-			case [
-				all [
-					#"%" = str/1
-					1 < length? str
-				][
-					append result 'file
-					append result red-complete-ctx/red-complete-file str no
-				]
-				all [
-					#"/" <> str/1
-					find system-words to word! copy/part str find str #"/"
-				][
-					append result 'path
-					append result red-complete-ctx/red-complete-path str no
-				]
-				true [
-					append result 'word
-					forall system-words [
-						sys-word: mold system-words/1
-						if find/match sys-word str [
-							append result sys-word
-						]
+		if any [
+			none? str
+			empty? str
+		][return result]
+		case [
+			all [
+				#"%" = str/1
+				1 < length? str
+			][
+				append result 'file
+				append result red-complete-ctx/red-complete-file str no
+			]
+			all [
+				#"/" <> str/1
+				ptr: find str #"/"
+				find system-words to word! copy/part str ptr
+			][
+				append result 'path
+				append result red-complete-ctx/red-complete-path str no
+			]
+			true [
+				append result 'word
+				forall system-words [
+					sys-word: mold system-words/1
+					if find/match sys-word str [
+						append result sys-word
 					]
 				]
 			]
@@ -144,5 +148,3 @@ system-words: context [
 		result
 	]
 ]
-
-probe system-words/get-completions "find/"
