@@ -3,13 +3,13 @@ Red [
 	Author:  "bitbegin"
 	File: 	 %parse.red
 	Tabs:	 4
-	Rights:  "Copyright (C) 2011-2015 Red Foundation. All rights reserved."
+	Rights:  "Copyright (C) 2011-2019 Red Foundation. All rights reserved."
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
 #include %error.red
 
-system-symbols: context [
+system-words: context [
 	get-words: has [sys words] [
 		sys: words-of system/words
 		words: make block! length? sys
@@ -22,7 +22,7 @@ system-symbols: context [
 	]
 	system-words: get-words
 
-	throw-error: register-error 'system-symbols
+	throw-error: register-error 'system-words
 
 	get-word-info: func [word [word!]][
 		either find system-words word [
@@ -111,4 +111,38 @@ system-symbols: context [
 		][none]
 		reduce [info args refines returns]
 	]
+
+	get-completions: func [str [string!] /local result sys-word][
+		result: make block! 4
+		unless empty? str [
+			case [
+				all [
+					#"%" = str/1
+					1 < length? str
+				][
+					append result 'file
+					append result red-complete-ctx/red-complete-file str no
+				]
+				all [
+					#"/" <> str/1
+					find system-words to word! copy/part str find str #"/"
+				][
+					append result 'path
+					append result red-complete-ctx/red-complete-path str no
+				]
+				true [
+					append result 'word
+					forall system-words [
+						sys-word: mold system-words/1
+						if find/match sys-word str [
+							append result sys-word
+						]
+					]
+				]
+			]
+		]
+		result
+	]
 ]
+
+probe system-words/get-completions "find/"
