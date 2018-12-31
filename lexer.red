@@ -7,11 +7,7 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-#include %error.red
-
-red-languege-parse: context [
-	throw-error: register-error 'red-parse
-
+red-lexer: context [
 	words-table: make block! 100
 
 	whitespace?: func [c [char!]][
@@ -22,7 +18,7 @@ red-languege-parse: context [
 		][true][false]
 	]
 
-	lexical-analysis: func [file [file!] source [string!]
+	analysis: func [file [file!] source [string!]
 		/local words pos npos npos2 out
 	][
 		either words: select words-table file! [
