@@ -40,7 +40,7 @@ red-lexer: context [
 					npos2: back npos2
 				]
 			]
-			append/only words reduce [out/1 index? pos index? npos2 []]
+			append/only words reduce [out/1 index? pos index? npos2 make block! 4]
 			pos: npos
 			tail? pos
 		]

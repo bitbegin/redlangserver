@@ -1,9 +1,11 @@
 Red []
 
 a: 'ta
+b: has [][]
+c: func [][]
+d: function [][]
+e: does []
+g: context []
+h: make object! []
 
-g: func [][
-    x: t
-]
-
-print length? to binary! append/dup a: "" "a" 1100000
+probe a
