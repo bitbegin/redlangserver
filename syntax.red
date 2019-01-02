@@ -11,8 +11,17 @@ Red [
 
 red-syntax: context [
 	throw-error: register-error 'red-syntax
-	pc: none
-	ctx: none
+
+	ctx: []
+
+	push-ctx: func [type [word!] params [block! none!]][
+		append/only ctx reduce [type params]
+		ctx: next ctx
+	]
+
+	pop-ctx: has [value][
+		also ctx/1 do [clear ctx ctx: back ctx]
+	]
 
 	next-tail?: func [fn where][
 		if tail? next where [
@@ -26,77 +35,119 @@ red-syntax: context [
 		]
 	]
 
-	mark-global: does [
-		case [
-			set-word? pc/1/1 [
-				clear pc/1/4
-				append pc/1/4 'global
-				next-tail? 'mark-global pc
-				pc: next pc
-			]
-			any [
-				pc/1/1 = 'set
-				all [
-					path? pc/1/1
-					find/match to string! pc/1/1 "set/"
-				]
-			][
-				next-tail? 'mark-global pc
-				pc: next pc
-				clear pc/1/4
-				append pc/1/4 'global
-				next-tail? 'mark-global pc
-				pc: next pc
-			]
-			any [
-				pc/1/1 = 'func
-				pc/1/1 = 'function
-				pc/1/1 = 'has
-			][
-				next-tail? 'mark-global pc
-				pc: next pc
-				check-block? 'mark-global pc
-				next-tail? 'mark-global pc
-				pc: next pc
-				check-block? 'mark-global pc
-				pc: next pc
-			]
-			any [
-				pc/1/1 = 'does
-				pc/1/1 = 'context
-			][
-				next-tail? 'mark-global pc
-				pc: next pc
-				check-block? 'mark-global pc
-				pc: next pc
-			]
-			pc/1/1 = 'make [
-				next-tail? 'mark-global pc
-				pc: next pc
-				if pc/1/1 = 'object! [
-					next-tail? 'mark-global pc
-					pc: next pc
-					check-block? 'mark-global pc
-					pc: next pc
-				]
-			]
-			true [pc: next pc]
+	literal-type: reduce [
+		binary! char! date! email! file! float!
+		get-path! get-word! lit-path! lit-word!
+		integer! issue! logic! map! pair! path!
+		percent! refinement! string! tag! time!
+		tuple! url!
+	]
+
+	simple-literal?: function [value][
+		either find literal-type type: type? value [reduce [type 1]][false]
+	]
+
+	save-type: func [npc [block!] type][
+		npc/1/4: reduce [copy ctx type]
+	]
+
+	semicolon-exp-type?: [
+		if code = none [
+			save-type old-pc 'semicolon
+			return ['semicolon 1]
 		]
 	]
 
-
-	find-head: func [file [file!] words-table [block!] /local npc][
-		npc: none
-		forall words-table [
-			if all [
-				3 = length? words-table/1
-				words-table/1/1 = file
-			][npc: words-table/1/3 break]
+	slit-exp-type?: [
+		if type: simple-literal? code [
+			save-type old-pc 'literal
+			return type
 		]
-		unless npc [
-			throw-error 'find-head "can't find file" file
-		]
+	]
 
+	set-word-exp-type?: [
+		if set-word? code [
+			next-tail? 'set-word npc
+			npc2: next npc
+			type: exp-type? npc2
+			save-type old-pc type/1
+			return reduce [type/1 type/2 + 1]
+		]
+	]
+
+	;-- a key word followed by 1 block
+	block-1-exp-type?: [
+		if any [
+			code = 'does
+			code = 'context
+		][
+			push-ctx code none
+			next-tail? code npc
+			npc2: next npc
+			check-block? code npc2
+			type: exp-type? npc2
+			save-type old-pc type/1
+			return reduce [type/1 type/2 + 1]
+		]
+	]
+
+	;-- a key word followed by 2 blocks
+	block-2-exp-type?: [
+		if any [
+			code = 'has
+			code = 'func
+			code = 'function
+			code = 'routine
+		][
+			next-tail? code npc
+			npc2: next npc
+			check-block? code npc2
+			push-ctx code npc2
+			next-tail? code npc2
+			npc2: next npc2
+			check-block? code npc2
+			type: exp-type? npc2
+			save-type old-pc type/1
+			return reduce [type/1 type/2 + 2]
+		]
+	]
+
+	block-exp-type?: [
+		if block? code [
+			;case [
+			;	ctx/1/1 = 'does [
+			;		return ['any 1]
+			;	]
+			;]
+			return ['any 1]
+		]
+	]
+
+	system-word-exp-type?: [
+		if all [
+			code-type = word!
+			find system-words/system-words code
+		][
+			return reduce ['builtin 1]
+		]
+	]
+
+	exp-type?: function [npc [block!]][
+		old-pc: npc2: npc
+		code: npc/1/1
+		code-type: type? code
+		type: none
+		do bind semicolon-exp-type? 'old-pc
+		do bind slit-exp-type? 'old-pc
+		do bind system-word-exp-type? 'old-pc
+		do bind set-word-exp-type? 'old-pc
+		do bind block-1-exp-type? 'old-pc
+		do bind block-2-exp-type? 'old-pc
+		do bind block-exp-type? 'old-pc
+		throw-error 'exp-type "not support!" code
+	]
+
+	find-head: function [npc [block!]][
 		unless npc/1/1 = 'Red [
 			throw-error 'find-head "incorrect header" npc/1
 		]
@@ -107,32 +158,15 @@ red-syntax: context [
 		next npc
 	]
 
-	analysis: func [file [file!] words-table [block!]
-		/local saved
-	][
-		pc: find-head file words-table
-
-		saved: pc
+	analysis: function [npc [block!]][
+		pc: find-head npc
+		clear ctx
+		append/only ctx [#[none] #[none]]
 		until [
-			mark-global
+			type: exp-type? pc
+			pc: skip pc type/2
 			tail? pc
 		]
 		true
-	]
-
-	get-globals: func [file [file!] words-table [block!]
-		/local blk
-	][
-		pc: find-head file words-table
-
-		blk: make block! 100
-		until [
-			if pc/1/4/1 = 'global [
-				append blk to word! pc/1/1
-			]
-			pc: next pc
-			tail? pc
-		]
-		blk
 	]
 ]

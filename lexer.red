@@ -8,7 +8,6 @@ Red [
 ]
 
 red-lexer: context [
-	words-table: make block! 100
 
 	whitespace?: function [c [char!]][
 		either any [
@@ -18,15 +17,9 @@ red-lexer: context [
 		][true][false]
 	]
 
-	analysis: function [file [file!] source [string!]][
-		forall words-table [
-			if find words-table/1 file! [
-				words: clear words-table/1/3
-			]
-		]
-		if none? words [words: make block! 10000]
+	analysis: function [source [string!]][
+		words: make block! 10000
 
-		append/only words-table reduce [file source words]
 		pos: source
 		out: make block! 1
 		until [
@@ -40,10 +33,11 @@ red-lexer: context [
 					npos2: back npos2
 				]
 			]
-			append/only words reduce [out/1 index? pos index? npos2 make block! 4]
+			if (index? pos) > (index? npos2) [break]
+			append/only words reduce [out/1 index? pos index? npos2 none none]
 			pos: npos
 			tail? pos
 		]
-		true
+		words
 	]
 ]

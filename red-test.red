@@ -7,6 +7,9 @@ do %syntax.red
 
 file: %testx.red
 code: read file
-probe red-lexer/analysis file code
-probe red-syntax/analysis file red-lexer/words-table
-probe red-syntax/get-globals file red-lexer/words-table
+code-analysis: clear []
+code-analysis: red-lexer/analysis code
+probe red-syntax/analysis code-analysis
+forall code-analysis [
+    probe code-analysis/1
+]
