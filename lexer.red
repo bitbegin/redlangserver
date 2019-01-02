@@ -10,7 +10,7 @@ Red [
 red-lexer: context [
 	words-table: make block! 100
 
-	whitespace?: func [c [char!]][
+	whitespace?: function [c [char!]][
 		either any [
 			c = #"^/"
 			c = #" "
@@ -18,14 +18,14 @@ red-lexer: context [
 		][true][false]
 	]
 
-	analysis: func [file [file!] source [string!]
-		/local words pos npos npos2 out
-	][
-		either words: select words-table file! [
-			clear words
-		][
-			words: make block! 10000
+	analysis: function [file [file!] source [string!]][
+		forall words-table [
+			if find words-table/1 file! [
+				words: clear words-table/1/3
+			]
 		]
+		if none? words [words: make block! 10000]
+
 		append/only words-table reduce [file source words]
 		pos: source
 		out: make block! 1
