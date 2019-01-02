@@ -7,8 +7,6 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-#include %error.red
-
 red-syntax: context [
 	throw-error: register-error 'red-syntax
 

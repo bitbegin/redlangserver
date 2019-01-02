@@ -7,9 +7,11 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-do %system-words.red
-do %lexer.red
-do %json.red
+#include %error.red
+#include %json.red
+#include %system-words.red
+#include %lexer.red
+#include %syntax.red
 
 logger: none
 
