@@ -14,8 +14,8 @@ red-syntax: context [
 
 	ctx: []
 
-	push-ctx: func [type [word!] params [block! none!]][
-		append/only ctx reduce [type params]
+	push-ctx: func [params [block!]][
+		append/only ctx params
 		ctx: next ctx
 	]
 
@@ -48,88 +48,8 @@ red-syntax: context [
 	]
 
 	save-type: func [npc [block!] type][
-		npc/1/4: reduce [copy ctx type]
-	]
-
-	semicolon-exp-type?: [
-		if code = none [
-			save-type old-pc 'semicolon
-			return ['semicolon 1]
-		]
-	]
-
-	slit-exp-type?: [
-		if type: simple-literal? code [
-			save-type old-pc 'literal
-			return type
-		]
-	]
-
-	set-word-exp-type?: [
-		if set-word? code [
-			next-tail? 'set-word npc
-			npc2: next npc
-			type: exp-type? npc2
-			save-type old-pc type/1
-			return reduce [type/1 type/2 + 1]
-		]
-	]
-
-	;-- a key word followed by 1 block
-	block-1-exp-type?: [
-		if any [
-			code = 'does
-			code = 'context
-		][
-			push-ctx code none
-			next-tail? code npc
-			npc2: next npc
-			check-block? code npc2
-			type: exp-type? npc2
-			save-type old-pc type/1
-			return reduce [type/1 type/2 + 1]
-		]
-	]
-
-	;-- a key word followed by 2 blocks
-	block-2-exp-type?: [
-		if any [
-			code = 'has
-			code = 'func
-			code = 'function
-			code = 'routine
-		][
-			next-tail? code npc
-			npc2: next npc
-			check-block? code npc2
-			push-ctx code npc2
-			next-tail? code npc2
-			npc2: next npc2
-			check-block? code npc2
-			type: exp-type? npc2
-			save-type old-pc type/1
-			return reduce [type/1 type/2 + 2]
-		]
-	]
-
-	block-exp-type?: [
-		if block? code [
-			;case [
-			;	ctx/1/1 = 'does [
-			;		return ['any 1]
-			;	]
-			;]
-			return ['any 1]
-		]
-	]
-
-	system-word-exp-type?: [
-		if all [
-			code-type = word!
-			find system-words/system-words code
-		][
-			return reduce ['builtin 1]
-		]
+		npc/1/4: type
+		npc/1/5: index? ctx
 	]
 
 	exp-type?: function [npc [block!]][
@@ -137,13 +57,126 @@ red-syntax: context [
 		code: npc/1/1
 		code-type: type? code
 		type: none
-		do bind semicolon-exp-type? 'old-pc
-		do bind slit-exp-type? 'old-pc
-		do bind system-word-exp-type? 'old-pc
-		do bind set-word-exp-type? 'old-pc
-		do bind block-1-exp-type? 'old-pc
-		do bind block-2-exp-type? 'old-pc
-		do bind block-exp-type? 'old-pc
+		value: none
+
+		semicolon-exp-type?: [
+			if code = none [
+				save-type old-pc 'semicolon
+				return ['semicolon 1]
+			]
+		]
+
+		slit-exp-type?: [
+			if type: simple-literal? code [
+				save-type old-pc 'literal
+				return type
+			]
+		]
+
+		set-word-exp-type?: [
+			if set-word? code [
+				next-tail? 'set-word npc
+				npc2: next npc
+				type: exp-type? npc2
+				save-type old-pc type/1
+				return reduce [type/1 type/2 + 1]
+			]
+		]
+
+		;-- a key word followed by 1 block
+		block-1-exp-type?: [
+			if any [
+				code = 'does
+				code = 'context
+			][
+				push-ctx old-pc/1
+				next-tail? code npc
+				npc2: next npc
+				check-block? code npc2
+				type: exp-type? npc2
+				save-type old-pc type/1
+				return reduce [type/1 type/2 + 1]
+			]
+		]
+
+		;-- a key word followed by 2 blocks
+		block-2-exp-type?: [
+			if any [
+				code = 'has
+				code = 'func
+				code = 'function
+				code = 'routine
+			][
+				next-tail? code npc
+				npc2: next npc
+				check-block? code npc2
+				push-ctx old-pc/1
+				next-tail? code npc2
+				npc2: next npc2
+				check-block? code npc2
+				type: exp-type? npc2
+				save-type old-pc type/1
+				return reduce [type/1 type/2 + 2]
+			]
+		]
+
+		block-exp-type?: [
+			if block? code [
+				case [
+					ctx/1/1 = 'does [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+					ctx/1/1 = 'context [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+					ctx/1/1 = 'has [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+					ctx/1/1 = 'func [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+					ctx/1/1 = 'function [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+					ctx/1/1 = 'routine [
+						value: pop-ctx
+						return reduce ['block 1]
+					]
+				]
+				return reduce ['block 1]
+			]
+		]
+
+		system-word-exp-type?: [
+			if all [
+				code-type = word!
+				find system-words/system-words code
+			][
+				save-type old-pc 'builtin
+				return reduce ['builtin 1]
+			]
+		]
+
+		unknown-word-exp-type?: [
+			if code-type = word! [
+				save-type old-pc 'unknown
+				return reduce ['unknown 1]
+			]
+		]
+
+		do semicolon-exp-type?
+		do slit-exp-type?
+		do set-word-exp-type?
+		do block-1-exp-type?
+		do block-2-exp-type?
+		do block-exp-type?
+		do system-word-exp-type?
+		do unknown-word-exp-type?
 		throw-error 'exp-type "not support!" code
 	]
 
@@ -158,8 +191,21 @@ red-syntax: context [
 		next npc
 	]
 
+	global?: function [npc [block!] word [word!]][
+		w: to set-word! word
+		forall npc [
+			if all [
+				npc/1/1 = w
+				npc/1/5 = 1
+			][
+				return true
+			]
+		]
+		false
+	]
+
 	analysis: function [npc [block!]][
-		pc: find-head npc
+		saved: pc: find-head npc
 		clear ctx
 		append/only ctx [#[none] #[none]]
 		until [
@@ -167,6 +213,19 @@ red-syntax: context [
 			pc: skip pc type/2
 			tail? pc
 		]
+
+		;-- resolve unknown type
+		pc: saved
+		until [
+			if pc/1/4 = 'unknown [
+				if global? saved pc/1/1 [
+					pc/1/4: 'global
+				]
+			]
+			pc: next pc
+			tail? pc
+		]
+
 		true
 	]
 ]

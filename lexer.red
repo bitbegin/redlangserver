@@ -34,7 +34,7 @@ red-lexer: context [
 				]
 			]
 			if (index? pos) > (index? npos2) [break]
-			append/only words reduce [out/1 index? pos index? npos2 none none]
+			append/only words reduce [out/1 index? pos index? npos2 none none none]
 			pos: npos
 			tail? pos
 		]
