@@ -364,7 +364,31 @@ get-selected-text: function [source line column][
 ]
 
 on-textDocument-symbol: function [params [map!]][
-	json-body/result: ""
+	uri: params/textDocument/uri
+	unless item: find-source uri [
+		json-body/result: ""
+		response
+		exit
+	]
+
+	blk: item/1/3
+	symbols: clear []
+	symbol: none
+	forall blk [
+		if blk/1/1 = none [continue]
+		unless block? blk/1/1 [
+			range: to-range blk/1/2 blk/1/3
+			symbol: make map! reduce [
+				'name		to string! blk/1/4/1
+				'kind		blk/1/4/3
+				'range		range
+				'selectionRange range
+			]
+			;write-log mold symbol
+			append symbols symbol
+		]
+	]
+	json-body/result: symbols
 	response
 ]
 

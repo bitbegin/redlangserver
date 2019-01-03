@@ -262,33 +262,6 @@ red-syntax: context [
 		next npc
 	]
 
-	global?: function [npc [block!] word [word!]][
-		w: to set-word! word
-		forall npc [
-			if all [
-				npc/1/1 == w
-				npc/1/6 = 1
-			][
-				return true
-			]
-		]
-		false
-	]
-
-	resolve-symbol: function [npc [block!]][
-		;-- resolve unknown type
-		pc: npc
-		until [
-			if pc/1/5 = 'unknown [
-				if global? npc pc/1/1 [
-					pc/1/5: 'global
-				]
-			]
-			pc: next pc
-			tail? pc
-		]
-	]
-
 	;-- npc layout: [code start end symbol-type TBD TBD TBD]
 	analysis: function [npc [block!]][
 		clear ctx
@@ -299,7 +272,7 @@ red-syntax: context [
 			pc: skip pc type/4
 			tail? pc
 		]
-		;resolve-symbol saved
 		npc
 	]
+
 ]
