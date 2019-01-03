@@ -17,24 +17,61 @@ red-lexer: context [
 		][true][false]
 	]
 
+	form-pos: function [pos [string!]][
+		start: end: head pos
+		line: 0
+		while [
+			not all [
+				(index? pos) >= (index? start)
+				(index? pos) < (index? end)
+			]
+		][
+			line: line + 1
+			start: end
+			unless end: find/tail start #"^/" [
+				end: tail start break
+			]
+		]
+		if line = 0 [line: 1]
+		column: (index? pos) - (index? start)
+		reduce [line column + 1]
+	]
+
 	analysis: function [source [string!]][
 		words: make block! 10000
 
 		pos: source
 		out: make block! 1
 		until [
+			forever [
+				print pos/1
+				case [
+					all [
+						not tail? pos
+						whitespace? pos/1
+					][
+						pos: next pos
+					]
+					pos/1 = #";" [
+						unless npos: find pos #"^/" [npos: tail pos]
+						append/only words reduce [
+							copy/part pos npos
+							form-pos pos form-pos npos
+							none none none
+						]
+						pos: npos
+					]
+					tail? pos [
+						return words
+					]
+					true [break]
+				]
+			]
 			if error? npos: try [system/lexer/transcode/one pos clear out false][
 				append/only words reduce [index? pos npos]
 				return false
 			]
-			npos2: back npos
-			if whitespace? npos2/1 [
-				while [whitespace? npos2/1][
-					npos2: back npos2
-				]
-			]
-			if (index? pos) > (index? npos2) [break]
-			append/only words reduce [out/1 index? pos index? npos2 none none none]
+			append/only words reduce [out/1 form-pos pos form-pos npos none none none]
 			pos: npos
 			tail? pos
 		]
