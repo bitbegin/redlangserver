@@ -23,7 +23,7 @@ code-symbols: clear []
 find-source: function [uri [string!]][
 	forall code-symbols [
 		if code-symbols/1/1 = uri [
-			return code-symbols/1
+			return code-symbols
 		]
 	]
 	false
@@ -69,8 +69,8 @@ add-source: function [uri [string!] code [string!]][
 	]
 
 	if item: find-source uri [
-		item/2: code
-		item/3: res
+		item/1/2: code
+		item/1/3: res
 		return []
 	]
 	append/only code-symbols reduce [uri code res]
@@ -158,6 +158,7 @@ dispatch-method: func [method [string!] params][
 	switch method [
 		"initialize"					[on-initialize params]
 		"textDocument/didOpen"			[on-textDocument-didOpen params]
+		"textDocument/didClose"			[on-textDocument-didClose params]
 		"textDocument/didChange"		[on-textDocument-didChange params]
 		"textDocument/completion"		[on-textDocument-completion params]
 		"textDocument/documentSymbol"	[on-textDocument-symbol params]
@@ -221,6 +222,14 @@ on-textDocument-didOpen: function [params [map!]][
 		'diagnostics diagnostics
 	]
 	response
+]
+
+on-textDocument-didClose: function [params [map!]][
+	uri: params/textDocument/uri
+	if item: find-source uri [
+		write-log rejoin ["[INFO]: remove " uri]
+		remove item
+	]
 ]
 
 on-textDocument-didChange: function [params [map!]][
