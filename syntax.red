@@ -58,7 +58,14 @@ red-syntax: context [
 		value: none
 
 		semicolon-exp-type?: [
-			if code = none [
+			if any [
+				all [
+					string? code
+					not empty? code
+					code/1 = #";"
+				]
+				code = none
+			][
 				save-type old-pc 'semicolon
 				return ['semicolon 1]
 			]

@@ -44,7 +44,6 @@ red-lexer: context [
 		out: make block! 1
 		until [
 			forever [
-				print pos/1
 				case [
 					all [
 						not tail? pos
