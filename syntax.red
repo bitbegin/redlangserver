@@ -41,13 +41,71 @@ red-syntax: context [
 		tuple! url!
 	]
 
+	form-type: function [type][
+		case [
+			any [
+				type = date!
+				type = float!
+				type = integer!
+				type = percent!
+				type = time!
+				type = tuple!
+				type = pair!
+			][
+				SymbolKind/Number
+			]
+			type = logic! [
+				SymbolKind/Boolean
+			]
+			any [
+				type = string!
+				type = char!
+				type = email!
+				type = file!
+				type = issue!
+				type = tag!
+				type = url!
+			][
+				SymbolKind/String
+			]
+			type = binary! [
+				SymbolKind/Array
+			]
+			any [
+				type = lit-word!
+				type = get-word!
+			][
+				SymbolKind/Constant
+			]
+			any [
+				type = get-path!
+				type = lit-path!
+				type = path!
+				type = refinement!
+			][
+				SymbolKind/Object
+			]
+			type = map! [
+				SymbolKind/Key
+			]
+		]
+	]
+
 	simple-literal?: function [value][
-		either find literal-type type: type? value [reduce [type 1]][false]
+		either find literal-type type: type? value [
+			reduce [form-type type 1]
+		][false]
 	]
 
 	save-type: func [npc [block!] type][
-		npc/1/4: type
-		npc/1/5: index? ctx
+		npc/1/5: type
+		npc/1/6: index? ctx
+		if all [
+			npc/1/6 = 1
+			set-word! = type? npc/1/1
+		][
+			npc/1/4: true
+		]
 	]
 
 	exp-type?: function [npc [block!]][
@@ -73,7 +131,7 @@ red-syntax: context [
 
 		slit-exp-type?: [
 			if type: simple-literal? code [
-				save-type old-pc 'literal
+				save-type old-pc type/1
 				return type
 			]
 		]
@@ -127,33 +185,21 @@ red-syntax: context [
 
 		block-exp-type?: [
 			if block? code [
-				case [
-					ctx/1/1 = 'does [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
-					ctx/1/1 = 'context [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
-					ctx/1/1 = 'has [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
-					ctx/1/1 = 'func [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
-					ctx/1/1 = 'function [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
-					ctx/1/1 = 'routine [
-						value: pop-ctx
-						return reduce ['block 1]
-					]
+				if any [
+					ctx/1/1 = 'does
+					ctx/1/1 = 'has
+					ctx/1/1 = 'func
+					ctx/1/1 = 'function
+					ctx/1/1 = 'routine
+				][
+					value: pop-ctx
+					return reduce [SymbolKind/Function 1]
 				]
-				return reduce ['block 1]
+				if ctx/1/1 = 'context [
+					value: pop-ctx
+					return reduce [SymbolKind/Namespace 1]
+				]
+				return reduce [SymbolKind/Object 1]
 			]
 		]
 
@@ -202,7 +248,7 @@ red-syntax: context [
 		forall npc [
 			if all [
 				npc/1/1 == w
-				npc/1/5 = 1
+				npc/1/6 = 1
 			][
 				return true
 			]
@@ -214,9 +260,9 @@ red-syntax: context [
 		;-- resolve unknown type
 		pc: npc
 		until [
-			if pc/1/4 = 'unknown [
+			if pc/1/5 = 'unknown [
 				if global? npc pc/1/1 [
-					pc/1/4: 'global
+					pc/1/5: 'global
 				]
 			]
 			pc: next pc
