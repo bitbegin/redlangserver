@@ -18,6 +18,33 @@ logger: none
 
 source-code: ""
 languageId: ""
+code-symbols: clear []
+
+find-source: function [uri [string!]][
+	forall code-symbols [
+		if code-symbols/1/1 = uri [
+			return code-symbols/1
+		]
+	]
+	false
+]
+
+parse-source: function [code [string!]][
+	blk: red-lexer/analysis code
+	red-syntax/analysis blk
+	blk
+]
+
+add-source: function [uri [string!] code [string!]][
+	blk: try [parse-source code]
+	if item: find-source uri [
+		item/2: code
+		item/3: blk
+		return
+	]
+	append/only code-symbols reduce [uri code blk]
+	write-log mold code-symbols
+]
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -152,22 +179,26 @@ on-initialize: function [params [map!]][
 	response
 ]
 
-on-textDocument-didOpen: func [params [map!] /local result pos start end range diagnostics][
+on-textDocument-didOpen: function [params [map!]][
 	source-code: params/textDocument/text
+	uri: params/textDocument/uri
+	add-source uri source-code
 	languageId: params/textDocument/languageId
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
-		'uri params/textDocument/uri
+		'uri uri
 		'diagnostics reduce []
 	]
 	response
 ]
 
-on-textDocument-didChange: func [params [map!] /local diagnostics][
+on-textDocument-didChange: function [params [map!]][
 	source-code: params/contentChanges/1/text
+	uri: params/textDocument/uri
+	add-source uri source-code
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
-		'uri params/textDocument/uri
+		'uri uri
 		'diagnostics []
 	]
 	response
