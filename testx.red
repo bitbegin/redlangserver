@@ -10,4 +10,6 @@ g: context []
 i: j: k: 3x3
 
 
-probe a
+probe a 
+
+print aaa

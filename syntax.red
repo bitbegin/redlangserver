@@ -201,13 +201,27 @@ red-syntax: context [
 		w: to set-word! word
 		forall npc [
 			if all [
-				npc/1/1 = w
+				npc/1/1 == w
 				npc/1/5 = 1
 			][
 				return true
 			]
 		]
 		false
+	]
+
+	resolve-symbol: function [npc [block!]][
+		;-- resolve unknown type
+		pc: npc
+		until [
+			if pc/1/4 = 'unknown [
+				if global? npc pc/1/1 [
+					pc/1/4: 'global
+				]
+			]
+			pc: next pc
+			tail? pc
+		]
 	]
 
 	analysis: function [npc [block!]][
@@ -219,19 +233,7 @@ red-syntax: context [
 			pc: skip pc type/2
 			tail? pc
 		]
-
-		;-- resolve unknown type
-		pc: saved
-		until [
-			if pc/1/4 = 'unknown [
-				if global? saved pc/1/1 [
-					pc/1/4: 'global
-				]
-			]
-			pc: next pc
-			tail? pc
-		]
-
+		resolve-symbol saved
 		npc
 	]
 ]
