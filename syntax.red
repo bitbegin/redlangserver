@@ -182,6 +182,7 @@ red-syntax: context [
 		unless npc/1/1 = 'Red [
 			throw-error 'find-head "incorrect header" npc/1
 		]
+		save-type npc SymbolKind/File
 		npc: next npc
 		unless block? npc/1/1 [
 			throw-error 'find-head "incorrect header" npc/1
@@ -203,9 +204,9 @@ red-syntax: context [
 	]
 
 	analysis: function [npc [block!]][
-		saved: pc: find-head npc
 		clear ctx
 		append/only ctx [#[none] #[none]]
+		saved: pc: find-head npc
 		until [
 			type: exp-type? pc
 			pc: skip pc type/2
@@ -224,6 +225,6 @@ red-syntax: context [
 			tail? pc
 		]
 
-		true
+		npc
 	]
 ]
