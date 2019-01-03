@@ -56,7 +56,7 @@ red-lexer: context [
 						append/only words reduce [
 							copy/part pos npos
 							form-pos pos form-pos npos
-							false none none none
+							none none none none
 						]
 						pos: npos
 					]
@@ -72,7 +72,7 @@ red-lexer: context [
 			]
 			append/only words reduce [
 				out/1 form-pos pos form-pos npos
-				false none none none]
+				none none none none]
 			pos: npos
 			tail? pos
 		]

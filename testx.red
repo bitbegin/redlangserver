@@ -5,7 +5,10 @@ b: has [][]
 c: func [][]
 d: function [][]
 e: does []
-g: context []
+g: context [
+	g1: []
+]
+g/g1: [23 4]
 ;h: make object! []
 i: j: k: 3x3
 

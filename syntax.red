@@ -92,20 +92,11 @@ red-syntax: context [
 	]
 
 	simple-literal?: function [value][
-		either find literal-type type: type? value [
-			reduce [form-type type 1]
-		][false]
+		either find literal-type type? value [true][false]
 	]
 
-	save-type: func [npc [block!] type][
-		npc/1/5: type
-		npc/1/6: index? ctx
-		if all [
-			npc/1/6 = 1
-			set-word! = type? npc/1/1
-		][
-			npc/1/4: true
-		]
+	save-type: func [npc [block!] symbol-type [block!]][
+		npc/1/4: symbol-type
 	]
 
 	exp-type?: function [npc [block!]][
@@ -114,6 +105,7 @@ red-syntax: context [
 		code-type: type? code
 		type: none
 		value: none
+		nctx: none
 
 		semicolon-exp-type?: [
 			if any [
@@ -124,15 +116,18 @@ red-syntax: context [
 				]
 				code = none
 			][
-				save-type old-pc 'semicolon
-				return ['semicolon 1]
+				type: reduce ['semicolon-exp none SymbolKind/Null 1]
+				save-type old-pc type
+				return copy type
 			]
 		]
 
 		slit-exp-type?: [
-			if type: simple-literal? code [
-				save-type old-pc type/1
-				return type
+			if simple-literal? code [
+				type: type? code
+				type: reduce ['slit-exp type form-type type 1]
+				save-type old-pc type
+				return copy type
 			]
 		]
 
@@ -141,8 +136,20 @@ red-syntax: context [
 				next-tail? 'set-word npc
 				npc2: next npc
 				type: exp-type? npc2
-				save-type old-pc type/1
-				return reduce [type/1 type/2 + 1]
+				type/4: type/4 + 1
+				save-type old-pc type
+				return copy type
+			]
+		]
+
+		set-path-exp-type?: [
+			if set-path? code [
+				next-tail? 'set-path npc
+				npc2: next npc
+				type: exp-type? npc2
+				type/4: type/4 + 1
+				save-type old-pc type
+				return copy type
 			]
 		]
 
@@ -157,8 +164,9 @@ red-syntax: context [
 				npc2: next npc
 				check-block? code npc2
 				type: exp-type? npc2
-				save-type old-pc type/1
-				return reduce [type/1 type/2 + 1]
+				type/4: type/4 + 1
+				save-type old-pc type
+				return copy type
 			]
 		]
 
@@ -178,28 +186,35 @@ red-syntax: context [
 				npc2: next npc2
 				check-block? code npc2
 				type: exp-type? npc2
-				save-type old-pc type/1
-				return reduce [type/1 type/2 + 2]
+				type/4: type/4 + 2
+				save-type old-pc type
+				return copy type
 			]
 		]
 
 		block-exp-type?: [
 			if block? code [
+				nctx: ctx/1/1
 				if any [
-					ctx/1/1 = 'does
-					ctx/1/1 = 'has
-					ctx/1/1 = 'func
-					ctx/1/1 = 'function
-					ctx/1/1 = 'routine
+					nctx = 'does
+					nctx = 'has
+					nctx = 'func
+					nctx = 'function
+					nctx = 'routine
 				][
 					value: pop-ctx
-					return reduce [SymbolKind/Function 1]
+					type: reduce ['block-exp nctx SymbolKind/Function 1]
+					save-type old-pc type
+					return copy type
 				]
-				if ctx/1/1 = 'context [
+				if nctx = 'context [
 					value: pop-ctx
-					return reduce [SymbolKind/Namespace 1]
+					type: reduce ['block-exp nctx SymbolKind/Namespace 1]
+					save-type old-pc type
+					return copy type
 				]
-				return reduce [SymbolKind/Object 1]
+				type: reduce ['block-exp nctx SymbolKind/Object 1]
+				return copy type
 			]
 		]
 
@@ -208,21 +223,24 @@ red-syntax: context [
 				code-type = word!
 				find system-words/system-words code
 			][
-				save-type old-pc 'builtin
-				return reduce ['builtin 1]
+				type: reduce ['system system-words/get-type code SymbolKind/Method 1]
+				save-type old-pc type
+				return copy type
 			]
 		]
 
 		unknown-word-exp-type?: [
 			if code-type = word! [
-				save-type old-pc 'unknown
-				return reduce ['unknown 1]
+				type: reduce ['unknown none SymbolKind/Null 1]
+				save-type old-pc type
+				return copy type
 			]
 		]
 
 		do semicolon-exp-type?
 		do slit-exp-type?
 		do set-word-exp-type?
+		do set-path-exp-type?
 		do block-1-exp-type?
 		do block-2-exp-type?
 		do block-exp-type?
@@ -235,11 +253,12 @@ red-syntax: context [
 		unless npc/1/1 = 'Red [
 			throw-error 'find-head "incorrect header" npc/1
 		]
-		save-type npc SymbolKind/File
+		save-type npc reduce ['header 'Red SymbolKind/File 2]
 		npc: next npc
 		unless block? npc/1/1 [
 			throw-error 'find-head "incorrect header" npc/1
 		]
+		save-type npc reduce ['header 'Block SymbolKind/File 1]
 		next npc
 	]
 
@@ -270,16 +289,17 @@ red-syntax: context [
 		]
 	]
 
+	;-- npc layout: [code start end symbol-type TBD TBD TBD]
 	analysis: function [npc [block!]][
 		clear ctx
 		append/only ctx [#[none] #[none]]
 		saved: pc: find-head npc
 		until [
 			type: exp-type? pc
-			pc: skip pc type/2
+			pc: skip pc type/4
 			tail? pc
 		]
-		resolve-symbol saved
+		;resolve-symbol saved
 		npc
 	]
 ]
