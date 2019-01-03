@@ -23,13 +23,13 @@ red-syntax: context [
 
 	next-tail?: func [fn where][
 		if tail? next where [
-			throw-error fn "no more code!" where
+			throw-error fn "no more code!" where/1
 		]
 	]
 
 	check-block?: func [fn where][
 		unless block? where/1/1 [
-			throw-error fn "need a block!" where
+			throw-error fn "need a block!" where/1
 		]
 	]
 
@@ -246,7 +246,7 @@ red-syntax: context [
 		do block-exp-type?
 		do system-word-exp-type?
 		do unknown-word-exp-type?
-		throw-error 'exp-type "not support!" code
+		throw-error 'exp-type "not support!" old-pc/1
 	]
 
 	find-head: function [npc [block!]][

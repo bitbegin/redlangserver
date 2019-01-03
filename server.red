@@ -29,21 +29,52 @@ find-source: function [uri [string!]][
 	false
 ]
 
-parse-source: function [code [string!]][
-	blk: red-lexer/analysis code
-	red-syntax/analysis blk
-	blk
+to-range: function [start [block!] end [block!]][
+	make map! reduce [
+		'start make map! reduce [
+			'line start/1 - 1 'character start/2 - 1
+		]
+		'end make map! reduce [
+			'line end/1 - 1 'character end/2 - 1
+		]
+	]
 ]
 
 add-source: function [uri [string!] code [string!]][
-	blk: try [parse-source code]
+	if map? res: try [red-lexer/analysis code][
+		range: to-range res/pos res/pos
+		return reduce [
+			make map! reduce [
+				'range range
+				'severity 1
+				'code 1
+				'source "lexer"
+				'message mold res/err
+			]
+		]
+	]
+	if error? res: try [red-syntax/analysis res][
+		pc: res/arg3
+		write-log mold res
+		range: to-range pc/2 pc/2
+		return reduce [
+			make map! reduce [
+				'range range
+				'severity 1
+				'code 1
+				'source "syntax"
+				'message res/arg2
+			]
+		]
+	]
+
 	if item: find-source uri [
 		item/2: code
-		item/3: blk
-		return
+		item/3: res
+		return []
 	]
-	append/only code-symbols reduce [uri code blk]
-	write-log mold code-symbols
+	append/only code-symbols reduce [uri code res]
+	[]
 ]
 
 init-logger: func [_logger [file! none!]][
@@ -182,12 +213,12 @@ on-initialize: function [params [map!]][
 on-textDocument-didOpen: function [params [map!]][
 	source-code: params/textDocument/text
 	uri: params/textDocument/uri
-	add-source uri source-code
+	diagnostics: add-source uri source-code
 	languageId: params/textDocument/languageId
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
-		'diagnostics reduce []
+		'diagnostics diagnostics
 	]
 	response
 ]
@@ -195,11 +226,11 @@ on-textDocument-didOpen: function [params [map!]][
 on-textDocument-didChange: function [params [map!]][
 	source-code: params/contentChanges/1/text
 	uri: params/textDocument/uri
-	add-source uri source-code
+	diagnostics: add-source uri source-code
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
-		'diagnostics []
+		'diagnostics diagnostics
 	]
 	response
 ]
