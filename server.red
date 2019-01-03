@@ -90,7 +90,7 @@ write-newline: does [
 	]
 ]
 
-write-response: func [response][
+write-response: function [response][
 	write-stdout "Content-Length: "
 	write-stdout to string! length? response
 	write-newline
@@ -99,7 +99,7 @@ write-response: func [response][
 	write-stdout response
 ]
 
-write-log: func [str [string!]][
+write-log: function [str [string!]][
 	if logger [
 		unless empty? str [write/append logger str]
 		write/append logger "^/"
@@ -114,9 +114,7 @@ json-body: #(
 	error: none
 )
 
-process: func [data [string!]
-	/local script resp
-][
+process: function [data [string!]][
 	script: first json/decode data
 	json-body/id: script/id
 	json-body/result: none
@@ -126,14 +124,14 @@ process: func [data [string!]
 	dispatch-method script/method script/params
 ]
 
-response: has [resp][
+response: function [][
 	resp: json/encode json-body
 	write-response resp
 	write-log rejoin ["[OUTPUT] Content-Length: " length? resp]
 	write-log resp write-log ""
 ]
 
-lsp-read: func [/local header len bin n str][
+lsp-read: function [][
 	len: 0
 	until [
 		header: trim input-stdin
@@ -154,7 +152,7 @@ lsp-read: func [/local header len bin n str][
 	also str: to string! bin do [write-log str write-log ""]
 ]
 
-dispatch-method: func [method [string!] params][
+dispatch-method: function [method [string!] params][
 	switch method [
 		"initialize"					[on-initialize params]
 		"textDocument/didOpen"			[on-textDocument-didOpen params]
@@ -212,10 +210,10 @@ on-initialize: function [params [map!]][
 ]
 
 on-textDocument-didOpen: function [params [map!]][
-	source-code: params/textDocument/text
+	system/words/source-code: params/textDocument/text
 	uri: params/textDocument/uri
 	diagnostics: add-source uri source-code
-	languageId: params/textDocument/languageId
+	system/words/languageId: params/textDocument/languageId
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
@@ -233,7 +231,7 @@ on-textDocument-didClose: function [params [map!]][
 ]
 
 on-textDocument-didChange: function [params [map!]][
-	source-code: params/contentChanges/1/text
+	system/words/source-code: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	diagnostics: add-source uri source-code
 	json-body/method: "textDocument/publishDiagnostics"
