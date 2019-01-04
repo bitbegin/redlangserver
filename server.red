@@ -254,22 +254,19 @@ parse-completion-string: function [source line column][
 	ptr
 ]
 
-system-completion-kind: function [text [string!]][
-	if empty? text [return CompletionItemKind/Text]
-	type: system-words/get-type to word! text
+system-completion-kind: function [word [word!]][
+	type: type? get word
 	kind: case [
-		#"!" = last text [
+		datatype? get word [
+			CompletionItemKind/Keyword
+		]
+		typeset? get word [
 			CompletionItemKind/Keyword
 		]
 		op! = type [
 			CompletionItemKind/Operator
 		]
-		any [
-			type = action!
-			type = native!
-			type = function!
-			type = routine!
-		][
+		find reduce [action! native! function! routine!] type [
 			CompletionItemKind/Function
 		]
 		object! = type [
@@ -312,7 +309,7 @@ system-completion: [
 			]
 			true [
 				forall completions [
-					kind: system-completion-kind completions/1
+					kind: system-completion-kind to word! completions/1
 					append comps make map! reduce [
 						'label completions/1
 						'kind kind
@@ -450,13 +447,18 @@ on-textDocument-hover: function [params [map!]][
 
 on-completionItem-resolve: function [params [map!]][
 	text: params/label
-	kind: get-completion-kind text
+	kind: CompletionItemKind/Text
 	hstr: either empty? text [""][
 		word: to word! text
-		either find system-words/base-types word [
-			rejoin [text " is a base datatype!"]
+		either find system-words/system-words word [
+			kind: system-completion-kind word
+			either datatype? get word [
+				rejoin [text " is a base datatype!"]
+			][
+				system-words/get-word-info word
+			]
 		][
-			system-words/get-word-info word
+			""
 		]
 	]
 

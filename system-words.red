@@ -29,53 +29,8 @@ system-words: context [
 	ws: charset " ^-^M"
 	word-char: complement charset {/\^^,[](){}"#%$@:;}
 
-	;-- datatype! or typeset!
-	get-data-types: func [type [word!] /local info out][
-		info: get-word-info type
-		info: split info "^/"
-		out: make block! 30
-		forall info [
-			trim/head info/1
-			if parse info/1 [to word-char copy type thru #"!" e: thru end][
-				unless empty? type [
-					append out to word! type
-				]
-			]
-		]
-		out
-	]
-
-	get-typeset: func [type [word!] /local info out types blk][
-		info: get-word-info type
-		out: make block! 30
-		parse info [thru "make typeset! [" copy types to "]" thru end
-			(blk: split types ws
-				forall blk [
-					unless empty? blk/1 [
-						append out to word! blk/1
-					]
-				]
-			)
-		]
-		out
-	]
-
-	get-typesets: has [types out][
-		types: get-data-types 'typeset!
-		out: make block! 60
-		forall types [
-			append out reduce [types/1 get-typeset types/1]
-		]
-		out
-	]
-
-	base-types: get-data-types 'datatype!
-	typesets: get-typesets
-
-	get-type: func [word [word!]][type? get word]
-
 	get-spec: func [word [word!] /local type info args refines returns lines][
-		type: get-type word
+		type: type? get word
 		unless any [
 			type = action!
 			type = native!

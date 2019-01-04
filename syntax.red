@@ -209,7 +209,7 @@ red-syntax: context [
 				code-type = word!
 				find system-words/system-words code
 			][
-				type: reduce ['system system-words/get-type code CompletionItemKind/Keyword SymbolKind/Method 1]
+				type: reduce ['system type? get code CompletionItemKind/Keyword SymbolKind/Method 1]
 				save-type old-pc type
 				return copy type
 			]
