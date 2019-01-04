@@ -16,8 +16,6 @@ Red [
 
 logger: none
 
-source-code: ""
-languageId: ""
 code-symbols: clear []
 
 find-source: function [uri [string!]][
@@ -210,10 +208,9 @@ on-initialize: function [params [map!]][
 ]
 
 on-textDocument-didOpen: function [params [map!]][
-	system/words/source-code: params/textDocument/text
+	source: params/textDocument/text
 	uri: params/textDocument/uri
-	diagnostics: add-source uri source-code
-	system/words/languageId: params/textDocument/languageId
+	diagnostics: add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
@@ -231,9 +228,9 @@ on-textDocument-didClose: function [params [map!]][
 ]
 
 on-textDocument-didChange: function [params [map!]][
-	system/words/source-code: params/contentChanges/1/text
+	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
-	diagnostics: add-source uri source-code
+	diagnostics: add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
@@ -435,16 +432,19 @@ on-textDocument-symbol: function [params [map!]][
 ]
 
 on-textDocument-hover: function [params [map!]][
+	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	word: to word! get-selected-text source-code line column
-	either hstr: system-words/get-word-info word [
-		json-body/result: make map! reduce [
-			'contents rejoin ["```^/" hstr "^/```"]
-		]
-	][
-		json-body/result: ""
-	]
+	result: either item: find-source uri [
+		source: item/1/2
+		word: to word! get-selected-text source line column
+		either hstr: system-words/get-word-info word [
+			make map! reduce [
+				'contents rejoin ["```^/" hstr "^/```"]
+			]
+		][""]
+	][""]
+	json-body/result: result
 	response
 ]
 
