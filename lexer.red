@@ -12,6 +12,7 @@ red-lexer: context [
 	whitespace?: function [c [char!]][
 		either any [
 			c = #"^/"
+			c = #"^M"
 			c = #" "
 			c = #"^-"
 		][true][false]
@@ -67,7 +68,7 @@ red-lexer: context [
 				]
 			]
 			if error? npos: try [system/lexer/transcode/one pos clear out false][
-				return make map! reduce ['pos form-pos pos 'err npos ]
+				return make map! reduce ['pos form-pos pos 'err npos]
 			]
 			append/only words reduce [
 				out/1 form-pos pos form-pos npos

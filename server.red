@@ -49,7 +49,7 @@ add-source: function [uri [string!] code [string!]][
 				'severity 1
 				'code 1
 				'source "lexer"
-				'message mold res/err
+				'message form res/err
 			]
 		]
 	]
@@ -200,7 +200,7 @@ on-initialize: function [params [map!]][
 			;'documentHighlightProvider true
 			'hoverProvider true
 			;'renameProvider true
-			'documentSymbolProvider true
+			;'documentSymbolProvider true
 			;'workspaceSymbolProvider true
 			;'referencesProvider true
 			;'executeCommandProvider make map! reduce ['commands "Red.applyFix"]
@@ -374,7 +374,8 @@ on-textDocument-symbol: function [params [map!]][
 	symbol: none
 	forall blk [
 		if blk/1/1 = none [continue]
-		if set-word? blk/1/1 [
+		;if set-word? blk/1/1 [
+		unless block? blk/1/1 [
 			range: to-range blk/1/2 blk/1/3
 			symbol: make map! reduce [
 				'name		mold blk/1/1
