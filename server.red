@@ -242,9 +242,7 @@ on-textDocument-didChange: function [params [map!]][
 	response
 ]
 
-;-- Use the completion function which is used by the red console
-;-- TBD replace it with a sophisticated one
-parse-completions: function [source line column][
+parse-completion-string: function [source line column][
 	n: -1
 	until [
 		str: source
@@ -256,11 +254,10 @@ parse-completions: function [source line column][
 	unless ptr: find/last/tail line-str delimiters [
 		ptr: line-str
 	]
-	if any [none? ptr empty? ptr][return []]
-	system-words/get-completions ptr
+	ptr
 ]
 
-get-completion-kind: function [text [string!]][
+system-completion-kind: function [text [string!]][
 	if empty? text [return CompletionItemKind/Text]
 	type: system-words/get-type to word! text
 	kind: case [
@@ -287,58 +284,104 @@ get-completion-kind: function [text [string!]][
 	]
 ]
 
-on-textDocument-completion: function [params [map!]][
-	line: params/position/line
-	column: params/position/character
-	items: parse-completions source-code line column
-	if any [
-		1 >= length? items
+system-completion: [
+	completions: system-words/get-completions completion-string
+	unless any [
+		none? completions
+		1 >= length? completions
 		all [
-			2 = length? items
-			"%" = items/2
+			2 = length? completions
+			"%" = completions/2
 		]
 	][
+		completions-type: completions/1
+		completions: next completions
+		case [
+			completions-type = 'file [
+				forall completions [
+					append comps make map! reduce [
+						'label skip completions/1 1
+						'kind CompletionItemKind/File
+					]
+				]
+			]
+			completions-type = 'path [
+				forall completions [
+					append comps make map! reduce [
+						'label find/tail completions/1 "/"
+						'kind CompletionItemKind/Field
+					]
+				]
+			]
+			true [
+				forall completions [
+					kind: system-completion-kind completions/1
+					append comps make map! reduce [
+						'label completions/1
+						'kind kind
+					]
+				]
+			]
+		]
+	]
+]
+
+context-completion: [
+	completions: red-syntax/get-completions syntax completion-string
+	unless any [
+		none? completions
+		1 >= length? completions
+	][
+		completions-type: completions/1
+		completions: next completions
+		if completions-type = 'word [
+			forall completions [
+				insert comps make map! reduce [
+					'label completions/1/1
+					'kind completions/1/2
+				]
+			]
+		]
+	]
+]
+
+on-textDocument-completion: function [params [map!]][
+	uri: params/textDocument/uri
+	line: params/position/line
+	column: params/position/character
+	source: none
+	syntax: none
+	completion-string: none
+	if item: find-source uri [
+		source: item/1/2
+		syntax: item/1/3
+		completion-string: parse-completion-string source line column
+	]
+
+	comps: clear []
+	completions: none
+	completions-type: none
+	kind: none
+
+	unless any [
+		none? completion-string
+		empty? completion-string
+	][
+		do bind system-completion 'completion-string
+		do bind context-completion 'completion-string
+	]
+
+	either empty? comps [
 		json-body/result: make map! reduce [
 			'isIncomplete true
 			'items []
 		]
-		response
-		exit
-	]
-	item-type: items/1
-	items: next items
-	comps: clear []
-	case [
-		item-type = 'file [
-			forall items [
-				append comps make map! reduce [
-					'label skip items/1 1
-					'kind CompletionItemKind/File
-				]
-			]
-		]
-		item-type = 'path [
-			forall items [
-				append comps make map! reduce [
-					'label find/tail items/1 "/"
-					'kind CompletionItemKind/Field
-				]
-			]
-		]
-		true [
-			forall items [
-				kind: get-completion-kind items/1
-				append comps make map! reduce [
-					'label items/1
-					'kind kind
-				]
-			]
+	][
+		json-body/result: make map! reduce [
+			'items comps
 		]
 	]
 
-	json-body/result: make map! reduce [
-		'items comps
-	]
 	response
 ]
 

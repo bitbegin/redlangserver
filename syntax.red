@@ -43,46 +43,22 @@ red-syntax: context [
 
 	form-type: function [type][
 		case [
-			any [
-				type = date!
-				type = float!
-				type = integer!
-				type = percent!
-				type = time!
-				type = tuple!
-				type = pair!
-			][
+			find reduce [date! float! integer! percent! time! tuple! pair!] type [
 				SymbolKind/Number
 			]
 			type = logic! [
 				SymbolKind/Boolean
 			]
-			any [
-				type = string!
-				type = char!
-				type = email!
-				type = file!
-				type = issue!
-				type = tag!
-				type = url!
-			][
+			find reduce [string! char! email! file! issue! tag! url!] type [
 				SymbolKind/String
 			]
 			type = binary! [
 				SymbolKind/Array
 			]
-			any [
-				type = lit-word!
-				type = get-word!
-			][
+			find reduce [lit-word! get-word!] type [
 				SymbolKind/Constant
 			]
-			any [
-				type = get-path!
-				type = lit-path!
-				type = path!
-				type = refinement!
-			][
+			find reduce [get-path! lit-path! path! refinement!] type [
 				SymbolKind/Object
 			]
 			type = map! [
@@ -92,7 +68,7 @@ red-syntax: context [
 	]
 
 	simple-literal?: function [value][
-		either find literal-type type? value [true][false]
+		either find literal-type value [true][false]
 	]
 
 	save-type: func [npc [block!] symbol-type [block!]][
@@ -116,16 +92,26 @@ red-syntax: context [
 				]
 				code = none
 			][
-				type: reduce ['semicolon-exp none SymbolKind/Null 1]
+				type: reduce ['semicolon-exp none CompletionItemKind/Text SymbolKind/Null 1]
+				save-type old-pc type
+				return copy type
+			]
+		]
+
+		include-exp-type?: [
+			if all [
+				code-type = issue! 
+				"include" = to string! code
+			][
+				type: reduce ['include-exp none CompletionItemKind/Module SymbolKind/Package 1]
 				save-type old-pc type
 				return copy type
 			]
 		]
 
 		slit-exp-type?: [
-			if simple-literal? code [
-				type: type? code
-				type: reduce ['slit-exp type form-type type 1]
+			if simple-literal? code-type [
+				type: reduce ['slit-exp code-type CompletionItemKind/Constant form-type code-type 1]
 				save-type old-pc type
 				return copy type
 			]
@@ -136,7 +122,7 @@ red-syntax: context [
 				next-tail? 'set-word npc
 				npc2: next npc
 				type: exp-type? npc2
-				type/4: type/4 + 1
+				type/5: type/5 + 1
 				save-type old-pc type
 				return copy type
 			]
@@ -147,7 +133,7 @@ red-syntax: context [
 				next-tail? 'set-path npc
 				npc2: next npc
 				type: exp-type? npc2
-				type/4: type/4 + 1
+				type/5: type/5 + 1
 				save-type old-pc type
 				return copy type
 			]
@@ -164,7 +150,7 @@ red-syntax: context [
 				npc2: next npc
 				check-block? code npc2
 				type: exp-type? npc2
-				type/4: type/4 + 1
+				type/5: type/5 + 1
 				save-type old-pc type
 				return copy type
 			]
@@ -186,7 +172,7 @@ red-syntax: context [
 				npc2: next npc2
 				check-block? code npc2
 				type: exp-type? npc2
-				type/4: type/4 + 2
+				type/5: type/5 + 2
 				save-type old-pc type
 				return copy type
 			]
@@ -203,17 +189,17 @@ red-syntax: context [
 					nctx = 'routine
 				][
 					value: pop-ctx
-					type: reduce ['block-exp nctx SymbolKind/Function 1]
+					type: reduce ['block-exp nctx CompletionItemKind/Function SymbolKind/Function 1]
 					save-type old-pc type
 					return copy type
 				]
 				if nctx = 'context [
 					value: pop-ctx
-					type: reduce ['block-exp nctx SymbolKind/Namespace 1]
+					type: reduce ['block-exp nctx CompletionItemKind/Module SymbolKind/Namespace 1]
 					save-type old-pc type
 					return copy type
 				]
-				type: reduce ['block-exp nctx SymbolKind/Object 1]
+				type: reduce ['block-exp nctx CompletionItemKind/Module SymbolKind/Object 1]
 				return copy type
 			]
 		]
@@ -223,7 +209,7 @@ red-syntax: context [
 				code-type = word!
 				find system-words/system-words code
 			][
-				type: reduce ['system system-words/get-type code SymbolKind/Method 1]
+				type: reduce ['system system-words/get-type code CompletionItemKind/Keyword SymbolKind/Method 1]
 				save-type old-pc type
 				return copy type
 			]
@@ -231,13 +217,14 @@ red-syntax: context [
 
 		unknown-word-exp-type?: [
 			if code-type = word! [
-				type: reduce ['unknown none SymbolKind/Null 1]
+				type: reduce ['unknown none CompletionItemKind/Text SymbolKind/Null 1]
 				save-type old-pc type
 				return copy type
 			]
 		]
 
 		do semicolon-exp-type?
+		do include-exp-type?
 		do slit-exp-type?
 		do set-word-exp-type?
 		do set-path-exp-type?
@@ -253,12 +240,12 @@ red-syntax: context [
 		unless npc/1/1 = 'Red [
 			throw-error 'find-head "incorrect header" npc/1
 		]
-		save-type npc reduce ['header 'Red SymbolKind/File 2]
+		save-type npc reduce ['header 'Red CompletionItemKind/File SymbolKind/File 2]
 		npc: next npc
 		unless block? npc/1/1 [
 			throw-error 'find-head "incorrect header" npc/1
 		]
-		save-type npc reduce ['header 'Block SymbolKind/File 1]
+		save-type npc reduce ['header 'Block CompletionItemKind/File SymbolKind/File 1]
 		next npc
 	]
 
@@ -269,10 +256,38 @@ red-syntax: context [
 		saved: pc: find-head npc
 		until [
 			type: exp-type? pc
-			pc: skip pc type/4
+			pc: skip pc type/5
 			tail? pc
 		]
 		npc
 	]
 
+	complete-set-word: function [npc [block!] str [string!]][
+		result: reduce ['word]
+		pc: npc
+		until [
+			if set-word? pc/1/1 [
+				word: to string! to word! pc/1/1
+				if all [
+					word <> str
+					find/match word str
+				][
+					append/only result reduce [word pc/1/4/3]
+				]
+			]
+			pc: next pc
+			tail? pc
+		]
+		result
+	]
+
+	get-completions: function [npc [block!] str [string! none!]][
+		if any [
+			none? str
+			empty? str
+			#"%" = str/1
+			find str #"/"
+		][return none]
+		complete-set-word npc str
+	]
 ]

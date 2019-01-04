@@ -113,12 +113,12 @@ system-words: context [
 		reduce [info args refines returns]
 	]
 
-	get-completions: func [str [string! none!] /local result sys-word ptr][
-		result: make block! 4
+	get-completions: function [str [string! none!]][
 		if any [
 			none? str
 			empty? str
-		][return result]
+		][return none]
+		result: make block! 4
 		case [
 			all [
 				#"%" = str/1
