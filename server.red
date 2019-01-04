@@ -374,10 +374,10 @@ on-textDocument-symbol: function [params [map!]][
 	symbol: none
 	forall blk [
 		if blk/1/1 = none [continue]
-		unless block? blk/1/1 [
+		if set-word? blk/1/1 [
 			range: to-range blk/1/2 blk/1/3
 			symbol: make map! reduce [
-				'name		to string! blk/1/4/1
+				'name		mold blk/1/1
 				'kind		blk/1/4/3
 				'range		range
 				'selectionRange range
