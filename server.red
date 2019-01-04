@@ -427,6 +427,33 @@ on-completionItem-resolve: function [params [map!]][
 
 init-logger %logger.txt
 write-log mold system/options/args
+
+red-version-error: [
+	json-body/method: "$/cancelRequest"
+	json-body/params: make map! reduce [
+		'id 0
+	]
+	response
+
+	json-body/method: "window/showMessage"
+	json-body/params: make map! reduce [
+		'type 1
+		'message "can't work with this 'Red' version, please update to a latest(daily) version!"
+	]
+	response
+	exit
+]
+unless value? 'input-stdin [
+	write-log "console not support `input-stdin`"
+	;do red-version-error
+	exit
+]
+unless value? 'read-stdin [
+	write-log "console not support `read-stdin`"
+	;do red-version-error
+	exit
+]
+
 if all [
 	system/options/args
 	system/options/args/1 <> "debug-on"
