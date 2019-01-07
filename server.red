@@ -506,9 +506,11 @@ if all [
 	init-logger none
 ]
 
-watch: does [
+watch: has [res] [
 	while [true][
-		attempt [process lsp-read]
+		if error? res: try [process lsp-read][
+			write-log mold res
+		]
 	]
 ]
 
