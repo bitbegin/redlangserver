@@ -39,8 +39,18 @@ to-range: function [start [block!] end [block!]][
 	]
 ]
 
+add-source-to-table: function [uri [string!] code [string!] blk [block!]][
+	either item: find-source uri [
+		item/1/2: code
+		item/1/3: blk
+	][
+		append/only code-symbols reduce [uri code blk]
+	]
+]
+
 add-source: function [uri [string!] code [string!]][
 	if map? res: try [red-lexer/analysis code][
+		add-source-to-table uri code res/lexer
 		range: to-range res/pos res/pos
 		return reduce [
 			make map! reduce [
@@ -53,8 +63,8 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 	if error? res: try [red-syntax/analysis res][
+		add-source-to-table uri code res
 		pc: res/arg3
-		write-log mold res
 		range: to-range pc/2 pc/2
 		return reduce [
 			make map! reduce [
@@ -67,12 +77,7 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 
-	if item: find-source uri [
-		item/1/2: code
-		item/1/3: res
-		return []
-	]
-	append/only code-symbols reduce [uri code res]
+	add-source-to-table uri code res
 	[]
 ]
 
@@ -307,7 +312,7 @@ system-completion: [
 			completions-type = 'path [
 				forall completions [
 					append comps make map! reduce [
-						'label find/tail completions/1 "/"
+						'label completions/1
 						'kind CompletionItemKind/Field
 					]
 				]
@@ -356,6 +361,9 @@ on-textDocument-completion: function [params [map!]][
 	if item: find-source uri [
 		source: item/1/2
 		syntax: item/1/3
+		if params/context/triggerCharacter = "/" [
+			column: column + 1
+		]
 		completion-string: parse-completion-string source line column
 	]
 
