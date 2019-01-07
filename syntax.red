@@ -94,6 +94,10 @@ red-syntax: context [
 			][
 				type: reduce ['semicolon-exp none CompletionItemKind/Text SymbolKind/Null 1]
 				save-type old-pc type
+				next-tail? 'semicolon npc
+				npc2: next npc
+				type: exp-type? npc2
+				type/5: type/5 + 1
 				return copy type
 			]
 		]
@@ -111,7 +115,7 @@ red-syntax: context [
 
 		slit-exp-type?: [
 			if simple-literal? code-type [
-				type: reduce ['slit-exp code-type CompletionItemKind/Constant form-type code-type 1]
+				type: reduce ['slit-exp type?/word code CompletionItemKind/Constant form-type code-type 1]
 				save-type old-pc type
 				return copy type
 			]
@@ -209,7 +213,7 @@ red-syntax: context [
 				code-type = word!
 				find system-words/system-words code
 			][
-				type: reduce ['system type? get code CompletionItemKind/Keyword SymbolKind/Method 1]
+				type: reduce ['system type?/word get code CompletionItemKind/Keyword SymbolKind/Method 1]
 				save-type old-pc type
 				return copy type
 			]
@@ -267,7 +271,7 @@ red-syntax: context [
 		pc: npc
 		until [
 			if set-word? pc/1/1 [
-				word: to string! to word! pc/1/1
+				word: to string! pc/1/1
 				if all [
 					word <> str
 					find/match word str
@@ -289,5 +293,47 @@ red-syntax: context [
 			find str #"/"
 		][return none]
 		complete-set-word npc str
+	]
+
+	resolve-set-word: function [npc [block!] str [string!]][
+		pc: npc
+		until [
+			if set-word? pc/1/1 [
+				word: to string! pc/1/1
+				if word = str [
+					type: pc/1/4
+					case [
+						type/1 = 'include-exp [
+							return rejoin [str " is a `#include` exp"]
+						]
+						type/1 = 'slit-exp [
+							return rejoin [str " is a " to string! type/2 " variable"]
+						]
+						all [
+							type/1 = 'block-exp
+							word? type/2
+						][
+							return rejoin [str " is a " to string! type/2 " variable"]
+						]
+						true [
+							return rejoin [str " is an unknown variable"]
+						]
+					]
+				]
+			]
+			pc: next pc
+			tail? pc
+		]
+		""
+	]
+
+	resolve-completion: function [npc [block!] str [string! none!]][
+		if any [
+			none? str
+			empty? str
+			#"%" = str/1
+			find str #"/"
+		][return ""]
+		resolve-set-word npc str
 	]
 ]

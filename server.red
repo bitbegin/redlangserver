@@ -17,6 +17,7 @@ Red [
 logger: none
 
 code-symbols: clear []
+last-uri: none
 
 find-source: function [uri [string!]][
 	forall code-symbols [
@@ -211,6 +212,7 @@ on-initialize: function [params [map!]][
 on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
+	set 'last-uri uri
 	diagnostics: add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
@@ -222,6 +224,7 @@ on-textDocument-didOpen: function [params [map!]][
 
 on-textDocument-didClose: function [params [map!]][
 	uri: params/textDocument/uri
+	set 'last-uri none
 	if item: find-source uri [
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
@@ -231,6 +234,7 @@ on-textDocument-didClose: function [params [map!]][
 on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
+	set 'last-uri uri
 	diagnostics: add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
@@ -343,6 +347,7 @@ context-completion: [
 
 on-textDocument-completion: function [params [map!]][
 	uri: params/textDocument/uri
+	set 'last-uri uri
 	line: params/position/line
 	column: params/position/character
 	source: none
@@ -432,16 +437,24 @@ on-textDocument-symbol: function [params [map!]][
 
 on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
+	set 'last-uri uri
 	line: params/position/line
 	column: params/position/character
 	result: either item: find-source uri [
 		source: item/1/2
-		word: to word! get-selected-text source line column
-		either hstr: system-words/get-word-info word [
+		word: to word! text: get-selected-text source line column
+		hstr: red-syntax/resolve-completion item/1/3 text
+		either empty? hstr [
+			either hstr: system-words/get-word-info word [
+				make map! reduce [
+					'contents rejoin ["```^/" hstr "^/```"]
+				]
+			][""]
+		][
 			make map! reduce [
 				'contents rejoin ["```^/" hstr "^/```"]
 			]
-		][""]
+		]
 	][""]
 	json-body/result: result
 	response
@@ -460,7 +473,11 @@ on-completionItem-resolve: function [params [map!]][
 				system-words/get-word-info word
 			]
 		][
-			""
+			either item: find-source last-uri [
+				red-syntax/resolve-completion item/1/3 text
+			][
+				""
+			]
 		]
 	]
 

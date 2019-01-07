@@ -9,7 +9,7 @@ g: context [
 	g1: []
 ]
 g/g1: [23 4]
-;h: make object! []
+x: ;h: make object! []
 i: j: k: 3x3
 
 
