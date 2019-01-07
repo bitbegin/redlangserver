@@ -294,7 +294,7 @@ system-completion: [
 			completions-type = 'file [
 				forall completions [
 					append comps make map! reduce [
-						'label skip completions/1 1
+						'label to string! completions/1
 						'kind CompletionItemKind/File
 					]
 				]
