@@ -334,6 +334,7 @@ context-completion: [
 				insert comps make map! reduce [
 					'label completions/1/1
 					'kind completions/1/2
+					'preselect true
 				]
 			]
 		]
