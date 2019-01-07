@@ -298,26 +298,36 @@ red-syntax: context [
 	resolve-set-word: function [npc [block!] str [string!]][
 		pc: npc
 		until [
-			if set-word? pc/1/1 [
-				word: to string! pc/1/1
-				if word = str [
-					type: pc/1/4
-					case [
-						type/1 = 'include-exp [
-							return rejoin [str " is a `#include` exp"]
+
+			code-type: type? pc/1/1
+			case [
+				set-word? pc/1/1 [
+					word: to string! pc/1/1
+					if word = str [
+						type: pc/1/4
+						case [
+							type/1 = 'include-exp [
+								return rejoin [str " is a `#include` exp"]
+							]
+							type/1 = 'slit-exp [
+								return rejoin [str " is a " to string! type/2 " variable"]
+							]
+							all [
+								type/1 = 'block-exp
+								word? type/2
+							][
+								return rejoin [str " is a " to string! type/2 " variable"]
+							]
+							true [
+								return rejoin [str " is an unknown variable"]
+							]
 						]
-						type/1 = 'slit-exp [
-							return rejoin [str " is a " to string! type/2 " variable"]
-						]
-						all [
-							type/1 = 'block-exp
-							word? type/2
-						][
-							return rejoin [str " is a " to string! type/2 " variable"]
-						]
-						true [
-							return rejoin [str " is an unknown variable"]
-						]
+					]
+				]
+				simple-literal? code-type [
+					word: to string! pc/1/1
+					if word = str [
+						return rejoin [str " is a " to string! type?/word pc/1/1 " literal"]
 					]
 				]
 			]

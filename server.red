@@ -393,7 +393,7 @@ get-selected-text: function [source line column][
 		if source: find/tail source #"^/" [n: n + 1]
 		any [none? source n = line]
 	]
-	delimiters: charset " ^-[](){}':;"
+	delimiters: charset " ^M^/^-[](){}':;"
 	while [not find delimiters str/(column + 1)][column: column + 1]
 	line-str: copy/part str column
 	unless ptr: find/last/tail line-str delimiters [
@@ -441,10 +441,10 @@ on-textDocument-hover: function [params [map!]][
 	line: params/position/line
 	column: params/position/character
 	result: either item: find-source uri [
-		source: item/1/2
-		word: to word! text: get-selected-text source line column
+		text: get-selected-text item/1/2 line column
 		hstr: red-syntax/resolve-completion item/1/3 text
 		either empty? hstr [
+			word: to word! text
 			either hstr: system-words/get-word-info word [
 				make map! reduce [
 					'contents rejoin ["```^/" hstr "^/```"]
