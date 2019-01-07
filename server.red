@@ -120,6 +120,7 @@ process: function [data [string!]][
 	json-body/params: none
 	json-body/error: none
 	dispatch-method script/method script/params
+	true
 ]
 
 response: function [][
