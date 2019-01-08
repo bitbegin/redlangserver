@@ -15,6 +15,7 @@ Red [
 #include %syntax.red
 
 logger: none
+auto-complete: false
 
 code-symbols: clear []
 last-uri: none
@@ -182,34 +183,46 @@ forall trigger-string [
 	append trigger-chars to string! trigger-string/1
 ]
 on-initialize: function [params [map!]][
+	caps: #()
+	put caps 'textDocumentSync TextDocumentSyncKind/Full
+	put caps 'hoverProvider true
+	if auto-complete [
+		put caps 'completionProvider
+			make map! reduce ['resolveProvider true 'triggerCharacters trigger-chars]
+	]
 
 	json-body/result: make map! reduce [
-		'capabilities make map! reduce [
-			'textDocumentSync TextDocumentSyncKind/Full
-			;'textDocumentSync make map! reduce [
-			;	'openClose			true
-			;	'change				0
-			;	'willSave			false
-			;	'willSaveWaitUntil	false
-			;	'save				make map! reduce ['includeText true]
-			;]
-
-			;'documentFormattingProvider true
-			;'documentRangeFormattingProvider true
-			;'documentOnTypeFormattingProvider make map! reduce ['firstTriggerCharacter "{" 'moreTriggerCharacter ""]
-			;'codeActionProvider true
-			'completionProvider make map! reduce ['resolveProvider true 'triggerCharacters trigger-chars]
-			;'signatureHelpProvider make map! reduce ['triggerCharacters ["."]]
-			;'definitionProvider true
-			;'documentHighlightProvider true
-			'hoverProvider true
-			;'renameProvider true
-			;'documentSymbolProvider true
-			;'workspaceSymbolProvider true
-			;'referencesProvider true
-			;'executeCommandProvider make map! reduce ['commands "Red.applyFix"]
-		]
+		'capabilities caps
 	]
+
+	;json-body/result: make map! reduce [
+	;	'capabilities make map! reduce [
+	;		'textDocumentSync TextDocumentSyncKind/Full
+	;		;'textDocumentSync make map! reduce [
+	;		;	'openClose			true
+	;		;	'change				0
+	;		;	'willSave			false
+	;		;	'willSaveWaitUntil	false
+	;		;	'save				make map! reduce ['includeText true]
+	;		;]
+
+	;		;'documentFormattingProvider true
+	;		;'documentRangeFormattingProvider true
+	;		;'documentOnTypeFormattingProvider make map! reduce ['firstTriggerCharacter "{" 'moreTriggerCharacter ""]
+	;		;'codeActionProvider true
+	;		'completionProvider make map! reduce ['resolveProvider true 'triggerCharacters trigger-chars]
+	;		;'signatureHelpProvider make map! reduce ['triggerCharacters ["."]]
+	;		;'definitionProvider true
+	;		;'documentHighlightProvider true
+	;		'hoverProvider true
+	;		;'renameProvider true
+	;		;'documentSymbolProvider true
+	;		;'workspaceSymbolProvider true
+	;		;'referencesProvider true
+	;		;'executeCommandProvider make map! reduce ['commands "Red.applyFix"]
+	;	]
+	;]
+
 	response
 ]
 
@@ -543,6 +556,13 @@ if all [
 	system/options/args/1 <> "debug-on"
 ][
 	init-logger none
+]
+
+if all [
+	2 = length? system/options/args
+	system/options/args/2 = "auto-on"
+][
+	auto-complete: true
 ]
 
 watch: has [res] [
