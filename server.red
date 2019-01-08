@@ -62,8 +62,8 @@ add-source: function [uri [string!] code [string!]][
 			]
 		]
 	]
+	add-source-to-table uri code res
 	if error? res: try [red-syntax/analysis res][
-		add-source-to-table uri code res
 		pc: res/arg3
 		range: to-range pc/2 pc/2
 		return reduce [
@@ -77,7 +77,6 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 
-	add-source-to-table uri code res
 	[]
 ]
 
