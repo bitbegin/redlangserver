@@ -67,10 +67,13 @@ red-lexer: context [
 					true [break]
 				]
 			]
-			if error? npos: try [system/lexer/transcode/one pos clear out false][
+			npos: try [system/lexer/transcode/one pos clear out false]
+			if any [
+				error? npos
+				npos = pos
+			][
 				return make map! reduce ['pos form-pos pos 'err npos 'lexer words]
 			]
-			if npos = pos [npos: next pos]
 			append/only words reduce [
 				out/1 form-pos pos form-pos npos
 				none none none none]
