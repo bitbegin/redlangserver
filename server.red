@@ -526,15 +526,12 @@ init-logger %logger.txt
 write-log mold system/options/args
 
 red-version-error: [
-	json-body/method: "$/cancelRequest"
-	json-body/params: make map! reduce [
-		'id 0
-	]
-	response
-
-	json-body/method: "window/showMessage"
-	json-body/params: make map! reduce [
-		'type 1
+	json-body/id: 0
+	json-body/result: none
+	json-body/method: none
+	json-body/params: none
+	json-body/error: make map! reduce [
+		'code -32002
 		'message "can't work with this 'Red' version, please update to a latest(daily) version!"
 	]
 	response
@@ -542,12 +539,12 @@ red-version-error: [
 ]
 unless value? 'input-stdin [
 	write-log "console not support `input-stdin`"
-	;do red-version-error
+	do red-version-error
 	exit
 ]
 unless value? 'read-stdin [
 	write-log "console not support `read-stdin`"
-	;do red-version-error
+	do red-version-error
 	exit
 ]
 
