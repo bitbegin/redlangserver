@@ -23,7 +23,7 @@ system-words: context [
 	get-word-info: func [word [word!]][
 		either find system-words word [
 			help-string :word
-		][none]
+		]["UNKNOWN"]
 	]
 
 	ws: charset " ^-^M"

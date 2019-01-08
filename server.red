@@ -394,6 +394,8 @@ on-textDocument-completion: function [params [map!]][
 ]
 
 get-selected-text: function [source line column][
+	start: 1
+	end: column
 	n: -1
 	until [
 		str: source
@@ -406,10 +408,12 @@ get-selected-text: function [source line column][
 	unless ptr: find/last/tail line-str delimiters [
 		ptr: line-str
 	]
+	start: index? ptr
 	if slash: find ptr #"/" [
 		ptr: copy/part ptr slash
 	]
-	ptr
+	end: start + length? ptr
+	reduce [ptr start end]
 ]
 
 on-textDocument-symbol: function [params [map!]][
@@ -447,23 +451,32 @@ on-textDocument-hover: function [params [map!]][
 	set 'last-uri uri
 	line: params/position/line
 	column: params/position/character
+	range: none
 	result: either item: find-source uri [
-		text: get-selected-text item/1/2 line column
-		hstr: red-syntax/resolve-completion item/1/3 text
-		either empty? hstr [
-			word: to word! text
-			either hstr: system-words/get-word-info word [
-				make map! reduce [
-					'contents rejoin ["```^/" hstr "^/```"]
+		blk: get-selected-text item/1/2 line column
+		text: blk/1
+		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
+		either empty? text ["UNKNOWN"][
+			hstr: red-syntax/resolve-completion item/1/3 text
+			either empty? hstr [
+				either error? word: try [to word! text][
+					["UNKNOWN"]
+				][
+					either find system-words/system-words word [
+						either datatype? get word [
+							rejoin [text " is a base datatype!"]
+						][
+							system-words/get-word-info word
+						]
+					]["UNKNOWN"]
 				]
-			][""]
-		][
-			make map! reduce [
-				'contents rejoin ["```^/" hstr "^/```"]
-			]
+			][hstr]
 		]
-	][""]
-	json-body/result: result
+	]["UNKNOWN"]
+	json-body/result: make map! reduce [
+		'contents rejoin ["```^/" result "^/```"]
+		'range range
+	]
 	response
 ]
 
