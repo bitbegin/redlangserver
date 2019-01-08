@@ -19,6 +19,7 @@ auto-complete: false
 
 code-symbols: clear []
 last-uri: none
+client-caps: none
 
 find-source: function [uri [string!]][
 	forall code-symbols [
@@ -183,7 +184,8 @@ forall trigger-string [
 	append trigger-chars to string! trigger-string/1
 ]
 on-initialize: function [params [map!]][
-	caps: #()
+	set 'client-caps params
+	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Full
 	put caps 'hoverProvider true
 	if auto-complete [
