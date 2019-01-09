@@ -93,7 +93,6 @@ system-words: context [
 			][
 				append result 'file
 				completions: red-complete-ctx/red-complete-file str no
-				write-log mold completions
 				append result form-completion completions
 			]
 			all [
@@ -103,7 +102,6 @@ system-words: context [
 			][
 				append result 'path
 				completions: red-complete-ctx/red-complete-path str no
-				write-log mold completions
 				append result form-completion completions
 			]
 			true [

@@ -172,9 +172,9 @@ dispatch-method: function [method [string!] params][
 		"textDocument/didClose"			[on-textDocument-didClose params]
 		"textDocument/didChange"		[on-textDocument-didChange params]
 		"textDocument/completion"		[on-textDocument-completion params]
+		"completionItem/resolve"		[on-completionItem-resolve params]
 		"textDocument/documentSymbol"	[on-textDocument-symbol params]
 		"textDocument/hover"			[on-textDocument-hover params]
-		"completionItem/resolve"		[on-completionItem-resolve params]
 	]
 ]
 
@@ -197,7 +197,10 @@ on-initialize: function [params [map!]][
 	put caps 'hoverProvider true
 	if auto-complete [
 		put caps 'completionProvider
-			make map! reduce ['resolveProvider true 'triggerCharacters trigger-chars]
+			make map! reduce [
+				'resolveProvider true
+				'triggerCharacters trigger-chars
+			]
 	]
 
 	json-body/result: make map! reduce [
@@ -276,6 +279,8 @@ on-textDocument-didChange: function [params [map!]][
 ]
 
 parse-completion-string: function [source line column][
+	start: 1
+	end: column
 	n: -1
 	until [
 		str: source
@@ -287,7 +292,9 @@ parse-completion-string: function [source line column][
 	unless ptr: find/last/tail line-str delimiters [
 		ptr: line-str
 	]
-	ptr
+	start: index? ptr
+	end: start + column
+	reduce [ptr start end]
 ]
 
 system-completion-kind: function [word [word!]][
@@ -314,7 +321,7 @@ system-completion-kind: function [word [word!]][
 	]
 ]
 
-system-completion: [
+complete-system: [
 	completions: system-words/get-completions completion-string
 	unless any [
 		none? completions
@@ -356,7 +363,7 @@ system-completion: [
 	]
 ]
 
-context-completion: [
+complete-context: [
 	completions: red-syntax/get-completions syntax completion-string
 	unless any [
 		none? completions
@@ -376,6 +383,97 @@ context-completion: [
 	]
 ]
 
+complete-snippet: [
+	if find/match "red$title$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "red$title$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "Red [^/^-Title: ^"${2:title}^"^/]^/"
+			]
+		]
+	]
+	if find/match "red$view$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "red$view$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "Red [^/^-Title: ^"${2:title}^"^/^-Needs: 'View^/]^/"
+			]
+		]
+	]
+	if find/match "either$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "either$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "either ${1:condition} [^/^-${2:exp}^/][^/^-${3:exp}^/]^/"
+			]
+		]
+	]
+	if find/match "func$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "func$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "func [${1:arg}][^/^-${2:exp}^/]^/"
+			]
+		]
+	]
+	if find/match "function$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "function$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "function [${1:arg}][^/^-${2:exp}^/]^/"
+			]
+		]
+	]
+	if find/match "while$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "while$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "while [${1:condition}][^/^-${2:exp}^/]^/"
+			]
+		]
+	]
+	if find/match "forall$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "forall$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "forall ${1:series} [^/^-${2:exp}^/]^/"
+			]
+		]
+	]
+	if find/match "foreach$snippet" completion-string [
+		insert comps make map! reduce [
+			'label "foreach$snippet"
+			'kind CompletionItemKind/Keyword
+			'insertTextFormat 2
+			'textEdit make map! reduce [
+				'range range
+				'newText "foreach ${1:iteration} ${2:series} [^/^-${3:exp}^/]^/"
+			]
+		]
+	]
+]
+
 on-textDocument-completion: function [params [map!]][
 	uri: params/textDocument/uri
 	set 'last-uri uri
@@ -387,7 +485,10 @@ on-textDocument-completion: function [params [map!]][
 	if item: find-source uri [
 		source: item/1/2
 		syntax: item/1/3
-		completion-string: parse-completion-string source line column
+		blk: parse-completion-string source line column
+		completion-string: blk/1
+		write-log mold blk
+		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 	]
 	set 'last-completion completion-string
 	write-log mold last-completion
@@ -401,8 +502,9 @@ on-textDocument-completion: function [params [map!]][
 		none? completion-string
 		empty? completion-string
 	][
-		do bind system-completion 'completion-string
-		do bind context-completion 'completion-string
+		do bind complete-snippet 'completion-string
+		do bind complete-system 'completion-string
+		do bind complete-context 'completion-string
 	]
 
 	either empty? comps [
@@ -412,10 +514,52 @@ on-textDocument-completion: function [params [map!]][
 		]
 	][
 		json-body/result: make map! reduce [
+			'isIncomplete false
 			'items comps
 		]
 	]
 
+	response
+]
+
+resolve-snippet: function [text [string!]][
+	switch text [
+		"red$title$snippet" [return "Red [ Title ]"]
+		"red$view$snippet" [return "Red [ Title NeedsView ]"]
+		"either$snippet" [return "either condition [ ][ ]"]
+		"func$snippet" [return "func [args][ ]"]
+		"function$snippet" [return "function [args][ ]"]
+		"while$snippet" [return "while [ condition ] [ ]"]
+		"forall$snippet" [return "forall series [ ]"]
+		"foreach$snippet" [return "foreach iteration series [ ]"]
+	]
+	none
+]
+
+on-completionItem-resolve: function [params [map!]][
+	text: params/label
+	hstr: either empty? text [""][
+		either last-completion/1 = #"%" [""][
+			either snip: resolve-snippet text [snip][
+				word: to word! text
+				either find system-words/system-words word [
+					either datatype? get word [
+						rejoin [text " is a base datatype!"]
+					][
+						system-words/get-word-info word
+					]
+				][
+					either item: find-source last-uri [
+						red-syntax/resolve-completion item/1/3 text
+					][""]
+				]
+			]
+		]
+	]
+
+	put params 'documentation hstr
+
+	json-body/result: params
 	response
 ]
 
@@ -507,40 +651,6 @@ on-textDocument-hover: function [params [map!]][
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range range
-	]
-	response
-]
-
-on-completionItem-resolve: function [params [map!]][
-	text: params/label
-	kind: CompletionItemKind/Text
-	hstr: either empty? text [""][
-		either last-completion/1 = #"%" [
-			kind: CompletionItemKind/File
-			""
-		][
-			word: to word! text
-			either find system-words/system-words word [
-				kind: system-completion-kind word
-				either datatype? get word [
-					rejoin [text " is a base datatype!"]
-				][
-					system-words/get-word-info word
-				]
-			][
-				either item: find-source last-uri [
-					red-syntax/resolve-completion item/1/3 text
-				][
-					""
-				]
-			]
-		]
-	]
-
-	json-body/result: make map! reduce [
-		'label text
-		'kind kind
-		'documentation hstr
 	]
 	response
 ]
