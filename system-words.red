@@ -68,19 +68,33 @@ system-words: context [
 		reduce [info args refines returns]
 	]
 
+	form-completion: function [completions [block!]][
+		either 1 = length? completions [
+			comp: either #"/" = last completions/1 [
+				copy/part completions/1 (length? completions/1) - 1
+			][completions/1]
+			unless res: find/last/tail comp #"/" [res: comp]
+			res
+		][completions]
+	]
+
 	get-completions: function [str [string! none!]][
 		if any [
 			none? str
 			empty? str
 		][return none]
 		result: make block! 4
+		completions: none
+		item: none
 		case [
 			all [
 				#"%" = str/1
 				1 < length? str
 			][
 				append result 'file
-				append result red-complete-ctx/red-complete-file str no
+				completions: red-complete-ctx/red-complete-file str no
+				write-log mold completions
+				append result form-completion completions
 			]
 			all [
 				#"/" <> str/1
@@ -88,7 +102,9 @@ system-words: context [
 				find system-words to word! copy/part str ptr
 			][
 				append result 'path
-				append result red-complete-ctx/red-complete-path str no
+				completions: red-complete-ctx/red-complete-path str no
+				write-log mold completions
+				append result form-completion completions
 			]
 			true [
 				append result 'word

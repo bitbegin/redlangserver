@@ -19,6 +19,7 @@ auto-complete: false
 
 code-symbols: clear []
 last-uri: none
+last-completion: none
 client-caps: none
 shutdown?: no
 
@@ -336,9 +337,8 @@ system-completion: [
 			]
 			completions-type = 'path [
 				forall completions [
-					unless label: find/tail completions/1 #"/" [label: completions/1]
 					append comps make map! reduce [
-						'label label
+						'label completions/1
 						'kind CompletionItemKind/Field
 					]
 				]
@@ -389,13 +389,13 @@ on-textDocument-completion: function [params [map!]][
 		syntax: item/1/3
 		completion-string: parse-completion-string source line column
 	]
-	write-log completion-string
+	set 'last-completion completion-string
+	write-log mold last-completion
 
 	comps: clear []
 	completions: none
 	completions-type: none
 	kind: none
-	label: none
 
 	unless any [
 		none? completion-string
@@ -429,14 +429,21 @@ get-selected-text: function [source line column][
 		any [none? source n = line]
 	]
 	delimiters: charset " ^M^/^-[](){}':;"
-	while [not find delimiters str/(column + 1)][column: column + 1]
+	while [
+		all [
+			column < length? str
+			not find delimiters str/(column + 1)
+		]
+	][column: column + 1]
 	line-str: copy/part str column
 	unless ptr: find/last/tail line-str delimiters [
 		ptr: line-str
 	]
 	start: index? ptr
-	if slash: find ptr #"/" [
-		ptr: copy/part ptr slash
+	if ptr/1 <> #"%" [
+		if slash: find ptr #"/" [
+			ptr: copy/part ptr slash
+		]
 	]
 	end: start + length? ptr
 	reduce [ptr start end]
@@ -485,9 +492,7 @@ on-textDocument-hover: function [params [map!]][
 		either empty? text [none][
 			hstr: red-syntax/resolve-completion item/1/3 text
 			either empty? hstr [
-				either error? word: try [to word! text][
-					[none]
-				][
+				either error? word: try [to word! text][none][
 					either find system-words/system-words word [
 						either datatype? get word [
 							rejoin [text " is a base datatype!"]
@@ -510,19 +515,24 @@ on-completionItem-resolve: function [params [map!]][
 	text: params/label
 	kind: CompletionItemKind/Text
 	hstr: either empty? text [""][
-		word: to word! text
-		either find system-words/system-words word [
-			kind: system-completion-kind word
-			either datatype? get word [
-				rejoin [text " is a base datatype!"]
-			][
-				system-words/get-word-info word
-			]
+		either last-completion/1 = #"%" [
+			kind: CompletionItemKind/File
+			""
 		][
-			either item: find-source last-uri [
-				red-syntax/resolve-completion item/1/3 text
+			word: to word! text
+			either find system-words/system-words word [
+				kind: system-completion-kind word
+				either datatype? get word [
+					rejoin [text " is a base datatype!"]
+				][
+					system-words/get-word-info word
+				]
 			][
-				""
+				either item: find-source last-uri [
+					red-syntax/resolve-completion item/1/3 text
+				][
+					""
+				]
 			]
 		]
 	]
