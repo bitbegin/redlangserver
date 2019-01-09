@@ -470,11 +470,11 @@ on-textDocument-hover: function [params [map!]][
 		blk: get-selected-text item/1/2 line column
 		text: blk/1
 		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
-		either empty? text ["UNKNOWN"][
+		either empty? text [none][
 			hstr: red-syntax/resolve-completion item/1/3 text
 			either empty? hstr [
 				either error? word: try [to word! text][
-					["UNKNOWN"]
+					[none]
 				][
 					either find system-words/system-words word [
 						either datatype? get word [
@@ -482,13 +482,13 @@ on-textDocument-hover: function [params [map!]][
 						][
 							system-words/get-word-info word
 						]
-					]["UNKNOWN"]
+					][none]
 				]
 			][hstr]
 		]
-	]["UNKNOWN"]
+	][none]
 	json-body/result: make map! reduce [
-		'contents rejoin ["```^/" result "^/```"]
+		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range range
 	]
 	response
