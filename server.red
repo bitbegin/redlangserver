@@ -20,6 +20,7 @@ auto-complete: false
 code-symbols: clear []
 last-uri: none
 client-caps: none
+shutdown?: no
 
 find-source: function [uri [string!]][
 	forall code-symbols [
@@ -165,6 +166,7 @@ lsp-read: function [][
 dispatch-method: function [method [string!] params][
 	switch method [
 		"initialize"					[on-initialize params]
+		"shutdown"						[on-shutdown params]
 		"textDocument/didOpen"			[on-textDocument-didOpen params]
 		"textDocument/didClose"			[on-textDocument-didClose params]
 		"textDocument/didChange"		[on-textDocument-didChange params]
@@ -229,6 +231,11 @@ on-initialize: function [params [map!]][
 	;	]
 	;]
 
+	response
+]
+
+on-shutdown: function [params [map! none!]][
+	set 'shutdown? yes
 	response
 ]
 
@@ -569,11 +576,12 @@ if all [
 ]
 
 watch: has [res] [
-	while [true][
+	while [not shutdown?][
 		if error? res: try [process lsp-read][
 			write-log mold res
 		]
 	]
+	write-log "[shutdown]"
 ]
 
 watch
