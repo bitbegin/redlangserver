@@ -56,7 +56,7 @@ add-source: function [uri [string!] code [string!]][
 		range: to-range res/pos res/pos
 		line-cs: charset [#"^M" #"^/"]
 		info: res/err/arg2
-		info: copy/part info find info line-cs
+		if part: find info line-cs [info: copy/part info part]
 		message: rejoin [res/err/id " ^"" res/err/arg1 "^" at: ^"" info "^""]
 		return reduce [
 			make map! reduce [
@@ -382,6 +382,7 @@ on-textDocument-completion: function [params [map!]][
 		syntax: item/1/3
 		completion-string: parse-completion-string source line column
 	]
+	write-log completion-string
 
 	comps: clear []
 	completions: none
