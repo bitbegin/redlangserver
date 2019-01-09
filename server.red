@@ -545,7 +545,7 @@ red-version-error: [
 	json-body/params: none
 	json-body/error: make map! reduce [
 		'code -32002
-		'message "can't work with this 'Red' version, please update to a latest(daily) version!"
+		'message "Can't work with this 'Red' version^/Please make sure that your Red toolchain newer than red-09jan19-acf34929.exe!"
 	]
 	response
 	exit
