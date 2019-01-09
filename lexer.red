@@ -71,7 +71,6 @@ red-lexer: context [
 			if npos = pos [
 				npos: make error! [
 					type: 'syntax
-					type: err-type
 					id: 'invalid
 					arg1: to string! pos/1
 					arg2: to string! pos/1
