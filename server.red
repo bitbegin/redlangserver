@@ -325,8 +325,9 @@ system-completion: [
 			]
 			completions-type = 'path [
 				forall completions [
+					unless label: find/tail completions/1 #"/" [label: completions/1]
 					append comps make map! reduce [
-						'label completions/1
+						'label label
 						'kind CompletionItemKind/Field
 					]
 				]
@@ -375,9 +376,6 @@ on-textDocument-completion: function [params [map!]][
 	if item: find-source uri [
 		source: item/1/2
 		syntax: item/1/3
-		if params/context/triggerCharacter = "/" [
-			column: column + 1
-		]
 		completion-string: parse-completion-string source line column
 	]
 
@@ -385,6 +383,7 @@ on-textDocument-completion: function [params [map!]][
 	completions: none
 	completions-type: none
 	kind: none
+	label: none
 
 	unless any [
 		none? completion-string
