@@ -54,13 +54,17 @@ add-source: function [uri [string!] code [string!]][
 	if map? res: try [red-lexer/analysis code][
 		add-source-to-table uri code res/lexer
 		range: to-range res/pos res/pos
+		line-cs: charset [#"^M" #"^/"]
+		info: res/err/arg2
+		info: copy/part info find info line-cs
+		message: rejoin [res/err/id " ^"" res/err/arg1 "^" at: ^"" info "^""]
 		return reduce [
 			make map! reduce [
 				'range range
 				'severity 1
 				'code 1
 				'source "lexer"
-				'message form res/err
+				'message message
 			]
 		]
 	]
