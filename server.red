@@ -15,7 +15,8 @@ Red [
 #include %syntax.red
 
 logger: none
-auto-complete: false
+auto-complete?: false
+open-logger?: false
 
 code-symbols: clear []
 last-uri: none
@@ -194,7 +195,7 @@ forall trigger-string [
 ]
 on-initialize: function [params [map!]][
 	set 'client-caps params
-	set 'auto-complete params/initializationOptions/autoComplete
+	set 'auto-complete? params/initializationOptions/autoComplete
 	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Full
 	put caps 'hoverProvider true
@@ -246,17 +247,21 @@ on-initialized: function [params [map! none!]][
 	;	'scopeUri "red"
 	;]
 	;json-body/params: items
-	response
 ]
 
 on-didChangeConfiguration: function [params [map! none!]][
-	set 'auto-complete params/settings/red/autoComplete
-	response
+	set 'auto-complete? params/settings/red/autoComplete
+	if open-logger? <> params/settings/red/rls-debug [
+		either open-logger?: params/settings/red/rls-debug [
+			init-logger %logger.txt
+		][
+			init-logger none
+		]
+	]
 ]
 
 on-shutdown: function [params [map! none!]][
 	set 'shutdown? yes
-	response
 ]
 
 on-textDocument-didOpen: function [params [map!]][
@@ -491,7 +496,7 @@ complete-snippet: [
 ]
 
 on-textDocument-completion: function [params [map!]][
-	unless auto-complete [
+	unless auto-complete? [
 		json-body/result: ""
 		response
 		exit
@@ -702,11 +707,14 @@ unless value? 'read-stdin [
 	exit
 ]
 
-if all [
+either all [
 	system/options/args
 	system/options/args/1 <> "debug-on"
 ][
 	init-logger none
+	open-logger?: false
+][
+	open-logger?: true
 ]
 
 watch: has [res] [
