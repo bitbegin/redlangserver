@@ -384,9 +384,9 @@ complete-context: [
 ]
 
 complete-snippet: [
-	if find/match "red$title$snippet" completion-string [
+	if find/match "red.title.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "red$title$snippet"
+			'label "red.title.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -395,9 +395,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "red$view$snippet" completion-string [
+	if find/match "red.view.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "red$view$snippet"
+			'label "red.view.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -406,9 +406,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "either$snippet" completion-string [
+	if find/match "either.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "either$snippet"
+			'label "either.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -417,9 +417,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "func$snippet" completion-string [
+	if find/match "func.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "func$snippet"
+			'label "func.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -428,9 +428,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "function$snippet" completion-string [
+	if find/match "function.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "function$snippet"
+			'label "function.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -439,9 +439,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "while$snippet" completion-string [
+	if find/match "while.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "while$snippet"
+			'label "while.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -450,9 +450,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "forall$snippet" completion-string [
+	if find/match "forall.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "forall$snippet"
+			'label "forall.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -461,9 +461,9 @@ complete-snippet: [
 			]
 		]
 	]
-	if find/match "foreach$snippet" completion-string [
+	if find/match "foreach.snippet" completion-string [
 		insert comps make map! reduce [
-			'label "foreach$snippet"
+			'label "foreach.snippet"
 			'kind CompletionItemKind/Keyword
 			'insertTextFormat 2
 			'textEdit make map! reduce [
@@ -524,14 +524,14 @@ on-textDocument-completion: function [params [map!]][
 
 resolve-snippet: function [text [string!]][
 	switch text [
-		"red$title$snippet" [return "Red [ Title ]"]
-		"red$view$snippet" [return "Red [ Title NeedsView ]"]
-		"either$snippet" [return "either condition [ ][ ]"]
-		"func$snippet" [return "func [args][ ]"]
-		"function$snippet" [return "function [args][ ]"]
-		"while$snippet" [return "while [ condition ] [ ]"]
-		"forall$snippet" [return "forall series [ ]"]
-		"foreach$snippet" [return "foreach iteration series [ ]"]
+		"red.title.snippet" [return "Red [ Title ]"]
+		"red.view.snippet" [return "Red [ Title NeedsView ]"]
+		"either.snippet" [return "either condition [ ][ ]"]
+		"func.snippet" [return "func [args][ ]"]
+		"function.snippet" [return "function [args][ ]"]
+		"while.snippet" [return "while [ condition ] [ ]"]
+		"forall.snippet" [return "forall series [ ]"]
+		"foreach.snippet" [return "foreach iteration series [ ]"]
 	]
 	none
 ]
