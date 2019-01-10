@@ -105,7 +105,7 @@ write-newline: does [
 
 write-response: function [response][
 	write-stdout "Content-Length: "
-	write-stdout to string! length? response
+	write-stdout to string! length? to binary! response
 	write-newline
 	write-stdout {Content-Type: application/vscode-jsonrpc; charset=utf-8}
 	write-newline write-newline
