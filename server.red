@@ -166,15 +166,17 @@ lsp-read: function [][
 
 dispatch-method: function [method [string!] params][
 	switch method [
-		"initialize"					[on-initialize params]
-		"shutdown"						[on-shutdown params]
-		"textDocument/didOpen"			[on-textDocument-didOpen params]
-		"textDocument/didClose"			[on-textDocument-didClose params]
-		"textDocument/didChange"		[on-textDocument-didChange params]
-		"textDocument/completion"		[on-textDocument-completion params]
-		"completionItem/resolve"		[on-completionItem-resolve params]
-		"textDocument/documentSymbol"	[on-textDocument-symbol params]
-		"textDocument/hover"			[on-textDocument-hover params]
+		"initialize"						[on-initialize params]
+		"initialized"						[on-initialized params]
+		"workspace/didChangeConfiguration"	[on-didChangeConfiguration params]
+		"shutdown"							[on-shutdown params]
+		"textDocument/didOpen"				[on-textDocument-didOpen params]
+		"textDocument/didClose"				[on-textDocument-didClose params]
+		"textDocument/didChange"			[on-textDocument-didChange params]
+		"textDocument/completion"			[on-textDocument-completion params]
+		"completionItem/resolve"			[on-completionItem-resolve params]
+		"textDocument/documentSymbol"		[on-textDocument-symbol params]
+		"textDocument/hover"				[on-textDocument-hover params]
 	]
 ]
 
@@ -192,16 +194,15 @@ forall trigger-string [
 ]
 on-initialize: function [params [map!]][
 	set 'client-caps params
+	set 'auto-complete params/initializationOptions/autoComplete
 	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Full
 	put caps 'hoverProvider true
-	if auto-complete [
-		put caps 'completionProvider
-			make map! reduce [
-				'resolveProvider true
-				'triggerCharacters trigger-chars
-			]
-	]
+	put caps 'completionProvider
+		make map! reduce [
+			'resolveProvider true
+			'triggerCharacters trigger-chars
+		]
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -235,6 +236,21 @@ on-initialize: function [params [map!]][
 	;	]
 	;]
 
+	response
+]
+
+on-initialized: function [params [map! none!]][
+	;json-body/method: "workspace/configuration"
+	;items: clear []
+	;append items make map! reduce [
+	;	'scopeUri "red"
+	;]
+	;json-body/params: items
+	response
+]
+
+on-didChangeConfiguration: function [params [map! none!]][
+	set 'auto-complete params/settings/red/autoComplete
 	response
 ]
 
@@ -475,6 +491,11 @@ complete-snippet: [
 ]
 
 on-textDocument-completion: function [params [map!]][
+	unless auto-complete [
+		json-body/result: ""
+		response
+		exit
+	]
 	uri: params/textDocument/uri
 	set 'last-uri uri
 	line: params/position/line
@@ -686,13 +707,6 @@ if all [
 	system/options/args/1 <> "debug-on"
 ][
 	init-logger none
-]
-
-if all [
-	2 = length? system/options/args
-	system/options/args/2 = "auto-on"
-][
-	auto-complete: true
 ]
 
 watch: has [res] [
