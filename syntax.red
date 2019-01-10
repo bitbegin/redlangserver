@@ -254,10 +254,9 @@ red-syntax: context [
 		clear ctx
 		append/only ctx [#[none] #[none]]
 		saved: pc: find-head npc
-		until [
+		while [not tail? pc][
 			type: exp-type? pc
 			pc: skip pc type/5
-			tail? pc
 		]
 		npc
 	]
