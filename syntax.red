@@ -94,10 +94,6 @@ red-syntax: context [
 			][
 				type: reduce ['semicolon-exp none CompletionItemKind/Text SymbolKind/Null 1]
 				save-type old-pc type
-				next-tail? 'semicolon npc
-				npc2: next npc
-				type: exp-type? npc2
-				type/5: type/5 + 1
 				return copy type
 			]
 		]
