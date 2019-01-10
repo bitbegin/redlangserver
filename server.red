@@ -17,6 +17,7 @@ Red [
 logger: none
 auto-complete?: false
 open-logger?: false
+debug-on?: false
 
 code-symbols: clear []
 last-uri: none
@@ -252,10 +253,13 @@ on-initialized: function [params [map! none!]][
 on-didChangeConfiguration: function [params [map! none!]][
 	set 'auto-complete? params/settings/red/autoComplete
 	if open-logger? <> params/settings/red/rls-debug [
-		either open-logger?: params/settings/red/rls-debug [
-			init-logger %logger.txt
-		][
-			init-logger none
+		open-logger?: params/settings/red/rls-debug
+		unless debug-on? [
+			either open-logger? [
+				init-logger %logger.txt
+			][
+				init-logger none
+			]
 		]
 	]
 ]
@@ -713,8 +717,10 @@ either all [
 ][
 	init-logger none
 	open-logger?: false
+	debug-on?: false
 ][
 	open-logger?: true
+	debug-on?: true
 ]
 
 watch: has [res] [
