@@ -43,7 +43,7 @@ red-syntax: context [
 		tuple! url!
 	]
 
-	form-type: function [type][
+	symblo-type?: function [type][
 		case [
 			find reduce [date! float! integer! percent! time! tuple! pair!] type [
 				SymbolKind/Number
@@ -126,9 +126,9 @@ red-syntax: context [
 			if simple-literal? expr-type [
 				put-syntax syntax reduce [
 					'name "literal"
-					'type to string! type?/word expr
+					'type expr-type
 					'CompletionItemKind CompletionItemKind/Constant
-					'SymbolKind form-type expr-type
+					'SymbolKind symblo-type? expr-type
 				]
 				return reduce [syntax 1]
 			]
@@ -193,7 +193,7 @@ red-syntax: context [
 				put-syntax syntax reduce [
 					'name "keyword"
 					'expr expr
-					'type to string! type?/word get expr
+					'type expr-type
 					'CompletionItemKind CompletionItemKind/Keyword
 					'SymbolKind SymbolKind/Method
 				]
