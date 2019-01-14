@@ -211,7 +211,7 @@ red-syntax: context [
 		block-type?: [
 			if block? expr [
 				unless empty? expr [
-					exp-all? expr
+					exp-all expr
 				]
 				put-syntax syntax reduce [
 					'name "block"
@@ -223,7 +223,7 @@ red-syntax: context [
 		paren-type?: [
 			if paren? expr [
 				unless empty? expr [
-					exp-all? expr
+					exp-all expr
 				]
 				put-syntax syntax reduce [
 					'name "paren"
@@ -303,7 +303,7 @@ red-syntax: context [
 		throw-error 'exp-type "not support!" pc/1/expr
 	]
 
-	exp-all?: function [pc [block! paren!]][
+	exp-all: function [pc [block! paren!]][
 		while [not tail? pc][
 			type: exp-type? pc
 			pc: skip pc type/2
@@ -317,7 +317,7 @@ red-syntax: context [
 		unless block? npc/2/expr [
 			create-error-at npc/2/syntax 'miss-head-block
 		]
-		exp-all? npc
+		exp-all npc
 	]
 
 	position?: function [npc [block! paren!] line [integer!] column [integer!]][
