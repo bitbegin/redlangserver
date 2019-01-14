@@ -87,10 +87,7 @@ system-words: context [
 							refinement? refs [
 								append/only blk reduce [refs]
 							]
-							any [
-								word? refs
-								block? refs
-							][
+							not none? refs [
 								append-last blk refs
 							]
 						]

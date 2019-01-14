@@ -16,6 +16,9 @@ red-syntax: context [
 		'miss-expr				"missing 'expr'"
 		'miss-block				"missing a block!"
 		'unresolve 				"need resolve unknown type"
+		'invalid-refine			"invalid refinement"
+		'invalid-datatype		"invalid datatype! in block!"
+		'invalid-arg			"invalid argument"
 	]
 
 	create-error-at: function [syntax [map!] word [word!]][
@@ -25,7 +28,16 @@ red-syntax: context [
 			'source "Syntax"
 			'message error-code/(word)
 		]
-		syntax/error: error
+		either none? syntax/error [
+			syntax/error: error
+		][
+			either block? syntax/error [
+				append syntax/error error
+			][
+				old: syntax/error
+				syntax/error: reduce [old error]
+			]
+		]
 	]
 
 	put-syntax: func [syn [map!] item [block!]][
@@ -43,7 +55,7 @@ red-syntax: context [
 		tuple! url!
 	]
 
-	symblo-type?: function [type][
+	symbol-type?: function [type][
 		case [
 			find reduce [date! float! integer! percent! time! tuple! pair!] type [
 				SymbolKind/Number
@@ -73,6 +85,39 @@ red-syntax: context [
 		either find literal-type value [true][false]
 	]
 
+	check-func-args: function [blk [block!]][
+		forall blk [
+			expr: blk/1/expr
+			either any [
+				word? expr
+				lit-word? expr
+				get-word? expr
+				refinement? expr
+			][
+				if all [
+					not tail? next blk
+					block? expr2: blk/2/expr
+				][
+					if refinement? expr [
+						create-error-at blk/2/syntax 'invalid-refine
+					]
+					forall expr2 [
+						expr3: expr2/1/expr
+						unless any [
+							datatype? expr3
+							typeset? expr3
+						][
+							create-error-at blk/2/syntax 'invalid-datatype
+						]
+					]
+					blk: next blk
+				]
+			][
+				create-error-at blk/1/syntax 'invalid-arg
+			]
+		]
+	]
+
 	exp-type?: function [pc [block!]][
 		if tail? pc [
 			syntax: make map! 1
@@ -83,6 +128,9 @@ red-syntax: context [
 		expr-type: type? expr
 		syntax: pc/1/syntax
 		ret: none
+		type: none
+		blk: none
+		step: none
 
 		semicolon-type?: [
 			if any [
@@ -112,7 +160,7 @@ red-syntax: context [
 				ret: exp-type? next pc
 				put-syntax syntax reduce [
 					'name "include"
-					'cast copy ret/1
+					'cast ret/1
 					'follow ret/2
 					'CompletionItemKind CompletionItemKind/Module
 					'SymbolKind SymbolKind/Package
@@ -128,7 +176,7 @@ red-syntax: context [
 					'name "literal"
 					'type expr-type
 					'CompletionItemKind CompletionItemKind/Constant
-					'SymbolKind symblo-type? expr-type
+					'SymbolKind symbol-type? expr-type
 				]
 				return reduce [syntax 1]
 			]
@@ -139,7 +187,7 @@ red-syntax: context [
 				ret: exp-type? next pc
 				put-syntax syntax reduce [
 					'name "set-word"
-					'cast copy ret/1
+					'cast ret/1
 					'follow ret/2
 				]
 				ret/2: ret/2 + 1
@@ -152,7 +200,7 @@ red-syntax: context [
 				ret: exp-type? next pc
 				put-syntax syntax reduce [
 					'name "set-path"
-					'cast copy ret/1
+					'cast ret/1
 					'follow ret/2
 				]
 				ret/2: ret/2 + 1
@@ -163,7 +211,7 @@ red-syntax: context [
 		block-type?: [
 			if block? expr [
 				unless empty? expr [
-					exp-type? expr
+					exp-all? expr
 				]
 				put-syntax syntax reduce [
 					'name "block"
@@ -176,7 +224,7 @@ red-syntax: context [
 			if paren? expr [
 				expr: to block! expr
 				unless empty? expr [
-					exp-type? expr
+					exp-all? expr
 				]
 				put-syntax syntax reduce [
 					'name "paren"
@@ -190,14 +238,47 @@ red-syntax: context [
 				expr-type = word!
 				find system-words/system-words expr
 			][
+				type: type? get expr
 				put-syntax syntax reduce [
 					'name "keyword"
 					'expr expr
-					'type expr-type
+					'type type
 					'CompletionItemKind CompletionItemKind/Keyword
 					'SymbolKind SymbolKind/Method
 				]
-				return reduce [syntax 1]
+
+				step: 1
+				if all [
+					not tail? next pc
+					block? pc/2/expr
+				][
+					case [
+						find [has func function] expr [
+							step: step + 1
+							check-func-args pc/2/expr
+							if all [
+								not tail? next next pc
+								block? pc/3/expr
+							][
+								exp-type? next next pc
+								step: step + 1
+							]
+						]
+						find [does context] expr [
+							exp-type? next pc
+							step: step + 1
+						]
+						;find [action! native! function! routine!] type [
+						;	step: step
+						;]
+					]
+				]
+				if step > 1 [
+					put-syntax syntax reduce [
+						'follow step - 1
+					]
+				]
+				return reduce [syntax step]
 			]
 		]
 
@@ -223,6 +304,13 @@ red-syntax: context [
 		throw-error 'exp-type "not support!" pc/1/expr
 	]
 
+	exp-all?: function [pc [block!]][
+		while [not tail? pc][
+			type: exp-type? pc
+			pc: skip pc type/2
+		]
+	]
+
 	analysis: function [npc [block!]][
 		unless npc/1/expr = 'Red [
 			create-error-at npc/1/syntax 'miss-head-red
@@ -230,11 +318,7 @@ red-syntax: context [
 		unless block? npc/2/expr [
 			create-error-at npc/2/syntax 'miss-head-block
 		]
-		pc: npc
-		while [not tail? pc][
-			type: exp-type? pc
-			pc: skip pc type/2
-		]
+		exp-all? npc
 	]
 
 ]
