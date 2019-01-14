@@ -581,13 +581,13 @@ on-completionItem-resolve: function [params [map!]][
 				][
 					either item: find-source last-uri [
 						red-syntax/resolve-completion item/1/3 text
-					][""]
+					][none]
 				]
 			]
 		]
 	]
 
-	put params 'documentation hstr
+	put params 'documentation either hstr [hstr][""]
 
 	json-body/result: params
 	response

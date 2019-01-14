@@ -23,13 +23,26 @@ system-words: context [
 	get-word-info: func [word [word!]][
 		either find system-words word [
 			help-string :word
-		]["UNKNOWN"]
+		][none]
 	]
 
 	ws: charset " ^-^M"
 	word-char: complement charset {/\^^,[](){}"#%$@:;}
 
-	get-spec: func [word [word!] /local type info args refines returns lines][
+	append-last: function [blk [block!] v][
+		if block? l: last blk [
+			append l v
+			exit
+		]
+		if none? l [
+			append/only blk reduce [v]
+			exit
+		]
+		remove back tail blk
+		append/only blk reduce [l v]
+	]
+
+	get-spec: function [word [word!] field [word!]][
 		type: type? get word
 		unless any [
 			type = action!
@@ -39,33 +52,59 @@ system-words: context [
 			type = op!
 		][return none]
 		info: get-word-info word
-		args: either parse info [thru "ARGUMENTS:^/" to word-char copy blk to ["^/^/" | "REFINEMENTS:^/" | "RETURNS:^/" | end] thru end][
-			lines: split blk "^/"
-			forall lines [
-				clear find lines/1 "^""
+		switch field [
+			args [		
+				if parse info [thru "ARGUMENTS:^/" to word-char copy blk to ["^/^/" | "REFINEMENTS:^/" | "RETURNS:^/" | end] thru end][
+					lines: split blk "^/"
+					forall lines [
+						clear find lines/1 "^""
+					]
+					blk: clear []
+					forall lines [
+						args: load lines/1
+						either block? args [
+							unless empty? args [
+								append/only blk args
+							]
+						][
+							append/only blk reduce [args]
+						]
+					]
+					return blk
+				]
 			]
-			blk: clear []
-			forall lines [
-				append/only blk load lines/1
+			refines [
+				if parse info [thru "REFINEMENTS:^/" to word-char copy blk to ["^/^/" | "RETURNS:^/" | end] thru end][
+					lines: split blk "^/"
+					forall lines [
+						clear find lines/1 "^""
+						clear find lines/1 "=>"
+					]
+					blk: clear []
+					forall lines [
+						refs: load lines/1
+						case [
+							refinement? refs [
+								append/only blk reduce [refs]
+							]
+							any [
+								word? refs
+								block? refs
+							][
+								append-last blk refs
+							]
+						]
+					]
+					return blk
+				]
 			]
-			blk
-		][none]
-		refines: either parse info [thru "REFINEMENTS:^/" to word-char copy blk to ["^/^/" | "RETURNS:^/" | end] thru end][
-			lines: split blk "^/"
-			forall lines [
-				clear find lines/1 "^""
-				clear find lines/1 "=>"
+			returns [
+				if parse info [thru "RETURNS:^/" to word-char copy blk to ["^/^/" | end] thru end][
+					return load blk
+				]
 			]
-			blk: clear []
-			forall lines [
-				append blk load lines/1
-			]
-			blk
-		][none]
-		returns: either parse info [thru "RETURNS:^/" to word-char copy blk to ["^/^/" | end] thru end][
-			load blk
-		][none]
-		reduce [info args refines returns]
+		]
+		none
 	]
 
 	form-completion: function [completions [block!]][
