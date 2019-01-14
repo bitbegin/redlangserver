@@ -97,7 +97,7 @@ red-lexer: context [
 				]
 				all [
 					paren? out/1
-					out/1/1
+					not empty? out/1
 				][
 					start2: next pos end2: back npos
 					stack2: analysis start2 end2

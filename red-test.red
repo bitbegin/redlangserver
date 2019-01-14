@@ -16,3 +16,5 @@ red-syntax/analysis code-analysis
 forall code-analysis [
     probe code-analysis/1
 ]
+
+red-syntax/position? code-analysis 1 2

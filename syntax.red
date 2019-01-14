@@ -118,7 +118,7 @@ red-syntax: context [
 		]
 	]
 
-	exp-type?: function [pc [block!]][
+	exp-type?: function [pc [block! paren!]][
 		if tail? pc [
 			syntax: make map! 1
 			create-error-at syntax 'miss-expr
@@ -222,7 +222,6 @@ red-syntax: context [
 
 		paren-type?: [
 			if paren? expr [
-				expr: to block! expr
 				unless empty? expr [
 					exp-all? expr
 				]
@@ -304,7 +303,7 @@ red-syntax: context [
 		throw-error 'exp-type "not support!" pc/1/expr
 	]
 
-	exp-all?: function [pc [block!]][
+	exp-all?: function [pc [block! paren!]][
 		while [not tail? pc][
 			type: exp-type? pc
 			pc: skip pc type/2
@@ -319,6 +318,54 @@ red-syntax: context [
 			create-error-at npc/2/syntax 'miss-head-block
 		]
 		exp-all? npc
+	]
+
+	position?: function [npc [block! paren!] line [integer!] column [integer!]][
+		cascade: [
+			append ctx index? npc
+			either all [
+				any [
+					block? npc/1/expr
+					paren? npc/1/expr
+				]
+				not empty? npc/1/expr
+			][
+				append ctx position? npc/1/expr line column
+				return ctx
+			][
+				return ctx
+			]
+		]
+		ctx: clear []
+		blk: none
+		forall npc [
+			if all [
+				npc/1/start/1 <= line
+				npc/1/start/2 <= column
+			][
+				either all [
+					npc/1/end/1 >= line
+					npc/1/end/2 > column
+				][
+					do cascade
+				][
+					if all [
+						npc/1/end/1 = line
+						npc/1/end/2 = column
+						any [
+							tail? next npc
+							all [
+								npc/2/start/1 >= line
+								npc/2/start/2 <> column
+							]
+						]
+					][
+						do cascade
+					]
+				]
+			]
+		]
+		return ctx
 	]
 
 ]
