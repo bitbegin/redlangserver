@@ -318,11 +318,77 @@ red-syntax: context [
 			create-error-at npc/2/syntax 'miss-head-block
 		]
 		exp-all npc
+		resolve-unknown npc
+	]
+
+	find-set-word: function [pc [block!] where [block!] stack [block!]][
+		len: length? where/1
+		while [npc: at where/1 len][
+			if all [
+				npc/1/syntax
+				npc/1/syntax/name = "set-word"
+				pc/1/expr = to word! npc/1/expr
+			][
+				pc/1/syntax/cast: npc/1/syntax/cast
+				append stack index? where
+				pc/1/syntax/stack: stack
+				pc/1/syntax/name: "resolved"
+				return true
+			]
+			len: len - 1
+			if len <= 0 [break]
+		]
+		false
+	]
+
+	resolve-unknown: function [npc [block!]][
+		resolve-unknown* reduce [npc] [1]
+	]
+
+	resolve-unknown*: function [pc-stack [block!] stack [block!]][
+		if empty? pc-stack [exit]
+		if empty? stack [exit]
+		len: length? pc-stack
+		where: at pc-stack len
+		pc: where/1
+		probe stack
+		while [not tail? pc][
+			either all [
+				any [
+					block? pc/1/expr
+					paren? pc/1/expr
+				]
+				not empty? pc/1/expr
+			][
+				append stack index? pc
+				append/only pc-stack pc/1/expr
+				resolve-unknown* pc-stack stack
+				remove back tail stack
+				remove back tail pc-stack
+			][
+				if all [
+					pc/1/syntax
+					pc/1/syntax/name = "unknown"
+				][
+					nstack: copy/part stack len - 1
+					unless find-set-word pc where nstack [
+						nlen: len - 1
+						while [nlen > 0][
+							where: at pc-stack nlen
+							nstack: copy/part stack nlen - 1
+							if find-set-word pc where nstack [break]
+							nlen: nlen - 1
+						]
+					]
+				]
+			]
+			pc: next pc
+		]
 	]
 
 	position?: function [npc [block! paren!] line [integer!] column [integer!]][
 		cascade: [
-			append ctx index? npc
+			append stack index? npc
 			either all [
 				any [
 					block? npc/1/expr
@@ -330,13 +396,13 @@ red-syntax: context [
 				]
 				not empty? npc/1/expr
 			][
-				append ctx position? npc/1/expr line column
-				return ctx
+				append stack position? npc/1/expr line column
+				return stack
 			][
-				return ctx
+				return stack
 			]
 		]
-		ctx: clear []
+		stack: clear []
 		blk: none
 		forall npc [
 			if all [
@@ -365,7 +431,7 @@ red-syntax: context [
 				]
 			]
 		]
-		return ctx
+		return stack
 	]
 
 ]
