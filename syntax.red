@@ -322,15 +322,15 @@ red-syntax: context [
 	]
 
 	find-set-word: function [pc [block!] where [block!] stack [block!]][
-		len: length? where/1
-		while [npc: at where/1 len][
+		len: length? where
+		while [npc: at where len][
 			if all [
 				npc/1/syntax
 				npc/1/syntax/name = "set-word"
 				pc/1/expr = to word! npc/1/expr
 			][
 				pc/1/syntax/cast: npc/1/syntax/cast
-				append stack index? where
+				append stack index? npc
 				pc/1/syntax/stack: stack
 				pc/1/syntax/name: "resolved"
 				return true
@@ -342,16 +342,12 @@ red-syntax: context [
 	]
 
 	resolve-unknown: function [npc [block!]][
-		resolve-unknown* reduce [npc] [1]
+		resolve-unknown* reduce [npc] []
 	]
 
 	resolve-unknown*: function [pc-stack [block!] stack [block!]][
 		if empty? pc-stack [exit]
-		if empty? stack [exit]
-		len: length? pc-stack
-		where: at pc-stack len
-		pc: where/1
-		probe stack
+		pc: last pc-stack
 		while [not tail? pc][
 			either all [
 				any [
@@ -370,13 +366,15 @@ red-syntax: context [
 					pc/1/syntax
 					pc/1/syntax/name = "unknown"
 				][
-					nstack: copy/part stack len - 1
-					unless find-set-word pc where nstack [
+					len: length? pc-stack
+					where: at pc-stack len
+					nstack: copy stack len - 1
+					unless find-set-word pc where/1 nstack [
 						nlen: len - 1
 						while [nlen > 0][
 							where: at pc-stack nlen
 							nstack: copy/part stack nlen - 1
-							if find-set-word pc where nstack [break]
+							if find-set-word pc where/1 nstack [break]
 							nlen: nlen - 1
 						]
 					]
