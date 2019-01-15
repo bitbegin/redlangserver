@@ -21,12 +21,20 @@ red-syntax: context [
 		'invalid-arg			"invalid argument"
 	]
 
-	create-error-at: function [syntax [map!] word [word!]][
+	warning-code: [
+		'unknown-word			"unknown word"
+	]
+
+	create-error-at: function [syntax [map!] type [word!] word [word!]][
+		message: case [
+			type = 'Error [error-code/(word)]
+			type = 'Warning [warning-code/(word)]
+		]
 		error: make map! reduce [
-			'severity DiagnosticSeverity/Error
+			'severity DiagnosticSeverity/(type)
 			'code to string! word
 			'source "Syntax"
-			'message error-code/(word)
+			'message message
 		]
 		either none? syntax/error [
 			syntax/error: error
@@ -99,7 +107,7 @@ red-syntax: context [
 					block? expr2: blk/2/expr
 				][
 					if refinement? expr [
-						create-error-at blk/2/syntax 'invalid-refine
+						create-error-at blk/2/syntax 'Error 'invalid-refine
 					]
 					forall expr2 [
 						expr3: expr2/1/expr
@@ -107,13 +115,13 @@ red-syntax: context [
 							datatype? expr3
 							typeset? expr3
 						][
-							create-error-at blk/2/syntax 'invalid-datatype
+							create-error-at blk/2/syntax 'Error 'invalid-datatype
 						]
 					]
 					blk: next blk
 				]
 			][
-				create-error-at blk/1/syntax 'invalid-arg
+				create-error-at blk/1/syntax 'Error 'invalid-arg
 			]
 		]
 	]
@@ -121,7 +129,7 @@ red-syntax: context [
 	exp-type?: function [pc [block! paren!]][
 		if tail? pc [
 			syntax: make map! 1
-			create-error-at syntax 'miss-expr
+			create-error-at syntax 'Error 'miss-expr
 			return reduce [syntax 0]
 		]
 		expr: pc/1/expr
@@ -312,13 +320,15 @@ red-syntax: context [
 
 	analysis: function [npc [block!]][
 		unless npc/1/expr = 'Red [
-			create-error-at npc/1/syntax 'miss-head-red
+			create-error-at npc/1/syntax 'Error 'miss-head-red
 		]
 		unless block? npc/2/expr [
-			create-error-at npc/2/syntax 'miss-head-block
+			create-error-at npc/2/syntax 'Error 'miss-head-block
 		]
 		exp-all npc
 		resolve-unknown npc
+		put-syntax npc/1/syntax ['meta 1]
+		put-syntax npc/2/syntax ['meta 2]
 	]
 
 	find-set-word: function [pc [block!] where [block!] stack [block!]][
@@ -362,7 +372,7 @@ red-syntax: context [
 				remove back tail stack
 				remove back tail pc-stack
 			][
-				if all [
+				either all [
 					pc/1/syntax
 					pc/1/syntax/name = "unknown"
 				][
@@ -377,6 +387,10 @@ red-syntax: context [
 							if find-set-word pc where/1 nstack [break]
 							nlen: nlen - 1
 						]
+					]
+				][
+					if pc/1/syntax [
+						create-error-at pc/1/syntax 'Warning 'unknown-word
 					]
 				]
 			]
