@@ -1,20 +1,19 @@
-Red []
+Red he: []
 
 a: 'test
 b: context [
 	c: 4
 	d: context [
 		e: #{12}
-		f: func [][
-			ff: func [][
+		f: func [x [block!] y [integer!]][
+			ff: function [][
 				f1: "test"
 				f2: x
 				f3: f1
 				f4: l
 			]
-			x: a
-			y: c
-			z: g
+			e: x + y
+			o: g
 			t: h
 			u: x
 		]

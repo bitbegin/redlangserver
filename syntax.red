@@ -263,15 +263,27 @@ red-syntax: context [
 						find [has func function] expr [
 							step: step + 1
 							check-func-args pc/2/expr
+							put-syntax pc/2/syntax reduce [
+								'ctx expr
+								'ctx-index 1
+							]
 							if all [
 								not tail? next next pc
 								block? pc/3/expr
 							][
+								put-syntax pc/3/syntax reduce [
+									'ctx expr
+									'ctx-index 2
+								]
 								exp-type? next next pc
 								step: step + 1
 							]
 						]
 						find [does context] expr [
+							put-syntax pc/2/syntax reduce [
+								'ctx expr
+								'ctx-index 1
+							]
 							exp-type? next pc
 							step: step + 1
 						]
@@ -372,7 +384,7 @@ red-syntax: context [
 				remove back tail stack
 				remove back tail pc-stack
 			][
-				either all [
+				if all [
 					pc/1/syntax
 					pc/1/syntax/name = "unknown"
 				][
@@ -381,16 +393,16 @@ red-syntax: context [
 					nstack: copy stack len - 1
 					unless find-set-word pc where/1 nstack [
 						nlen: len - 1
+						find?: false
 						while [nlen > 0][
 							where: at pc-stack nlen
 							nstack: copy/part stack nlen - 1
-							if find-set-word pc where/1 nstack [break]
+							if find?: find-set-word pc where/1 nstack [break]
 							nlen: nlen - 1
 						]
-					]
-				][
-					if pc/1/syntax [
-						create-error-at pc/1/syntax 'Warning 'unknown-word
+						unless find? [
+							create-error-at pc/1/syntax 'Warning 'unknown-word
+						]
 					]
 				]
 			]
@@ -445,5 +457,6 @@ red-syntax: context [
 		]
 		return stack
 	]
+
 
 ]
