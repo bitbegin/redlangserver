@@ -1,18 +1,28 @@
 Red []
 
-a: 'ta
-b: has [][]
-c: func [][]
-d: function [][]
-e: does []
-g: context [
-	g1: []
+a: 'test
+b: context [
+	c: 4
+	d: context [
+		e: #{12}
+		f: func [][
+			ff: func [][
+				f1: "test"
+				f2: x
+				f3: f1
+				f4: l
+			]
+			x: a
+			y: c
+			z: g
+			t: h
+			u: x
+		]
+		g: []
+	]
+	h: #(a: 3)
+	i: x
+	j: e
 ]
-g/g1: [23 4]
-x: ;h: make object! []
-i: j: k: 3x3
 
-
-probe a 
-
-print aaa
+l: (m: 3)
