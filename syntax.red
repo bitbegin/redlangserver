@@ -112,8 +112,8 @@ red-syntax: context [
 					forall expr2 [
 						expr3: expr2/1/expr
 						unless any [
-							datatype? expr3
-							typeset? expr3
+							datatype? get expr3
+							typeset? get expr3
 						][
 							create-error-at blk/2/syntax 'Error 'invalid-datatype
 						]
