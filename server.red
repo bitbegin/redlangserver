@@ -55,13 +55,13 @@ add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 ]
 
 add-source: function [uri [string!] code [string!]][
-	if map? res: try [red-lexer/analysis code][
-		add-source-to-table uri code res/lexer
+	if map? res: red-lexer/analysis code tail code [
+		add-source-to-table uri code res/stack
 		range: to-range res/pos res/pos
 		line-cs: charset [#"^M" #"^/"]
-		info: res/err/arg2
+		info: res/error/arg2
 		if part: find info line-cs [info: copy/part info part]
-		message: rejoin [res/err/id " ^"" res/err/arg1 "^" at: ^"" info "^""]
+		message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
 		return reduce [
 			make map! reduce [
 				'range range
