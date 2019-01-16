@@ -262,11 +262,11 @@ red-syntax: context [
 					case [
 						find [has func function] expr [
 							step: step + 1
-							check-func-args pc/2/expr
 							put-syntax pc/2/syntax reduce [
 								'ctx expr
 								'ctx-index 1
 							]
+							check-func-args pc/2/expr
 							if all [
 								not tail? next next pc
 								block? pc/3/expr
@@ -410,6 +410,31 @@ red-syntax: context [
 		]
 	]
 
+	get-parent: function [_top [block!] _pc [block! paren!]][
+		ret: []
+		get-parent*: func [top [block!] pc [block! paren!]][
+			while [not tail top][
+				if all [
+					pc/start = top/1/start
+					pc/end = top/1/end
+				][return ret]
+				if all [
+					any [
+						block? top/1/expr
+						paren? top/1/expr
+					]
+					not empty? top/1/expr
+				][
+					ret: top
+					return get-parent
+				]
+				top: next top
+			]
+			false
+		]
+		get-parent* _top _pc
+	]
+
 	position?: function [npc [block! paren!] line [integer!] column [integer!]][
 		cascade: [
 			append stack index? npc
@@ -457,6 +482,5 @@ red-syntax: context [
 		]
 		return stack
 	]
-
 
 ]
