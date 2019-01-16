@@ -351,7 +351,8 @@ Type HELP for starting information.
                                 CompletionItemKind: 21
                                 SymbolKind: 15
                             )
-                            stack: [8 5 6 4 1]
+                            start: [10 5]
+                            end: [10 8]
                         )
                         follow: 1
                     )
@@ -368,7 +369,8 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 15
                         )
-                        stack: [8 5 6 4 1]
+                        start: [10 5]
+                        end: [10 8]
                     )
                 ) #(
                     expr: f4:
@@ -382,7 +384,8 @@ Type HELP for starting information.
                             cast: #(
                                 name: "paren"
                             )
-                            stack: [9]
+                            start: [27 1]
+                            end: [27 3]
                         )
                         follow: 1
                     )
@@ -396,7 +399,8 @@ Type HELP for starting information.
                         cast: #(
                             name: "paren"
                         )
-                        stack: [9]
+                        start: [27 1]
+                        end: [27 3]
                     )
                 )]
                 start: [9 19]
@@ -404,6 +408,7 @@ Type HELP for starting information.
                 syntax: #(
                     ctx: function
                     ctx-index: 2
+                    spec: []
                     name: "block"
                 )
             ) #(
@@ -475,7 +480,8 @@ Type HELP for starting information.
                         cast: #(
                             name: "block"
                         )
-                        stack: [8 5 7]
+                        start: [20 3]
+                        end: [20 5]
                     )
                     follow: 1
                 )
@@ -489,7 +495,8 @@ Type HELP for starting information.
                     cast: #(
                         name: "block"
                     )
-                    stack: [8 5 7]
+                    start: [20 3]
+                    end: [20 5]
                 )
             ) #(
                 expr: t:
@@ -506,7 +513,8 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 20
                         )
-                        stack: [8 6]
+                        start: [22 2]
+                        end: [22 4]
                     )
                     follow: 1
                 )
@@ -523,7 +531,8 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 20
                     )
-                    stack: [8 6]
+                    start: [22 2]
+                    end: [22 4]
                 )
             ) #(
                 expr: u:
@@ -563,6 +572,37 @@ Type HELP for starting information.
             syntax: #(
                 ctx: func
                 ctx-index: 2
+                spec: [#(
+                    expr: x
+                    start: [8 12]
+                    end: [8 13]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: block!
+                        start: [8 15]
+                        end: [8 21]
+                        syntax: #()
+                    )]
+                    start: [8 14]
+                    end: [8 22]
+                    syntax: #()
+                ) #(
+                    expr: y
+                    start: [8 23]
+                    end: [8 24]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [8 26]
+                        end: [8 34]
+                        syntax: #()
+                    )]
+                    start: [8 25]
+                    end: [8 35]
+                    syntax: #()
+                )]
                 name: "block"
             )
         ) #(
@@ -721,12 +761,135 @@ Type HELP for starting information.
             CompletionItemKind: 21
             SymbolKind: 16
         )
+    ) #(
+        expr: n:
+        start: [27 10]
+        end: [27 12]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "resolved"
+                expr: a
+                cast: #(
+                    name: "literal"
+                    type: lit-word!
+                    CompletionItemKind: 21
+                    SymbolKind: 14
+                )
+                start: [3 1]
+                end: [3 3]
+            )
+            follow: 1
+        )
+    ) #(
+        expr: a
+        start: [27 13]
+        end: [27 14]
+        syntax: #(
+            name: "resolved"
+            expr: a
+            cast: #(
+                name: "literal"
+                type: lit-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [3 1]
+            end: [3 3]
+        )
     ))
     start: [27 4]
-    end: [27 10]
+    end: [27 15]
     syntax: #(
         name: "paren"
     )
 )
+#(
+    expr: o:
+    start: [28 1]
+    end: [28 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: l
+            cast: #(
+                name: "paren"
+            )
+            start: [27 1]
+            end: [27 3]
+        )
+        follow: 1
+    )
+)
+#(
+    expr: l
+    start: [28 4]
+    end: [28 5]
+    syntax: #(
+        name: "resolved"
+        expr: l
+        cast: #(
+            name: "paren"
+        )
+        start: [27 1]
+        end: [27 3]
+    )
+)
+[#(
+    expr: ff:
+    start: [9 4]
+    end: [9 7]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: function
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+) #(
+    expr: t:
+    start: [17 4]
+    end: [17 6]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: h
+            cast: #(
+                name: "literal"
+                type: map!
+                CompletionItemKind: 21
+                SymbolKind: 20
+            )
+            start: [22 2]
+            end: [22 4]
+        )
+        follow: 1
+    )
+) #(
+    expr: u:
+    start: [18 4]
+    end: [18 6]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "unknown"
+            expr: x
+            error: #(
+                severity: 2
+                code: "unknown-word"
+                source: "Syntax"
+                message: "unknown word"
+            )
+        )
+        follow: 1
+    )
+)]
 == [1]
 >> 
