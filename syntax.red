@@ -330,84 +330,73 @@ red-syntax: context [
 		]
 	]
 
-	analysis: function [npc [block!]][
-		unless npc/1/expr = 'Red [
-			create-error-at npc/1/syntax 'Error 'miss-head-red
+	analysis: function [pc [block!]][
+		unless pc/1/expr = 'Red [
+			create-error-at pc/1/syntax 'Error 'miss-head-red
 		]
-		unless block? npc/2/expr [
-			create-error-at npc/2/syntax 'Error 'miss-head-block
+		unless block? pc/2/expr [
+			create-error-at pc/2/syntax 'Error 'miss-head-block
 		]
-		exp-all npc
-		resolve-unknown npc
-		put-syntax npc/1/syntax ['meta 1]
-		put-syntax npc/2/syntax ['meta 2]
+		exp-all pc
+		resolve-unknown pc
+		put-syntax pc/1/syntax ['meta 1]
+		put-syntax pc/2/syntax ['meta 2]
 	]
 
-	find-set-word: function [pc [block!] where [block!] stack [block!]][
-		len: length? where
-		while [npc: at where len][
-			if all [
-				npc/1/syntax
-				npc/1/syntax/name = "set-word"
-				pc/1/expr = to word! npc/1/expr
-			][
-				pc/1/syntax/cast: npc/1/syntax/cast
-				append stack index? npc
-				pc/1/syntax/stack: stack
-				pc/1/syntax/name: "resolved"
-				return true
-			]
-			len: len - 1
-			if len <= 0 [break]
-		]
-		false
-	]
-
-	resolve-unknown: function [npc [block!]][
-		resolve-unknown* reduce [npc] []
-	]
-
-	resolve-unknown*: function [pc-stack [block!] stack [block!]][
-		if empty? pc-stack [exit]
-		pc: last pc-stack
-		while [not tail? pc][
-			either all [
-				any [
-					block? pc/1/expr
-					paren? pc/1/expr
+	resolve-unknown: function [top [block!]][
+		resolve-set-word: function [pc [block!]][
+			resolve-set-word*: function [npc [block! paren!]][
+				while [not tail? npc][
+					if all [
+						npc/1/syntax
+						npc/1/syntax/name = "set-word"
+						pc/1/expr = to word! npc/1/expr
+					][
+						pc/1/syntax/cast: npc/1/syntax/cast
+						pc/1/syntax/start: npc/1/start
+						pc/1/syntax/end: npc/1/end
+						pc/1/syntax/name: "resolved"
+						return true
+					]
+					npc: next npc
 				]
-				not empty? pc/1/expr
-			][
-				append stack index? pc
-				append/only pc-stack pc/1/expr
-				resolve-unknown* pc-stack stack
-				remove back tail stack
-				remove back tail pc-stack
-			][
-				if all [
-					pc/1/syntax
-					pc/1/syntax/name = "unknown"
+				return false
+			]
+			if resolve-set-word* head pc [return true]
+			if top = head pc [return false]
+			par: pc
+			while [par: get-parent top par][
+				if empty? par [
+					return resolve-set-word* top
+				]
+				if resolve-set-word* par/1/expr [return true]
+			]
+			return false
+		]
+		resolve-unknown*: func [pc [block! paren!]][
+			while [not tail? pc][
+				either all [
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
 				][
-					len: length? pc-stack
-					where: at pc-stack len
-					nstack: copy stack len - 1
-					unless find-set-word pc where/1 nstack [
-						nlen: len - 1
-						find?: false
-						while [nlen > 0][
-							where: at pc-stack nlen
-							nstack: copy/part stack nlen - 1
-							if find?: find-set-word pc where/1 nstack [break]
-							nlen: nlen - 1
-						]
-						unless find? [
+					resolve-unknown* pc/1/expr
+				][
+					if all [
+						pc/1/syntax
+						pc/1/syntax/name = "unknown"
+					][
+						unless resolve-set-word pc [
 							create-error-at pc/1/syntax 'Warning 'unknown-word
 						]
 					]
 				]
+				pc: next pc
 			]
-			pc: next pc
 		]
+		resolve-unknown* top
 	]
 
 	get-parent: function [_top [block!] _pc [block! paren!]][
@@ -435,17 +424,17 @@ red-syntax: context [
 		get-parent* _top _pc
 	]
 
-	position?: function [npc [block! paren!] line [integer!] column [integer!]][
+	position?: function [pc [block! paren!] line [integer!] column [integer!]][
 		cascade: [
-			append stack index? npc
+			append stack index? pc
 			either all [
 				any [
-					block? npc/1/expr
-					paren? npc/1/expr
+					block? pc/1/expr
+					paren? pc/1/expr
 				]
-				not empty? npc/1/expr
+				not empty? pc/1/expr
 			][
-				append stack position? npc/1/expr line column
+				append stack position? pc/1/expr line column
 				return stack
 			][
 				return stack
@@ -453,25 +442,25 @@ red-syntax: context [
 		]
 		stack: clear []
 		blk: none
-		forall npc [
+		forall pc [
 			if all [
-				npc/1/start/1 <= line
-				npc/1/start/2 <= column
+				pc/1/start/1 <= line
+				pc/1/start/2 <= column
 			][
 				either all [
-					npc/1/end/1 >= line
-					npc/1/end/2 > column
+					pc/1/end/1 >= line
+					pc/1/end/2 > column
 				][
 					do cascade
 				][
 					if all [
-						npc/1/end/1 = line
-						npc/1/end/2 = column
+						pc/1/end/1 = line
+						pc/1/end/2 = column
 						any [
-							tail? next npc
+							tail? next pc
 							all [
-								npc/2/start/1 >= line
-								npc/2/start/2 <> column
+								pc/2/start/1 >= line
+								pc/2/start/2 <> column
 							]
 						]
 					][
