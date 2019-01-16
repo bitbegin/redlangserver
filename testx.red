@@ -24,4 +24,5 @@ b: context [
 	j: e
 ]
 
-l: (m: 3)
+l: (m: 3 n: a)
+o: l

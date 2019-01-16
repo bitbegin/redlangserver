@@ -274,6 +274,7 @@ red-syntax: context [
 								put-syntax pc/3/syntax reduce [
 									'ctx expr
 									'ctx-index 2
+									'spec pc/2/expr
 								]
 								exp-type? next next pc
 								step: step + 1
@@ -325,8 +326,12 @@ red-syntax: context [
 
 	exp-all: function [pc [block! paren!]][
 		while [not tail? pc][
-			type: exp-type? pc
-			pc: skip pc type/2
+			either map? pc/1 [
+				type: exp-type? pc
+				pc: skip pc type/2
+			][
+				pc: next pc
+			]
 		]
 	]
 
@@ -338,13 +343,90 @@ red-syntax: context [
 			create-error-at pc/2/syntax 'Error 'miss-head-block
 		]
 		exp-all pc
+		raise-global pc
 		resolve-unknown pc
 		put-syntax pc/1/syntax ['meta 1]
 		put-syntax pc/2/syntax ['meta 2]
 	]
 
+	raise-global: function [top [block!]][
+		globals: clear []
+		append/only top globals
+
+		raise-set-word: function [pc [block! paren!]][
+			raise-set-word*: function [npc [block! paren!]][
+				while [not tail? npc][
+					if all [
+						npc/1/syntax
+						npc/1/syntax/name = "set-word"
+						pc/1/expr = npc/1/expr
+					][
+						return false
+					]
+					npc: next npc
+				]
+				return true
+			]
+			if top = head pc [return false]
+			par: get-parent top pc/1
+
+			unless any [
+				all [
+					par/1/syntax/ctx = 'does
+					par/1/syntax/ctx-index = 1
+				]
+				all [
+					par/1/syntax/ctx = 'has
+					par/1/syntax/ctx-index = 2
+				]
+				all [
+					par/1/syntax/ctx = 'func
+					par/1/syntax/ctx-index = 2
+				]
+			][
+				return false
+			]
+			until [
+				unless raise-set-word* head par [return false]
+				par: get-parent top par/1
+				if empty? par [
+					return raise-set-word* top
+				]
+				par = false
+			]
+			return true
+		]
+		raise-global*: function [pc [block! paren!]][
+			while [not tail? pc][
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					raise-global* pc/1/expr
+				][
+					if all [
+						map? pc/1
+						pc/1/syntax
+						pc/1/syntax/name = "set-word"
+					][
+						if raise-set-word pc [
+							append/only globals pc/1
+						]
+					]
+				]
+				pc: next pc
+			]
+		]
+
+		raise-global* top
+	]
+
 	resolve-unknown: function [top [block!]][
-		resolve-set-word: function [pc [block!]][
+		resolve-set-word: function [pc [block! paren!]][
 			resolve-set-word*: function [npc [block! paren!]][
 				while [not tail? npc][
 					if all [
@@ -365,7 +447,7 @@ red-syntax: context [
 			if resolve-set-word* head pc [return true]
 			if top = head pc [return false]
 			par: pc
-			while [par: get-parent top par][
+			while [par: get-parent top par/1][
 				if empty? par [
 					return resolve-set-word* top
 				]
@@ -376,6 +458,7 @@ red-syntax: context [
 		resolve-unknown*: func [pc [block! paren!]][
 			while [not tail? pc][
 				either all [
+					map? pc/1
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
@@ -385,6 +468,7 @@ red-syntax: context [
 					resolve-unknown* pc/1/expr
 				][
 					if all [
+						map? pc/1
 						pc/1/syntax
 						pc/1/syntax/name = "unknown"
 					][
@@ -399,35 +483,37 @@ red-syntax: context [
 		resolve-unknown* top
 	]
 
-	get-parent: function [_top [block!] _pc [block! paren!]][
-		ret: []
-		get-parent*: func [top [block!] pc [block! paren!]][
-			while [not tail top][
+	get-parent: function [top [block!] item [map!]][
+		get-parent*: function [pc [block! paren!] par [block!]][
+			;probe length? ret
+			while [not tail? pc][
 				if all [
-					pc/start = top/1/start
-					pc/end = top/1/end
-				][return ret]
+					map? pc/1
+					item/start = pc/1/start
+					item/end = pc/1/end
+				][return par]
 				if all [
+					map? pc/1
 					any [
-						block? top/1/expr
-						paren? top/1/expr
+						block? pc/1/expr
+						paren? pc/1/expr
 					]
-					not empty? top/1/expr
+					not empty? pc/1/expr
 				][
-					ret: top
-					return get-parent
+					if temp: get-parent* pc/1/expr pc [return temp]
 				]
-				top: next top
+				pc: next pc
 			]
 			false
 		]
-		get-parent* _top _pc
+		get-parent* top clear []
 	]
 
 	position?: function [pc [block! paren!] line [integer!] column [integer!]][
 		cascade: [
 			append stack index? pc
 			either all [
+				map? pc/1
 				any [
 					block? pc/1/expr
 					paren? pc/1/expr
@@ -444,6 +530,7 @@ red-syntax: context [
 		blk: none
 		forall pc [
 			if all [
+				map? pc/1
 				pc/1/start/1 <= line
 				pc/1/start/2 <= column
 			][
@@ -459,6 +546,7 @@ red-syntax: context [
 						any [
 							tail? next pc
 							all [
+								map? pc/2
 								pc/2/start/1 >= line
 								pc/2/start/2 <> column
 							]
