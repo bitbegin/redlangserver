@@ -12,6 +12,8 @@ b: context [
 				f3: f1
 				f4: l
 			]
+			x: 1
+			y: 1
 			e: x + y
 			o: g
 			t: h

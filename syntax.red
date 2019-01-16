@@ -385,6 +385,18 @@ red-syntax: context [
 			][
 				return false
 			]
+			if any [
+				par/1/syntax/ctx = 'has
+				par/1/syntax/ctx = 'func
+			][
+				spec: par/1/syntax/spec
+				forall spec [
+					if spec/1/expr = to word! pc/1/expr [
+						return false
+					]
+				]
+				print true
+			]
 			until [
 				unless raise-set-word* head par [return false]
 				par: get-parent top par/1
@@ -497,7 +509,6 @@ red-syntax: context [
 
 	get-parent: function [top [block!] item [map!]][
 		get-parent*: function [pc [block! paren!] par [block!]][
-			;probe length? ret
 			forall pc [
 				if all [
 					map? pc/1
