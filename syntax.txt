@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->> do %red-test.red
+>>  do %red-test.red
 #(
     expr: Red
     start: [1 1]
@@ -384,8 +384,8 @@ Type HELP for starting information.
                             cast: #(
                                 name: "paren"
                             )
-                            start: [27 1]
-                            end: [27 3]
+                            start: [28 1]
+                            end: [28 3]
                         )
                         follow: 1
                     )
@@ -399,8 +399,8 @@ Type HELP for starting information.
                         cast: #(
                             name: "paren"
                         )
-                        start: [27 1]
-                        end: [27 3]
+                        start: [28 1]
+                        end: [28 3]
                     )
                 )]
                 start: [9 19]
@@ -715,9 +715,57 @@ Type HELP for starting information.
             CompletionItemKind: 14
             SymbolKind: 6
         )
+    ) #(
+        expr: k:
+        start: [25 2]
+        end: [25 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "resolved"
+                expr: t
+                cast: #(
+                    name: "resolved"
+                    expr: h
+                    cast: #(
+                        name: "literal"
+                        type: map!
+                        CompletionItemKind: 21
+                        SymbolKind: 20
+                    )
+                    start: [22 2]
+                    end: [22 4]
+                )
+                start: [17 4]
+                end: [17 6]
+            )
+            follow: 1
+        )
+    ) #(
+        expr: t
+        start: [25 5]
+        end: [25 6]
+        syntax: #(
+            name: "resolved"
+            expr: t
+            cast: #(
+                name: "resolved"
+                expr: h
+                cast: #(
+                    name: "literal"
+                    type: map!
+                    CompletionItemKind: 21
+                    SymbolKind: 20
+                )
+                start: [22 2]
+                end: [22 4]
+            )
+            start: [17 4]
+            end: [17 6]
+        )
     )]
     start: [4 12]
-    end: [25 2]
+    end: [26 2]
     syntax: #(
         ctx: context
         ctx-index: 1
@@ -726,8 +774,8 @@ Type HELP for starting information.
 )
 #(
     expr: l:
-    start: [27 1]
-    end: [27 3]
+    start: [28 1]
+    end: [28 3]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -739,8 +787,8 @@ Type HELP for starting information.
 #(
     expr: (#(
         expr: m:
-        start: [27 5]
-        end: [27 7]
+        start: [28 5]
+        end: [28 7]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -753,8 +801,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 3
-        start: [27 8]
-        end: [27 9]
+        start: [28 8]
+        end: [28 9]
         syntax: #(
             name: "literal"
             type: integer!
@@ -763,8 +811,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: n:
-        start: [27 10]
-        end: [27 12]
+        start: [28 10]
+        end: [28 12]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -783,8 +831,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: a
-        start: [27 13]
-        end: [27 14]
+        start: [28 13]
+        end: [28 14]
         syntax: #(
             name: "resolved"
             expr: a
@@ -798,16 +846,16 @@ Type HELP for starting information.
             end: [3 3]
         )
     ))
-    start: [27 4]
-    end: [27 15]
+    start: [28 4]
+    end: [28 15]
     syntax: #(
         name: "paren"
     )
 )
 #(
     expr: o:
-    start: [28 1]
-    end: [28 3]
+    start: [29 1]
+    end: [29 3]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -816,24 +864,24 @@ Type HELP for starting information.
             cast: #(
                 name: "paren"
             )
-            start: [27 1]
-            end: [27 3]
+            start: [28 1]
+            end: [28 3]
         )
         follow: 1
     )
 )
 #(
     expr: l
-    start: [28 4]
-    end: [28 5]
+    start: [29 4]
+    end: [29 5]
     syntax: #(
         name: "resolved"
         expr: l
         cast: #(
             name: "paren"
         )
-        start: [27 1]
-        end: [27 3]
+        start: [28 1]
+        end: [28 3]
     )
 )
 [#(

@@ -22,6 +22,7 @@ b: context [
 	h: #(a: 3)
 	i: x
 	j: e
+	k: t
 ]
 
 l: (m: 3 n: a)

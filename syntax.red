@@ -355,7 +355,7 @@ red-syntax: context [
 
 		raise-set-word: function [pc [block! paren!]][
 			raise-set-word*: function [npc [block! paren!]][
-				while [not tail? npc][
+				forall npc [
 					if all [
 						npc/1/syntax
 						npc/1/syntax/name = "set-word"
@@ -363,7 +363,6 @@ red-syntax: context [
 					][
 						return false
 					]
-					npc: next npc
 				]
 				return true
 			]
@@ -397,7 +396,7 @@ red-syntax: context [
 			return true
 		]
 		raise-global*: function [pc [block! paren!]][
-			while [not tail? pc][
+			forall pc [
 				either all [
 					map? pc/1
 					any [
@@ -418,7 +417,6 @@ red-syntax: context [
 						]
 					]
 				]
-				pc: next pc
 			]
 		]
 
@@ -426,9 +424,10 @@ red-syntax: context [
 	]
 
 	resolve-unknown: function [top [block!]][
+		globals: last top
 		resolve-set-word: function [pc [block! paren!]][
 			resolve-set-word*: function [npc [block! paren!]][
-				while [not tail? npc][
+				forall npc [
 					if all [
 						npc/1/syntax
 						npc/1/syntax/name = "set-word"
@@ -440,7 +439,6 @@ red-syntax: context [
 						pc/1/syntax/name: "resolved"
 						return true
 					]
-					npc: next npc
 				]
 				return false
 			]
@@ -455,8 +453,20 @@ red-syntax: context [
 			]
 			return false
 		]
-		resolve-unknown*: func [pc [block! paren!]][
-			while [not tail? pc][
+		resolve-extra: function [item [map!]][
+			forall globals [
+				if globals/1/expr = item/expr [
+					item/syntax/cast: globals/1/syntax/cast
+					item/syntax/start: globals/1/start
+					item/syntax/end: globals/1/end
+					item/syntax/name: "resolved"
+					return true
+				]
+			]
+			false
+		]
+		resolve-unknown*: function [pc [block! paren!]][
+			forall pc [
 				either all [
 					map? pc/1
 					any [
@@ -473,20 +483,22 @@ red-syntax: context [
 						pc/1/syntax/name = "unknown"
 					][
 						unless resolve-set-word pc [
-							create-error-at pc/1/syntax 'Warning 'unknown-word
+							unless resolve-extra pc/1 [
+								create-error-at pc/1/syntax 'Warning 'unknown-word
+							]
 						]
 					]
 				]
-				pc: next pc
 			]
 		]
+
 		resolve-unknown* top
 	]
 
 	get-parent: function [top [block!] item [map!]][
 		get-parent*: function [pc [block! paren!] par [block!]][
 			;probe length? ret
-			while [not tail? pc][
+			forall pc [
 				if all [
 					map? pc/1
 					item/start = pc/1/start
@@ -502,7 +514,6 @@ red-syntax: context [
 				][
 					if temp: get-parent* pc/1/expr pc [return temp]
 				]
-				pc: next pc
 			]
 			false
 		]
