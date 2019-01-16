@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->>  do %red-test.red
+>> do %red-test.red
 true
 true
 true
@@ -949,6 +949,309 @@ true
         )
         start: [30 1]
         end: [30 3]
+    )
+)
+#(
+    expr: r:
+    start: [33 1]
+    end: [33 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)
+#(
+    expr: func
+    start: [33 4]
+    end: [33 8]
+    syntax: #(
+        name: "keyword"
+        expr: func
+        type: native!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        follow: 2
+    )
+)
+#(
+    expr: [#(
+        expr: a
+        start: [33 10]
+        end: [33 11]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: test
+            start: [33 13]
+            end: [33 17]
+            syntax: #()
+        )]
+        start: [33 12]
+        end: [33 18]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "invalid-datatype"
+                source: "Syntax"
+                message: "invalid datatype! in block!"
+            )
+        )
+    ) #(
+        expr: b
+        start: [33 19]
+        end: [33 20]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: test!
+            start: [33 22]
+            end: [33 27]
+            syntax: #()
+        )]
+        start: [33 21]
+        end: [33 28]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "invalid-datatype"
+                source: "Syntax"
+                message: "invalid datatype! in block!"
+            )
+        )
+    ) #(
+        expr: /local
+        start: [33 29]
+        end: [33 35]
+        syntax: #()
+    ) #(
+        expr: x
+        start: [33 36]
+        end: [33 37]
+        syntax: #()
+    ) #(
+        expr: y
+        start: [33 38]
+        end: [33 39]
+        syntax: #()
+    )]
+    start: [33 9]
+    end: [33 40]
+    syntax: #(
+        ctx: func
+        ctx-index: 1
+    )
+)
+#(
+    expr: [#(
+        expr: x:
+        start: [34 2]
+        end: [34 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 1
+        start: [34 5]
+        end: [34 6]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: y:
+        start: [34 7]
+        end: [34 9]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 1
+        start: [34 10]
+        end: [34 11]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: a
+        start: [35 2]
+        end: [35 3]
+        syntax: #(
+            name: "resolved"
+            expr: a
+            cast: #(
+                name: "literal"
+                type: lit-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [3 1]
+            end: [3 3]
+        )
+    ) #(
+        expr: +
+        start: [35 4]
+        end: [35 5]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: b
+        start: [35 6]
+        end: [35 7]
+        syntax: #(
+            name: "resolved"
+            expr: b
+            cast: #(
+                name: "keyword"
+                expr: context
+                type: function!
+                CompletionItemKind: 14
+                SymbolKind: 6
+                follow: 1
+            )
+            start: [4 1]
+            end: [4 3]
+        )
+    ) #(
+        expr: +
+        start: [35 8]
+        end: [35 9]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: 1
+        start: [35 10]
+        end: [35 11]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: +
+        start: [35 12]
+        end: [35 13]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: 1
+        start: [35 14]
+        end: [35 15]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    )]
+    start: [33 40]
+    end: [36 2]
+    syntax: #(
+        ctx: func
+        ctx-index: 2
+        spec: [#(
+            expr: a
+            start: [33 10]
+            end: [33 11]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: test
+                start: [33 13]
+                end: [33 17]
+                syntax: #()
+            )]
+            start: [33 12]
+            end: [33 18]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "invalid-datatype"
+                    source: "Syntax"
+                    message: "invalid datatype! in block!"
+                )
+            )
+        ) #(
+            expr: b
+            start: [33 19]
+            end: [33 20]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: test!
+                start: [33 22]
+                end: [33 27]
+                syntax: #()
+            )]
+            start: [33 21]
+            end: [33 28]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "invalid-datatype"
+                    source: "Syntax"
+                    message: "invalid datatype! in block!"
+                )
+            )
+        ) #(
+            expr: /local
+            start: [33 29]
+            end: [33 35]
+            syntax: #()
+        ) #(
+            expr: x
+            start: [33 36]
+            end: [33 37]
+            syntax: #()
+        ) #(
+            expr: y
+            start: [33 38]
+            end: [33 39]
+            syntax: #()
+        )]
+        name: "block"
     )
 )
 [#(

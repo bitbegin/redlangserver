@@ -29,3 +29,8 @@ b: context [
 
 l: (m: 3 n: a)
 o: l
+
+r: func [a [test] b [test!] /local x y][
+	x: 1 y: 1
+	a + b + 1 + 1
+]
