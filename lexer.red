@@ -38,6 +38,19 @@ red-lexer: context [
 		reduce [line column + 1]
 	]
 
+	to-range: function [start [block!] end [block!] /keep][
+		make map! reduce [
+			'start make map! reduce [
+				'line either keep [start/1][start/1 - 1]
+				'character either keep [start/2][start/2 - 1]
+			]
+			'end make map! reduce [
+				'line either keep [end/1][end/1 - 1]
+				'character either keep [end/2][end/2 - 1]
+			]
+		]
+	]
+
 	push-stack: function [stack [block!] expr start [string!] end [string!]][
 		append stack make map! reduce [
 			'expr expr

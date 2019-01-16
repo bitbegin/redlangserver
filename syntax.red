@@ -355,6 +355,41 @@ red-syntax: context [
 		put-syntax pc/2/syntax ['meta 2]
 	]
 
+	collect-errors: function [top [block! paren!]][
+		ret: clear []
+		collect-errors*: function [pc [block! paren!]][
+			blk: [
+				if all [
+					pc/1/syntax
+					pc/1/syntax/error
+				][
+					error: copy pc/1/syntax/error
+					error/range: red-lexer/to-range/keep pc/1/start pc/1/end
+					append ret error
+				]
+			]
+			forall pc [
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					do blk
+					collect-errors* pc/1/expr
+				][
+					if map? pc/1 [
+						do blk
+					]
+				]
+			]
+		]
+		collect-errors* top
+		ret
+	]
+
 	raise-global: function [top [block!]][
 		globals: clear []
 		append/only top globals
@@ -401,7 +436,6 @@ red-syntax: context [
 						return false
 					]
 				]
-				print true
 			]
 			until [
 				unless raise-set-word* head par [return false]

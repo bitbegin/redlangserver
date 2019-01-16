@@ -17,4 +17,5 @@ forall code-analysis [
     probe code-analysis/1
 ]
 
-red-syntax/position? code-analysis 1 2
+print "Error/Warning: ---------------------------------------"
+probe red-syntax/collect-errors code-analysis

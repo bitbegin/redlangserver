@@ -34,17 +34,6 @@ find-source: function [uri [string!]][
 	false
 ]
 
-to-range: function [start [block!] end [block!]][
-	make map! reduce [
-		'start make map! reduce [
-			'line start/1 - 1 'character start/2 - 1
-		]
-		'end make map! reduce [
-			'line end/1 - 1 'character end/2 - 1
-		]
-	]
-]
-
 add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 	either item: find-source uri [
 		item/1/2: code
@@ -57,7 +46,7 @@ add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 add-source: function [uri [string!] code [string!]][
 	if map? res: red-lexer/analysis code tail code [
 		add-source-to-table uri code res/stack
-		range: to-range res/pos res/pos
+		range: red-lexer/to-range res/pos res/pos
 		line-cs: charset [#"^M" #"^/"]
 		info: res/error/arg2
 		if part: find info line-cs [info: copy/part info part]
@@ -75,7 +64,7 @@ add-source: function [uri [string!] code [string!]][
 	add-source-to-table uri code res
 	if error? res: try [red-syntax/analysis res][
 		pc: res/arg3
-		range: to-range pc/2 pc/2
+		range: red-lexer/to-range pc/2 pc/2
 		return reduce [
 			make map! reduce [
 				'range range
@@ -87,7 +76,7 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 
-	[]
+	red-syntax/collect-errors res
 ]
 
 init-logger: func [_logger [file! none!]][
@@ -518,7 +507,7 @@ on-textDocument-completion: function [params [map!]][
 		blk: parse-completion-string source line column
 		completion-string: blk/1
 		write-log mold blk
-		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
+		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 	]
 	set 'last-completion completion-string
 	write-log mold last-completion
@@ -638,7 +627,7 @@ on-textDocument-symbol: function [params [map!]][
 		if blk/1/1 = none [continue]
 		;if set-word? blk/1/1 [
 		unless block? blk/1/1 [
-			range: to-range blk/1/2 blk/1/3
+			range: red-lexer/to-range blk/1/2 blk/1/3
 			symbol: make map! reduce [
 				'name		mold blk/1/1
 				'kind		blk/1/4/3
@@ -662,7 +651,7 @@ on-textDocument-hover: function [params [map!]][
 	result: either item: find-source uri [
 		blk: get-selected-text item/1/2 line column
 		text: blk/1
-		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
+		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 		either empty? text [none][
 			hstr: red-syntax/resolve-completion item/1/3 text
 			either empty? hstr [
