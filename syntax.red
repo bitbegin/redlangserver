@@ -364,7 +364,7 @@ red-syntax: context [
 					pc/1/syntax/error
 				][
 					error: copy pc/1/syntax/error
-					error/range: red-lexer/to-range/keep pc/1/start pc/1/end
+					error/range: red-lexer/to-range pc/1/start pc/1/end
 					append ret error
 				]
 			]
@@ -571,55 +571,118 @@ red-syntax: context [
 		get-parent* top clear []
 	]
 
-	position?: function [pc [block! paren!] line [integer!] column [integer!]][
-		cascade: [
-			append stack index? pc
-			either all [
-				map? pc/1
-				any [
-					block? pc/1/expr
-					paren? pc/1/expr
-				]
-				not empty? pc/1/expr
-			][
-				append stack position? pc/1/expr line column
-				return stack
-			][
-				return stack
-			]
-		]
-		stack: clear []
-		blk: none
-		forall pc [
-			if all [
-				map? pc/1
-				pc/1/start/1 <= line
-				pc/1/start/2 <= column
-			][
+	position?: function [top [block! paren!] line [integer!] column [integer!]][
+		position*: function [pc [block! paren!] line [integer!] column [integer!]][
+			cascade: [
 				either all [
-					pc/1/end/1 >= line
-					pc/1/end/2 > column
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
 				][
-					do cascade
+					if ret: position* pc/1/expr line column [return ret]
+					return pc
 				][
-					if all [
-						pc/1/end/1 = line
-						pc/1/end/2 = column
-						any [
-							tail? next pc
-							all [
-								map? pc/2
-								pc/2/start/1 >= line
-								pc/2/start/2 <> column
-							]
+					return pc
+				]
+			]
+			ret: none
+			forall pc [
+				if all [
+					map? pc/1
+					any [
+						pc/1/start/1 < line
+						all [
+							pc/1/start/1 = line
+							pc/1/start/2 <= column
+						]
+					]
+				][
+					either any [
+						pc/1/end/1 > line
+						all [
+							pc/1/end/1 = line
+							pc/1/end/2 > column
 						]
 					][
 						do cascade
+					][
+						if all [
+							pc/1/end/1 = line
+							pc/1/end/2 = column
+							any [
+								tail? next pc
+								all [
+									map? pc/2
+									pc/2/start/1 >= line
+									pc/2/start/2 <> column
+								]
+							]
+						][
+							do cascade
+						]
+					]
+				]
+			]
+			return none
+		]
+		if ret: position* top line column [return ret]
+		top
+	]
+
+	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
+		words: clear []
+		unique?: function [word [string!]][
+			forall words [
+				if words/1/1 = word [return false]
+			]
+			true
+		]
+		collect-set-word: function [pc [block! paren!]][
+			forall pc [
+				if all [
+					map? pc/1
+					pc/1/syntax
+					pc/1/syntax/name = "set-word"
+				][
+					word: to string! pc/1/expr
+					if find/match word str [
+						if unique? word [
+							append/only words reduce [word pc/1/syntax/cast]
+						]
 					]
 				]
 			]
 		]
-		return stack
+		pc: position? top line column
+		if all [
+			any [
+				block? pc/1/expr
+				paren? pc/1/expr
+			]
+			not empty? pc/1/expr
+			any [
+				pc/1/end/1 > line
+				all [
+					pc/1/end/1 = line
+					pc/1/end/2 > column
+				]
+			]
+		][
+			collect-set-word pc/1/expr
+		]
+		collect-set-word head pc
+		if top = head pc [return words]
+		par: pc
+		while [par: get-parent top par/1][
+			either empty? par [
+				break
+			][
+				collect-set-word head par
+			]
+		]
+		words
 	]
 
 ]

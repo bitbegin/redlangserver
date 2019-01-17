@@ -19,3 +19,6 @@ forall code-analysis [
 
 print "Error/Warning: ---------------------------------------"
 probe red-syntax/collect-errors code-analysis
+
+;probe red-syntax/position? code-analysis 12 1
+probe red-syntax/collect-completions code-analysis "f" 12 1

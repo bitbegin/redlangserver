@@ -2,11 +2,6 @@
 Type HELP for starting information. 
 
 >> do %red-test.red
-true
-true
-true
-true
-true
 #(
     expr: Red
     start: [1 1]
@@ -1254,6 +1249,32 @@ true
         name: "block"
     )
 )
+#(
+    expr: fff:
+    start: [38 1]
+    end: [38 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+        follow: 1
+    )
+)
+#(
+    expr: 3
+    start: [38 6]
+    end: [38 7]
+    syntax: #(
+        name: "literal"
+        type: integer!
+        CompletionItemKind: 21
+        SymbolKind: 16
+    )
+)
 [#(
     expr: ff:
     start: [9 4]
@@ -1311,5 +1332,129 @@ true
         follow: 1
     )
 )]
-== [1]
+Error/Warning: ---------------------------------------
+[#(
+    severity: 1
+    code: "miss-head-block"
+    source: "Syntax"
+    message: "missing '[]' at head"
+    range: #(
+        start: #(
+            line: 0
+            character: 4
+        )
+        end: #(
+            line: 0
+            character: 7
+        )
+    )
+) #(
+    severity: 2
+    code: "unknown-word"
+    source: "Syntax"
+    message: "unknown word"
+    range: #(
+        start: #(
+            line: 24
+            character: 4
+        )
+        end: #(
+            line: 24
+            character: 5
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "invalid datatype! in block!"
+    range: #(
+        start: #(
+            line: 32
+            character: 11
+        )
+        end: #(
+            line: 32
+            character: 17
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "invalid datatype! in block!"
+    range: #(
+        start: #(
+            line: 32
+            character: 20
+        )
+        end: #(
+            line: 32
+            character: 27
+        )
+    )
+)]
+[["f1" #(
+    name: "literal"
+    type: string!
+    CompletionItemKind: 21
+    SymbolKind: 15
+)] ["f2" #(
+    name: "resolved"
+    expr: x
+    cast: #(
+        name: "literal"
+        type: integer!
+        CompletionItemKind: 21
+        SymbolKind: 16
+    )
+    start: [15 4]
+    end: [15 6]
+)] ["f3" #(
+    name: "resolved"
+    expr: f1
+    cast: #(
+        name: "literal"
+        type: string!
+        CompletionItemKind: 21
+        SymbolKind: 15
+    )
+    start: [10 5]
+    end: [10 8]
+)] ["f4" #(
+    name: "resolved"
+    expr: l
+    cast: #(
+        name: "paren"
+    )
+    start: [30 1]
+    end: [30 3]
+)] ["ff" #(
+    name: "keyword"
+    expr: function
+    type: native!
+    CompletionItemKind: 14
+    SymbolKind: 6
+    follow: 2
+)] ["f" #(
+    name: "keyword"
+    expr: func
+    type: native!
+    CompletionItemKind: 14
+    SymbolKind: 6
+    follow: 2
+)] ["fff" #(
+    name: "literal"
+    type: integer!
+    CompletionItemKind: 21
+    SymbolKind: 16
+)]]
+== [["f1" #(
+    name: "literal"
+    type: string!
+    CompletionItemKind: 21
+    SymbolKind: 15
+)] ["f2" #(
+    name: "resolved"
+    ex...
 >> 

@@ -34,3 +34,5 @@ r: func [a [test] b [test!] /local x y][
 	x: 1 y: 1
 	a + b + 1 + 1
 ]
+
+fff: 3
