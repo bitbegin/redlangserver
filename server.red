@@ -62,8 +62,8 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 	add-source-to-table uri code res
-	if error? res: try [red-syntax/analysis res][
-		pc: res/arg3
+	if error? err: try [red-syntax/analysis res][
+		pc: err/arg3
 		range: red-lexer/to-range pc/2 pc/2
 		return reduce [
 			make map! reduce [
@@ -71,11 +71,10 @@ add-source: function [uri [string!] code [string!]][
 				'severity 1
 				'code 1
 				'source "syntax"
-				'message res/arg2
+				'message err/arg2
 			]
 		]
 	]
-
 	red-syntax/collect-errors res
 ]
 
@@ -378,7 +377,7 @@ complete-system: [
 ]
 
 complete-context: [
-	completions: red-syntax/get-completions syntax completion-string
+	completions: red-syntax/get-completions syntax completion-string line column
 	unless any [
 		none? completions
 		1 >= length? completions
@@ -569,7 +568,8 @@ on-completionItem-resolve: function [params [map!]][
 					]
 				][
 					either item: find-source last-uri [
-						red-syntax/resolve-completion item/1/3 text
+						;red-syntax/resolve-completion item/1/3 text
+						none
 					][none]
 				]
 			]
@@ -653,7 +653,7 @@ on-textDocument-hover: function [params [map!]][
 		text: blk/1
 		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 		either empty? text [none][
-			hstr: red-syntax/resolve-completion item/1/3 text
+			hstr: "";red-syntax/resolve-completion item/1/3 text
 			either empty? hstr [
 				either error? word: try [to word! text][none][
 					either find system-words/system-words word [

@@ -685,4 +685,27 @@ red-syntax: context [
 		words
 	]
 
+	resolve-block: none
+	get-completions: func [top [block!] str [string! none!] line [integer!] column [integer!] /local words cast][
+		if any [
+			none? str
+			empty? str
+			#"%" = str/1
+			find str #"/"
+		][return none]
+		if empty? resolve-block: collect-completions top str line column [return none]
+		words: reduce ['word]
+		forall resolve-block [
+			kind: CompletionItemKind/Variable
+			cast: resolve-block/1/2
+			if all [
+				cast/expr
+				find [does has func function] cast/expr
+			][
+				kind: cast/CompletionItemKind
+			]
+			append/only words reduce [resolve-block/1/1 kind]
+		]
+		words
+	]
 ]
