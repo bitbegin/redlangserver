@@ -649,7 +649,7 @@ red-syntax: context [
 					word: to string! pc/1/expr
 					if find/match word str [
 						if unique? word [
-							append/only words reduce [word pc/1/syntax/cast]
+							append/only words reduce [word pc/1]
 						]
 					]
 				]
@@ -685,8 +685,7 @@ red-syntax: context [
 		words
 	]
 
-	resolve-block: none
-	get-completions: func [top [block!] str [string! none!] line [integer!] column [integer!] /local words cast][
+	get-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
 		if any [
 			none? str
 			empty? str
@@ -697,7 +696,7 @@ red-syntax: context [
 		words: reduce ['word]
 		forall resolve-block [
 			kind: CompletionItemKind/Variable
-			cast: resolve-block/1/2
+			cast: resolve-block/1/2/syntax/cast
 			if all [
 				cast/expr
 				find [does has func function] cast/expr
@@ -707,5 +706,30 @@ red-syntax: context [
 			append/only words reduce [resolve-block/1/1 kind]
 		]
 		words
+	]
+
+	resolve-completion: function [top [block!] str [string! none!] line [integer!] column [integer!]][
+		if any [
+			none? str
+			empty? str
+			#"%" = str/1
+			find str #"/"
+		][return ""]
+		if empty? resolve-block: collect-completions top str line column [return ""]
+		forall resolve-block [
+			if resolve-block/1/1 = str [
+				item: resolve-block/1/2
+				cast: item/syntax/cast
+				either all [
+					cast/expr
+					find [does has func function] cast/expr
+				][
+					return rejoin [str " is a " to string! cast/expr]
+				][
+					return rejoin [str " is a variable"]
+				]
+			]
+		]
+		""
 	]
 ]

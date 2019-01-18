@@ -319,8 +319,8 @@ Type HELP for starting information.
                                 CompletionItemKind: 21
                                 SymbolKind: 16
                             )
-                            start: [15 4]
-                            end: [15 6]
+                            start: [17 4]
+                            end: [17 6]
                         )
                         follow: 1
                     )
@@ -337,8 +337,8 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 16
                         )
-                        start: [15 4]
-                        end: [15 6]
+                        start: [17 4]
+                        end: [17 6]
                     )
                 ) #(
                     expr: f3:
@@ -388,8 +388,8 @@ Type HELP for starting information.
                             cast: #(
                                 name: "paren"
                             )
-                            start: [30 1]
-                            end: [30 3]
+                            start: [32 1]
+                            end: [32 3]
                         )
                         follow: 1
                     )
@@ -403,12 +403,72 @@ Type HELP for starting information.
                         cast: #(
                             name: "paren"
                         )
-                        start: [30 1]
-                        end: [30 3]
+                        start: [32 1]
+                        end: [32 3]
+                    )
+                ) #(
+                    expr: f5:
+                    start: [14 5]
+                    end: [14 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "literal"
+                            type: get-word!
+                            CompletionItemKind: 21
+                            SymbolKind: 14
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: :f
+                    start: [14 9]
+                    end: [14 11]
+                    syntax: #(
+                        name: "literal"
+                        type: get-word!
+                        CompletionItemKind: 21
+                        SymbolKind: 14
+                    )
+                ) #(
+                    expr: f6:
+                    start: [15 5]
+                    end: [15 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: f5
+                            cast: #(
+                                name: "literal"
+                                type: get-word!
+                                CompletionItemKind: 21
+                                SymbolKind: 14
+                            )
+                            start: [14 5]
+                            end: [14 8]
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: f5
+                    start: [15 9]
+                    end: [15 11]
+                    syntax: #(
+                        name: "resolved"
+                        expr: f5
+                        cast: #(
+                            name: "literal"
+                            type: get-word!
+                            CompletionItemKind: 21
+                            SymbolKind: 14
+                        )
+                        start: [14 5]
+                        end: [14 8]
                     )
                 )]
                 start: [9 19]
-                end: [14 5]
+                end: [16 5]
                 syntax: #(
                     ctx: function
                     ctx-index: 2
@@ -417,8 +477,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: x:
-                start: [15 4]
-                end: [15 6]
+                start: [17 4]
+                end: [17 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -431,8 +491,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: 1
-                start: [15 7]
-                end: [15 8]
+                start: [17 7]
+                end: [17 8]
                 syntax: #(
                     name: "literal"
                     type: integer!
@@ -441,8 +501,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: y:
-                start: [16 4]
-                end: [16 6]
+                start: [18 4]
+                end: [18 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -455,8 +515,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: 1
-                start: [16 7]
-                end: [16 8]
+                start: [18 7]
+                end: [18 8]
                 syntax: #(
                     name: "literal"
                     type: integer!
@@ -465,8 +525,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: e:
-                start: [17 4]
-                end: [17 6]
+                start: [19 4]
+                end: [19 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -478,15 +538,15 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 16
                         )
-                        start: [15 4]
-                        end: [15 6]
+                        start: [17 4]
+                        end: [17 6]
                     )
                     follow: 1
                 )
             ) #(
                 expr: x
-                start: [17 7]
-                end: [17 8]
+                start: [19 7]
+                end: [19 8]
                 syntax: #(
                     name: "resolved"
                     expr: x
@@ -496,13 +556,13 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 16
                     )
-                    start: [15 4]
-                    end: [15 6]
+                    start: [17 4]
+                    end: [17 6]
                 )
             ) #(
                 expr: +
-                start: [17 9]
-                end: [17 10]
+                start: [19 9]
+                end: [19 10]
                 syntax: #(
                     name: "keyword"
                     expr: +
@@ -512,8 +572,8 @@ Type HELP for starting information.
                 )
             ) #(
                 expr: y
-                start: [17 11]
-                end: [17 12]
+                start: [19 11]
+                end: [19 12]
                 syntax: #(
                     name: "resolved"
                     expr: y
@@ -523,13 +583,13 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 16
                     )
-                    start: [16 4]
-                    end: [16 6]
+                    start: [18 4]
+                    end: [18 6]
                 )
             ) #(
                 expr: o:
-                start: [18 4]
-                end: [18 6]
+                start: [20 4]
+                end: [20 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -538,28 +598,28 @@ Type HELP for starting information.
                         cast: #(
                             name: "block"
                         )
-                        start: [22 3]
-                        end: [22 5]
+                        start: [24 3]
+                        end: [24 5]
                     )
                     follow: 1
                 )
             ) #(
                 expr: g
-                start: [18 7]
-                end: [18 8]
+                start: [20 7]
+                end: [20 8]
                 syntax: #(
                     name: "resolved"
                     expr: g
                     cast: #(
                         name: "block"
                     )
-                    start: [22 3]
-                    end: [22 5]
+                    start: [24 3]
+                    end: [24 5]
                 )
             ) #(
                 expr: t:
-                start: [19 4]
-                end: [19 6]
+                start: [21 4]
+                end: [21 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -571,15 +631,15 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 20
                         )
-                        start: [24 2]
-                        end: [24 4]
+                        start: [26 2]
+                        end: [26 4]
                     )
                     follow: 1
                 )
             ) #(
                 expr: h
-                start: [19 7]
-                end: [19 8]
+                start: [21 7]
+                end: [21 8]
                 syntax: #(
                     name: "resolved"
                     expr: h
@@ -589,13 +649,13 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 20
                     )
-                    start: [24 2]
-                    end: [24 4]
+                    start: [26 2]
+                    end: [26 4]
                 )
             ) #(
                 expr: u:
-                start: [20 4]
-                end: [20 6]
+                start: [22 4]
+                end: [22 6]
                 syntax: #(
                     name: "set-word"
                     cast: #(
@@ -607,15 +667,15 @@ Type HELP for starting information.
                             CompletionItemKind: 21
                             SymbolKind: 16
                         )
-                        start: [15 4]
-                        end: [15 6]
+                        start: [17 4]
+                        end: [17 6]
                     )
                     follow: 1
                 )
             ) #(
                 expr: x
-                start: [20 7]
-                end: [20 8]
+                start: [22 7]
+                end: [22 8]
                 syntax: #(
                     name: "resolved"
                     expr: x
@@ -625,12 +685,12 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 16
                     )
-                    start: [15 4]
-                    end: [15 6]
+                    start: [17 4]
+                    end: [17 6]
                 )
             )]
             start: [8 36]
-            end: [21 4]
+            end: [23 4]
             syntax: #(
                 ctx: func
                 ctx-index: 2
@@ -669,8 +729,8 @@ Type HELP for starting information.
             )
         ) #(
             expr: g:
-            start: [22 3]
-            end: [22 5]
+            start: [24 3]
+            end: [24 5]
             syntax: #(
                 name: "set-word"
                 cast: #(
@@ -680,14 +740,14 @@ Type HELP for starting information.
             )
         ) #(
             expr: []
-            start: [22 6]
-            end: [22 8]
+            start: [24 6]
+            end: [24 8]
             syntax: #(
                 name: "block"
             )
         )]
         start: [6 13]
-        end: [23 3]
+        end: [25 3]
         syntax: #(
             ctx: context
             ctx-index: 1
@@ -695,8 +755,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: h:
-        start: [24 2]
-        end: [24 4]
+        start: [26 2]
+        end: [26 4]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -711,8 +771,8 @@ Type HELP for starting information.
         expr: #(
             a: 3
         )
-        start: [24 5]
-        end: [24 12]
+        start: [26 5]
+        end: [26 12]
         syntax: #(
             name: "literal"
             type: map!
@@ -721,8 +781,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: i:
-        start: [25 2]
-        end: [25 4]
+        start: [27 2]
+        end: [27 4]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -739,8 +799,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: x
-        start: [25 5]
-        end: [25 6]
+        start: [27 5]
+        end: [27 6]
         syntax: #(
             name: "unknown"
             expr: x
@@ -753,8 +813,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: j:
-        start: [26 2]
-        end: [26 4]
+        start: [28 2]
+        end: [28 4]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -768,8 +828,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: e
-        start: [26 5]
-        end: [26 6]
+        start: [28 5]
+        end: [28 6]
         syntax: #(
             name: "keyword"
             expr: e
@@ -779,8 +839,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: k:
-        start: [27 2]
-        end: [27 4]
+        start: [29 2]
+        end: [29 4]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -795,18 +855,18 @@ Type HELP for starting information.
                         CompletionItemKind: 21
                         SymbolKind: 20
                     )
-                    start: [24 2]
-                    end: [24 4]
+                    start: [26 2]
+                    end: [26 4]
                 )
-                start: [19 4]
-                end: [19 6]
+                start: [21 4]
+                end: [21 6]
             )
             follow: 1
         )
     ) #(
         expr: t
-        start: [27 5]
-        end: [27 6]
+        start: [29 5]
+        end: [29 6]
         syntax: #(
             name: "resolved"
             expr: t
@@ -819,15 +879,15 @@ Type HELP for starting information.
                     CompletionItemKind: 21
                     SymbolKind: 20
                 )
-                start: [24 2]
-                end: [24 4]
+                start: [26 2]
+                end: [26 4]
             )
-            start: [19 4]
-            end: [19 6]
+            start: [21 4]
+            end: [21 6]
         )
     )]
     start: [4 12]
-    end: [28 2]
+    end: [30 2]
     syntax: #(
         ctx: context
         ctx-index: 1
@@ -836,8 +896,8 @@ Type HELP for starting information.
 )
 #(
     expr: l:
-    start: [30 1]
-    end: [30 3]
+    start: [32 1]
+    end: [32 3]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -849,8 +909,8 @@ Type HELP for starting information.
 #(
     expr: (#(
         expr: m:
-        start: [30 5]
-        end: [30 7]
+        start: [32 5]
+        end: [32 7]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -863,8 +923,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 3
-        start: [30 8]
-        end: [30 9]
+        start: [32 8]
+        end: [32 9]
         syntax: #(
             name: "literal"
             type: integer!
@@ -873,8 +933,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: n:
-        start: [30 10]
-        end: [30 12]
+        start: [32 10]
+        end: [32 12]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -893,8 +953,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: a
-        start: [30 13]
-        end: [30 14]
+        start: [32 13]
+        end: [32 14]
         syntax: #(
             name: "resolved"
             expr: a
@@ -908,16 +968,16 @@ Type HELP for starting information.
             end: [3 3]
         )
     ))
-    start: [30 4]
-    end: [30 15]
+    start: [32 4]
+    end: [32 15]
     syntax: #(
         name: "paren"
     )
 )
 #(
     expr: o:
-    start: [31 1]
-    end: [31 3]
+    start: [33 1]
+    end: [33 3]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -926,30 +986,30 @@ Type HELP for starting information.
             cast: #(
                 name: "paren"
             )
-            start: [30 1]
-            end: [30 3]
+            start: [32 1]
+            end: [32 3]
         )
         follow: 1
     )
 )
 #(
     expr: l
-    start: [31 4]
-    end: [31 5]
+    start: [33 4]
+    end: [33 5]
     syntax: #(
         name: "resolved"
         expr: l
         cast: #(
             name: "paren"
         )
-        start: [30 1]
-        end: [30 3]
+        start: [32 1]
+        end: [32 3]
     )
 )
 #(
     expr: r:
-    start: [33 1]
-    end: [33 3]
+    start: [35 1]
+    end: [35 3]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -965,8 +1025,8 @@ Type HELP for starting information.
 )
 #(
     expr: func
-    start: [33 4]
-    end: [33 8]
+    start: [35 4]
+    end: [35 8]
     syntax: #(
         name: "keyword"
         expr: func
@@ -979,18 +1039,18 @@ Type HELP for starting information.
 #(
     expr: [#(
         expr: a
-        start: [33 10]
-        end: [33 11]
+        start: [35 10]
+        end: [35 11]
         syntax: #()
     ) #(
         expr: [#(
             expr: test
-            start: [33 13]
-            end: [33 17]
+            start: [35 13]
+            end: [35 17]
             syntax: #()
         )]
-        start: [33 12]
-        end: [33 18]
+        start: [35 12]
+        end: [35 18]
         syntax: #(
             error: #(
                 severity: 1
@@ -1001,18 +1061,18 @@ Type HELP for starting information.
         )
     ) #(
         expr: b
-        start: [33 19]
-        end: [33 20]
+        start: [35 19]
+        end: [35 20]
         syntax: #()
     ) #(
         expr: [#(
             expr: test!
-            start: [33 22]
-            end: [33 27]
+            start: [35 22]
+            end: [35 27]
             syntax: #()
         )]
-        start: [33 21]
-        end: [33 28]
+        start: [35 21]
+        end: [35 28]
         syntax: #(
             error: #(
                 severity: 1
@@ -1023,22 +1083,22 @@ Type HELP for starting information.
         )
     ) #(
         expr: /local
-        start: [33 29]
-        end: [33 35]
+        start: [35 29]
+        end: [35 35]
         syntax: #()
     ) #(
         expr: x
-        start: [33 36]
-        end: [33 37]
+        start: [35 36]
+        end: [35 37]
         syntax: #()
     ) #(
         expr: y
-        start: [33 38]
-        end: [33 39]
+        start: [35 38]
+        end: [35 39]
         syntax: #()
     )]
-    start: [33 9]
-    end: [33 40]
+    start: [35 9]
+    end: [35 40]
     syntax: #(
         ctx: func
         ctx-index: 1
@@ -1047,8 +1107,8 @@ Type HELP for starting information.
 #(
     expr: [#(
         expr: x:
-        start: [34 2]
-        end: [34 4]
+        start: [36 2]
+        end: [36 4]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -1061,8 +1121,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 1
-        start: [34 5]
-        end: [34 6]
+        start: [36 5]
+        end: [36 6]
         syntax: #(
             name: "literal"
             type: integer!
@@ -1071,8 +1131,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: y:
-        start: [34 7]
-        end: [34 9]
+        start: [36 7]
+        end: [36 9]
         syntax: #(
             name: "set-word"
             cast: #(
@@ -1085,8 +1145,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 1
-        start: [34 10]
-        end: [34 11]
+        start: [36 10]
+        end: [36 11]
         syntax: #(
             name: "literal"
             type: integer!
@@ -1095,8 +1155,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: a
-        start: [35 2]
-        end: [35 3]
+        start: [37 2]
+        end: [37 3]
         syntax: #(
             name: "resolved"
             expr: a
@@ -1111,8 +1171,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: +
-        start: [35 4]
-        end: [35 5]
+        start: [37 4]
+        end: [37 5]
         syntax: #(
             name: "keyword"
             expr: +
@@ -1122,8 +1182,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: b
-        start: [35 6]
-        end: [35 7]
+        start: [37 6]
+        end: [37 7]
         syntax: #(
             name: "resolved"
             expr: b
@@ -1140,8 +1200,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: +
-        start: [35 8]
-        end: [35 9]
+        start: [37 8]
+        end: [37 9]
         syntax: #(
             name: "keyword"
             expr: +
@@ -1151,8 +1211,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 1
-        start: [35 10]
-        end: [35 11]
+        start: [37 10]
+        end: [37 11]
         syntax: #(
             name: "literal"
             type: integer!
@@ -1161,8 +1221,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: +
-        start: [35 12]
-        end: [35 13]
+        start: [37 12]
+        end: [37 13]
         syntax: #(
             name: "keyword"
             expr: +
@@ -1172,8 +1232,8 @@ Type HELP for starting information.
         )
     ) #(
         expr: 1
-        start: [35 14]
-        end: [35 15]
+        start: [37 14]
+        end: [37 15]
         syntax: #(
             name: "literal"
             type: integer!
@@ -1181,25 +1241,25 @@ Type HELP for starting information.
             SymbolKind: 16
         )
     )]
-    start: [33 40]
-    end: [36 2]
+    start: [35 40]
+    end: [38 2]
     syntax: #(
         ctx: func
         ctx-index: 2
         spec: [#(
             expr: a
-            start: [33 10]
-            end: [33 11]
+            start: [35 10]
+            end: [35 11]
             syntax: #()
         ) #(
             expr: [#(
                 expr: test
-                start: [33 13]
-                end: [33 17]
+                start: [35 13]
+                end: [35 17]
                 syntax: #()
             )]
-            start: [33 12]
-            end: [33 18]
+            start: [35 12]
+            end: [35 18]
             syntax: #(
                 error: #(
                     severity: 1
@@ -1210,18 +1270,18 @@ Type HELP for starting information.
             )
         ) #(
             expr: b
-            start: [33 19]
-            end: [33 20]
+            start: [35 19]
+            end: [35 20]
             syntax: #()
         ) #(
             expr: [#(
                 expr: test!
-                start: [33 22]
-                end: [33 27]
+                start: [35 22]
+                end: [35 27]
                 syntax: #()
             )]
-            start: [33 21]
-            end: [33 28]
+            start: [35 21]
+            end: [35 28]
             syntax: #(
                 error: #(
                     severity: 1
@@ -1232,18 +1292,18 @@ Type HELP for starting information.
             )
         ) #(
             expr: /local
-            start: [33 29]
-            end: [33 35]
+            start: [35 29]
+            end: [35 35]
             syntax: #()
         ) #(
             expr: x
-            start: [33 36]
-            end: [33 37]
+            start: [35 36]
+            end: [35 37]
             syntax: #()
         ) #(
             expr: y
-            start: [33 38]
-            end: [33 39]
+            start: [35 38]
+            end: [35 39]
             syntax: #()
         )]
         name: "block"
@@ -1251,8 +1311,8 @@ Type HELP for starting information.
 )
 #(
     expr: fff:
-    start: [38 1]
-    end: [38 5]
+    start: [40 1]
+    end: [40 5]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -1266,8 +1326,8 @@ Type HELP for starting information.
 )
 #(
     expr: 3
-    start: [38 6]
-    end: [38 7]
+    start: [40 6]
+    end: [40 7]
     syntax: #(
         name: "literal"
         type: integer!
@@ -1293,8 +1353,8 @@ Type HELP for starting information.
     )
 ) #(
     expr: t:
-    start: [19 4]
-    end: [19 6]
+    start: [21 4]
+    end: [21 6]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -1306,15 +1366,15 @@ Type HELP for starting information.
                 CompletionItemKind: 21
                 SymbolKind: 20
             )
-            start: [24 2]
-            end: [24 4]
+            start: [26 2]
+            end: [26 4]
         )
         follow: 1
     )
 ) #(
     expr: u:
-    start: [20 4]
-    end: [20 6]
+    start: [22 4]
+    end: [22 6]
     syntax: #(
         name: "set-word"
         cast: #(
@@ -1326,8 +1386,8 @@ Type HELP for starting information.
                 CompletionItemKind: 21
                 SymbolKind: 16
             )
-            start: [15 4]
-            end: [15 6]
+            start: [17 4]
+            end: [17 6]
         )
         follow: 1
     )
@@ -1355,11 +1415,11 @@ Error/Warning: ---------------------------------------
     message: "unknown word"
     range: #(
         start: #(
-            line: 24
+            line: 26
             character: 4
         )
         end: #(
-            line: 24
+            line: 26
             character: 5
         )
     )
@@ -1370,11 +1430,11 @@ Error/Warning: ---------------------------------------
     message: "invalid datatype! in block!"
     range: #(
         start: #(
-            line: 32
+            line: 34
             character: 11
         )
         end: #(
-            line: 32
+            line: 34
             character: 17
         )
     )
@@ -1385,76 +1445,173 @@ Error/Warning: ---------------------------------------
     message: "invalid datatype! in block!"
     range: #(
         start: #(
-            line: 32
+            line: 34
             character: 20
         )
         end: #(
-            line: 32
+            line: 34
             character: 27
         )
     )
 )]
 [["f1" #(
-    name: "literal"
-    type: string!
-    CompletionItemKind: 21
-    SymbolKind: 15
-)] ["f2" #(
-    name: "resolved"
-    expr: x
-    cast: #(
-        name: "literal"
-        type: integer!
-        CompletionItemKind: 21
-        SymbolKind: 16
-    )
-    start: [15 4]
-    end: [15 6]
-)] ["f3" #(
-    name: "resolved"
-    expr: f1
-    cast: #(
-        name: "literal"
-        type: string!
-        CompletionItemKind: 21
-        SymbolKind: 15
-    )
+    expr: f1:
     start: [10 5]
     end: [10 8]
-)] ["f4" #(
-    name: "resolved"
-    expr: l
-    cast: #(
-        name: "paren"
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: string!
+            CompletionItemKind: 21
+            SymbolKind: 15
+        )
+        follow: 1
     )
-    start: [30 1]
-    end: [30 3]
+)] ["f2" #(
+    expr: f2:
+    start: [11 5]
+    end: [11 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: x
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            start: [17 4]
+            end: [17 6]
+        )
+        follow: 1
+    )
+)] ["f3" #(
+    expr: f3:
+    start: [12 5]
+    end: [12 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: f1
+            cast: #(
+                name: "literal"
+                type: string!
+                CompletionItemKind: 21
+                SymbolKind: 15
+            )
+            start: [10 5]
+            end: [10 8]
+        )
+        follow: 1
+    )
+)] ["f4" #(
+    expr: f4:
+    start: [13 5]
+    end: [13 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: l
+            cast: #(
+                name: "paren"
+            )
+            start: [32 1]
+            end: [32 3]
+        )
+        follow: 1
+    )
+)] ["f5" #(
+    expr: f5:
+    start: [14 5]
+    end: [14 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: get-word!
+            CompletionItemKind: 21
+            SymbolKind: 14
+        )
+        follow: 1
+    )
+)] ["f6" #(
+    expr: f6:
+    start: [15 5]
+    end: [15 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: f5
+            cast: #(
+                name: "literal"
+                type: get-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [14 5]
+            end: [14 8]
+        )
+        follow: 1
+    )
 )] ["ff" #(
-    name: "keyword"
-    expr: function
-    type: native!
-    CompletionItemKind: 14
-    SymbolKind: 6
-    follow: 2
+    expr: ff:
+    start: [9 4]
+    end: [9 7]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: function
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
 )] ["f" #(
-    name: "keyword"
-    expr: func
-    type: native!
-    CompletionItemKind: 14
-    SymbolKind: 6
-    follow: 2
+    expr: f:
+    start: [8 3]
+    end: [8 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
 )] ["fff" #(
-    name: "literal"
-    type: integer!
-    CompletionItemKind: 21
-    SymbolKind: 16
+    expr: fff:
+    start: [40 1]
+    end: [40 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+        follow: 1
+    )
 )]]
 == [["f1" #(
-    name: "literal"
-    type: string!
-    CompletionItemKind: 21
-    SymbolKind: 15
-)] ["f2" #(
-    name: "resolved"
-    ex...
+    expr: f1:
+    start: [10 5]
+    end: [10 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: ...
 >> 

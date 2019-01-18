@@ -11,6 +11,8 @@ b: context [
 				f2: x
 				f3: f1
 				f4: l
+				f5: :f
+				f6: f5
 			]
 			x: 1
 			y: 1

@@ -22,6 +22,8 @@ debug-on?: false
 code-symbols: clear []
 last-uri: none
 last-completion: none
+last-line: none
+last-column: none
 client-caps: none
 shutdown?: no
 
@@ -505,11 +507,11 @@ on-textDocument-completion: function [params [map!]][
 		syntax: item/1/3
 		blk: parse-completion-string source line column
 		completion-string: blk/1
-		write-log mold blk
 		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 	]
 	set 'last-completion completion-string
-	write-log mold last-completion
+	set 'last-line line
+	set 'last-column column
 
 	comps: clear []
 	completions: none
@@ -568,8 +570,7 @@ on-completionItem-resolve: function [params [map!]][
 					]
 				][
 					either item: find-source last-uri [
-						;red-syntax/resolve-completion item/1/3 text
-						none
+						red-syntax/resolve-completion item/1/3 text last-line last-column
 					][none]
 				]
 			]
