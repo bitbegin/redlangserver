@@ -647,7 +647,10 @@ red-syntax: context [
 					pc/1/syntax/name = "set-word"
 				][
 					word: to string! pc/1/expr
-					if find/match word str [
+					if any [
+						empty? str
+						find/match word str
+					][
 						if unique? word [
 							append/only words reduce [word pc/1]
 						]
@@ -731,5 +734,30 @@ red-syntax: context [
 			]
 		]
 		""
+	]
+
+	hover: function [top [block!] line [integer!] column [integer!]][
+		pc: position? top line column
+		range: red-lexer/to-range pc/1/start pc/1/end
+		case [
+			pc/1/syntax/name = "set-word" [
+				res: rejoin [to string! pc/1/expr " is a variable"]
+				return reduce [res range]
+			]
+			word? pc/1/expr [
+				if find system-words/system-words pc/1/expr [
+					either datatype? get word [
+						res: rejoin [text " is a base datatype!"]
+						return reduce [res range]
+					][
+						res: system-words/get-word-info pc/1/expr
+						return reduce [res range]
+					]
+				]
+				res: rejoin [to string! pc/1/expr " is a resolved word"]
+				return reduce [res range]
+			]
+		]
+		return none
 	]
 ]

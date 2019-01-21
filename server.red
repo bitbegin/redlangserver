@@ -649,25 +649,12 @@ on-textDocument-hover: function [params [map!]][
 	line: params/position/line
 	column: params/position/character
 	range: none
-	result: either item: find-source uri [
-		blk: get-selected-text item/1/2 line column
-		text: blk/1
-		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
-		either empty? text [none][
-			hstr: "";red-syntax/resolve-completion item/1/3 text
-			either empty? hstr [
-				either error? word: try [to word! text][none][
-					either find system-words/system-words word [
-						either datatype? get word [
-							rejoin [text " is a base datatype!"]
-						][
-							system-words/get-word-info word
-						]
-					][none]
-				]
-			][hstr]
+	result: none
+	if item: find-source uri [
+		if blk: red-syntax/hover item/1/3 line + 1 column + 1 [
+			result: blk/1 range: blk/2
 		]
-	][none]
+	]
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range range
