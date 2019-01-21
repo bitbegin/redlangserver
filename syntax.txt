@@ -1378,14 +1378,7 @@ Type HELP for starting information.
         expr: x
         start: [36 36]
         end: [36 37]
-        syntax: #(
-            error: #(
-                severity: 1
-                code: "invalid-refine"
-                source: "Syntax"
-                message: "invalid refinement"
-            )
-        )
+        syntax: #()
     ) #(
         expr: y
         start: [36 38]
@@ -1508,14 +1501,7 @@ Type HELP for starting information.
                 expr: x
                 start: [36 36]
                 end: [36 37]
-                syntax: #(
-                    error: #(
-                        severity: 1
-                        code: "invalid-refine"
-                        source: "Syntax"
-                        message: "invalid refinement"
-                    )
-                )
+                syntax: #()
             ) #(
                 expr: y
                 start: [36 38]
@@ -1572,14 +1558,7 @@ Type HELP for starting information.
                 expr: x
                 start: [36 36]
                 end: [36 37]
-                syntax: #(
-                    error: #(
-                        severity: 1
-                        code: "invalid-refine"
-                        source: "Syntax"
-                        message: "invalid refinement"
-                    )
-                )
+                syntax: #()
             ) #(
                 expr: y
                 start: [36 38]
@@ -1688,14 +1667,7 @@ Type HELP for starting information.
             expr: x
             start: [36 36]
             end: [36 37]
-            syntax: #(
-                error: #(
-                    severity: 1
-                    code: "invalid-refine"
-                    source: "Syntax"
-                    message: "invalid refinement"
-                )
-            )
+            syntax: #()
         ) #(
             expr: y
             start: [36 38]
@@ -2232,21 +2204,6 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 35
             character: 26
-        )
-    )
-) #(
-    severity: 1
-    code: "invalid-refine"
-    source: "Syntax"
-    message: "invalid refinement"
-    range: #(
-        start: #(
-            line: 35
-            character: 35
-        )
-        end: #(
-            line: 35
-            character: 36
         )
     )
 ) #(

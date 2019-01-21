@@ -124,7 +124,7 @@ red-syntax: context [
 					blk: skip blk (skip-semicolon-exp blk) - 1
 					if all [
 						not tail? next blk
-						any [
+						all [
 							not word? blk/2/expr
 							not string? blk/2/expr
 						]
