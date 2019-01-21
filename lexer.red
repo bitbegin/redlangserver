@@ -38,31 +38,50 @@ red-lexer: context [
 		reduce [line column + 1]
 	]
 
-	analysis: function [source [string!]][
-		words: make block! 10000
+	to-range: function [start [block!] end [block!] /keep][
+		make map! reduce [
+			'start make map! reduce [
+				'line either keep [start/1][start/1 - 1]
+				'character either keep [start/2][start/2 - 1]
+			]
+			'end make map! reduce [
+				'line either keep [end/1][end/1 - 1]
+				'character either keep [end/2][end/2 - 1]
+			]
+		]
+	]
 
-		pos: source
+	push-stack: function [stack [block!] expr start [string!] end [string!]][
+		append stack make map! reduce [
+			'expr expr
+			'start form-pos start
+			'end form-pos end
+			'syntax make map! 4
+		]
+	]
+
+	analysis: function [start [string!] end [string!]][
+		stack: make block! 10000
+
+		pos: start
 		out: make block! 1
 		until [
 			forever [
 				case [
-					all [
-						not tail? pos
-						whitespace? pos/1
-					][
+					(index? pos) >= index? end [
+						return stack
+					]
+					whitespace? pos/1 [
 						pos: next pos
 					]
 					pos/1 = #";" [
-						unless npos: find pos #"^/" [npos: tail pos]
-						append/only words reduce [
-							copy/part pos npos
-							form-pos pos form-pos npos
-							none none none none
-						]
+						either npos: find pos #"^/" [
+							if (index? npos) > index? end [
+								npos: end
+							]
+						][npos: end]
+						push-stack stack copy/part pos npos pos npos
 						pos: npos
-					]
-					tail? pos [
-						return words
 					]
 					true [break]
 				]
@@ -78,14 +97,34 @@ red-lexer: context [
 				]
 			]
 			if error? npos [
-				return make map! reduce ['pos form-pos pos 'err npos 'lexer words]
+				return make map! reduce ['pos form-pos pos 'error npos 'stack stack]
 			]
-			append/only words reduce [
-				out/1 form-pos pos form-pos npos
-				none none none none]
+			case [
+				all [
+					block? out/1
+					not empty? out/1
+				][
+					start2: next pos end2: back npos
+					stack2: analysis start2 end2
+					push-stack stack stack2 pos npos
+				]
+				all [
+					paren? out/1
+					not empty? out/1
+				][
+					start2: next pos end2: back npos
+					stack2: analysis start2 end2
+					paren: make paren! 4
+					append paren stack2
+					push-stack stack paren pos npos
+				]
+				true [
+					push-stack stack out/1 pos npos
+				]
+			]
 			pos: npos
 			tail? pos
 		]
-		words
+		stack
 	]
 ]

@@ -22,6 +22,8 @@ debug-on?: false
 code-symbols: clear []
 last-uri: none
 last-completion: none
+last-line: none
+last-column: none
 client-caps: none
 shutdown?: no
 
@@ -34,17 +36,6 @@ find-source: function [uri [string!]][
 	false
 ]
 
-to-range: function [start [block!] end [block!]][
-	make map! reduce [
-		'start make map! reduce [
-			'line start/1 - 1 'character start/2 - 1
-		]
-		'end make map! reduce [
-			'line end/1 - 1 'character end/2 - 1
-		]
-	]
-]
-
 add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 	either item: find-source uri [
 		item/1/2: code
@@ -55,13 +46,13 @@ add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 ]
 
 add-source: function [uri [string!] code [string!]][
-	if map? res: try [red-lexer/analysis code][
-		add-source-to-table uri code res/lexer
-		range: to-range res/pos res/pos
+	if map? res: red-lexer/analysis code tail code [
+		add-source-to-table uri code res/stack
+		range: red-lexer/to-range res/pos res/pos
 		line-cs: charset [#"^M" #"^/"]
-		info: res/err/arg2
+		info: res/error/arg2
 		if part: find info line-cs [info: copy/part info part]
-		message: rejoin [res/err/id " ^"" res/err/arg1 "^" at: ^"" info "^""]
+		message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
 		return reduce [
 			make map! reduce [
 				'range range
@@ -73,21 +64,20 @@ add-source: function [uri [string!] code [string!]][
 		]
 	]
 	add-source-to-table uri code res
-	if error? res: try [red-syntax/analysis res][
-		pc: res/arg3
-		range: to-range pc/2 pc/2
+	if error? err: try [red-syntax/analysis res][
+		pc: err/arg3
+		range: red-lexer/to-range pc/2 pc/2
 		return reduce [
 			make map! reduce [
 				'range range
 				'severity 1
 				'code 1
 				'source "syntax"
-				'message res/arg2
+				'message err/arg2
 			]
 		]
 	]
-
-	[]
+	red-syntax/collect-errors res
 ]
 
 init-logger: func [_logger [file! none!]][
@@ -389,7 +379,7 @@ complete-system: [
 ]
 
 complete-context: [
-	completions: red-syntax/get-completions syntax completion-string
+	completions: red-syntax/get-completions syntax completion-string line column
 	unless any [
 		none? completions
 		1 >= length? completions
@@ -517,11 +507,11 @@ on-textDocument-completion: function [params [map!]][
 		syntax: item/1/3
 		blk: parse-completion-string source line column
 		completion-string: blk/1
-		write-log mold blk
-		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
+		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
 	]
 	set 'last-completion completion-string
-	write-log mold last-completion
+	set 'last-line line
+	set 'last-column column
 
 	comps: clear []
 	completions: none
@@ -580,14 +570,14 @@ on-completionItem-resolve: function [params [map!]][
 					]
 				][
 					either item: find-source last-uri [
-						red-syntax/resolve-completion item/1/3 text
-					][""]
+						red-syntax/resolve-completion item/1/3 text last-line last-column
+					][none]
 				]
 			]
 		]
 	]
 
-	put params 'documentation hstr
+	put params 'documentation either hstr [hstr][""]
 
 	json-body/result: params
 	response
@@ -638,7 +628,7 @@ on-textDocument-symbol: function [params [map!]][
 		if blk/1/1 = none [continue]
 		;if set-word? blk/1/1 [
 		unless block? blk/1/1 [
-			range: to-range blk/1/2 blk/1/3
+			range: red-lexer/to-range blk/1/2 blk/1/3
 			symbol: make map! reduce [
 				'name		mold blk/1/1
 				'kind		blk/1/4/3
@@ -659,25 +649,12 @@ on-textDocument-hover: function [params [map!]][
 	line: params/position/line
 	column: params/position/character
 	range: none
-	result: either item: find-source uri [
-		blk: get-selected-text item/1/2 line column
-		text: blk/1
-		range: to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
-		either empty? text [none][
-			hstr: red-syntax/resolve-completion item/1/3 text
-			either empty? hstr [
-				either error? word: try [to word! text][none][
-					either find system-words/system-words word [
-						either datatype? get word [
-							rejoin [text " is a base datatype!"]
-						][
-							system-words/get-word-info word
-						]
-					][none]
-				]
-			][hstr]
+	result: none
+	if item: find-source uri [
+		if blk: red-syntax/hover item/1/3 line + 1 column + 1 [
+			result: blk/1 range: blk/2
 		]
-	][none]
+	]
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range range

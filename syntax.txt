@@ -1,0 +1,1617 @@
+--== Red 0.6.4 ==-- 
+Type HELP for starting information. 
+
+>> do %red-test.red
+#(
+    expr: Red
+    start: [1 1]
+    end: [1 4]
+    syntax: #(
+        name: "keyword"
+        expr: Red
+        type: tuple!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        meta: 1
+    )
+)
+#(
+    expr: he:
+    start: [1 5]
+    end: [1 8]
+    syntax: #(
+        error: #(
+            severity: 1
+            code: "miss-head-block"
+            source: "Syntax"
+            message: "missing '[]' at head"
+        )
+        name: "set-word"
+        cast: #(
+            name: "block"
+        )
+        follow: 1
+        meta: 2
+    )
+)
+#(
+    expr: []
+    start: [1 9]
+    end: [1 11]
+    syntax: #(
+        name: "block"
+    )
+)
+#(
+    expr: a:
+    start: [3 1]
+    end: [3 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: lit-word!
+            CompletionItemKind: 21
+            SymbolKind: 14
+        )
+        follow: 1
+    )
+)
+#(
+    expr: 'test
+    start: [3 4]
+    end: [3 9]
+    syntax: #(
+        name: "literal"
+        type: lit-word!
+        CompletionItemKind: 21
+        SymbolKind: 14
+    )
+)
+#(
+    expr: b:
+    start: [4 1]
+    end: [4 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: context
+            type: function!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 1
+        )
+        follow: 2
+    )
+)
+#(
+    expr: context
+    start: [4 4]
+    end: [4 11]
+    syntax: #(
+        name: "keyword"
+        expr: context
+        type: function!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        follow: 1
+    )
+)
+#(
+    expr: [#(
+        expr: c:
+        start: [5 2]
+        end: [5 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 4
+        start: [5 5]
+        end: [5 6]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: d:
+        start: [6 2]
+        end: [6 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "keyword"
+                expr: context
+                type: function!
+                CompletionItemKind: 14
+                SymbolKind: 6
+                follow: 1
+            )
+            follow: 2
+        )
+    ) #(
+        expr: context
+        start: [6 5]
+        end: [6 12]
+        syntax: #(
+            name: "keyword"
+            expr: context
+            type: function!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 1
+        )
+    ) #(
+        expr: [#(
+            expr: e:
+            start: [7 3]
+            end: [7 5]
+            syntax: #(
+                name: "set-word"
+                cast: #(
+                    name: "literal"
+                    type: binary!
+                    CompletionItemKind: 21
+                    SymbolKind: 18
+                )
+                follow: 1
+            )
+        ) #(
+            expr: #{12}
+            start: [7 6]
+            end: [7 11]
+            syntax: #(
+                name: "literal"
+                type: binary!
+                CompletionItemKind: 21
+                SymbolKind: 18
+            )
+        ) #(
+            expr: f:
+            start: [8 3]
+            end: [8 5]
+            syntax: #(
+                name: "set-word"
+                cast: #(
+                    name: "keyword"
+                    expr: func
+                    type: native!
+                    CompletionItemKind: 14
+                    SymbolKind: 6
+                    follow: 2
+                )
+                follow: 3
+            )
+        ) #(
+            expr: func
+            start: [8 6]
+            end: [8 10]
+            syntax: #(
+                name: "keyword"
+                expr: func
+                type: native!
+                CompletionItemKind: 14
+                SymbolKind: 6
+                follow: 2
+            )
+        ) #(
+            expr: [#(
+                expr: x
+                start: [8 12]
+                end: [8 13]
+                syntax: #()
+            ) #(
+                expr: [#(
+                    expr: block!
+                    start: [8 15]
+                    end: [8 21]
+                    syntax: #()
+                )]
+                start: [8 14]
+                end: [8 22]
+                syntax: #()
+            ) #(
+                expr: y
+                start: [8 23]
+                end: [8 24]
+                syntax: #()
+            ) #(
+                expr: [#(
+                    expr: integer!
+                    start: [8 26]
+                    end: [8 34]
+                    syntax: #()
+                )]
+                start: [8 25]
+                end: [8 35]
+                syntax: #()
+            )]
+            start: [8 11]
+            end: [8 36]
+            syntax: #(
+                ctx: func
+                ctx-index: 1
+            )
+        ) #(
+            expr: [#(
+                expr: ff:
+                start: [9 4]
+                end: [9 7]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "keyword"
+                        expr: function
+                        type: native!
+                        CompletionItemKind: 14
+                        SymbolKind: 6
+                        follow: 2
+                    )
+                    follow: 3
+                )
+            ) #(
+                expr: function
+                start: [9 8]
+                end: [9 16]
+                syntax: #(
+                    name: "keyword"
+                    expr: function
+                    type: native!
+                    CompletionItemKind: 14
+                    SymbolKind: 6
+                    follow: 2
+                )
+            ) #(
+                expr: []
+                start: [9 17]
+                end: [9 19]
+                syntax: #(
+                    ctx: function
+                    ctx-index: 1
+                )
+            ) #(
+                expr: [#(
+                    expr: f1:
+                    start: [10 5]
+                    end: [10 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "literal"
+                            type: string!
+                            CompletionItemKind: 21
+                            SymbolKind: 15
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: "test"
+                    start: [10 9]
+                    end: [10 15]
+                    syntax: #(
+                        name: "literal"
+                        type: string!
+                        CompletionItemKind: 21
+                        SymbolKind: 15
+                    )
+                ) #(
+                    expr: f2:
+                    start: [11 5]
+                    end: [11 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: x
+                            cast: #(
+                                name: "literal"
+                                type: integer!
+                                CompletionItemKind: 21
+                                SymbolKind: 16
+                            )
+                            start: [17 4]
+                            end: [17 6]
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: x
+                    start: [11 9]
+                    end: [11 10]
+                    syntax: #(
+                        name: "resolved"
+                        expr: x
+                        cast: #(
+                            name: "literal"
+                            type: integer!
+                            CompletionItemKind: 21
+                            SymbolKind: 16
+                        )
+                        start: [17 4]
+                        end: [17 6]
+                    )
+                ) #(
+                    expr: f3:
+                    start: [12 5]
+                    end: [12 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: f1
+                            cast: #(
+                                name: "literal"
+                                type: string!
+                                CompletionItemKind: 21
+                                SymbolKind: 15
+                            )
+                            start: [10 5]
+                            end: [10 8]
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: f1
+                    start: [12 9]
+                    end: [12 11]
+                    syntax: #(
+                        name: "resolved"
+                        expr: f1
+                        cast: #(
+                            name: "literal"
+                            type: string!
+                            CompletionItemKind: 21
+                            SymbolKind: 15
+                        )
+                        start: [10 5]
+                        end: [10 8]
+                    )
+                ) #(
+                    expr: f4:
+                    start: [13 5]
+                    end: [13 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: l
+                            cast: #(
+                                name: "paren"
+                            )
+                            start: [32 1]
+                            end: [32 3]
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: l
+                    start: [13 9]
+                    end: [13 10]
+                    syntax: #(
+                        name: "resolved"
+                        expr: l
+                        cast: #(
+                            name: "paren"
+                        )
+                        start: [32 1]
+                        end: [32 3]
+                    )
+                ) #(
+                    expr: f5:
+                    start: [14 5]
+                    end: [14 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "literal"
+                            type: get-word!
+                            CompletionItemKind: 21
+                            SymbolKind: 14
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: :f
+                    start: [14 9]
+                    end: [14 11]
+                    syntax: #(
+                        name: "literal"
+                        type: get-word!
+                        CompletionItemKind: 21
+                        SymbolKind: 14
+                    )
+                ) #(
+                    expr: f6:
+                    start: [15 5]
+                    end: [15 8]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: f5
+                            cast: #(
+                                name: "literal"
+                                type: get-word!
+                                CompletionItemKind: 21
+                                SymbolKind: 14
+                            )
+                            start: [14 5]
+                            end: [14 8]
+                        )
+                        follow: 1
+                    )
+                ) #(
+                    expr: f5
+                    start: [15 9]
+                    end: [15 11]
+                    syntax: #(
+                        name: "resolved"
+                        expr: f5
+                        cast: #(
+                            name: "literal"
+                            type: get-word!
+                            CompletionItemKind: 21
+                            SymbolKind: 14
+                        )
+                        start: [14 5]
+                        end: [14 8]
+                    )
+                )]
+                start: [9 19]
+                end: [16 5]
+                syntax: #(
+                    ctx: function
+                    ctx-index: 2
+                    spec: []
+                    name: "block"
+                )
+            ) #(
+                expr: x:
+                start: [17 4]
+                end: [17 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "literal"
+                        type: integer!
+                        CompletionItemKind: 21
+                        SymbolKind: 16
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: 1
+                start: [17 7]
+                end: [17 8]
+                syntax: #(
+                    name: "literal"
+                    type: integer!
+                    CompletionItemKind: 21
+                    SymbolKind: 16
+                )
+            ) #(
+                expr: y:
+                start: [18 4]
+                end: [18 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "literal"
+                        type: integer!
+                        CompletionItemKind: 21
+                        SymbolKind: 16
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: 1
+                start: [18 7]
+                end: [18 8]
+                syntax: #(
+                    name: "literal"
+                    type: integer!
+                    CompletionItemKind: 21
+                    SymbolKind: 16
+                )
+            ) #(
+                expr: e:
+                start: [19 4]
+                end: [19 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "resolved"
+                        expr: x
+                        cast: #(
+                            name: "literal"
+                            type: integer!
+                            CompletionItemKind: 21
+                            SymbolKind: 16
+                        )
+                        start: [17 4]
+                        end: [17 6]
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: x
+                start: [19 7]
+                end: [19 8]
+                syntax: #(
+                    name: "resolved"
+                    expr: x
+                    cast: #(
+                        name: "literal"
+                        type: integer!
+                        CompletionItemKind: 21
+                        SymbolKind: 16
+                    )
+                    start: [17 4]
+                    end: [17 6]
+                )
+            ) #(
+                expr: +
+                start: [19 9]
+                end: [19 10]
+                syntax: #(
+                    name: "keyword"
+                    expr: +
+                    type: op!
+                    CompletionItemKind: 14
+                    SymbolKind: 6
+                )
+            ) #(
+                expr: y
+                start: [19 11]
+                end: [19 12]
+                syntax: #(
+                    name: "resolved"
+                    expr: y
+                    cast: #(
+                        name: "literal"
+                        type: integer!
+                        CompletionItemKind: 21
+                        SymbolKind: 16
+                    )
+                    start: [18 4]
+                    end: [18 6]
+                )
+            ) #(
+                expr: o:
+                start: [20 4]
+                end: [20 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "resolved"
+                        expr: g
+                        cast: #(
+                            name: "block"
+                        )
+                        start: [24 3]
+                        end: [24 5]
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: g
+                start: [20 7]
+                end: [20 8]
+                syntax: #(
+                    name: "resolved"
+                    expr: g
+                    cast: #(
+                        name: "block"
+                    )
+                    start: [24 3]
+                    end: [24 5]
+                )
+            ) #(
+                expr: t:
+                start: [21 4]
+                end: [21 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "resolved"
+                        expr: h
+                        cast: #(
+                            name: "literal"
+                            type: map!
+                            CompletionItemKind: 21
+                            SymbolKind: 20
+                        )
+                        start: [26 2]
+                        end: [26 4]
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: h
+                start: [21 7]
+                end: [21 8]
+                syntax: #(
+                    name: "resolved"
+                    expr: h
+                    cast: #(
+                        name: "literal"
+                        type: map!
+                        CompletionItemKind: 21
+                        SymbolKind: 20
+                    )
+                    start: [26 2]
+                    end: [26 4]
+                )
+            ) #(
+                expr: u:
+                start: [22 4]
+                end: [22 6]
+                syntax: #(
+                    name: "set-word"
+                    cast: #(
+                        name: "resolved"
+                        expr: x
+                        cast: #(
+                            name: "literal"
+                            type: integer!
+                            CompletionItemKind: 21
+                            SymbolKind: 16
+                        )
+                        start: [17 4]
+                        end: [17 6]
+                    )
+                    follow: 1
+                )
+            ) #(
+                expr: x
+                start: [22 7]
+                end: [22 8]
+                syntax: #(
+                    name: "resolved"
+                    expr: x
+                    cast: #(
+                        name: "literal"
+                        type: integer!
+                        CompletionItemKind: 21
+                        SymbolKind: 16
+                    )
+                    start: [17 4]
+                    end: [17 6]
+                )
+            )]
+            start: [8 36]
+            end: [23 4]
+            syntax: #(
+                ctx: func
+                ctx-index: 2
+                spec: [#(
+                    expr: x
+                    start: [8 12]
+                    end: [8 13]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: block!
+                        start: [8 15]
+                        end: [8 21]
+                        syntax: #()
+                    )]
+                    start: [8 14]
+                    end: [8 22]
+                    syntax: #()
+                ) #(
+                    expr: y
+                    start: [8 23]
+                    end: [8 24]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [8 26]
+                        end: [8 34]
+                        syntax: #()
+                    )]
+                    start: [8 25]
+                    end: [8 35]
+                    syntax: #()
+                )]
+                name: "block"
+            )
+        ) #(
+            expr: g:
+            start: [24 3]
+            end: [24 5]
+            syntax: #(
+                name: "set-word"
+                cast: #(
+                    name: "block"
+                )
+                follow: 1
+            )
+        ) #(
+            expr: []
+            start: [24 6]
+            end: [24 8]
+            syntax: #(
+                name: "block"
+            )
+        )]
+        start: [6 13]
+        end: [25 3]
+        syntax: #(
+            ctx: context
+            ctx-index: 1
+            name: "block"
+        )
+    ) #(
+        expr: h:
+        start: [26 2]
+        end: [26 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: map!
+                CompletionItemKind: 21
+                SymbolKind: 20
+            )
+            follow: 1
+        )
+    ) #(
+        expr: #(
+            a: 3
+        )
+        start: [26 5]
+        end: [26 12]
+        syntax: #(
+            name: "literal"
+            type: map!
+            CompletionItemKind: 21
+            SymbolKind: 20
+        )
+    ) #(
+        expr: i:
+        start: [27 2]
+        end: [27 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "unknown"
+                expr: x
+                error: #(
+                    severity: 2
+                    code: "unknown-word"
+                    source: "Syntax"
+                    message: "unknown word"
+                )
+            )
+            follow: 1
+        )
+    ) #(
+        expr: x
+        start: [27 5]
+        end: [27 6]
+        syntax: #(
+            name: "unknown"
+            expr: x
+            error: #(
+                severity: 2
+                code: "unknown-word"
+                source: "Syntax"
+                message: "unknown word"
+            )
+        )
+    ) #(
+        expr: j:
+        start: [28 2]
+        end: [28 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "keyword"
+                expr: e
+                type: block!
+                CompletionItemKind: 14
+                SymbolKind: 6
+            )
+            follow: 1
+        )
+    ) #(
+        expr: e
+        start: [28 5]
+        end: [28 6]
+        syntax: #(
+            name: "keyword"
+            expr: e
+            type: block!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: k:
+        start: [29 2]
+        end: [29 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "resolved"
+                expr: t
+                cast: #(
+                    name: "resolved"
+                    expr: h
+                    cast: #(
+                        name: "literal"
+                        type: map!
+                        CompletionItemKind: 21
+                        SymbolKind: 20
+                    )
+                    start: [26 2]
+                    end: [26 4]
+                )
+                start: [21 4]
+                end: [21 6]
+            )
+            follow: 1
+        )
+    ) #(
+        expr: t
+        start: [29 5]
+        end: [29 6]
+        syntax: #(
+            name: "resolved"
+            expr: t
+            cast: #(
+                name: "resolved"
+                expr: h
+                cast: #(
+                    name: "literal"
+                    type: map!
+                    CompletionItemKind: 21
+                    SymbolKind: 20
+                )
+                start: [26 2]
+                end: [26 4]
+            )
+            start: [21 4]
+            end: [21 6]
+        )
+    )]
+    start: [4 12]
+    end: [30 2]
+    syntax: #(
+        ctx: context
+        ctx-index: 1
+        name: "block"
+    )
+)
+#(
+    expr: l:
+    start: [32 1]
+    end: [32 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "paren"
+        )
+        follow: 1
+    )
+)
+#(
+    expr: (#(
+        expr: m:
+        start: [32 5]
+        end: [32 7]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 3
+        start: [32 8]
+        end: [32 9]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: n:
+        start: [32 10]
+        end: [32 12]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "resolved"
+                expr: a
+                cast: #(
+                    name: "literal"
+                    type: lit-word!
+                    CompletionItemKind: 21
+                    SymbolKind: 14
+                )
+                start: [3 1]
+                end: [3 3]
+            )
+            follow: 1
+        )
+    ) #(
+        expr: a
+        start: [32 13]
+        end: [32 14]
+        syntax: #(
+            name: "resolved"
+            expr: a
+            cast: #(
+                name: "literal"
+                type: lit-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [3 1]
+            end: [3 3]
+        )
+    ))
+    start: [32 4]
+    end: [32 15]
+    syntax: #(
+        name: "paren"
+    )
+)
+#(
+    expr: o:
+    start: [33 1]
+    end: [33 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: l
+            cast: #(
+                name: "paren"
+            )
+            start: [32 1]
+            end: [32 3]
+        )
+        follow: 1
+    )
+)
+#(
+    expr: l
+    start: [33 4]
+    end: [33 5]
+    syntax: #(
+        name: "resolved"
+        expr: l
+        cast: #(
+            name: "paren"
+        )
+        start: [32 1]
+        end: [32 3]
+    )
+)
+#(
+    expr: r:
+    start: [35 1]
+    end: [35 3]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)
+#(
+    expr: func
+    start: [35 4]
+    end: [35 8]
+    syntax: #(
+        name: "keyword"
+        expr: func
+        type: native!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        follow: 2
+    )
+)
+#(
+    expr: [#(
+        expr: a
+        start: [35 10]
+        end: [35 11]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: test
+            start: [35 13]
+            end: [35 17]
+            syntax: #()
+        )]
+        start: [35 12]
+        end: [35 18]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "invalid-datatype"
+                source: "Syntax"
+                message: "invalid datatype! in block!"
+            )
+        )
+    ) #(
+        expr: b
+        start: [35 19]
+        end: [35 20]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: test!
+            start: [35 22]
+            end: [35 27]
+            syntax: #()
+        )]
+        start: [35 21]
+        end: [35 28]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "invalid-datatype"
+                source: "Syntax"
+                message: "invalid datatype! in block!"
+            )
+        )
+    ) #(
+        expr: /local
+        start: [35 29]
+        end: [35 35]
+        syntax: #()
+    ) #(
+        expr: x
+        start: [35 36]
+        end: [35 37]
+        syntax: #()
+    ) #(
+        expr: y
+        start: [35 38]
+        end: [35 39]
+        syntax: #()
+    )]
+    start: [35 9]
+    end: [35 40]
+    syntax: #(
+        ctx: func
+        ctx-index: 1
+    )
+)
+#(
+    expr: [#(
+        expr: x:
+        start: [36 2]
+        end: [36 4]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 1
+        start: [36 5]
+        end: [36 6]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: y:
+        start: [36 7]
+        end: [36 9]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            follow: 1
+        )
+    ) #(
+        expr: 1
+        start: [36 10]
+        end: [36 11]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: a
+        start: [37 2]
+        end: [37 3]
+        syntax: #(
+            name: "resolved"
+            expr: a
+            cast: #(
+                name: "literal"
+                type: lit-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [3 1]
+            end: [3 3]
+        )
+    ) #(
+        expr: +
+        start: [37 4]
+        end: [37 5]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: b
+        start: [37 6]
+        end: [37 7]
+        syntax: #(
+            name: "resolved"
+            expr: b
+            cast: #(
+                name: "keyword"
+                expr: context
+                type: function!
+                CompletionItemKind: 14
+                SymbolKind: 6
+                follow: 1
+            )
+            start: [4 1]
+            end: [4 3]
+        )
+    ) #(
+        expr: +
+        start: [37 8]
+        end: [37 9]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: 1
+        start: [37 10]
+        end: [37 11]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    ) #(
+        expr: +
+        start: [37 12]
+        end: [37 13]
+        syntax: #(
+            name: "keyword"
+            expr: +
+            type: op!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: 1
+        start: [37 14]
+        end: [37 15]
+        syntax: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+    )]
+    start: [35 40]
+    end: [38 2]
+    syntax: #(
+        ctx: func
+        ctx-index: 2
+        spec: [#(
+            expr: a
+            start: [35 10]
+            end: [35 11]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: test
+                start: [35 13]
+                end: [35 17]
+                syntax: #()
+            )]
+            start: [35 12]
+            end: [35 18]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "invalid-datatype"
+                    source: "Syntax"
+                    message: "invalid datatype! in block!"
+                )
+            )
+        ) #(
+            expr: b
+            start: [35 19]
+            end: [35 20]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: test!
+                start: [35 22]
+                end: [35 27]
+                syntax: #()
+            )]
+            start: [35 21]
+            end: [35 28]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "invalid-datatype"
+                    source: "Syntax"
+                    message: "invalid datatype! in block!"
+                )
+            )
+        ) #(
+            expr: /local
+            start: [35 29]
+            end: [35 35]
+            syntax: #()
+        ) #(
+            expr: x
+            start: [35 36]
+            end: [35 37]
+            syntax: #()
+        ) #(
+            expr: y
+            start: [35 38]
+            end: [35 39]
+            syntax: #()
+        )]
+        name: "block"
+    )
+)
+#(
+    expr: fff:
+    start: [40 1]
+    end: [40 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+        follow: 1
+    )
+)
+#(
+    expr: 3
+    start: [40 6]
+    end: [40 7]
+    syntax: #(
+        name: "literal"
+        type: integer!
+        CompletionItemKind: 21
+        SymbolKind: 16
+    )
+)
+[#(
+    expr: ff:
+    start: [9 4]
+    end: [9 7]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: function
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+) #(
+    expr: t:
+    start: [21 4]
+    end: [21 6]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: h
+            cast: #(
+                name: "literal"
+                type: map!
+                CompletionItemKind: 21
+                SymbolKind: 20
+            )
+            start: [26 2]
+            end: [26 4]
+        )
+        follow: 1
+    )
+) #(
+    expr: u:
+    start: [22 4]
+    end: [22 6]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: x
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            start: [17 4]
+            end: [17 6]
+        )
+        follow: 1
+    )
+)]
+Error/Warning: ---------------------------------------
+[#(
+    severity: 1
+    code: "miss-head-block"
+    source: "Syntax"
+    message: "missing '[]' at head"
+    range: #(
+        start: #(
+            line: 0
+            character: 4
+        )
+        end: #(
+            line: 0
+            character: 7
+        )
+    )
+) #(
+    severity: 2
+    code: "unknown-word"
+    source: "Syntax"
+    message: "unknown word"
+    range: #(
+        start: #(
+            line: 26
+            character: 4
+        )
+        end: #(
+            line: 26
+            character: 5
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "invalid datatype! in block!"
+    range: #(
+        start: #(
+            line: 34
+            character: 11
+        )
+        end: #(
+            line: 34
+            character: 17
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "invalid datatype! in block!"
+    range: #(
+        start: #(
+            line: 34
+            character: 20
+        )
+        end: #(
+            line: 34
+            character: 27
+        )
+    )
+)]
+[["f1" #(
+    expr: f1:
+    start: [10 5]
+    end: [10 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: string!
+            CompletionItemKind: 21
+            SymbolKind: 15
+        )
+        follow: 1
+    )
+)] ["f2" #(
+    expr: f2:
+    start: [11 5]
+    end: [11 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: x
+            cast: #(
+                name: "literal"
+                type: integer!
+                CompletionItemKind: 21
+                SymbolKind: 16
+            )
+            start: [17 4]
+            end: [17 6]
+        )
+        follow: 1
+    )
+)] ["f3" #(
+    expr: f3:
+    start: [12 5]
+    end: [12 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: f1
+            cast: #(
+                name: "literal"
+                type: string!
+                CompletionItemKind: 21
+                SymbolKind: 15
+            )
+            start: [10 5]
+            end: [10 8]
+        )
+        follow: 1
+    )
+)] ["f4" #(
+    expr: f4:
+    start: [13 5]
+    end: [13 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: l
+            cast: #(
+                name: "paren"
+            )
+            start: [32 1]
+            end: [32 3]
+        )
+        follow: 1
+    )
+)] ["f5" #(
+    expr: f5:
+    start: [14 5]
+    end: [14 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: get-word!
+            CompletionItemKind: 21
+            SymbolKind: 14
+        )
+        follow: 1
+    )
+)] ["f6" #(
+    expr: f6:
+    start: [15 5]
+    end: [15 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "resolved"
+            expr: f5
+            cast: #(
+                name: "literal"
+                type: get-word!
+                CompletionItemKind: 21
+                SymbolKind: 14
+            )
+            start: [14 5]
+            end: [14 8]
+        )
+        follow: 1
+    )
+)] ["ff" #(
+    expr: ff:
+    start: [9 4]
+    end: [9 7]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: function
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)] ["f" #(
+    expr: f:
+    start: [8 3]
+    end: [8 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)] ["fff" #(
+    expr: fff:
+    start: [40 1]
+    end: [40 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "literal"
+            type: integer!
+            CompletionItemKind: 21
+            SymbolKind: 16
+        )
+        follow: 1
+    )
+)]]
+== [["f1" #(
+    expr: f1:
+    start: [10 5]
+    end: [10 8]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: ...
+>> 

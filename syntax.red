@@ -10,26 +10,48 @@ Red [
 red-syntax: context [
 	throw-error: register-error 'red-syntax
 
-	ctx: []
-
-	push-ctx: func [params [block!]][
-		append/only ctx params
-		ctx: next ctx
+	error-code: [
+		'miss-head-red			"missing 'Red' at head"
+		'miss-head-block		"missing '[]' at head"
+		'miss-expr				"missing 'expr'"
+		'miss-block				"missing a block!"
+		'unresolve 				"need resolve unknown type"
+		'invalid-refine			"invalid refinement"
+		'invalid-datatype		"invalid datatype! in block!"
+		'invalid-arg			"invalid argument"
 	]
 
-	pop-ctx: has [value][
-		also ctx/1 do [clear ctx ctx: back ctx]
+	warning-code: [
+		'unknown-word			"unknown word"
 	]
 
-	next-tail?: func [fn where][
-		if tail? next where [
-			throw-error fn "no more code!" where/1
+	create-error-at: function [syntax [map!] type [word!] word [word!]][
+		message: case [
+			type = 'Error [error-code/(word)]
+			type = 'Warning [warning-code/(word)]
+		]
+		error: make map! reduce [
+			'severity DiagnosticSeverity/(type)
+			'code to string! word
+			'source "Syntax"
+			'message message
+		]
+		either none? syntax/error [
+			syntax/error: error
+		][
+			either block? syntax/error [
+				append syntax/error error
+			][
+				old: syntax/error
+				syntax/error: reduce [old error]
+			]
 		]
 	]
 
-	check-block?: func [fn where][
-		unless block? where/1/1 [
-			throw-error fn "need a block!" where/1
+	put-syntax: func [syn [map!] item [block!]][
+		forall item [
+			put syn item/1 item/2
+			item: next item
 		]
 	]
 
@@ -41,7 +63,7 @@ red-syntax: context [
 		tuple! url!
 	]
 
-	form-type: function [type][
+	symbol-type?: function [type][
 		case [
 			find reduce [date! float! integer! percent! time! tuple! pair!] type [
 				SymbolKind/Number
@@ -71,274 +93,671 @@ red-syntax: context [
 		either find literal-type value [true][false]
 	]
 
-	save-type: func [npc [block!] symbol-type [block!]][
-		npc/1/4: symbol-type
+	check-func-args: function [blk [block!]][
+		forall blk [
+			expr: blk/1/expr
+			either any [
+				word? expr
+				lit-word? expr
+				get-word? expr
+				refinement? expr
+			][
+				if all [
+					not tail? next blk
+					block? expr2: blk/2/expr
+				][
+					if refinement? expr [
+						create-error-at blk/2/syntax 'Error 'invalid-refine
+					]
+					forall expr2 [
+						expr3: expr2/1/expr
+						unless any [
+							all [
+								value? expr3
+								datatype? get expr3
+							]
+							all [
+								value? expr3
+								typeset? get expr3
+							]
+						][
+							create-error-at blk/2/syntax 'Error 'invalid-datatype
+						]
+					]
+					blk: next blk
+				]
+			][
+				create-error-at blk/1/syntax 'Error 'invalid-arg
+			]
+		]
 	]
 
-	exp-type?: function [npc [block!]][
-		old-pc: npc2: npc
-		code: npc/1/1
-		code-type: type? code
+	exp-type?: function [pc [block! paren!]][
+		if tail? pc [
+			syntax: make map! 1
+			create-error-at syntax 'Error 'miss-expr
+			return reduce [syntax 0]
+		]
+		expr: pc/1/expr
+		expr-type: type? expr
+		syntax: pc/1/syntax
+		ret: none
 		type: none
-		value: none
-		nctx: none
+		blk: none
+		step: none
 
-		semicolon-exp-type?: [
+		semicolon-type?: [
 			if any [
 				all [
-					string? code
-					not empty? code
-					code/1 = #";"
+					string? expr
+					not empty? expr
+					expr/1 = #";"
 				]
-				code = none
+				expr = none
 			][
-				type: reduce ['semicolon-exp none CompletionItemKind/Text SymbolKind/Null 1]
-				save-type old-pc type
-				return copy type
+				put-syntax syntax reduce [
+					'name "semicolon"
+					'CompletionItemKind CompletionItemKind/Text
+					'SymbolKind SymbolKind/Null
+				]
+				ret: exp-type? next pc
+				ret/2: ret/2 + 1
+				return ret
 			]
 		]
 
-		include-exp-type?: [
+		include-type?: [
 			if all [
-				code-type = issue! 
-				"include" = to string! code
+				expr-type = issue! 
+				"include" = to string! expr
 			][
-				type: reduce ['include-exp none CompletionItemKind/Module SymbolKind/Package 1]
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		slit-exp-type?: [
-			if simple-literal? code-type [
-				type: reduce ['slit-exp type?/word code CompletionItemKind/Constant form-type code-type 1]
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		set-word-exp-type?: [
-			if set-word? code [
-				next-tail? 'set-word npc
-				npc2: next npc
-				type: exp-type? npc2
-				type/5: type/5 + 1
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		set-path-exp-type?: [
-			if set-path? code [
-				next-tail? 'set-path npc
-				npc2: next npc
-				type: exp-type? npc2
-				type/5: type/5 + 1
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		;-- a key word followed by 1 block
-		block-1-exp-type?: [
-			if any [
-				code = 'does
-				code = 'context
-			][
-				push-ctx old-pc/1
-				next-tail? code npc
-				npc2: next npc
-				check-block? code npc2
-				type: exp-type? npc2
-				type/5: type/5 + 1
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		;-- a key word followed by 2 blocks
-		block-2-exp-type?: [
-			if any [
-				code = 'has
-				code = 'func
-				code = 'function
-				code = 'routine
-			][
-				next-tail? code npc
-				npc2: next npc
-				check-block? code npc2
-				push-ctx old-pc/1
-				next-tail? code npc2
-				npc2: next npc2
-				check-block? code npc2
-				type: exp-type? npc2
-				type/5: type/5 + 2
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		block-exp-type?: [
-			if block? code [
-				nctx: ctx/1/1
-				if any [
-					nctx = 'does
-					nctx = 'has
-					nctx = 'func
-					nctx = 'function
-					nctx = 'routine
-				][
-					value: pop-ctx
-					type: reduce ['block-exp nctx CompletionItemKind/Function SymbolKind/Function 1]
-					save-type old-pc type
-					return copy type
+				ret: exp-type? next pc
+				put-syntax syntax reduce [
+					'name "include"
+					'cast ret/1
+					'follow ret/2
+					'CompletionItemKind CompletionItemKind/Module
+					'SymbolKind SymbolKind/Package
 				]
-				if nctx = 'context [
-					value: pop-ctx
-					type: reduce ['block-exp nctx CompletionItemKind/Module SymbolKind/Namespace 1]
-					save-type old-pc type
-					return copy type
-				]
-				type: reduce ['block-exp nctx CompletionItemKind/Module SymbolKind/Object 1]
-				return copy type
+				ret/2: ret/2 + 1
+				return ret
 			]
 		]
 
-		system-word-exp-type?: [
+		slit-type?: [
+			if simple-literal? expr-type [
+				put-syntax syntax reduce [
+					'name "literal"
+					'type expr-type
+					'CompletionItemKind CompletionItemKind/Constant
+					'SymbolKind symbol-type? expr-type
+				]
+				return reduce [syntax 1]
+			]
+		]
+
+		set-word-type?: [
+			if set-word? expr [
+				ret: exp-type? next pc
+				put-syntax syntax reduce [
+					'name "set-word"
+					'cast ret/1
+					'follow ret/2
+				]
+				ret/2: ret/2 + 1
+				return ret
+			]
+		]
+
+		set-path-type?: [
+			if set-path? expr [
+				ret: exp-type? next pc
+				put-syntax syntax reduce [
+					'name "set-path"
+					'cast ret/1
+					'follow ret/2
+				]
+				ret/2: ret/2 + 1
+				return ret
+			]
+		]
+
+		block-type?: [
+			if block? expr [
+				unless empty? expr [
+					exp-all expr
+				]
+				put-syntax syntax reduce [
+					'name "block"
+				]
+				return reduce [syntax 1]
+			]
+		]
+
+		paren-type?: [
+			if paren? expr [
+				unless empty? expr [
+					exp-all expr
+				]
+				put-syntax syntax reduce [
+					'name "paren"
+				]
+				return reduce [syntax 1]
+			]
+		]
+
+		keyword-type?: [
 			if all [
-				code-type = word!
-				find system-words/system-words code
+				expr-type = word!
+				find system-words/system-words expr
 			][
-				type: reduce ['system type?/word get code CompletionItemKind/Keyword SymbolKind/Method 1]
-				save-type old-pc type
-				return copy type
-			]
-		]
+				type: type? get expr
+				put-syntax syntax reduce [
+					'name "keyword"
+					'expr expr
+					'type type
+					'CompletionItemKind CompletionItemKind/Keyword
+					'SymbolKind SymbolKind/Method
+				]
 
-		unknown-word-exp-type?: [
-			if code-type = word! [
-				type: reduce ['unknown none CompletionItemKind/Text SymbolKind/Null 1]
-				save-type old-pc type
-				return copy type
-			]
-		]
-
-		do semicolon-exp-type?
-		do include-exp-type?
-		do slit-exp-type?
-		do set-word-exp-type?
-		do set-path-exp-type?
-		do block-1-exp-type?
-		do block-2-exp-type?
-		do block-exp-type?
-		do system-word-exp-type?
-		do unknown-word-exp-type?
-		throw-error 'exp-type "not support!" old-pc/1
-	]
-
-	find-head: function [npc [block!]][
-		unless npc/1/1 = 'Red [
-			throw-error 'find-head "incorrect header" npc/1
-		]
-		save-type npc reduce ['header 'Red CompletionItemKind/File SymbolKind/File 2]
-		npc: next npc
-		unless block? npc/1/1 [
-			throw-error 'find-head "incorrect header" npc/1
-		]
-		save-type npc reduce ['header 'Block CompletionItemKind/File SymbolKind/File 1]
-		next npc
-	]
-
-	;-- npc layout: [code start end symbol-type TBD TBD TBD]
-	analysis: function [npc [block!]][
-		clear ctx
-		append/only ctx [#[none] #[none]]
-		saved: pc: find-head npc
-		while [not tail? pc][
-			type: exp-type? pc
-			pc: skip pc type/5
-		]
-		npc
-	]
-
-	complete-set-word: function [npc [block!] str [string!]][
-		result: reduce ['word]
-		pc: npc
-		until [
-			if set-word? pc/1/1 [
-				word: to string! pc/1/1
+				step: 1
 				if all [
-					word <> str
-					find/match word str
+					not tail? next pc
+					block? pc/2/expr
 				][
-					append/only result reduce [word pc/1/4/3]
+					case [
+						find [has func function] expr [
+							step: step + 1
+							put-syntax pc/2/syntax reduce [
+								'ctx expr
+								'ctx-index 1
+							]
+							check-func-args pc/2/expr
+							if all [
+								not tail? next next pc
+								block? pc/3/expr
+							][
+								put-syntax pc/3/syntax reduce [
+									'ctx expr
+									'ctx-index 2
+									'spec pc/2/expr
+								]
+								exp-type? next next pc
+								step: step + 1
+							]
+						]
+						find [does context] expr [
+							put-syntax pc/2/syntax reduce [
+								'ctx expr
+								'ctx-index 1
+							]
+							exp-type? next pc
+							step: step + 1
+						]
+						;find [action! native! function! routine!] type [
+						;	step: step
+						;]
+					]
 				]
+				if step > 1 [
+					put-syntax syntax reduce [
+						'follow step - 1
+					]
+				]
+				return reduce [syntax step]
 			]
-			pc: next pc
-			tail? pc
 		]
-		result
+
+		unknown-type?: [
+			if expr-type = word! [
+				put-syntax syntax reduce [
+					'name "unknown"
+					'expr expr
+				]
+				return reduce [syntax 1]
+			]
+		]
+
+		do semicolon-type?
+		do include-type?
+		do slit-type?
+		do set-word-type?
+		do set-path-type?
+		do block-type?
+		do paren-type?
+		do keyword-type?
+		do unknown-type?
+		throw-error 'exp-type "not support!" pc/1/expr
 	]
 
-	get-completions: function [npc [block!] str [string! none!]][
+	exp-all: function [pc [block! paren!]][
+		while [not tail? pc][
+			either map? pc/1 [
+				type: exp-type? pc
+				pc: skip pc type/2
+			][
+				pc: next pc
+			]
+		]
+	]
+
+	analysis: function [pc [block!]][
+		unless pc/1/expr = 'Red [
+			create-error-at pc/1/syntax 'Error 'miss-head-red
+		]
+		unless block? pc/2/expr [
+			create-error-at pc/2/syntax 'Error 'miss-head-block
+		]
+		exp-all pc
+		raise-global pc
+		resolve-unknown pc
+		put-syntax pc/1/syntax ['meta 1]
+		put-syntax pc/2/syntax ['meta 2]
+	]
+
+	collect-errors: function [top [block! paren!]][
+		ret: clear []
+		collect-errors*: function [pc [block! paren!]][
+			blk: [
+				if all [
+					pc/1/syntax
+					pc/1/syntax/error
+				][
+					error: copy pc/1/syntax/error
+					error/range: red-lexer/to-range pc/1/start pc/1/end
+					append ret error
+				]
+			]
+			forall pc [
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					do blk
+					collect-errors* pc/1/expr
+				][
+					if map? pc/1 [
+						do blk
+					]
+				]
+			]
+		]
+		collect-errors* top
+		ret
+	]
+
+	raise-global: function [top [block!]][
+		globals: clear []
+		append/only top globals
+
+		raise-set-word: function [pc [block! paren!]][
+			raise-set-word*: function [npc [block! paren!]][
+				forall npc [
+					if all [
+						npc/1/syntax
+						npc/1/syntax/name = "set-word"
+						pc/1/expr = npc/1/expr
+					][
+						return false
+					]
+				]
+				return true
+			]
+			if top = head pc [return false]
+			par: get-parent top pc/1
+
+			unless any [
+				all [
+					par/1/syntax/ctx = 'does
+					par/1/syntax/ctx-index = 1
+				]
+				all [
+					par/1/syntax/ctx = 'has
+					par/1/syntax/ctx-index = 2
+				]
+				all [
+					par/1/syntax/ctx = 'func
+					par/1/syntax/ctx-index = 2
+				]
+			][
+				return false
+			]
+			if any [
+				par/1/syntax/ctx = 'has
+				par/1/syntax/ctx = 'func
+			][
+				spec: par/1/syntax/spec
+				forall spec [
+					if spec/1/expr = to word! pc/1/expr [
+						return false
+					]
+				]
+			]
+			until [
+				unless raise-set-word* head par [return false]
+				par: get-parent top par/1
+				if empty? par [
+					return raise-set-word* top
+				]
+				par = false
+			]
+			return true
+		]
+		raise-global*: function [pc [block! paren!]][
+			forall pc [
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					raise-global* pc/1/expr
+				][
+					if all [
+						map? pc/1
+						pc/1/syntax
+						pc/1/syntax/name = "set-word"
+					][
+						if raise-set-word pc [
+							append/only globals pc/1
+						]
+					]
+				]
+			]
+		]
+
+		raise-global* top
+	]
+
+	resolve-unknown: function [top [block!]][
+		globals: last top
+		resolve-set-word: function [pc [block! paren!]][
+			resolve-set-word*: function [npc [block! paren!]][
+				forall npc [
+					if all [
+						npc/1/syntax
+						npc/1/syntax/name = "set-word"
+						pc/1/expr = to word! npc/1/expr
+					][
+						pc/1/syntax/cast: npc/1/syntax/cast
+						pc/1/syntax/start: npc/1/start
+						pc/1/syntax/end: npc/1/end
+						pc/1/syntax/name: "resolved"
+						return true
+					]
+				]
+				return false
+			]
+			if resolve-set-word* head pc [return true]
+			if top = head pc [return false]
+			par: pc
+			while [par: get-parent top par/1][
+				if empty? par [
+					return resolve-set-word* top
+				]
+				if resolve-set-word* par/1/expr [return true]
+			]
+			return false
+		]
+		resolve-extra: function [item [map!]][
+			forall globals [
+				if globals/1/expr = item/expr [
+					item/syntax/cast: globals/1/syntax/cast
+					item/syntax/start: globals/1/start
+					item/syntax/end: globals/1/end
+					item/syntax/name: "resolved"
+					return true
+				]
+			]
+			false
+		]
+		resolve-unknown*: function [pc [block! paren!]][
+			forall pc [
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					resolve-unknown* pc/1/expr
+				][
+					if all [
+						map? pc/1
+						pc/1/syntax
+						pc/1/syntax/name = "unknown"
+					][
+						unless resolve-set-word pc [
+							unless resolve-extra pc/1 [
+								create-error-at pc/1/syntax 'Warning 'unknown-word
+							]
+						]
+					]
+				]
+			]
+		]
+
+		resolve-unknown* top
+	]
+
+	get-parent: function [top [block!] item [map!]][
+		get-parent*: function [pc [block! paren!] par [block!]][
+			forall pc [
+				if all [
+					map? pc/1
+					item/start = pc/1/start
+					item/end = pc/1/end
+				][return par]
+				if all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					if temp: get-parent* pc/1/expr pc [return temp]
+				]
+			]
+			false
+		]
+		get-parent* top clear []
+	]
+
+	position?: function [top [block! paren!] line [integer!] column [integer!]][
+		position*: function [pc [block! paren!] line [integer!] column [integer!]][
+			cascade: [
+				either all [
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					if ret: position* pc/1/expr line column [return ret]
+					return pc
+				][
+					return pc
+				]
+			]
+			ret: none
+			forall pc [
+				if all [
+					map? pc/1
+					any [
+						pc/1/start/1 < line
+						all [
+							pc/1/start/1 = line
+							pc/1/start/2 <= column
+						]
+					]
+				][
+					either any [
+						pc/1/end/1 > line
+						all [
+							pc/1/end/1 = line
+							pc/1/end/2 > column
+						]
+					][
+						do cascade
+					][
+						if all [
+							pc/1/end/1 = line
+							pc/1/end/2 = column
+							any [
+								tail? next pc
+								all [
+									map? pc/2
+									pc/2/start/1 >= line
+									pc/2/start/2 <> column
+								]
+							]
+						][
+							do cascade
+						]
+					]
+				]
+			]
+			return none
+		]
+		if ret: position* top line column [return ret]
+		top
+	]
+
+	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
+		words: clear []
+		unique?: function [word [string!]][
+			forall words [
+				if words/1/1 = word [return false]
+			]
+			true
+		]
+		collect-set-word: function [pc [block! paren!]][
+			forall pc [
+				if all [
+					map? pc/1
+					pc/1/syntax
+					pc/1/syntax/name = "set-word"
+				][
+					word: to string! pc/1/expr
+					if any [
+						empty? str
+						find/match word str
+					][
+						if unique? word [
+							append/only words reduce [word pc/1]
+						]
+					]
+				]
+			]
+		]
+		pc: position? top line column
+		if all [
+			any [
+				block? pc/1/expr
+				paren? pc/1/expr
+			]
+			not empty? pc/1/expr
+			any [
+				pc/1/end/1 > line
+				all [
+					pc/1/end/1 = line
+					pc/1/end/2 > column
+				]
+			]
+		][
+			collect-set-word pc/1/expr
+		]
+		collect-set-word head pc
+		if top = head pc [return words]
+		par: pc
+		while [par: get-parent top par/1][
+			either empty? par [
+				break
+			][
+				collect-set-word head par
+			]
+		]
+		words
+	]
+
+	get-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
 		if any [
 			none? str
 			empty? str
 			#"%" = str/1
 			find str #"/"
 		][return none]
-		complete-set-word npc str
-	]
-
-	resolve-set-word: function [npc [block!] str [string!]][
-		pc: npc
-		until [
-
-			code-type: type? pc/1/1
-			case [
-				set-word? pc/1/1 [
-					word: to string! pc/1/1
-					if word = str [
-						type: pc/1/4
-						case [
-							type/1 = 'include-exp [
-								return rejoin [str " is a `#include` exp"]
-							]
-							type/1 = 'slit-exp [
-								return rejoin [str " is a " to string! type/2 " variable"]
-							]
-							all [
-								type/1 = 'block-exp
-								word? type/2
-							][
-								return rejoin [str " is a " to string! type/2 " variable"]
-							]
-							true [
-								return rejoin [str " is an unknown variable"]
-							]
-						]
-					]
-				]
-				simple-literal? code-type [
-					word: to string! pc/1/1
-					if word = str [
-						return rejoin [str " is a " to string! type?/word pc/1/1 " literal"]
-					]
-				]
+		if empty? resolve-block: collect-completions top str line column [return none]
+		words: reduce ['word]
+		forall resolve-block [
+			kind: CompletionItemKind/Variable
+			cast: resolve-block/1/2/syntax/cast
+			if all [
+				cast/expr
+				find [does has func function] cast/expr
+			][
+				kind: cast/CompletionItemKind
 			]
-			pc: next pc
-			tail? pc
+			append/only words reduce [resolve-block/1/1 kind]
 		]
-		""
+		words
 	]
 
-	resolve-completion: function [npc [block!] str [string! none!]][
+	resolve-completion: function [top [block!] str [string! none!] line [integer!] column [integer!]][
 		if any [
 			none? str
 			empty? str
 			#"%" = str/1
 			find str #"/"
 		][return ""]
-		resolve-set-word npc str
+		if empty? resolve-block: collect-completions top str line column [return ""]
+		forall resolve-block [
+			if resolve-block/1/1 = str [
+				item: resolve-block/1/2
+				cast: item/syntax/cast
+				either all [
+					cast/expr
+					find [does has func function] cast/expr
+				][
+					return rejoin [str " is a " to string! cast/expr]
+				][
+					return rejoin [str " is a variable"]
+				]
+			]
+		]
+		""
+	]
+
+	hover: function [top [block!] line [integer!] column [integer!]][
+		pc: position? top line column
+		range: red-lexer/to-range pc/1/start pc/1/end
+		case [
+			pc/1/syntax/name = "set-word" [
+				res: rejoin [to string! pc/1/expr " is a variable"]
+				return reduce [res range]
+			]
+			word? pc/1/expr [
+				if find system-words/system-words pc/1/expr [
+					either datatype? get word [
+						res: rejoin [text " is a base datatype!"]
+						return reduce [res range]
+					][
+						res: system-words/get-word-info pc/1/expr
+						return reduce [res range]
+					]
+				]
+				res: rejoin [to string! pc/1/expr " is a resolved word"]
+				return reduce [res range]
+			]
+		]
+		return none
 	]
 ]
