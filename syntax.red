@@ -19,6 +19,7 @@ red-syntax: context [
 		'invalid-refine			"invalid refinement"
 		'invalid-datatype		"invalid datatype! in block!"
 		'invalid-arg			"invalid argument"
+		'double-define			"double define"
 	]
 
 	warning-code: [
@@ -93,41 +94,85 @@ red-syntax: context [
 		either find literal-type value [true][false]
 	]
 
+	skip-semicolon-exp: function [pc [block! paren!]][
+		until [
+			npc: next pc
+			any [
+				tail? npc
+				npc/1/syntax/name <> "semicolon"
+			]
+		]
+		(index? npc) - (index? pc)
+	]
+
 	check-func-args: function [blk [block!]][
-		forall blk [
-			expr: blk/1/expr
-			either any [
-				word? expr
-				lit-word? expr
-				get-word? expr
-				refinement? expr
+		words: clear []
+		word: none
+		double-check: [
+			either find words word: to word! expr [
+				create-error-at blk/1/syntax 'Error 'double-define
 			][
-				if all [
-					not tail? next blk
-					block? expr2: blk/2/expr
-				][
-					if refinement? expr [
+				append words word
+			]
+		]
+		forall blk [
+			blk: skip blk (skip-semicolon-exp blk) - 1
+			expr: blk/1/expr
+			case [
+				refinement? expr [
+					do double-check
+					blk: skip blk (skip-semicolon-exp blk) - 1
+					if all [
+						not tail? next blk
+						any [
+							not word? blk/2/expr
+							not string? blk/2/expr
+						]
+					][
 						create-error-at blk/2/syntax 'Error 'invalid-refine
+						blk: next blk
 					]
-					forall expr2 [
-						expr3: expr2/1/expr
-						unless any [
-							all [
-								value? expr3
-								datatype? get expr3
+				]
+				find [word? lit-word? get-word?] type? expr [
+					do double-check
+					blk: skip blk (skip-semicolon-exp blk) - 1
+					if all [
+						not tail? next blk
+						block? expr2: blk/2/expr
+					][
+						forall expr2 [
+							expr3: expr2/1/expr
+							unless any [
+								all [
+									value? expr3
+									datatype? get expr3
+								]
+								all [
+									value? expr3
+									typeset? get expr3
+								]
+							][
+								create-error-at expr2/1/syntax 'Error 'invalid-datatype
 							]
-							all [
-								value? expr3
-								typeset? get expr3
-							]
-						][
-							create-error-at blk/2/syntax 'Error 'invalid-datatype
+						]
+						blk: next blk
+					]
+				]
+				all [
+					string? expr
+					blk/1/syntax/name = "literal"
+				][
+					blk: skip blk (skip-semicolon-exp blk) - 1
+					if not tail next blk [
+						expr2: blk/2/expr
+						unless find [word? lit-word? get-word? refinement?] type? expr2 [
+							create-error-at blk/2/syntax 'Error 'invalid-arg
+							blk: next blk
 						]
 					]
-					blk: next blk
+				][
+					create-error-at blk/1/syntax 'Error 'invalid-arg
 				]
-			][
-				create-error-at blk/1/syntax 'Error 'invalid-arg
 			]
 		]
 	]
@@ -477,6 +522,37 @@ red-syntax: context [
 
 	resolve-unknown: function [top [block!]][
 		globals: last top
+		resolve-func-spec: function [pc [block! paren!]][
+			unless par: get-parent top pc/1 [return false]
+			if empty? par [return false]
+			if any [
+				all [
+					par/1/syntax/ctx = 'has
+					par/1/syntax/ctx-index = 2
+				]
+				all [
+					par/1/syntax/ctx = 'func
+					par/1/syntax/ctx-index = 2
+				]
+				all [
+					par/1/syntax/ctx = 'function
+					par/1/syntax/ctx-index = 2
+				]
+			][
+				spec: par/1/syntax/spec
+				forall spec [
+					if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+						word: to word! spec/1/expr
+						if word = pc/1/expr [
+							pc/1/syntax/name: "resolved"
+							pc/1/syntax/spec: spec
+							return true
+						]
+					]
+				]
+			]
+			false
+		]
 		resolve-set-word: function [pc [block! paren!]][
 			resolve-set-word*: function [npc [block! paren!]][
 				forall npc [
@@ -534,9 +610,11 @@ red-syntax: context [
 						pc/1/syntax
 						pc/1/syntax/name = "unknown"
 					][
-						unless resolve-set-word pc [
-							unless resolve-extra pc/1 [
-								create-error-at pc/1/syntax 'Warning 'unknown-word
+						unless resolve-func-spec pc [
+							unless resolve-set-word pc [
+								unless resolve-extra pc/1 [
+									create-error-at pc/1/syntax 'Warning 'unknown-word
+								]
 							]
 						]
 					]

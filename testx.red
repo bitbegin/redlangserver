@@ -6,13 +6,14 @@ b: context [
 	d: context [
 		e: #{12}
 		f: func [x [block!] y [integer!]][
-			ff: function [][
+			ff: function [a [integer!] b [binary!]][
 				f1: "test"
 				f2: x
 				f3: f1
 				f4: l
 				f5: :f
 				f6: f5
+				f7: a + length? b
 			]
 			x: 1
 			y: 1
@@ -35,6 +36,14 @@ o: l
 r: func [a [test] b [test!] /local x y][
 	x: 1 y: 1
 	a + b + 1 + 1
+]
+
+s: function [uri [string!] code [string!] blk [block!]][
+	either uri [
+		return reduce [uri code blk]
+	][
+		return reduce [uri code blk]
+	]
 ]
 
 fff: 3

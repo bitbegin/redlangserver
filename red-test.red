@@ -14,6 +14,9 @@ code-analysis: clear []
 code-analysis: red-lexer/analysis code tail code
 red-syntax/analysis code-analysis
 forall code-analysis [
+    if tail? next code-analysis [
+        print "globals: ---------------------------------------"
+    ]
     probe code-analysis/1
 ]
 
