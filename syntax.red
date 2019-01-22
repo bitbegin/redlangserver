@@ -218,7 +218,7 @@ red-syntax: context [
 					]
 					while [not tail? npc2][
 						either word? npc2/1/expr [
-							append npc/1/syntax/spec npc2/1/syntax
+							append npc/1/syntax/spec npc2/1
 							if tail? npc2: check-args npc2 [return npc2]
 						][
 							either refinement? npc2/1/expr [

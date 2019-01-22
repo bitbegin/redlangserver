@@ -1761,8 +1761,18 @@ Type HELP for starting information.
         syntax: #(
             name: "func-refines"
             spec: [#(
-                name: "func-args"
-            ) #()]
+                expr: x
+                start: [36 36]
+                end: [36 37]
+                syntax: #(
+                    name: "func-args"
+                )
+            ) #(
+                expr: y
+                start: [36 38]
+                end: [36 39]
+                syntax: #()
+            )]
         )
     ) #(
         expr: x
@@ -1924,8 +1934,18 @@ Type HELP for starting information.
                 syntax: #(
                     name: "func-refines"
                     spec: [#(
-                        name: "func-args"
-                    ) #()]
+                        expr: x
+                        start: [36 36]
+                        end: [36 37]
+                        syntax: #(
+                            name: "func-args"
+                        )
+                    ) #(
+                        expr: y
+                        start: [36 38]
+                        end: [36 39]
+                        syntax: #()
+                    )]
                 )
             ) #(
                 expr: x
@@ -2004,8 +2024,18 @@ Type HELP for starting information.
                 syntax: #(
                     name: "func-refines"
                     spec: [#(
-                        name: "func-args"
-                    ) #()]
+                        expr: x
+                        start: [36 36]
+                        end: [36 37]
+                        syntax: #(
+                            name: "func-args"
+                        )
+                    ) #(
+                        expr: y
+                        start: [36 38]
+                        end: [36 39]
+                        syntax: #()
+                    )]
                 )
             ) #(
                 expr: x
@@ -2152,8 +2182,18 @@ Type HELP for starting information.
             syntax: #(
                 name: "func-refines"
                 spec: [#(
-                    name: "func-args"
-                ) #()]
+                    expr: x
+                    start: [36 36]
+                    end: [36 37]
+                    syntax: #(
+                        name: "func-args"
+                    )
+                ) #(
+                    expr: y
+                    start: [36 38]
+                    end: [36 39]
+                    syntax: #()
+                )]
             )
         ) #(
             expr: x
@@ -3071,10 +3111,25 @@ Type HELP for starting information.
             )
             name: "func-refines"
             spec: [#(
-                name: "func-args"
+                expr: x
+                start: [51 98]
+                end: [51 99]
+                syntax: #(
+                    name: "func-args"
+                )
             ) #(
-                name: "func-args"
-            ) #()]
+                expr: y
+                start: [51 100]
+                end: [51 101]
+                syntax: #(
+                    name: "func-args"
+                )
+            ) #(
+                expr: z
+                start: [51 102]
+                end: [51 103]
+                syntax: #()
+            )]
         )
     ) #(
         expr: a
@@ -3120,10 +3175,25 @@ Type HELP for starting information.
         syntax: #(
             name: "func-refines"
             spec: [#(
-                name: "func-args"
+                expr: x
+                start: [51 98]
+                end: [51 99]
+                syntax: #(
+                    name: "func-args"
+                )
             ) #(
-                name: "func-args"
-            ) #()]
+                expr: y
+                start: [51 100]
+                end: [51 101]
+                syntax: #(
+                    name: "func-args"
+                )
+            ) #(
+                expr: z
+                start: [51 102]
+                end: [51 103]
+                syntax: #()
+            )]
         )
     ) #(
         expr: x
@@ -3298,10 +3368,25 @@ Type HELP for starting information.
                         )
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: a
@@ -3347,10 +3432,25 @@ Type HELP for starting information.
                     syntax: #(
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: x
@@ -3481,10 +3581,25 @@ Type HELP for starting information.
                         )
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: a
@@ -3530,10 +3645,25 @@ Type HELP for starting information.
                     syntax: #(
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: x
@@ -3600,10 +3730,25 @@ Type HELP for starting information.
                         )
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: a
@@ -3649,10 +3794,25 @@ Type HELP for starting information.
                     syntax: #(
                         name: "func-refines"
                         spec: [#(
-                            name: "func-args"
+                            expr: x
+                            start: [51 98]
+                            end: [51 99]
+                            syntax: #(
+                                name: "func-args"
+                            )
                         ) #(
-                            name: "func-args"
-                        ) #()]
+                            expr: y
+                            start: [51 100]
+                            end: [51 101]
+                            syntax: #(
+                                name: "func-args"
+                            )
+                        ) #(
+                            expr: z
+                            start: [51 102]
+                            end: [51 103]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: x
@@ -3857,10 +4017,25 @@ Type HELP for starting information.
                 )
                 name: "func-refines"
                 spec: [#(
-                    name: "func-args"
+                    expr: x
+                    start: [51 98]
+                    end: [51 99]
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
-                    name: "func-args"
-                ) #()]
+                    expr: y
+                    start: [51 100]
+                    end: [51 101]
+                    syntax: #(
+                        name: "func-args"
+                    )
+                ) #(
+                    expr: z
+                    start: [51 102]
+                    end: [51 103]
+                    syntax: #()
+                )]
             )
         ) #(
             expr: a
@@ -3906,10 +4081,25 @@ Type HELP for starting information.
             syntax: #(
                 name: "func-refines"
                 spec: [#(
-                    name: "func-args"
+                    expr: x
+                    start: [51 98]
+                    end: [51 99]
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
-                    name: "func-args"
-                ) #()]
+                    expr: y
+                    start: [51 100]
+                    end: [51 101]
+                    syntax: #(
+                        name: "func-args"
+                    )
+                ) #(
+                    expr: z
+                    start: [51 102]
+                    end: [51 103]
+                    syntax: #()
+                )]
             )
         ) #(
             expr: x
@@ -3993,8 +4183,18 @@ Type HELP for starting information.
             )
             name: "func-refines"
             spec: [#(
-                name: "func-args"
-            ) #()]
+                expr: a
+                start: [56 16]
+                end: [56 17]
+                syntax: #(
+                    name: "func-args"
+                )
+            ) #(
+                expr: b
+                start: [56 18]
+                end: [56 19]
+                syntax: #()
+            )]
         )
     ) #(
         expr: a
