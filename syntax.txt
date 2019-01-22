@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->>  do %red-test.red
+>> do %red-test.red
 #(
     expr: Red
     start: [1 1]
@@ -220,6 +220,7 @@ Type HELP for starting information.
                 start: [8 14]
                 end: [8 22]
                 syntax: #()
+                origin: [block!]
             ) #(
                 expr: y
                 start: [8 23]
@@ -235,6 +236,7 @@ Type HELP for starting information.
                 start: [8 25]
                 end: [8 35]
                 syntax: #()
+                origin: [integer!]
             )]
             start: [8 11]
             end: [8 36]
@@ -242,6 +244,7 @@ Type HELP for starting information.
                 ctx: func
                 ctx-index: 1
             )
+            origin: [x [block!] y [integer!]]
         ) #(
             expr: [#(
                 expr: ff:
@@ -287,6 +290,7 @@ Type HELP for starting information.
                     start: [9 20]
                     end: [9 30]
                     syntax: #()
+                    origin: [integer!]
                 ) #(
                     expr: b
                     start: [9 31]
@@ -302,6 +306,7 @@ Type HELP for starting information.
                     start: [9 33]
                     end: [9 42]
                     syntax: #()
+                    origin: [binary!]
                 )]
                 start: [9 17]
                 end: [9 43]
@@ -309,6 +314,7 @@ Type HELP for starting information.
                     ctx: function
                     ctx-index: 1
                 )
+                origin: [a [integer!] b [binary!]]
             ) #(
                 expr: [#(
                     expr: f1:
@@ -520,6 +526,7 @@ Type HELP for starting information.
                                 start: [9 20]
                                 end: [9 30]
                                 syntax: #()
+                                origin: [integer!]
                             ) #(
                                 expr: b
                                 start: [9 31]
@@ -535,6 +542,7 @@ Type HELP for starting information.
                                 start: [9 33]
                                 end: [9 42]
                                 syntax: #()
+                                origin: [binary!]
                             )]
                         )
                         follow: 1
@@ -561,6 +569,7 @@ Type HELP for starting information.
                             start: [9 20]
                             end: [9 30]
                             syntax: #()
+                            origin: [integer!]
                         ) #(
                             expr: b
                             start: [9 31]
@@ -576,6 +585,7 @@ Type HELP for starting information.
                             start: [9 33]
                             end: [9 42]
                             syntax: #()
+                            origin: [binary!]
                         )]
                     )
                 ) #(
@@ -622,6 +632,7 @@ Type HELP for starting information.
                             start: [9 33]
                             end: [9 42]
                             syntax: #()
+                            origin: [binary!]
                         )]
                     )
                 )]
@@ -645,6 +656,7 @@ Type HELP for starting information.
                         start: [9 20]
                         end: [9 30]
                         syntax: #()
+                        origin: [integer!]
                     ) #(
                         expr: b
                         start: [9 31]
@@ -660,9 +672,19 @@ Type HELP for starting information.
                         start: [9 33]
                         end: [9 42]
                         syntax: #()
+                        origin: [binary!]
                     )]
                     name: "block"
                 )
+                origin: [
+                    f1: "test" 
+                    f2: x 
+                    f3: f1 
+                    f4: l 
+                    f5: :f 
+                    f6: f5 
+                    f7: a + length? b
+                ]
             ) #(
                 expr: x:
                 start: [18 4]
@@ -735,6 +757,7 @@ Type HELP for starting information.
                             start: [8 14]
                             end: [8 22]
                             syntax: #()
+                            origin: [block!]
                         ) #(
                             expr: y
                             start: [8 23]
@@ -750,6 +773,7 @@ Type HELP for starting information.
                             start: [8 25]
                             end: [8 35]
                             syntax: #()
+                            origin: [integer!]
                         )]
                     )
                     follow: 1
@@ -776,6 +800,7 @@ Type HELP for starting information.
                         start: [8 14]
                         end: [8 22]
                         syntax: #()
+                        origin: [block!]
                     ) #(
                         expr: y
                         start: [8 23]
@@ -791,6 +816,7 @@ Type HELP for starting information.
                         start: [8 25]
                         end: [8 35]
                         syntax: #()
+                        origin: [integer!]
                     )]
                 )
             ) #(
@@ -826,6 +852,7 @@ Type HELP for starting information.
                         start: [8 25]
                         end: [8 35]
                         syntax: #()
+                        origin: [integer!]
                     )]
                 )
             ) #(
@@ -918,6 +945,7 @@ Type HELP for starting information.
                             start: [8 14]
                             end: [8 22]
                             syntax: #()
+                            origin: [block!]
                         ) #(
                             expr: y
                             start: [8 23]
@@ -933,6 +961,7 @@ Type HELP for starting information.
                             start: [8 25]
                             end: [8 35]
                             syntax: #()
+                            origin: [integer!]
                         )]
                     )
                     follow: 1
@@ -959,6 +988,7 @@ Type HELP for starting information.
                         start: [8 14]
                         end: [8 22]
                         syntax: #()
+                        origin: [block!]
                     ) #(
                         expr: y
                         start: [8 23]
@@ -974,6 +1004,7 @@ Type HELP for starting information.
                         start: [8 25]
                         end: [8 35]
                         syntax: #()
+                        origin: [integer!]
                     )]
                 )
             )]
@@ -997,6 +1028,7 @@ Type HELP for starting information.
                     start: [8 14]
                     end: [8 22]
                     syntax: #()
+                    origin: [block!]
                 ) #(
                     expr: y
                     start: [8 23]
@@ -1012,9 +1044,26 @@ Type HELP for starting information.
                     start: [8 25]
                     end: [8 35]
                     syntax: #()
+                    origin: [integer!]
                 )]
                 name: "block"
             )
+            origin: [
+                ff: function [a [integer!] b [binary!]] [f1: "test" 
+                    f2: x 
+                    f3: f1 
+                    f4: l 
+                    f5: :f 
+                    f6: f5 
+                    f7: a + length? b
+                ] 
+                x: 1 
+                y: 1 
+                e: x + y 
+                o: g 
+                t: h 
+                u: x
+            ]
         ) #(
             expr: g:
             start: [25 3]
@@ -1041,6 +1090,24 @@ Type HELP for starting information.
             ctx-index: 1
             name: "block"
         )
+        origin: [
+            e: #{12} f: func [x [block!] y [integer!]] [ff: function [a [integer!] b [binary!]] [f1: "test" 
+                f2: x 
+                f3: f1 
+                f4: l 
+                f5: :f 
+                f6: f5 
+                f7: a + length? b
+            ] 
+                x: 1 
+                y: 1 
+                e: x + y 
+                o: g 
+                t: h 
+                u: x
+            ] 
+            g: []
+        ]
     ) #(
         expr: h:
         start: [27 2]
@@ -1181,6 +1248,33 @@ Type HELP for starting information.
         ctx-index: 1
         name: "block"
     )
+    origin: [
+        c: 4 
+        d: context [
+            e: #{12} f: func [x [block!] y [integer!]] [ff: function [a [integer!] b [binary!]] [f1: "test" 
+                f2: x 
+                f3: f1 
+                f4: l 
+                f5: :f 
+                f6: f5 
+                f7: a + length? b
+            ] 
+                x: 1 
+                y: 1 
+                e: x + y 
+                o: g 
+                t: h 
+                u: x
+            ] 
+            g: []
+        ] 
+        h: #(
+            a: 3
+        ) 
+        i: x 
+        j: e 
+        k: t
+    ]
 )
 #(
     expr: l:
@@ -1261,6 +1355,7 @@ Type HELP for starting information.
     syntax: #(
         name: "paren"
     )
+    origin: (m: 3 n: a)
 )
 #(
     expr: o:
@@ -1347,6 +1442,7 @@ Type HELP for starting information.
         start: [36 12]
         end: [36 18]
         syntax: #()
+        origin: [test]
     ) #(
         expr: b
         start: [36 19]
@@ -1369,6 +1465,7 @@ Type HELP for starting information.
         start: [36 21]
         end: [36 28]
         syntax: #()
+        origin: [test!]
     ) #(
         expr: /local
         start: [36 29]
@@ -1391,6 +1488,7 @@ Type HELP for starting information.
         ctx: func
         ctx-index: 1
     )
+    origin: [a [test] b [test!] /local x y]
 )
 #(
     expr: [#(
@@ -1470,6 +1568,7 @@ Type HELP for starting information.
                 start: [36 12]
                 end: [36 18]
                 syntax: #()
+                origin: [test]
             ) #(
                 expr: b
                 start: [36 19]
@@ -1492,6 +1591,7 @@ Type HELP for starting information.
                 start: [36 21]
                 end: [36 28]
                 syntax: #()
+                origin: [test!]
             ) #(
                 expr: /local
                 start: [36 29]
@@ -1549,6 +1649,7 @@ Type HELP for starting information.
                 start: [36 21]
                 end: [36 28]
                 syntax: #()
+                origin: [test!]
             ) #(
                 expr: /local
                 start: [36 29]
@@ -1636,6 +1737,7 @@ Type HELP for starting information.
             start: [36 12]
             end: [36 18]
             syntax: #()
+            origin: [test]
         ) #(
             expr: b
             start: [36 19]
@@ -1658,6 +1760,7 @@ Type HELP for starting information.
             start: [36 21]
             end: [36 28]
             syntax: #()
+            origin: [test!]
         ) #(
             expr: /local
             start: [36 29]
@@ -1676,6 +1779,10 @@ Type HELP for starting information.
         )]
         name: "block"
     )
+    origin: [
+        x: 1 y: 1 
+        a + b + 1 + 1
+    ]
 )
 #(
     expr: s:
@@ -1723,6 +1830,7 @@ Type HELP for starting information.
         start: [41 18]
         end: [41 27]
         syntax: #()
+        origin: [string!]
     ) #(
         expr: code
         start: [41 28]
@@ -1738,6 +1846,7 @@ Type HELP for starting information.
         start: [41 33]
         end: [41 42]
         syntax: #()
+        origin: [string!]
     ) #(
         expr: blk
         start: [41 43]
@@ -1753,6 +1862,7 @@ Type HELP for starting information.
         start: [41 47]
         end: [41 55]
         syntax: #()
+        origin: [block!]
     )]
     start: [41 13]
     end: [41 56]
@@ -1760,6 +1870,7 @@ Type HELP for starting information.
         ctx: function
         ctx-index: 1
     )
+    origin: [uri [string!] code [string!] blk [block!]]
 )
 #(
     expr: [#(
@@ -1795,6 +1906,7 @@ Type HELP for starting information.
                 start: [41 18]
                 end: [41 27]
                 syntax: #()
+                origin: [string!]
             ) #(
                 expr: code
                 start: [41 28]
@@ -1810,6 +1922,7 @@ Type HELP for starting information.
                 start: [41 33]
                 end: [41 42]
                 syntax: #()
+                origin: [string!]
             ) #(
                 expr: blk
                 start: [41 43]
@@ -1825,6 +1938,7 @@ Type HELP for starting information.
                 start: [41 47]
                 end: [41 55]
                 syntax: #()
+                origin: [block!]
             )]
         )
     ) #(
@@ -1899,12 +2013,16 @@ Type HELP for starting information.
             syntax: #(
                 name: "block"
             )
+            origin: [uri code blk]
         )]
         start: [42 13]
         end: [44 3]
         syntax: #(
             name: "block"
         )
+        origin: [
+            return reduce [uri code blk]
+        ]
     ) #(
         expr: [#(
             expr: return
@@ -1977,12 +2095,16 @@ Type HELP for starting information.
             syntax: #(
                 name: "block"
             )
+            origin: [uri code blk]
         )]
         start: [44 3]
         end: [46 3]
         syntax: #(
             name: "block"
         )
+        origin: [
+            return reduce [uri code blk]
+        ]
     )]
     start: [41 56]
     end: [47 2]
@@ -2004,6 +2126,7 @@ Type HELP for starting information.
             start: [41 18]
             end: [41 27]
             syntax: #()
+            origin: [string!]
         ) #(
             expr: code
             start: [41 28]
@@ -2019,6 +2142,7 @@ Type HELP for starting information.
             start: [41 33]
             end: [41 42]
             syntax: #()
+            origin: [string!]
         ) #(
             expr: blk
             start: [41 43]
@@ -2034,9 +2158,15 @@ Type HELP for starting information.
             start: [41 47]
             end: [41 55]
             syntax: #()
+            origin: [block!]
         )]
         name: "block"
     )
+    origin: [
+        either uri [
+            return reduce [uri code blk]
+        ] [return reduce [uri code blk]]
+    ]
 )
 #(
     expr: fff:
@@ -2110,6 +2240,7 @@ Type HELP for starting information.
         start: [51 13]
         end: [51 21]
         syntax: #()
+        origin: [block!]
     ) #(
         expr: b
         start: [51 22]
@@ -2130,6 +2261,7 @@ Type HELP for starting information.
         start: [51 24]
         end: [51 39]
         syntax: #()
+        origin: [map! integer!]
     ) #(
         expr: return:
         start: [51 40]
@@ -2152,6 +2284,7 @@ Type HELP for starting information.
         start: [51 48]
         end: [51 58]
         syntax: #()
+        origin: [integer!]
     ) #(
         expr: c
         start: [51 59]
@@ -2167,6 +2300,7 @@ Type HELP for starting information.
         start: [51 61]
         end: [51 71]
         syntax: #()
+        origin: [integer!]
     ) #(
         expr: /c
         start: [51 72]
@@ -2201,6 +2335,7 @@ Type HELP for starting information.
         start: [51 77]
         end: [51 87]
         syntax: #()
+        origin: [integer!]
     ) #(
         expr: /local
         start: [51 88]
@@ -2228,6 +2363,7 @@ Type HELP for starting information.
         ctx: func
         ctx-index: 1
     )
+    origin: [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /local x y z]
 )
 #(
     expr: []
@@ -2251,6 +2387,7 @@ Type HELP for starting information.
             start: [51 13]
             end: [51 21]
             syntax: #()
+            origin: [block!]
         ) #(
             expr: b
             start: [51 22]
@@ -2271,6 +2408,7 @@ Type HELP for starting information.
             start: [51 24]
             end: [51 39]
             syntax: #()
+            origin: [map! integer!]
         ) #(
             expr: return:
             start: [51 40]
@@ -2293,6 +2431,7 @@ Type HELP for starting information.
             start: [51 48]
             end: [51 58]
             syntax: #()
+            origin: [integer!]
         ) #(
             expr: c
             start: [51 59]
@@ -2308,6 +2447,7 @@ Type HELP for starting information.
             start: [51 61]
             end: [51 71]
             syntax: #()
+            origin: [integer!]
         ) #(
             expr: /c
             start: [51 72]
@@ -2342,6 +2482,7 @@ Type HELP for starting information.
             start: [51 77]
             end: [51 87]
             syntax: #()
+            origin: [integer!]
         ) #(
             expr: /local
             start: [51 88]
@@ -2427,6 +2568,7 @@ globals: ---------------------------------------
                 start: [8 14]
                 end: [8 22]
                 syntax: #()
+                origin: [block!]
             ) #(
                 expr: y
                 start: [8 23]
@@ -2442,6 +2584,7 @@ globals: ---------------------------------------
                 start: [8 25]
                 end: [8 35]
                 syntax: #()
+                origin: [integer!]
             )]
         )
         follow: 1
@@ -2773,6 +2916,7 @@ Error/Warning: ---------------------------------------
                 start: [9 20]
                 end: [9 30]
                 syntax: #()
+                origin: [integer!]
             ) #(
                 expr: b
                 start: [9 31]
@@ -2788,6 +2932,7 @@ Error/Warning: ---------------------------------------
                 start: [9 33]
                 end: [9 42]
                 syntax: #()
+                origin: [binary!]
             )]
         )
         follow: 1
