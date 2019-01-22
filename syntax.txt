@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->> do %red-test.red
+>>  do %red-test.red
 #(
     expr: Red
     start: [1 1]
@@ -2064,6 +2064,308 @@ Type HELP for starting information.
         SymbolKind: 16
     )
 )
+#(
+    expr: ft:
+    start: [51 1]
+    end: [51 4]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)
+#(
+    expr: func
+    start: [51 5]
+    end: [51 9]
+    syntax: #(
+        name: "keyword"
+        expr: func
+        type: native!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        follow: 2
+    )
+)
+#(
+    expr: [#(
+        expr: a
+        start: [51 11]
+        end: [51 12]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: block!
+            start: [51 14]
+            end: [51 20]
+            syntax: #()
+        )]
+        start: [51 13]
+        end: [51 21]
+        syntax: #()
+    ) #(
+        expr: b
+        start: [51 22]
+        end: [51 23]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: map!
+            start: [51 25]
+            end: [51 29]
+            syntax: #()
+        ) #(
+            expr: integer!
+            start: [51 30]
+            end: [51 38]
+            syntax: #()
+        )]
+        start: [51 24]
+        end: [51 39]
+        syntax: #()
+    ) #(
+        expr: return:
+        start: [51 40]
+        end: [51 47]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "return-place"
+                source: "Syntax"
+                message: "invalid place for return"
+            )
+        )
+    ) #(
+        expr: [#(
+            expr: integer!
+            start: [51 49]
+            end: [51 57]
+            syntax: #()
+        )]
+        start: [51 48]
+        end: [51 58]
+        syntax: #()
+    ) #(
+        expr: c
+        start: [51 59]
+        end: [51 60]
+        syntax: #()
+    ) #(
+        expr: [#(
+            expr: integer!
+            start: [51 62]
+            end: [51 70]
+            syntax: #()
+        )]
+        start: [51 61]
+        end: [51 71]
+        syntax: #()
+    ) #(
+        expr: /c
+        start: [51 72]
+        end: [51 74]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "double-define"
+                source: "Syntax"
+                message: "double define"
+            )
+        )
+    ) #(
+        expr: a
+        start: [51 75]
+        end: [51 76]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "double-define"
+                source: "Syntax"
+                message: "double define"
+            )
+        )
+    ) #(
+        expr: [#(
+            expr: integer!
+            start: [51 78]
+            end: [51 86]
+            syntax: #()
+        )]
+        start: [51 77]
+        end: [51 87]
+        syntax: #()
+    ) #(
+        expr: /local
+        start: [51 88]
+        end: [51 94]
+        syntax: #()
+    ) #(
+        expr: x
+        start: [51 95]
+        end: [51 96]
+        syntax: #()
+    ) #(
+        expr: y
+        start: [51 97]
+        end: [51 98]
+        syntax: #()
+    ) #(
+        expr: z
+        start: [51 99]
+        end: [51 100]
+        syntax: #()
+    )]
+    start: [51 10]
+    end: [51 101]
+    syntax: #(
+        ctx: func
+        ctx-index: 1
+    )
+)
+#(
+    expr: []
+    start: [51 101]
+    end: [53 2]
+    syntax: #(
+        ctx: func
+        ctx-index: 2
+        spec: [#(
+            expr: a
+            start: [51 11]
+            end: [51 12]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: block!
+                start: [51 14]
+                end: [51 20]
+                syntax: #()
+            )]
+            start: [51 13]
+            end: [51 21]
+            syntax: #()
+        ) #(
+            expr: b
+            start: [51 22]
+            end: [51 23]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: map!
+                start: [51 25]
+                end: [51 29]
+                syntax: #()
+            ) #(
+                expr: integer!
+                start: [51 30]
+                end: [51 38]
+                syntax: #()
+            )]
+            start: [51 24]
+            end: [51 39]
+            syntax: #()
+        ) #(
+            expr: return:
+            start: [51 40]
+            end: [51 47]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "return-place"
+                    source: "Syntax"
+                    message: "invalid place for return"
+                )
+            )
+        ) #(
+            expr: [#(
+                expr: integer!
+                start: [51 49]
+                end: [51 57]
+                syntax: #()
+            )]
+            start: [51 48]
+            end: [51 58]
+            syntax: #()
+        ) #(
+            expr: c
+            start: [51 59]
+            end: [51 60]
+            syntax: #()
+        ) #(
+            expr: [#(
+                expr: integer!
+                start: [51 62]
+                end: [51 70]
+                syntax: #()
+            )]
+            start: [51 61]
+            end: [51 71]
+            syntax: #()
+        ) #(
+            expr: /c
+            start: [51 72]
+            end: [51 74]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "double-define"
+                    source: "Syntax"
+                    message: "double define"
+                )
+            )
+        ) #(
+            expr: a
+            start: [51 75]
+            end: [51 76]
+            syntax: #(
+                error: #(
+                    severity: 1
+                    code: "double-define"
+                    source: "Syntax"
+                    message: "double define"
+                )
+            )
+        ) #(
+            expr: [#(
+                expr: integer!
+                start: [51 78]
+                end: [51 86]
+                syntax: #()
+            )]
+            start: [51 77]
+            end: [51 87]
+            syntax: #()
+        ) #(
+            expr: /local
+            start: [51 88]
+            end: [51 94]
+            syntax: #()
+        ) #(
+            expr: x
+            start: [51 95]
+            end: [51 96]
+            syntax: #()
+        ) #(
+            expr: y
+            start: [51 97]
+            end: [51 98]
+            syntax: #()
+        ) #(
+            expr: z
+            start: [51 99]
+            end: [51 100]
+            syntax: #()
+        )]
+        name: "block"
+    )
+)
 globals: ---------------------------------------
 [#(
     expr: ff:
@@ -2296,6 +2598,51 @@ Error/Warning: ---------------------------------------
             character: 29
         )
     )
+) #(
+    severity: 1
+    code: "return-place"
+    source: "Syntax"
+    message: "invalid place for return"
+    range: #(
+        start: #(
+            line: 50
+            character: 39
+        )
+        end: #(
+            line: 50
+            character: 46
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "double define"
+    range: #(
+        start: #(
+            line: 50
+            character: 71
+        )
+        end: #(
+            line: 50
+            character: 73
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "double define"
+    range: #(
+        start: #(
+            line: 50
+            character: 74
+        )
+        end: #(
+            line: 50
+            character: 75
+        )
+    )
 )]
 [["f1" #(
     expr: f1:
@@ -2491,6 +2838,22 @@ Error/Warning: ---------------------------------------
         )
         follow: 1
     )
+)] ["ft" #(
+    expr: ft:
+    start: [51 1]
+    end: [51 4]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
 )]]
 == [["f1" #(
     expr: f1:
@@ -2499,5 +2862,5 @@ Error/Warning: ---------------------------------------
     syntax: #(
         name: "set-word"
         cast: #(
-            name: ...
+        ...
 >> 

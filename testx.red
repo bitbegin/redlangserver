@@ -47,3 +47,7 @@ s: function [uri [string!] code [string!] blk [block!]][
 ]
 
 fff: 3
+
+ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /local x y z][
+	
+]

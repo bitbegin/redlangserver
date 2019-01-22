@@ -20,6 +20,7 @@ red-syntax: context [
 		'invalid-datatype		"invalid datatype! in block!"
 		'invalid-arg			"invalid argument"
 		'double-define			"double define"
+		'return-place			"invalid place for return"
 	]
 
 	warning-code: [
@@ -94,86 +95,140 @@ red-syntax: context [
 		either find literal-type value [true][false]
 	]
 
-	skip-semicolon-exp: function [pc [block! paren!]][
+	skip-semicolon-next: function [pc [block! paren!]][
+		npc: pc
 		until [
-			npc: next pc
+			npc: next npc
 			any [
 				tail? npc
 				npc/1/syntax/name <> "semicolon"
 			]
 		]
-		(index? npc) - (index? pc)
+		npc
 	]
 
-	check-func-args: function [blk [block!]][
+	check-func-spec: function [pc [block!]][
 		words: clear []
 		word: none
-		double-check: [
-			either find words word: to word! expr [
-				create-error-at blk/1/syntax 'Error 'double-define
+		double-check: function [pc][
+			either find words word: to word! pc/1/expr [
+				create-error-at pc/1/syntax 'Error 'double-define
 			][
 				append words word
 			]
 		]
-		forall blk [
-			blk: skip blk (skip-semicolon-exp blk) - 1
-			expr: blk/1/expr
+		check-args: function [npc [block!]][
+			double-check npc
+			npc2: skip-semicolon-next npc
+			if tail? npc2 [return npc2]
+			type: type? npc2/1/expr
 			case [
-				refinement? expr [
-					do double-check
-					blk: skip blk (skip-semicolon-exp blk) - 1
-					if all [
-						not tail? next blk
-						all [
-							not word? blk/2/expr
-							not string? blk/2/expr
-						]
-					][
-						create-error-at blk/2/syntax 'Error 'invalid-refine
-						blk: next blk
+				type = string! [
+					npc3: skip-semicolon-next npc2
+					if tail? npc3 [return npc3]
+					if block? npc3/1/expr [
+						create-error-at npc3/1/syntax 'Error 'invalid-arg
+						return next npc3
 					]
+					return npc3
 				]
-				find [word? lit-word? get-word?] type? expr [
-					do double-check
-					blk: skip blk (skip-semicolon-exp blk) - 1
-					if all [
-						not tail? next blk
-						block? expr2: blk/2/expr
-					][
-						forall expr2 [
-							expr3: expr2/1/expr
-							unless any [
-								all [
-									value? expr3
-									datatype? get expr3
-								]
-								all [
-									value? expr3
-									typeset? get expr3
-								]
-							][
-								create-error-at expr2/1/syntax 'Error 'invalid-datatype
+				type = block! [
+					expr2: npc2/1/expr
+					forall expr2 [
+						expr3: expr2/1/expr
+						unless any [
+							all [
+								value? expr3
+								datatype? get expr3
 							]
-						]
-						blk: next blk
-					]
-				]
-				all [
-					string? expr
-					blk/1/syntax/name = "literal"
-				][
-					blk: skip blk (skip-semicolon-exp blk) - 1
-					if not tail next blk [
-						expr2: blk/2/expr
-						unless find [word? lit-word? get-word? refinement?] type? expr2 [
-							create-error-at blk/2/syntax 'Error 'invalid-arg
-							blk: next blk
+							all [
+								value? expr3
+								typeset? get expr3
+							]
+						][
+							create-error-at expr2/1/syntax 'Error 'invalid-datatype
 						]
 					]
-				][
-					create-error-at blk/1/syntax 'Error 'invalid-arg
+					npc3: skip-semicolon-next npc2
+					if tail? npc3 [return npc3]
+					if string? npc3/1/expr [return next npc3]
+					return npc3
 				]
 			]
+			npc2
+		]
+		check-refines: function [npc [block!]][
+			double-check npc
+			npc2: skip-semicolon-next npc
+			if tail? npc2 [return npc2]
+			type: type? npc2/1/expr
+			case [
+				type = string! [
+					npc3: skip-semicolon-next npc2
+					while [not tail? npc3][
+						either word? npc3/1/expr [
+							if tail? npc3: check-args npc3 [return npc3]
+						][
+							either refinement? npc3/1/expr [
+								return npc3
+							][
+								create-error-at npc3/1/syntax 'Error 'invalid-arg
+								npc3: next npc3
+							]
+						]
+					]
+					return npc3
+				]
+				type = word! [
+					while [not tail? npc2][
+						either word? npc2/1/expr [
+							if tail? npc2: check-args npc2 [return npc2]
+						][
+							either refinement? npc2/1/expr [
+								return npc2
+							][
+								create-error-at npc2/1/syntax 'Error 'invalid-arg
+								return next npc2
+							]
+						]
+					]
+					return npc2
+				]
+				true [
+					create-error-at npc2/1/syntax 'Error 'invalid-arg
+					return next npc2
+				]
+			]
+		]
+		if all [
+			string? pc/1/expr
+			pc/1/syntax/name = "literal"
+		][
+			pc: next pc
+		]
+		return-pc: none
+		until [
+			expr: pc/1/expr
+			case [
+				expr = to set-word! 'return [
+					return-pc: pc
+					pc: check-args pc
+				]
+				refinement? expr [
+					pc: check-refines pc
+				]
+				find [word! lit-word! get-word!] type? expr [
+					if return-pc [
+						create-error-at return-pc/1/syntax 'Error 'return-place
+					]
+					pc: check-args pc
+				]
+				true [
+					create-error-at pc/1/syntax 'Error 'invalid-arg
+					pc: next pc
+				]
+			]
+			tail? pc
 		]
 	]
 
@@ -317,7 +372,7 @@ red-syntax: context [
 								'ctx expr
 								'ctx-index 1
 							]
-							check-func-args pc/2/expr
+							check-func-spec pc/2/expr
 							if all [
 								not tail? next next pc
 								block? pc/3/expr
@@ -832,7 +887,11 @@ red-syntax: context [
 						return reduce [res range]
 					]
 				]
-				res: rejoin [to string! pc/1/expr " is a resolved word"]
+				res: either pc/1/syntax/name = "resolved" [
+					rejoin [to string! pc/1/expr " is a resolved word"]
+				][
+					rejoin [to string! pc/1/expr " is a unknown word"]
+				]
 				return reduce [res range]
 			]
 		]
