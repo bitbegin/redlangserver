@@ -27,10 +27,18 @@ red-syntax: context [
 		'unknown-word			"unknown word"
 	]
 
-	create-error-at: function [syntax [map!] type [word!] word [word!]][
+	create-error-at: function [syntax [map!] type [word!] word [word!] more [string! none!]][
 		message: case [
-			type = 'Error [error-code/(word)]
-			type = 'Warning [warning-code/(word)]
+			type = 'Error [copy error-code/(word)]
+			type = 'Warning [copy warning-code/(word)]
+		][none]
+		if all [
+			message
+			more
+			not empty? more
+		][
+			append message ": "
+			append message more
 		]
 		error: make map! reduce [
 			'severity DiagnosticSeverity/(type)
@@ -112,7 +120,7 @@ red-syntax: context [
 		word: none
 		double-check: function [pc][
 			either find words word: to word! pc/1/expr [
-				create-error-at pc/1/syntax 'Error 'double-define
+				create-error-at pc/1/syntax 'Error 'double-define to string! word
 			][
 				append words word
 			]
@@ -127,7 +135,7 @@ red-syntax: context [
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if block? npc3/1/expr [
-						create-error-at npc3/1/syntax 'Error 'invalid-arg
+						create-error-at npc3/1/syntax 'Error 'invalid-arg mold npc3/1/expr
 						return next npc3
 					]
 					return npc3
@@ -146,7 +154,7 @@ red-syntax: context [
 								typeset? get expr3
 							]
 						][
-							create-error-at expr2/1/syntax 'Error 'invalid-datatype
+							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
 					]
 					npc3: skip-semicolon-next npc2
@@ -172,7 +180,7 @@ red-syntax: context [
 							either refinement? npc3/1/expr [
 								return npc3
 							][
-								create-error-at npc3/1/syntax 'Error 'invalid-arg
+								create-error-at npc3/1/syntax 'Error 'invalid-arg mold npc3/1/expr
 								npc3: next npc3
 							]
 						]
@@ -187,7 +195,7 @@ red-syntax: context [
 							either refinement? npc2/1/expr [
 								return npc2
 							][
-								create-error-at npc2/1/syntax 'Error 'invalid-arg
+								create-error-at npc2/1/syntax 'Error 'invalid-arg mold npc2/1/expr
 								return next npc2
 							]
 						]
@@ -195,7 +203,7 @@ red-syntax: context [
 					return npc2
 				]
 				true [
-					create-error-at npc2/1/syntax 'Error 'invalid-arg
+					create-error-at npc2/1/syntax 'Error 'invalid-arg mold npc2/1/expr
 					return next npc2
 				]
 			]
@@ -219,12 +227,12 @@ red-syntax: context [
 				]
 				find [word! lit-word! get-word!] type? expr [
 					if return-pc [
-						create-error-at return-pc/1/syntax 'Error 'return-place
+						create-error-at return-pc/1/syntax 'Error 'return-place to string! expr
 					]
 					pc: check-args pc
 				]
 				true [
-					create-error-at pc/1/syntax 'Error 'invalid-arg
+					create-error-at pc/1/syntax 'Error 'invalid-arg mold expr
 					pc: next pc
 				]
 			]
@@ -235,7 +243,7 @@ red-syntax: context [
 	exp-type?: function [pc [block! paren!]][
 		if tail? pc [
 			syntax: make map! 1
-			create-error-at syntax 'Error 'miss-expr
+			create-error-at syntax 'Error 'miss-expr none
 			return reduce [syntax 0]
 		]
 		expr: pc/1/expr
@@ -443,10 +451,10 @@ red-syntax: context [
 
 	analysis: function [pc [block!]][
 		unless pc/1/expr = 'Red [
-			create-error-at pc/1/syntax 'Error 'miss-head-red
+			create-error-at pc/1/syntax 'Error 'miss-head-red none
 		]
 		unless block? pc/2/expr [
-			create-error-at pc/2/syntax 'Error 'miss-head-block
+			create-error-at pc/2/syntax 'Error 'miss-head-block none
 		]
 		exp-all pc
 		raise-global pc
@@ -578,30 +586,33 @@ red-syntax: context [
 	resolve-unknown: function [top [block!]][
 		globals: last top
 		resolve-func-spec: function [pc [block! paren!]][
-			unless par: get-parent top pc/1 [return false]
-			if empty? par [return false]
-			if any [
-				all [
-					par/1/syntax/ctx = 'has
-					par/1/syntax/ctx-index = 2
-				]
-				all [
-					par/1/syntax/ctx = 'func
-					par/1/syntax/ctx-index = 2
-				]
-				all [
-					par/1/syntax/ctx = 'function
-					par/1/syntax/ctx-index = 2
-				]
-			][
-				spec: par/1/syntax/spec
-				forall spec [
-					if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-						word: to word! spec/1/expr
-						if word = pc/1/expr [
-							pc/1/syntax/name: "resolved"
-							pc/1/syntax/spec: spec
-							return true
+			par: pc
+			forever [
+				unless par: get-parent top par/1 [return false]
+				if empty? par [return false]
+				if any [
+					all [
+						par/1/syntax/ctx = 'has
+						par/1/syntax/ctx-index = 2
+					]
+					all [
+						par/1/syntax/ctx = 'func
+						par/1/syntax/ctx-index = 2
+					]
+					all [
+						par/1/syntax/ctx = 'function
+						par/1/syntax/ctx-index = 2
+					]
+				][
+					spec: par/1/syntax/spec
+					forall spec [
+						if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+							word: to word! spec/1/expr
+							if word = pc/1/expr [
+								pc/1/syntax/name: "resolved"
+								pc/1/syntax/spec: spec
+								return true
+							]
 						]
 					]
 				]
@@ -668,7 +679,7 @@ red-syntax: context [
 						unless resolve-func-spec pc [
 							unless resolve-set-word pc [
 								unless resolve-extra pc/1 [
-									create-error-at pc/1/syntax 'Warning 'unknown-word
+									create-error-at pc/1/syntax 'Warning 'unknown-word mold pc/1/expr
 								]
 							]
 						]
