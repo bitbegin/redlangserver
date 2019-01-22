@@ -879,8 +879,8 @@ red-syntax: context [
 			]
 			word? pc/1/expr [
 				if find system-words/system-words pc/1/expr [
-					either datatype? get word [
-						res: rejoin [text " is a base datatype!"]
+					either datatype? get pc/1/expr [
+						res: rejoin [to string! pc/1/expr " is a base datatype!"]
 						return reduce [res range]
 					][
 						res: system-words/get-word-info pc/1/expr
