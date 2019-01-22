@@ -20,7 +20,7 @@ red-syntax: context [
 		'invalid-datatype		"invalid datatype! in block!"
 		'invalid-arg			"invalid argument"
 		'double-define			"double define"
-		'return-place			"invalid place for return"
+		'return-place			"invalid place for 'return:'"
 	]
 
 	warning-code: [
@@ -31,7 +31,8 @@ red-syntax: context [
 		message: case [
 			type = 'Error [copy error-code/(word)]
 			type = 'Warning [copy warning-code/(word)]
-		][none]
+			true [none]
+		]
 		if all [
 			message
 			more
@@ -202,6 +203,9 @@ red-syntax: context [
 					]
 					return npc2
 				]
+				type = refinement! [
+					return npc2
+				]
 				true [
 					create-error-at npc2/1/syntax 'Error 'invalid-arg mold npc2/1/expr
 					return next npc2
@@ -227,7 +231,7 @@ red-syntax: context [
 				]
 				find [word! lit-word! get-word!] type? expr [
 					if return-pc [
-						create-error-at return-pc/1/syntax 'Error 'return-place to string! expr
+						create-error-at return-pc/1/syntax 'Error 'return-place none
 					]
 					pc: check-args pc
 				]
@@ -883,25 +887,32 @@ red-syntax: context [
 	hover: function [top [block!] line [integer!] column [integer!]][
 		pc: position? top line column
 		range: red-lexer/to-range pc/1/start pc/1/end
+		expr: pc/1/expr
 		case [
 			pc/1/syntax/name = "set-word" [
-				res: rejoin [to string! pc/1/expr " is a variable"]
+				res: rejoin [to string! expr " is a variable"]
 				return reduce [res range]
 			]
-			word? pc/1/expr [
-				if find system-words/system-words pc/1/expr [
-					either datatype? get pc/1/expr [
-						res: rejoin [to string! pc/1/expr " is a base datatype!"]
+			path? expr [
+				if find system-words/system-words expr/1 [
+					res: system-words/get-word-info expr/1
+					return reduce [res range]
+				]
+			]
+			word? expr [
+				if find system-words/system-words expr [
+					either datatype? get expr [
+						res: rejoin [to string! expr " is a base datatype!"]
 						return reduce [res range]
 					][
-						res: system-words/get-word-info pc/1/expr
+						res: system-words/get-word-info expr
 						return reduce [res range]
 					]
 				]
 				res: either pc/1/syntax/name = "resolved" [
-					rejoin [to string! pc/1/expr " is a resolved word"]
+					rejoin [to string! expr " is a resolved word"]
 				][
-					rejoin [to string! pc/1/expr " is a unknown word"]
+					rejoin [to string! expr " is a unknown word"]
 				]
 				return reduce [res range]
 			]

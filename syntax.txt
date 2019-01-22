@@ -349,14 +349,39 @@ Type HELP for starting information.
                         cast: #(
                             name: "resolved"
                             expr: x
-                            cast: #(
-                                name: "literal"
-                                type: integer!
-                                CompletionItemKind: 21
-                                SymbolKind: 16
-                            )
-                            start: [18 4]
-                            end: [18 6]
+                            spec: [#(
+                                expr: x
+                                start: [8 12]
+                                end: [8 13]
+                                syntax: #()
+                            ) #(
+                                expr: [#(
+                                    expr: block!
+                                    start: [8 15]
+                                    end: [8 21]
+                                    syntax: #()
+                                )]
+                                start: [8 14]
+                                end: [8 22]
+                                syntax: #()
+                                origin: [block!]
+                            ) #(
+                                expr: y
+                                start: [8 23]
+                                end: [8 24]
+                                syntax: #()
+                            ) #(
+                                expr: [#(
+                                    expr: integer!
+                                    start: [8 26]
+                                    end: [8 34]
+                                    syntax: #()
+                                )]
+                                start: [8 25]
+                                end: [8 35]
+                                syntax: #()
+                                origin: [integer!]
+                            )]
                         )
                         follow: 1
                     )
@@ -367,14 +392,39 @@ Type HELP for starting information.
                     syntax: #(
                         name: "resolved"
                         expr: x
-                        cast: #(
-                            name: "literal"
-                            type: integer!
-                            CompletionItemKind: 21
-                            SymbolKind: 16
-                        )
-                        start: [18 4]
-                        end: [18 6]
+                        spec: [#(
+                            expr: x
+                            start: [8 12]
+                            end: [8 13]
+                            syntax: #()
+                        ) #(
+                            expr: [#(
+                                expr: block!
+                                start: [8 15]
+                                end: [8 21]
+                                syntax: #()
+                            )]
+                            start: [8 14]
+                            end: [8 22]
+                            syntax: #()
+                            origin: [block!]
+                        ) #(
+                            expr: y
+                            start: [8 23]
+                            end: [8 24]
+                            syntax: #()
+                        ) #(
+                            expr: [#(
+                                expr: integer!
+                                start: [8 26]
+                                end: [8 34]
+                                syntax: #()
+                            )]
+                            start: [8 25]
+                            end: [8 35]
+                            syntax: #()
+                            origin: [integer!]
+                        )]
                     )
                 ) #(
                     expr: f3:
@@ -1147,7 +1197,7 @@ Type HELP for starting information.
                     severity: 2
                     code: "unknown-word"
                     source: "Syntax"
-                    message: "unknown word"
+                    message: "unknown word: x"
                 )
             )
             follow: 1
@@ -1163,7 +1213,7 @@ Type HELP for starting information.
                 severity: 2
                 code: "unknown-word"
                 source: "Syntax"
-                message: "unknown word"
+                message: "unknown word: x"
             )
         )
     ) #(
@@ -1435,7 +1485,7 @@ Type HELP for starting information.
                     severity: 1
                     code: "invalid-datatype"
                     source: "Syntax"
-                    message: "invalid datatype! in block!"
+                    message: "invalid datatype! in block!: test"
                 )
             )
         )]
@@ -1458,7 +1508,7 @@ Type HELP for starting information.
                     severity: 1
                     code: "invalid-datatype"
                     source: "Syntax"
-                    message: "invalid datatype! in block!"
+                    message: "invalid datatype! in block!: test!"
                 )
             )
         )]
@@ -1561,7 +1611,7 @@ Type HELP for starting information.
                             severity: 1
                             code: "invalid-datatype"
                             source: "Syntax"
-                            message: "invalid datatype! in block!"
+                            message: "invalid datatype! in block!: test"
                         )
                     )
                 )]
@@ -1584,7 +1634,7 @@ Type HELP for starting information.
                             severity: 1
                             code: "invalid-datatype"
                             source: "Syntax"
-                            message: "invalid datatype! in block!"
+                            message: "invalid datatype! in block!: test!"
                         )
                     )
                 )]
@@ -1642,7 +1692,7 @@ Type HELP for starting information.
                             severity: 1
                             code: "invalid-datatype"
                             source: "Syntax"
-                            message: "invalid datatype! in block!"
+                            message: "invalid datatype! in block!: test!"
                         )
                     )
                 )]
@@ -1730,7 +1780,7 @@ Type HELP for starting information.
                         severity: 1
                         code: "invalid-datatype"
                         source: "Syntax"
-                        message: "invalid datatype! in block!"
+                        message: "invalid datatype! in block!: test"
                     )
                 )
             )]
@@ -1753,7 +1803,7 @@ Type HELP for starting information.
                         severity: 1
                         code: "invalid-datatype"
                         source: "Syntax"
-                        message: "invalid datatype! in block!"
+                        message: "invalid datatype! in block!: test!"
                     )
                 )
             )]
@@ -1970,42 +2020,123 @@ Type HELP for starting information.
                 start: [43 18]
                 end: [43 21]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: uri
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: uri
+                        start: [41 14]
+                        end: [41 17]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 19]
+                            end: [41 26]
+                            syntax: #()
+                        )]
+                        start: [41 18]
+                        end: [41 27]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: code
+                        start: [41 28]
+                        end: [41 32]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 34]
+                            end: [41 41]
+                            syntax: #()
+                        )]
+                        start: [41 33]
+                        end: [41 42]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             ) #(
                 expr: code
                 start: [43 22]
                 end: [43 26]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: code
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: code
+                        start: [41 28]
+                        end: [41 32]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 34]
+                            end: [41 41]
+                            syntax: #()
+                        )]
+                        start: [41 33]
+                        end: [41 42]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             ) #(
                 expr: blk
                 start: [43 27]
                 end: [43 30]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: blk
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             )]
             start: [43 17]
@@ -2052,42 +2183,123 @@ Type HELP for starting information.
                 start: [45 18]
                 end: [45 21]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: uri
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: uri
+                        start: [41 14]
+                        end: [41 17]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 19]
+                            end: [41 26]
+                            syntax: #()
+                        )]
+                        start: [41 18]
+                        end: [41 27]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: code
+                        start: [41 28]
+                        end: [41 32]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 34]
+                            end: [41 41]
+                            syntax: #()
+                        )]
+                        start: [41 33]
+                        end: [41 42]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             ) #(
                 expr: code
                 start: [45 22]
                 end: [45 26]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: code
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: code
+                        start: [41 28]
+                        end: [41 32]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: string!
+                            start: [41 34]
+                            end: [41 41]
+                            syntax: #()
+                        )]
+                        start: [41 33]
+                        end: [41 42]
+                        syntax: #()
+                        origin: [string!]
+                    ) #(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             ) #(
                 expr: blk
                 start: [45 27]
                 end: [45 30]
                 syntax: #(
-                    name: "unknown"
+                    name: "resolved"
                     expr: blk
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word"
-                    )
+                    spec: [#(
+                        expr: blk
+                        start: [41 43]
+                        end: [41 46]
+                        syntax: #()
+                    ) #(
+                        expr: [#(
+                            expr: block!
+                            start: [41 48]
+                            end: [41 54]
+                            syntax: #()
+                        )]
+                        start: [41 47]
+                        end: [41 55]
+                        syntax: #()
+                        origin: [block!]
+                    )]
                 )
             )]
             start: [45 17]
@@ -2271,7 +2483,7 @@ Type HELP for starting information.
                 severity: 1
                 code: "return-place"
                 source: "Syntax"
-                message: "invalid place for return"
+                message: "invalid place for 'return:'"
             )
         )
     ) #(
@@ -2310,7 +2522,7 @@ Type HELP for starting information.
                 severity: 1
                 code: "double-define"
                 source: "Syntax"
-                message: "double define"
+                message: "double define: c"
             )
         )
     ) #(
@@ -2322,7 +2534,7 @@ Type HELP for starting information.
                 severity: 1
                 code: "double-define"
                 source: "Syntax"
-                message: "double define"
+                message: "double define: a"
             )
         )
     ) #(
@@ -2337,38 +2549,465 @@ Type HELP for starting information.
         syntax: #()
         origin: [integer!]
     ) #(
-        expr: /local
+        expr: /d
         start: [51 88]
-        end: [51 94]
+        end: [51 90]
+        syntax: #()
+    ) #(
+        expr: /local
+        start: [51 91]
+        end: [51 97]
         syntax: #()
     ) #(
         expr: x
-        start: [51 95]
-        end: [51 96]
+        start: [51 98]
+        end: [51 99]
         syntax: #()
     ) #(
         expr: y
-        start: [51 97]
-        end: [51 98]
+        start: [51 100]
+        end: [51 101]
         syntax: #()
     ) #(
         expr: z
-        start: [51 99]
-        end: [51 100]
+        start: [51 102]
+        end: [51 103]
         syntax: #()
     )]
     start: [51 10]
-    end: [51 101]
+    end: [51 104]
     syntax: #(
         ctx: func
         ctx-index: 1
     )
-    origin: [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /local x y z]
+    origin: [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /d /local x y z]
 )
 #(
-    expr: []
-    start: [51 101]
-    end: [53 2]
+    expr: [#(
+        expr: reduce
+        start: [52 2]
+        end: [52 8]
+        syntax: #(
+            name: "keyword"
+            expr: reduce
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+        )
+    ) #(
+        expr: [#(
+            expr: a
+            start: [52 10]
+            end: [52 11]
+            syntax: #(
+                name: "resolved"
+                expr: a
+                spec: [#(
+                    expr: a
+                    start: [51 11]
+                    end: [51 12]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: block!
+                        start: [51 14]
+                        end: [51 20]
+                        syntax: #()
+                    )]
+                    start: [51 13]
+                    end: [51 21]
+                    syntax: #()
+                    origin: [block!]
+                ) #(
+                    expr: b
+                    start: [51 22]
+                    end: [51 23]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: map!
+                        start: [51 25]
+                        end: [51 29]
+                        syntax: #()
+                    ) #(
+                        expr: integer!
+                        start: [51 30]
+                        end: [51 38]
+                        syntax: #()
+                    )]
+                    start: [51 24]
+                    end: [51 39]
+                    syntax: #()
+                    origin: [map! integer!]
+                ) #(
+                    expr: return:
+                    start: [51 40]
+                    end: [51 47]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "return-place"
+                            source: "Syntax"
+                            message: "invalid place for 'return:'"
+                        )
+                    )
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 49]
+                        end: [51 57]
+                        syntax: #()
+                    )]
+                    start: [51 48]
+                    end: [51 58]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: c
+                    start: [51 59]
+                    end: [51 60]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 62]
+                        end: [51 70]
+                        syntax: #()
+                    )]
+                    start: [51 61]
+                    end: [51 71]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /c
+                    start: [51 72]
+                    end: [51 74]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: c"
+                        )
+                    )
+                ) #(
+                    expr: a
+                    start: [51 75]
+                    end: [51 76]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: a"
+                        )
+                    )
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 78]
+                        end: [51 86]
+                        syntax: #()
+                    )]
+                    start: [51 77]
+                    end: [51 87]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /d
+                    start: [51 88]
+                    end: [51 90]
+                    syntax: #()
+                ) #(
+                    expr: /local
+                    start: [51 91]
+                    end: [51 97]
+                    syntax: #()
+                ) #(
+                    expr: x
+                    start: [51 98]
+                    end: [51 99]
+                    syntax: #()
+                ) #(
+                    expr: y
+                    start: [51 100]
+                    end: [51 101]
+                    syntax: #()
+                ) #(
+                    expr: z
+                    start: [51 102]
+                    end: [51 103]
+                    syntax: #()
+                )]
+            )
+        ) #(
+            expr: b
+            start: [52 12]
+            end: [52 13]
+            syntax: #(
+                name: "resolved"
+                expr: b
+                spec: [#(
+                    expr: b
+                    start: [51 22]
+                    end: [51 23]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: map!
+                        start: [51 25]
+                        end: [51 29]
+                        syntax: #()
+                    ) #(
+                        expr: integer!
+                        start: [51 30]
+                        end: [51 38]
+                        syntax: #()
+                    )]
+                    start: [51 24]
+                    end: [51 39]
+                    syntax: #()
+                    origin: [map! integer!]
+                ) #(
+                    expr: return:
+                    start: [51 40]
+                    end: [51 47]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "return-place"
+                            source: "Syntax"
+                            message: "invalid place for 'return:'"
+                        )
+                    )
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 49]
+                        end: [51 57]
+                        syntax: #()
+                    )]
+                    start: [51 48]
+                    end: [51 58]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: c
+                    start: [51 59]
+                    end: [51 60]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 62]
+                        end: [51 70]
+                        syntax: #()
+                    )]
+                    start: [51 61]
+                    end: [51 71]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /c
+                    start: [51 72]
+                    end: [51 74]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: c"
+                        )
+                    )
+                ) #(
+                    expr: a
+                    start: [51 75]
+                    end: [51 76]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: a"
+                        )
+                    )
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 78]
+                        end: [51 86]
+                        syntax: #()
+                    )]
+                    start: [51 77]
+                    end: [51 87]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /d
+                    start: [51 88]
+                    end: [51 90]
+                    syntax: #()
+                ) #(
+                    expr: /local
+                    start: [51 91]
+                    end: [51 97]
+                    syntax: #()
+                ) #(
+                    expr: x
+                    start: [51 98]
+                    end: [51 99]
+                    syntax: #()
+                ) #(
+                    expr: y
+                    start: [51 100]
+                    end: [51 101]
+                    syntax: #()
+                ) #(
+                    expr: z
+                    start: [51 102]
+                    end: [51 103]
+                    syntax: #()
+                )]
+            )
+        ) #(
+            expr: c
+            start: [52 14]
+            end: [52 15]
+            syntax: #(
+                name: "resolved"
+                expr: c
+                spec: [#(
+                    expr: c
+                    start: [51 59]
+                    end: [51 60]
+                    syntax: #()
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 62]
+                        end: [51 70]
+                        syntax: #()
+                    )]
+                    start: [51 61]
+                    end: [51 71]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /c
+                    start: [51 72]
+                    end: [51 74]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: c"
+                        )
+                    )
+                ) #(
+                    expr: a
+                    start: [51 75]
+                    end: [51 76]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "double-define"
+                            source: "Syntax"
+                            message: "double define: a"
+                        )
+                    )
+                ) #(
+                    expr: [#(
+                        expr: integer!
+                        start: [51 78]
+                        end: [51 86]
+                        syntax: #()
+                    )]
+                    start: [51 77]
+                    end: [51 87]
+                    syntax: #()
+                    origin: [integer!]
+                ) #(
+                    expr: /d
+                    start: [51 88]
+                    end: [51 90]
+                    syntax: #()
+                ) #(
+                    expr: /local
+                    start: [51 91]
+                    end: [51 97]
+                    syntax: #()
+                ) #(
+                    expr: x
+                    start: [51 98]
+                    end: [51 99]
+                    syntax: #()
+                ) #(
+                    expr: y
+                    start: [51 100]
+                    end: [51 101]
+                    syntax: #()
+                ) #(
+                    expr: z
+                    start: [51 102]
+                    end: [51 103]
+                    syntax: #()
+                )]
+            )
+        ) #(
+            expr: d
+            start: [52 16]
+            end: [52 17]
+            syntax: #(
+                name: "unknown"
+                expr: d
+                error: #(
+                    severity: 2
+                    code: "unknown-word"
+                    source: "Syntax"
+                    message: "unknown word: d"
+                )
+            )
+        )]
+        start: [52 9]
+        end: [52 18]
+        syntax: #(
+            name: "block"
+        )
+        origin: [a b c d]
+    ) #(
+        expr: find/match
+        start: [53 2]
+        end: [53 12]
+        syntax: #(
+            name: "literal"
+            type: path!
+            CompletionItemKind: 21
+            SymbolKind: 19
+        )
+    ) #(
+        expr: "adb"
+        start: [53 13]
+        end: [53 18]
+        syntax: #(
+            name: "literal"
+            type: string!
+            CompletionItemKind: 21
+            SymbolKind: 15
+        )
+    ) #(
+        expr: "a"
+        start: [53 19]
+        end: [53 22]
+        syntax: #(
+            name: "literal"
+            type: string!
+            CompletionItemKind: 21
+            SymbolKind: 15
+        )
+    )]
+    start: [51 104]
+    end: [54 2]
     syntax: #(
         ctx: func
         ctx-index: 2
@@ -2418,7 +3057,7 @@ Type HELP for starting information.
                     severity: 1
                     code: "return-place"
                     source: "Syntax"
-                    message: "invalid place for return"
+                    message: "invalid place for 'return:'"
                 )
             )
         ) #(
@@ -2457,7 +3096,7 @@ Type HELP for starting information.
                     severity: 1
                     code: "double-define"
                     source: "Syntax"
-                    message: "double define"
+                    message: "double define: c"
                 )
             )
         ) #(
@@ -2469,7 +3108,7 @@ Type HELP for starting information.
                     severity: 1
                     code: "double-define"
                     source: "Syntax"
-                    message: "double define"
+                    message: "double define: a"
                 )
             )
         ) #(
@@ -2484,28 +3123,36 @@ Type HELP for starting information.
             syntax: #()
             origin: [integer!]
         ) #(
-            expr: /local
+            expr: /d
             start: [51 88]
-            end: [51 94]
+            end: [51 90]
+            syntax: #()
+        ) #(
+            expr: /local
+            start: [51 91]
+            end: [51 97]
             syntax: #()
         ) #(
             expr: x
-            start: [51 95]
-            end: [51 96]
+            start: [51 98]
+            end: [51 99]
             syntax: #()
         ) #(
             expr: y
-            start: [51 97]
-            end: [51 98]
+            start: [51 100]
+            end: [51 101]
             syntax: #()
         ) #(
             expr: z
-            start: [51 99]
-            end: [51 100]
+            start: [51 102]
+            end: [51 103]
             syntax: #()
         )]
         name: "block"
     )
+    origin: [
+        reduce [a b c d] find/match "adb" "a"
+    ]
 )
 globals: ---------------------------------------
 [#(
@@ -2610,7 +3257,7 @@ Error/Warning: ---------------------------------------
     severity: 2
     code: "unknown-word"
     source: "Syntax"
-    message: "unknown word"
+    message: "unknown word: x"
     range: #(
         start: #(
             line: 27
@@ -2625,7 +3272,7 @@ Error/Warning: ---------------------------------------
     severity: 1
     code: "invalid-datatype"
     source: "Syntax"
-    message: "invalid datatype! in block!"
+    message: "invalid datatype! in block!: test"
     range: #(
         start: #(
             line: 35
@@ -2640,7 +3287,7 @@ Error/Warning: ---------------------------------------
     severity: 1
     code: "invalid-datatype"
     source: "Syntax"
-    message: "invalid datatype! in block!"
+    message: "invalid datatype! in block!: test!"
     range: #(
         start: #(
             line: 35
@@ -2649,103 +3296,13 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 35
             character: 26
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 42
-            character: 17
-        )
-        end: #(
-            line: 42
-            character: 20
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 42
-            character: 21
-        )
-        end: #(
-            line: 42
-            character: 25
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 42
-            character: 26
-        )
-        end: #(
-            line: 42
-            character: 29
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 44
-            character: 17
-        )
-        end: #(
-            line: 44
-            character: 20
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 44
-            character: 21
-        )
-        end: #(
-            line: 44
-            character: 25
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word"
-    range: #(
-        start: #(
-            line: 44
-            character: 26
-        )
-        end: #(
-            line: 44
-            character: 29
         )
     )
 ) #(
     severity: 1
     code: "return-place"
     source: "Syntax"
-    message: "invalid place for return"
+    message: "invalid place for 'return:'"
     range: #(
         start: #(
             line: 50
@@ -2760,7 +3317,7 @@ Error/Warning: ---------------------------------------
     severity: 1
     code: "double-define"
     source: "Syntax"
-    message: "double define"
+    message: "double define: c"
     range: #(
         start: #(
             line: 50
@@ -2775,7 +3332,7 @@ Error/Warning: ---------------------------------------
     severity: 1
     code: "double-define"
     source: "Syntax"
-    message: "double define"
+    message: "double define: a"
     range: #(
         start: #(
             line: 50
@@ -2784,6 +3341,21 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 50
             character: 75
+        )
+    )
+) #(
+    severity: 2
+    code: "unknown-word"
+    source: "Syntax"
+    message: "unknown word: d"
+    range: #(
+        start: #(
+            line: 51
+            character: 15
+        )
+        end: #(
+            line: 51
+            character: 16
         )
     )
 )]
@@ -2810,14 +3382,39 @@ Error/Warning: ---------------------------------------
         cast: #(
             name: "resolved"
             expr: x
-            cast: #(
-                name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
-            )
-            start: [18 4]
-            end: [18 6]
+            spec: [#(
+                expr: x
+                start: [8 12]
+                end: [8 13]
+                syntax: #()
+            ) #(
+                expr: [#(
+                    expr: block!
+                    start: [8 15]
+                    end: [8 21]
+                    syntax: #()
+                )]
+                start: [8 14]
+                end: [8 22]
+                syntax: #()
+                origin: [block!]
+            ) #(
+                expr: y
+                start: [8 23]
+                end: [8 24]
+                syntax: #()
+            ) #(
+                expr: [#(
+                    expr: integer!
+                    start: [8 26]
+                    end: [8 34]
+                    syntax: #()
+                )]
+                start: [8 25]
+                end: [8 35]
+                syntax: #()
+                origin: [integer!]
+            )]
         )
         follow: 1
     )
