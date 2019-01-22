@@ -21,6 +21,7 @@ red-syntax: context [
 		'invalid-arg			"invalid argument"
 		'double-define			"double define"
 		'return-place			"invalid place for 'return:'"
+		'forbidden-refine		"forbidden refinement here"
 	]
 
 	warning-code: [
@@ -116,6 +117,14 @@ red-syntax: context [
 		npc
 	]
 
+	check-has-spec: function [pc [block!]][
+		forall pc [
+			if refinement? pc/1/expr [
+				create-error-at pc/1/syntax 'Error 'forbidden-refine mold pc/1/expr
+			]
+		]
+	]
+
 	check-func-spec: function [pc [block!]][
 		words: clear []
 		word: none
@@ -131,8 +140,14 @@ red-syntax: context [
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
+			put-syntax npc/1/syntax reduce [
+				'name "func-args"
+			]
 			case [
 				type = string! [
+					put-syntax npc/1/syntax reduce [
+						'desc npc2/1/expr
+					]
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if block? npc3/1/expr [
@@ -158,6 +173,9 @@ red-syntax: context [
 							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
 					]
+					put-syntax npc/1/syntax reduce [
+						'spec expr2
+					]
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if string? npc3/1/expr [return next npc3]
@@ -171,8 +189,14 @@ red-syntax: context [
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
+			put-syntax npc/1/syntax reduce [
+				'name "func-refines"
+			]
 			case [
 				type = string! [
+					put-syntax npc/1/syntax reduce [
+						'desc npc2/1/expr
+					]
 					npc3: skip-semicolon-next npc2
 					while [not tail? npc3][
 						either word? npc3/1/expr [
@@ -189,8 +213,12 @@ red-syntax: context [
 					return npc3
 				]
 				type = word! [
+					put-syntax npc/1/syntax reduce [
+						'spec clear []
+					]
 					while [not tail? npc2][
 						either word? npc2/1/expr [
+							append npc/1/syntax/spec npc2/1/syntax
 							if tail? npc2: check-args npc2 [return npc2]
 						][
 							either refinement? npc2/1/expr [
@@ -384,18 +412,22 @@ red-syntax: context [
 								'ctx expr
 								'ctx-index 1
 							]
+							if expr = 'has [
+								check-has-spec pc/2/expr
+							]
 							check-func-spec pc/2/expr
-							if all [
-								not tail? next next pc
-								block? pc/3/expr
-							][
-								put-syntax pc/3/syntax reduce [
-									'ctx expr
-									'ctx-index 2
-									'spec pc/2/expr
+							unless tail? next next pc [
+								either block? pc/3/expr [
+									put-syntax pc/3/syntax reduce [
+										'ctx expr
+										'ctx-index 2
+										'spec pc/2/expr
+									]
+									exp-type? next next pc
+									step: step + 1
+								][
+									create-error-at pc/1/syntax 'Error 'miss-block to string! expr
 								]
-								exp-type? next next pc
-								step: step + 1
 							]
 						]
 						find [does context] expr [

@@ -209,7 +209,15 @@ Type HELP for starting information.
                 expr: x
                 start: [8 12]
                 end: [8 13]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: block!
+                        start: [8 15]
+                        end: [8 21]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: block!
@@ -225,7 +233,15 @@ Type HELP for starting information.
                 expr: y
                 start: [8 23]
                 end: [8 24]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: integer!
+                        start: [8 26]
+                        end: [8 34]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: integer!
@@ -279,7 +295,15 @@ Type HELP for starting information.
                     expr: a
                     start: [9 18]
                     end: [9 19]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [9 21]
+                            end: [9 29]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: integer!
@@ -295,7 +319,15 @@ Type HELP for starting information.
                     expr: b
                     start: [9 31]
                     end: [9 32]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: binary!
+                            start: [9 34]
+                            end: [9 41]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: binary!
@@ -353,7 +385,15 @@ Type HELP for starting information.
                                 expr: x
                                 start: [8 12]
                                 end: [8 13]
-                                syntax: #()
+                                syntax: #(
+                                    name: "func-args"
+                                    spec: [#(
+                                        expr: block!
+                                        start: [8 15]
+                                        end: [8 21]
+                                        syntax: #()
+                                    )]
+                                )
                             ) #(
                                 expr: [#(
                                     expr: block!
@@ -369,7 +409,15 @@ Type HELP for starting information.
                                 expr: y
                                 start: [8 23]
                                 end: [8 24]
-                                syntax: #()
+                                syntax: #(
+                                    name: "func-args"
+                                    spec: [#(
+                                        expr: integer!
+                                        start: [8 26]
+                                        end: [8 34]
+                                        syntax: #()
+                                    )]
+                                )
                             ) #(
                                 expr: [#(
                                     expr: integer!
@@ -396,7 +444,15 @@ Type HELP for starting information.
                             expr: x
                             start: [8 12]
                             end: [8 13]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: block!
+                                    start: [8 15]
+                                    end: [8 21]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: block!
@@ -412,7 +468,15 @@ Type HELP for starting information.
                             expr: y
                             start: [8 23]
                             end: [8 24]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: integer!
+                                    start: [8 26]
+                                    end: [8 34]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: integer!
@@ -565,7 +629,15 @@ Type HELP for starting information.
                                 expr: a
                                 start: [9 18]
                                 end: [9 19]
-                                syntax: #()
+                                syntax: #(
+                                    name: "func-args"
+                                    spec: [#(
+                                        expr: integer!
+                                        start: [9 21]
+                                        end: [9 29]
+                                        syntax: #()
+                                    )]
+                                )
                             ) #(
                                 expr: [#(
                                     expr: integer!
@@ -581,7 +653,15 @@ Type HELP for starting information.
                                 expr: b
                                 start: [9 31]
                                 end: [9 32]
-                                syntax: #()
+                                syntax: #(
+                                    name: "func-args"
+                                    spec: [#(
+                                        expr: binary!
+                                        start: [9 34]
+                                        end: [9 41]
+                                        syntax: #()
+                                    )]
+                                )
                             ) #(
                                 expr: [#(
                                     expr: binary!
@@ -608,7 +688,15 @@ Type HELP for starting information.
                             expr: a
                             start: [9 18]
                             end: [9 19]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: integer!
+                                    start: [9 21]
+                                    end: [9 29]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: integer!
@@ -624,7 +712,15 @@ Type HELP for starting information.
                             expr: b
                             start: [9 31]
                             end: [9 32]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: binary!
+                                    start: [9 34]
+                                    end: [9 41]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: binary!
@@ -671,7 +767,15 @@ Type HELP for starting information.
                             expr: b
                             start: [9 31]
                             end: [9 32]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: binary!
+                                    start: [9 34]
+                                    end: [9 41]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: binary!
@@ -695,7 +799,15 @@ Type HELP for starting information.
                         expr: a
                         start: [9 18]
                         end: [9 19]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: integer!
+                                start: [9 21]
+                                end: [9 29]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: integer!
@@ -711,7 +823,15 @@ Type HELP for starting information.
                         expr: b
                         start: [9 31]
                         end: [9 32]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: binary!
+                                start: [9 34]
+                                end: [9 41]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: binary!
@@ -796,7 +916,15 @@ Type HELP for starting information.
                             expr: x
                             start: [8 12]
                             end: [8 13]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: block!
+                                    start: [8 15]
+                                    end: [8 21]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: block!
@@ -812,7 +940,15 @@ Type HELP for starting information.
                             expr: y
                             start: [8 23]
                             end: [8 24]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: integer!
+                                    start: [8 26]
+                                    end: [8 34]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: integer!
@@ -839,7 +975,15 @@ Type HELP for starting information.
                         expr: x
                         start: [8 12]
                         end: [8 13]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [8 15]
+                                end: [8 21]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -855,7 +999,15 @@ Type HELP for starting information.
                         expr: y
                         start: [8 23]
                         end: [8 24]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: integer!
+                                start: [8 26]
+                                end: [8 34]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: integer!
@@ -891,7 +1043,15 @@ Type HELP for starting information.
                         expr: y
                         start: [8 23]
                         end: [8 24]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: integer!
+                                start: [8 26]
+                                end: [8 34]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: integer!
@@ -984,7 +1144,15 @@ Type HELP for starting information.
                             expr: x
                             start: [8 12]
                             end: [8 13]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: block!
+                                    start: [8 15]
+                                    end: [8 21]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: block!
@@ -1000,7 +1168,15 @@ Type HELP for starting information.
                             expr: y
                             start: [8 23]
                             end: [8 24]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                spec: [#(
+                                    expr: integer!
+                                    start: [8 26]
+                                    end: [8 34]
+                                    syntax: #()
+                                )]
+                            )
                         ) #(
                             expr: [#(
                                 expr: integer!
@@ -1027,7 +1203,15 @@ Type HELP for starting information.
                         expr: x
                         start: [8 12]
                         end: [8 13]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [8 15]
+                                end: [8 21]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -1043,7 +1227,15 @@ Type HELP for starting information.
                         expr: y
                         start: [8 23]
                         end: [8 24]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: integer!
+                                start: [8 26]
+                                end: [8 34]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: integer!
@@ -1067,7 +1259,15 @@ Type HELP for starting information.
                     expr: x
                     start: [8 12]
                     end: [8 13]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: block!
+                            start: [8 15]
+                            end: [8 21]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: block!
@@ -1083,7 +1283,15 @@ Type HELP for starting information.
                     expr: y
                     start: [8 23]
                     end: [8 24]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [8 26]
+                            end: [8 34]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: integer!
@@ -1474,7 +1682,22 @@ Type HELP for starting information.
         expr: a
         start: [36 10]
         end: [36 11]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: test
+                start: [36 13]
+                end: [36 17]
+                syntax: #(
+                    error: #(
+                        severity: 1
+                        code: "invalid-datatype"
+                        source: "Syntax"
+                        message: "invalid datatype! in block!: test"
+                    )
+                )
+            )]
+        )
     ) #(
         expr: [#(
             expr: test
@@ -1497,7 +1720,22 @@ Type HELP for starting information.
         expr: b
         start: [36 19]
         end: [36 20]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: test!
+                start: [36 22]
+                end: [36 27]
+                syntax: #(
+                    error: #(
+                        severity: 1
+                        code: "invalid-datatype"
+                        source: "Syntax"
+                        message: "invalid datatype! in block!: test!"
+                    )
+                )
+            )]
+        )
     ) #(
         expr: [#(
             expr: test!
@@ -1520,12 +1758,19 @@ Type HELP for starting information.
         expr: /local
         start: [36 29]
         end: [36 35]
-        syntax: #()
+        syntax: #(
+            name: "func-refines"
+            spec: [#(
+                name: "func-args"
+            ) #()]
+        )
     ) #(
         expr: x
         start: [36 36]
         end: [36 37]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+        )
     ) #(
         expr: y
         start: [36 38]
@@ -1600,7 +1845,22 @@ Type HELP for starting information.
                 expr: a
                 start: [36 10]
                 end: [36 11]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: test
+                        start: [36 13]
+                        end: [36 17]
+                        syntax: #(
+                            error: #(
+                                severity: 1
+                                code: "invalid-datatype"
+                                source: "Syntax"
+                                message: "invalid datatype! in block!: test"
+                            )
+                        )
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: test
@@ -1623,7 +1883,22 @@ Type HELP for starting information.
                 expr: b
                 start: [36 19]
                 end: [36 20]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: test!
+                        start: [36 22]
+                        end: [36 27]
+                        syntax: #(
+                            error: #(
+                                severity: 1
+                                code: "invalid-datatype"
+                                source: "Syntax"
+                                message: "invalid datatype! in block!: test!"
+                            )
+                        )
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: test!
@@ -1646,12 +1921,19 @@ Type HELP for starting information.
                 expr: /local
                 start: [36 29]
                 end: [36 35]
-                syntax: #()
+                syntax: #(
+                    name: "func-refines"
+                    spec: [#(
+                        name: "func-args"
+                    ) #()]
+                )
             ) #(
                 expr: x
                 start: [36 36]
                 end: [36 37]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                )
             ) #(
                 expr: y
                 start: [36 38]
@@ -1681,7 +1963,22 @@ Type HELP for starting information.
                 expr: b
                 start: [36 19]
                 end: [36 20]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: test!
+                        start: [36 22]
+                        end: [36 27]
+                        syntax: #(
+                            error: #(
+                                severity: 1
+                                code: "invalid-datatype"
+                                source: "Syntax"
+                                message: "invalid datatype! in block!: test!"
+                            )
+                        )
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: test!
@@ -1704,12 +2001,19 @@ Type HELP for starting information.
                 expr: /local
                 start: [36 29]
                 end: [36 35]
-                syntax: #()
+                syntax: #(
+                    name: "func-refines"
+                    spec: [#(
+                        name: "func-args"
+                    ) #()]
+                )
             ) #(
                 expr: x
                 start: [36 36]
                 end: [36 37]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                )
             ) #(
                 expr: y
                 start: [36 38]
@@ -1769,7 +2073,22 @@ Type HELP for starting information.
             expr: a
             start: [36 10]
             end: [36 11]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: test
+                    start: [36 13]
+                    end: [36 17]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "invalid-datatype"
+                            source: "Syntax"
+                            message: "invalid datatype! in block!: test"
+                        )
+                    )
+                )]
+            )
         ) #(
             expr: [#(
                 expr: test
@@ -1792,7 +2111,22 @@ Type HELP for starting information.
             expr: b
             start: [36 19]
             end: [36 20]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: test!
+                    start: [36 22]
+                    end: [36 27]
+                    syntax: #(
+                        error: #(
+                            severity: 1
+                            code: "invalid-datatype"
+                            source: "Syntax"
+                            message: "invalid datatype! in block!: test!"
+                        )
+                    )
+                )]
+            )
         ) #(
             expr: [#(
                 expr: test!
@@ -1815,12 +2149,19 @@ Type HELP for starting information.
             expr: /local
             start: [36 29]
             end: [36 35]
-            syntax: #()
+            syntax: #(
+                name: "func-refines"
+                spec: [#(
+                    name: "func-args"
+                ) #()]
+            )
         ) #(
             expr: x
             start: [36 36]
             end: [36 37]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+            )
         ) #(
             expr: y
             start: [36 38]
@@ -1869,7 +2210,15 @@ Type HELP for starting information.
         expr: uri
         start: [41 14]
         end: [41 17]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: string!
+                start: [41 19]
+                end: [41 26]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: string!
@@ -1885,7 +2234,15 @@ Type HELP for starting information.
         expr: code
         start: [41 28]
         end: [41 32]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: string!
+                start: [41 34]
+                end: [41 41]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: string!
@@ -1901,7 +2258,15 @@ Type HELP for starting information.
         expr: blk
         start: [41 43]
         end: [41 46]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: block!
+                start: [41 48]
+                end: [41 54]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: block!
@@ -1945,7 +2310,15 @@ Type HELP for starting information.
                 expr: uri
                 start: [41 14]
                 end: [41 17]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: string!
+                        start: [41 19]
+                        end: [41 26]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: string!
@@ -1961,7 +2334,15 @@ Type HELP for starting information.
                 expr: code
                 start: [41 28]
                 end: [41 32]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: string!
+                        start: [41 34]
+                        end: [41 41]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: string!
@@ -1977,7 +2358,15 @@ Type HELP for starting information.
                 expr: blk
                 start: [41 43]
                 end: [41 46]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: block!
+                        start: [41 48]
+                        end: [41 54]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: block!
@@ -2026,7 +2415,15 @@ Type HELP for starting information.
                         expr: uri
                         start: [41 14]
                         end: [41 17]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 19]
+                                end: [41 26]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2042,7 +2439,15 @@ Type HELP for starting information.
                         expr: code
                         start: [41 28]
                         end: [41 32]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 34]
+                                end: [41 41]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2058,7 +2463,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2083,7 +2496,15 @@ Type HELP for starting information.
                         expr: code
                         start: [41 28]
                         end: [41 32]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 34]
+                                end: [41 41]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2099,7 +2520,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2124,7 +2553,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2189,7 +2626,15 @@ Type HELP for starting information.
                         expr: uri
                         start: [41 14]
                         end: [41 17]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 19]
+                                end: [41 26]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2205,7 +2650,15 @@ Type HELP for starting information.
                         expr: code
                         start: [41 28]
                         end: [41 32]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 34]
+                                end: [41 41]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2221,7 +2674,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2246,7 +2707,15 @@ Type HELP for starting information.
                         expr: code
                         start: [41 28]
                         end: [41 32]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: string!
+                                start: [41 34]
+                                end: [41 41]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: string!
@@ -2262,7 +2731,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2287,7 +2764,15 @@ Type HELP for starting information.
                         expr: blk
                         start: [41 43]
                         end: [41 46]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            spec: [#(
+                                expr: block!
+                                start: [41 48]
+                                end: [41 54]
+                                syntax: #()
+                            )]
+                        )
                     ) #(
                         expr: [#(
                             expr: block!
@@ -2327,7 +2812,15 @@ Type HELP for starting information.
             expr: uri
             start: [41 14]
             end: [41 17]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: string!
+                    start: [41 19]
+                    end: [41 26]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: string!
@@ -2343,7 +2836,15 @@ Type HELP for starting information.
             expr: code
             start: [41 28]
             end: [41 32]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: string!
+                    start: [41 34]
+                    end: [41 41]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: string!
@@ -2359,7 +2860,15 @@ Type HELP for starting information.
             expr: blk
             start: [41 43]
             end: [41 46]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: block!
+                    start: [41 48]
+                    end: [41 54]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: block!
@@ -2441,7 +2950,15 @@ Type HELP for starting information.
         expr: a
         start: [51 11]
         end: [51 12]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: block!
+                start: [51 14]
+                end: [51 20]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: block!
@@ -2457,7 +2974,20 @@ Type HELP for starting information.
         expr: b
         start: [51 22]
         end: [51 23]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: map!
+                start: [51 25]
+                end: [51 29]
+                syntax: #()
+            ) #(
+                expr: integer!
+                start: [51 30]
+                end: [51 38]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: map!
@@ -2479,6 +3009,13 @@ Type HELP for starting information.
         start: [51 40]
         end: [51 47]
         syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: integer!
+                start: [51 49]
+                end: [51 57]
+                syntax: #()
+            )]
             error: #(
                 severity: 1
                 code: "return-place"
@@ -2501,7 +3038,15 @@ Type HELP for starting information.
         expr: c
         start: [51 59]
         end: [51 60]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            spec: [#(
+                expr: integer!
+                start: [51 62]
+                end: [51 70]
+                syntax: #()
+            )]
+        )
     ) #(
         expr: [#(
             expr: integer!
@@ -2524,6 +3069,12 @@ Type HELP for starting information.
                 source: "Syntax"
                 message: "double define: c"
             )
+            name: "func-refines"
+            spec: [#(
+                name: "func-args"
+            ) #(
+                name: "func-args"
+            ) #()]
         )
     ) #(
         expr: a
@@ -2536,6 +3087,13 @@ Type HELP for starting information.
                 source: "Syntax"
                 message: "double define: a"
             )
+            name: "func-args"
+            spec: [#(
+                expr: integer!
+                start: [51 78]
+                end: [51 86]
+                syntax: #()
+            )]
         )
     ) #(
         expr: [#(
@@ -2552,22 +3110,35 @@ Type HELP for starting information.
         expr: /d
         start: [51 88]
         end: [51 90]
-        syntax: #()
+        syntax: #(
+            name: "func-refines"
+        )
     ) #(
         expr: /local
         start: [51 91]
         end: [51 97]
-        syntax: #()
+        syntax: #(
+            name: "func-refines"
+            spec: [#(
+                name: "func-args"
+            ) #(
+                name: "func-args"
+            ) #()]
+        )
     ) #(
         expr: x
         start: [51 98]
         end: [51 99]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+        )
     ) #(
         expr: y
         start: [51 100]
         end: [51 101]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+        )
     ) #(
         expr: z
         start: [51 102]
@@ -2606,7 +3177,15 @@ Type HELP for starting information.
                     expr: a
                     start: [51 11]
                     end: [51 12]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: block!
+                            start: [51 14]
+                            end: [51 20]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: block!
@@ -2622,7 +3201,20 @@ Type HELP for starting information.
                     expr: b
                     start: [51 22]
                     end: [51 23]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: map!
+                            start: [51 25]
+                            end: [51 29]
+                            syntax: #()
+                        ) #(
+                            expr: integer!
+                            start: [51 30]
+                            end: [51 38]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: map!
@@ -2644,6 +3236,13 @@ Type HELP for starting information.
                     start: [51 40]
                     end: [51 47]
                     syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 49]
+                            end: [51 57]
+                            syntax: #()
+                        )]
                         error: #(
                             severity: 1
                             code: "return-place"
@@ -2666,7 +3265,15 @@ Type HELP for starting information.
                     expr: c
                     start: [51 59]
                     end: [51 60]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 62]
+                            end: [51 70]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: integer!
@@ -2689,6 +3296,12 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: c"
                         )
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
                     )
                 ) #(
                     expr: a
@@ -2701,6 +3314,13 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: a"
                         )
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 78]
+                            end: [51 86]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: [#(
@@ -2717,22 +3337,35 @@ Type HELP for starting information.
                     expr: /d
                     start: [51 88]
                     end: [51 90]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                    )
                 ) #(
                     expr: /local
                     start: [51 91]
                     end: [51 97]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
+                    )
                 ) #(
                     expr: x
                     start: [51 98]
                     end: [51 99]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: y
                     start: [51 100]
                     end: [51 101]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: z
                     start: [51 102]
@@ -2751,7 +3384,20 @@ Type HELP for starting information.
                     expr: b
                     start: [51 22]
                     end: [51 23]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: map!
+                            start: [51 25]
+                            end: [51 29]
+                            syntax: #()
+                        ) #(
+                            expr: integer!
+                            start: [51 30]
+                            end: [51 38]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: map!
@@ -2773,6 +3419,13 @@ Type HELP for starting information.
                     start: [51 40]
                     end: [51 47]
                     syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 49]
+                            end: [51 57]
+                            syntax: #()
+                        )]
                         error: #(
                             severity: 1
                             code: "return-place"
@@ -2795,7 +3448,15 @@ Type HELP for starting information.
                     expr: c
                     start: [51 59]
                     end: [51 60]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 62]
+                            end: [51 70]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: integer!
@@ -2818,6 +3479,12 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: c"
                         )
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
                     )
                 ) #(
                     expr: a
@@ -2830,6 +3497,13 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: a"
                         )
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 78]
+                            end: [51 86]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: [#(
@@ -2846,22 +3520,35 @@ Type HELP for starting information.
                     expr: /d
                     start: [51 88]
                     end: [51 90]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                    )
                 ) #(
                     expr: /local
                     start: [51 91]
                     end: [51 97]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
+                    )
                 ) #(
                     expr: x
                     start: [51 98]
                     end: [51 99]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: y
                     start: [51 100]
                     end: [51 101]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: z
                     start: [51 102]
@@ -2880,7 +3567,15 @@ Type HELP for starting information.
                     expr: c
                     start: [51 59]
                     end: [51 60]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 62]
+                            end: [51 70]
+                            syntax: #()
+                        )]
+                    )
                 ) #(
                     expr: [#(
                         expr: integer!
@@ -2903,6 +3598,12 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: c"
                         )
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
                     )
                 ) #(
                     expr: a
@@ -2915,6 +3616,13 @@ Type HELP for starting information.
                             source: "Syntax"
                             message: "double define: a"
                         )
+                        name: "func-args"
+                        spec: [#(
+                            expr: integer!
+                            start: [51 78]
+                            end: [51 86]
+                            syntax: #()
+                        )]
                     )
                 ) #(
                     expr: [#(
@@ -2931,22 +3639,35 @@ Type HELP for starting information.
                     expr: /d
                     start: [51 88]
                     end: [51 90]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                    )
                 ) #(
                     expr: /local
                     start: [51 91]
                     end: [51 97]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-refines"
+                        spec: [#(
+                            name: "func-args"
+                        ) #(
+                            name: "func-args"
+                        ) #()]
+                    )
                 ) #(
                     expr: x
                     start: [51 98]
                     end: [51 99]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: y
                     start: [51 100]
                     end: [51 101]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                    )
                 ) #(
                     expr: z
                     start: [51 102]
@@ -3015,7 +3736,15 @@ Type HELP for starting information.
             expr: a
             start: [51 11]
             end: [51 12]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: block!
+                    start: [51 14]
+                    end: [51 20]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: block!
@@ -3031,7 +3760,20 @@ Type HELP for starting information.
             expr: b
             start: [51 22]
             end: [51 23]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: map!
+                    start: [51 25]
+                    end: [51 29]
+                    syntax: #()
+                ) #(
+                    expr: integer!
+                    start: [51 30]
+                    end: [51 38]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: map!
@@ -3053,6 +3795,13 @@ Type HELP for starting information.
             start: [51 40]
             end: [51 47]
             syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: integer!
+                    start: [51 49]
+                    end: [51 57]
+                    syntax: #()
+                )]
                 error: #(
                     severity: 1
                     code: "return-place"
@@ -3075,7 +3824,15 @@ Type HELP for starting information.
             expr: c
             start: [51 59]
             end: [51 60]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                spec: [#(
+                    expr: integer!
+                    start: [51 62]
+                    end: [51 70]
+                    syntax: #()
+                )]
+            )
         ) #(
             expr: [#(
                 expr: integer!
@@ -3098,6 +3855,12 @@ Type HELP for starting information.
                     source: "Syntax"
                     message: "double define: c"
                 )
+                name: "func-refines"
+                spec: [#(
+                    name: "func-args"
+                ) #(
+                    name: "func-args"
+                ) #()]
             )
         ) #(
             expr: a
@@ -3110,6 +3873,13 @@ Type HELP for starting information.
                     source: "Syntax"
                     message: "double define: a"
                 )
+                name: "func-args"
+                spec: [#(
+                    expr: integer!
+                    start: [51 78]
+                    end: [51 86]
+                    syntax: #()
+                )]
             )
         ) #(
             expr: [#(
@@ -3126,22 +3896,35 @@ Type HELP for starting information.
             expr: /d
             start: [51 88]
             end: [51 90]
-            syntax: #()
+            syntax: #(
+                name: "func-refines"
+            )
         ) #(
             expr: /local
             start: [51 91]
             end: [51 97]
-            syntax: #()
+            syntax: #(
+                name: "func-refines"
+                spec: [#(
+                    name: "func-args"
+                ) #(
+                    name: "func-args"
+                ) #()]
+            )
         ) #(
             expr: x
             start: [51 98]
             end: [51 99]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+            )
         ) #(
             expr: y
             start: [51 100]
             end: [51 101]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+            )
         ) #(
             expr: z
             start: [51 102]
@@ -3153,6 +3936,161 @@ Type HELP for starting information.
     origin: [
         reduce [a b c d] find/match "adb" "a"
     ]
+)
+#(
+    expr: fh1:
+    start: [56 1]
+    end: [56 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: has
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            error: #(
+                severity: 1
+                code: "miss-block"
+                source: "Syntax"
+                message: "missing a block!: has"
+            )
+            follow: 1
+        )
+        follow: 2
+    )
+)
+#(
+    expr: has
+    start: [56 6]
+    end: [56 9]
+    syntax: #(
+        name: "keyword"
+        expr: has
+        type: native!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        error: #(
+            severity: 1
+            code: "miss-block"
+            source: "Syntax"
+            message: "missing a block!: has"
+        )
+        follow: 1
+    )
+)
+#(
+    expr: [#(
+        expr: /ref
+        start: [56 11]
+        end: [56 15]
+        syntax: #(
+            error: #(
+                severity: 1
+                code: "forbidden-refine"
+                source: "Syntax"
+                message: "forbidden refinement here: /ref"
+            )
+            name: "func-refines"
+            spec: [#(
+                name: "func-args"
+            ) #()]
+        )
+    ) #(
+        expr: a
+        start: [56 16]
+        end: [56 17]
+        syntax: #(
+            name: "func-args"
+        )
+    ) #(
+        expr: b
+        start: [56 18]
+        end: [56 19]
+        syntax: #()
+    )]
+    start: [56 10]
+    end: [56 20]
+    syntax: #(
+        ctx: has
+        ctx-index: 1
+    )
+    origin: [/ref a b]
+)
+#(
+    expr: fh2:
+    start: [57 1]
+    end: [57 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: has
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)
+#(
+    expr: has
+    start: [57 6]
+    end: [57 9]
+    syntax: #(
+        name: "keyword"
+        expr: has
+        type: native!
+        CompletionItemKind: 14
+        SymbolKind: 6
+        follow: 2
+    )
+)
+#(
+    expr: [#(
+        expr: a
+        start: [57 11]
+        end: [57 12]
+        syntax: #(
+            name: "func-args"
+        )
+    ) #(
+        expr: b
+        start: [57 13]
+        end: [57 14]
+        syntax: #()
+    )]
+    start: [57 10]
+    end: [57 15]
+    syntax: #(
+        ctx: has
+        ctx-index: 1
+    )
+    origin: [a b]
+)
+#(
+    expr: []
+    start: [57 15]
+    end: [57 17]
+    syntax: #(
+        ctx: has
+        ctx-index: 2
+        spec: [#(
+            expr: a
+            start: [57 11]
+            end: [57 12]
+            syntax: #(
+                name: "func-args"
+            )
+        ) #(
+            expr: b
+            start: [57 13]
+            end: [57 14]
+            syntax: #()
+        )]
+        name: "block"
+    )
 )
 globals: ---------------------------------------
 [#(
@@ -3204,7 +4142,15 @@ globals: ---------------------------------------
                 expr: x
                 start: [8 12]
                 end: [8 13]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: block!
+                        start: [8 15]
+                        end: [8 21]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: block!
@@ -3220,7 +4166,15 @@ globals: ---------------------------------------
                 expr: y
                 start: [8 23]
                 end: [8 24]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: integer!
+                        start: [8 26]
+                        end: [8 34]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: integer!
@@ -3358,6 +4312,36 @@ Error/Warning: ---------------------------------------
             character: 16
         )
     )
+) #(
+    severity: 1
+    code: "miss-block"
+    source: "Syntax"
+    message: "missing a block!: has"
+    range: #(
+        start: #(
+            line: 55
+            character: 5
+        )
+        end: #(
+            line: 55
+            character: 8
+        )
+    )
+) #(
+    severity: 1
+    code: "forbidden-refine"
+    source: "Syntax"
+    message: "forbidden refinement here: /ref"
+    range: #(
+        start: #(
+            line: 55
+            character: 10
+        )
+        end: #(
+            line: 55
+            character: 14
+        )
+    )
 )]
 [["f1" #(
     expr: f1:
@@ -3386,7 +4370,15 @@ Error/Warning: ---------------------------------------
                 expr: x
                 start: [8 12]
                 end: [8 13]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: block!
+                        start: [8 15]
+                        end: [8 21]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: block!
@@ -3402,7 +4394,15 @@ Error/Warning: ---------------------------------------
                 expr: y
                 start: [8 23]
                 end: [8 24]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: integer!
+                        start: [8 26]
+                        end: [8 34]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: integer!
@@ -3502,7 +4502,15 @@ Error/Warning: ---------------------------------------
                 expr: a
                 start: [9 18]
                 end: [9 19]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: integer!
+                        start: [9 21]
+                        end: [9 29]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: integer!
@@ -3518,7 +4526,15 @@ Error/Warning: ---------------------------------------
                 expr: b
                 start: [9 31]
                 end: [9 32]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    spec: [#(
+                        expr: binary!
+                        start: [9 34]
+                        end: [9 41]
+                        syntax: #()
+                    )]
+                )
             ) #(
                 expr: [#(
                     expr: binary!
@@ -3589,6 +4605,44 @@ Error/Warning: ---------------------------------------
         cast: #(
             name: "keyword"
             expr: func
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            follow: 2
+        )
+        follow: 3
+    )
+)] ["fh1" #(
+    expr: fh1:
+    start: [56 1]
+    end: [56 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: has
+            type: native!
+            CompletionItemKind: 14
+            SymbolKind: 6
+            error: #(
+                severity: 1
+                code: "miss-block"
+                source: "Syntax"
+                message: "missing a block!: has"
+            )
+            follow: 1
+        )
+        follow: 2
+    )
+)] ["fh2" #(
+    expr: fh2:
+    start: [57 1]
+    end: [57 5]
+    syntax: #(
+        name: "set-word"
+        cast: #(
+            name: "keyword"
+            expr: has
             type: native!
             CompletionItemKind: 14
             SymbolKind: 6

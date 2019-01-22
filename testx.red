@@ -52,3 +52,6 @@ ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [int
 	reduce [a b c d]
 	find/match "adb" "a"
 ]
+
+fh1: has [/ref a b]
+fh2: has [a b][]
