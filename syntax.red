@@ -506,7 +506,7 @@ red-syntax: context [
 		]
 
 		exp-all pc
-		raise-global top
+		raise-variables top
 		resolve-unknown top
 	]
 
@@ -545,31 +545,31 @@ red-syntax: context [
 		ret
 	]
 
-	raise-global: function [top [block!]][
+	func-arg?: function [pc [block! paren!] par [block! paren!]][
+		if block? spec: par/1/syntax/spec [
+			forall spec [
+				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+					if (to word! spec/1/expr) = to word! pc/1/expr [
+						return spec/1
+					]
+				]
+			]
+		]
+		false
+	]
+
+	raise-variables: function [top [block!]][
 		raise?: function [pc [block! paren!]][
 			dpar: get-parent top pc/1
 			raise*?: function [par [block! paren!]][
-				func-arg?: function [par [block! paren!]][
-					if block? spec: par/1/syntax/spec [
-						forall spec [
-							if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-								if (to word! spec/1/expr) = to word! pc/1/expr [
-									pc/1/syntax/func-args: spec/1
-									return true
-								]
-							]
-						]
-					]
-					false
-				]
 				if all [
 					par = dpar
 					par/1/syntax/ctx = 'context
 				][
-					either par/1/syntax/extra [
-						append par/1/syntax/extra pc/1
+					either par/1/syntax/vars [
+						append par/1/syntax/vars pc/1
 					][
-						par/1/syntax/extra: reduce [pc/1]
+						par/1/syntax/vars: reduce [pc/1]
 					]
 					return false
 				]
@@ -577,11 +577,11 @@ red-syntax: context [
 					par/1/syntax/ctx = 'function
 					par/1/syntax/ctx-index = 2
 				][
-					unless func-arg? par [
-						either par/1/syntax/extra [
-							append par/1/syntax/extra pc/1
+					unless func-arg? pc par [
+						either par/1/syntax/vars [
+							append par/1/syntax/vars pc/1
 						][
-							par/1/syntax/extra: reduce [pc/1]
+							par/1/syntax/vars: reduce [pc/1]
 						]
 					]
 					return false
@@ -593,7 +593,7 @@ red-syntax: context [
 					]
 					par/1/syntax/ctx-index = 2
 				][
-					return not func-arg? par
+					return not func-arg? pc par
 				]
 				if all [
 					par/1/syntax/ctx = 'does
@@ -619,7 +619,7 @@ red-syntax: context [
 			]
 			true
 		]
-		raise-global*: function [pc [block! paren!]][
+		raise-vars*: function [pc [block! paren!]][
 			forall pc [
 				either all [
 					any [
@@ -628,18 +628,17 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					raise-global* pc/1/expr
+					raise-vars* pc/1/expr
 				][
 					if all [
 						pc/1/syntax
 						pc/1/syntax/name = "set-word"
 					][
 						if raise? pc [
-							append/only globals pc/1
-							either top/1/syntax/globals [
-								append top/1/syntax/globals pc/1
+							either top/1/syntax/vars [
+								append top/1/syntax/vars pc/1
 							][
-								top/1/syntax/globals: reduce [pc/1]
+								top/1/syntax/vars: reduce [pc/1]
 							]
 						]
 					]
@@ -647,85 +646,65 @@ red-syntax: context [
 			]
 		]
 
-		raise-global* top/1/expr
+		raise-vars* top/1/expr
 	]
 
 	resolve-unknown: function [top [block!]][
-		globals: last top
-		resolve-func-spec: function [pc [block! paren!]][
-			par: pc
-			forever [
-				unless par: get-parent top par/1 [return false]
-				if empty? par [return false]
+		resolve-ctx: function [pc [block! paren!]][
+			resolve-ctx*: function [par [block! paren!]][
+				if all [
+					par/1/syntax/ctx = 'context
+					vars: par/1/syntax/vars
+				][
+					forall vars [
+						if pc/1/expr = to word! vars/1/expr [
+							pc/1/syntax/cast: vars/1
+							pc/1/syntax/name: "resolved"
+							pc/1/syntax/resolved-type: 'context
+							return true
+						]
+					]
+					return false
+				]
 				if any [
 					all [
-						par/1/syntax/ctx = 'has
+						any [
+							par/1/syntax/ctx = 'func
+							par/1/syntax/ctx = 'function
+							par/1/syntax/ctx = 'has
+						]
 						par/1/syntax/ctx-index = 2
 					]
-					all [
-						par/1/syntax/ctx = 'func
-						par/1/syntax/ctx-index = 2
-					]
-					all [
-						par/1/syntax/ctx = 'function
-						par/1/syntax/ctx-index = 2
-					]
+					par/1/syntax/ctx = 'does
 				][
-					spec: par/1/syntax/spec
-					forall spec [
-						if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-							word: to word! spec/1/expr
-							if word = pc/1/expr [
+					if par/1/syntax/spec [
+						if ret: func-arg? pc par [
+							pc/1/syntax/cast: ret
+							pc/1/syntax/name: "resolved"
+							pc/1/syntax/resolved-type: 'spec
+							return true
+						]
+					]
+					if vars: par/1/syntax/vars [
+						forall vars [
+							if pc/1/expr = to word! vars/1/expr [
+								pc/1/syntax/cast: vars/1
 								pc/1/syntax/name: "resolved"
-								pc/1/syntax/spec: spec
+								pc/1/syntax/resolved-type: 'function
 								return true
 							]
 						]
 					]
+					return false
 				]
 			]
-			false
-		]
-		resolve-set-word: function [pc [block! paren!]][
-			resolve-set-word*: function [npc [block! paren!]][
-				forall npc [
-					if all [
-						npc/1/syntax
-						npc/1/syntax/name = "set-word"
-						pc/1/expr = to word! npc/1/expr
-					][
-						pc/1/syntax/cast: npc/1/syntax/cast
-						pc/1/syntax/start: npc/1/start
-						pc/1/syntax/end: npc/1/end
-						pc/1/syntax/name: "resolved"
-						return true
-					]
-				]
-				return false
-			]
-			if resolve-set-word* head pc [return true]
-			if top = head pc [return false]
 			par: pc
 			while [par: get-parent top par/1][
-				if empty? par [
-					return resolve-set-word* top
-				]
-				if resolve-set-word* par/1/expr [return true]
-			]
-			return false
-		]
-		resolve-extra: function [item [map!]][
-			forall globals [
-				if globals/1/expr = item/expr [
-					item/syntax/cast: globals/1/syntax/cast
-					item/syntax/start: globals/1/start
-					item/syntax/end: globals/1/end
-					item/syntax/name: "resolved"
-					return true
-				]
+				if resolve-ctx* par [return true]
 			]
 			false
 		]
+
 		resolve-unknown*: function [pc [block! paren!]][
 			forall pc [
 				either all [
@@ -743,12 +722,8 @@ red-syntax: context [
 						pc/1/syntax
 						pc/1/syntax/name = "unknown"
 					][
-						unless resolve-func-spec pc [
-							unless resolve-set-word pc [
-								unless resolve-extra pc/1 [
-									create-error-at pc/1/syntax 'Warning 'unknown-word mold pc/1/expr
-								]
-							]
+						unless resolve-ctx pc [
+							create-error-at pc/1/syntax 'Warning 'unknown-word mold pc/1/expr
 						]
 					]
 				]
