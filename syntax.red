@@ -545,10 +545,71 @@ red-syntax: context [
 
 	raise-global: function [top [block!]][
 		globals: clear []
-		append/only top globals
+		top/1/syntax/extra: globals
+		raise?: function [pc [block! paren!]][
+			dpar: get-parent top pc/1
+			raise*?: function [par [block! paren!]][
+				func-arg?: function [par [block! paren!]][
+					if block? spec: par/1/syntax/spec [
+						forall spec [
+							if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+								if (to word! spec/1/expr) = to word! pc/1/expr [
+									pc/1/syntax/func-args: spec/1
+									return true
+								]
+							]
+						]
+					]
+					false
+				]
+				if all [
+					par = top
+					par = dpar
+				][
+					return false
+				]
+				if all [
+					par/1/syntax/ctx = 'function
+					par/1/syntax/ctx-index = 2
+				][
+					unless func-arg? par [
+						either par/1/syntax/extra [
+							append par/1/syntax/extra pc/1
+						][
+							par/1/syntax/extra: reduce [pc/1]
+						]
+					]
+					return false
+				]
+				if all [
+					any [
+						par/1/syntax/ctx = 'func
+						par/1/syntax/ctx = 'has
+					]
+					par/1/syntax/ctx-index = 2
+				][
+					return not func-arg? par
+				]
+				if all [
+					par/1/syntax/ctx = 'does
+					par/1/syntax/ctx-index = 1
+				][
+					return true
+				]
+				if all [
+					par = dpar
+					par/1/syntax/ctx = 'context
+					par/1/syntax/ctx-index = 1
+				][
+					either par/1/syntax/extra [
+						append par/1/syntax/extra pc/1
+					][
+						par/1/syntax/extra: reduce [pc/1]
+					]
+					return false
+				]
 
-		raise-set-word: function [pc [block! paren!]][
-			raise-set-word*: function [npc [block! paren!]][
+				npc: head par
 				forall npc [
 					if all [
 						npc/1/syntax
@@ -560,50 +621,15 @@ red-syntax: context [
 				]
 				return true
 			]
-			if top = head pc [return false]
-			par: get-parent top pc/1
-
-			unless any [
-				all [
-					par/1/syntax/ctx = 'does
-					par/1/syntax/ctx-index = 1
-				]
-				all [
-					par/1/syntax/ctx = 'has
-					par/1/syntax/ctx-index = 2
-				]
-				all [
-					par/1/syntax/ctx = 'func
-					par/1/syntax/ctx-index = 2
-				]
-			][
-				return false
+			par: pc
+			while [par: get-parent top par/1][
+				unless raise*? par [return false]
 			]
-			if any [
-				par/1/syntax/ctx = 'has
-				par/1/syntax/ctx = 'func
-			][
-				spec: par/1/syntax/spec
-				forall spec [
-					if spec/1/expr = to word! pc/1/expr [
-						return false
-					]
-				]
-			]
-			until [
-				unless raise-set-word* head par [return false]
-				par: get-parent top par/1
-				if empty? par [
-					return raise-set-word* top
-				]
-				par = false
-			]
-			return true
+			true
 		]
 		raise-global*: function [pc [block! paren!]][
 			forall pc [
 				either all [
-					map? pc/1
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
@@ -613,11 +639,10 @@ red-syntax: context [
 					raise-global* pc/1/expr
 				][
 					if all [
-						map? pc/1
 						pc/1/syntax
 						pc/1/syntax/name = "set-word"
 					][
-						if raise-set-word pc [
+						if raise? pc [
 							append/only globals pc/1
 						]
 					]
@@ -625,7 +650,7 @@ red-syntax: context [
 			]
 		]
 
-		raise-global* top
+		raise-global* top/1/expr
 	]
 
 	resolve-unknown: function [top [block!]][
@@ -753,7 +778,7 @@ red-syntax: context [
 					if ret: get-parent* pc/1/expr pc [return ret]
 				]
 			]
-			false
+			none
 		]
 		get-parent* top/1/expr top
 	]
@@ -840,7 +865,10 @@ red-syntax: context [
 				]
 			]
 		]
-		pc: position? top line column
+
+		unless pc: position? top line column [
+			pc: top
+		]
 		if all [
 			any [
 				block? pc/1/expr
