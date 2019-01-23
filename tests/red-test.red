@@ -1,11 +1,11 @@
 Red []
 
-#include %error.red
-#include %lsp-const.red
-;#include %json.red
-#include %system-words.red
-#include %lexer.red
-#include %syntax.red
+#include %../error.red
+#include %../lsp-const.red
+;#include %../json.red
+#include %../system-words.red
+#include %../lexer.red
+#include %../syntax.red
 
 
 file: %testx.red

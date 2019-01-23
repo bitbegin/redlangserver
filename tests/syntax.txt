@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->> do %red-test.red
+>> do %tests/red-test.red
 [#(
     expr: [#(
         expr: Red
@@ -1365,11 +1365,37 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "keyword"
+                    name: "resolved"
                     expr: e
-                    type: block!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
+                    cast: #(
+                        expr: e:
+                        start: [20 4]
+                        end: [20 6]
+                        syntax: #(
+                            name: "set-word"
+                            cast: #(
+                                name: "resolved"
+                                expr: x
+                                cast: #(
+                                    expr: x
+                                    start: [8 12]
+                                    end: [8 13]
+                                    syntax: #(
+                                        name: "func-args"
+                                        spec: [#(
+                                            expr: block!
+                                            start: [8 15]
+                                            end: [8 21]
+                                            syntax: #()
+                                        )]
+                                    )
+                                )
+                                resolved-type: spec
+                            )
+                            follow: 1
+                        )
+                    )
+                    resolved-type: context
                 )
                 follow: 1
             )
@@ -1378,11 +1404,37 @@ Type HELP for starting information.
             start: [29 5]
             end: [29 6]
             syntax: #(
-                name: "keyword"
+                name: "resolved"
                 expr: e
-                type: block!
-                CompletionItemKind: 14
-                SymbolKind: 6
+                cast: #(
+                    expr: e:
+                    start: [20 4]
+                    end: [20 6]
+                    syntax: #(
+                        name: "set-word"
+                        cast: #(
+                            name: "resolved"
+                            expr: x
+                            cast: #(
+                                expr: x
+                                start: [8 12]
+                                end: [8 13]
+                                syntax: #(
+                                    name: "func-args"
+                                    spec: [#(
+                                        expr: block!
+                                        start: [8 15]
+                                        end: [8 21]
+                                        syntax: #()
+                                    )]
+                                )
+                            )
+                            resolved-type: spec
+                        )
+                        follow: 1
+                    )
+                )
+                resolved-type: context
             )
         ) #(
             expr: k:
@@ -1539,11 +1591,37 @@ Type HELP for starting information.
                 syntax: #(
                     name: "set-word"
                     cast: #(
-                        name: "keyword"
+                        name: "resolved"
                         expr: e
-                        type: block!
-                        CompletionItemKind: 14
-                        SymbolKind: 6
+                        cast: #(
+                            expr: e:
+                            start: [20 4]
+                            end: [20 6]
+                            syntax: #(
+                                name: "set-word"
+                                cast: #(
+                                    name: "resolved"
+                                    expr: x
+                                    cast: #(
+                                        expr: x
+                                        start: [8 12]
+                                        end: [8 13]
+                                        syntax: #(
+                                            name: "func-args"
+                                            spec: [#(
+                                                expr: block!
+                                                start: [8 15]
+                                                end: [8 21]
+                                                syntax: #()
+                                            )]
+                                        )
+                                    )
+                                    resolved-type: spec
+                                )
+                                follow: 1
+                            )
+                        )
+                        resolved-type: context
                     )
                     follow: 1
                 )
