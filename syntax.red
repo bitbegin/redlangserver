@@ -728,7 +728,7 @@ red-syntax: context [
 	]
 
 	get-parent: function [top [block!] item [map!]][
-		get-parent*: function [pc [block! paren!] par [block!]][
+		get-parent*: function [pc [block! paren!] par [block! paren!]][
 			forall pc [
 				if all [
 					map? pc/1
