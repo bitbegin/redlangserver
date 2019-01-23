@@ -476,14 +476,6 @@ red-syntax: context [
 	]
 
 	exp-all: function [pc [block! paren!]][
-		unless pc/1/expr = 'Red [
-			create-error-at pc/1/syntax 'Error 'miss-head-red none
-		]
-		unless block? pc/2/expr [
-			create-error-at pc/2/syntax 'Error 'miss-head-block none
-		]
-		put-syntax pc/1/syntax ['meta 1]
-		put-syntax pc/2/syntax ['meta 2]
 		while [not tail? pc][
 			either map? pc/1 [
 				type: exp-type? pc
@@ -504,7 +496,14 @@ red-syntax: context [
 		put-syntax top/1/syntax reduce [
 			'ctx 'context
 		]
-
+		unless pc/1/expr = 'Red [
+			create-error-at pc/1/syntax 'Error 'miss-head-red none
+		]
+		unless block? pc/2/expr [
+			create-error-at pc/2/syntax 'Error 'miss-head-block none
+		]
+		put-syntax pc/1/syntax ['meta 1]
+		put-syntax pc/2/syntax ['meta 2]
 		exp-all pc
 		raise-variables top
 		resolve-unknown top
