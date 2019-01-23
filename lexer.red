@@ -61,7 +61,7 @@ red-lexer: context [
 		]
 	]
 
-	analysis: function [start [string!] end [string!]][
+	analysis*: function [start [string!] end [string!]][
 		stack: make block! 10000
 
 		pos: start
@@ -126,6 +126,15 @@ red-lexer: context [
 			pos: npos
 			tail? pos
 		]
+		stack
+	]
+	analysis: function [start [string!]][
+		stack: clear []
+		end: tail start
+		if map? sub: analysis* start end [
+			return sub
+		]
+		push-stack stack sub start end none
 		stack
 	]
 ]

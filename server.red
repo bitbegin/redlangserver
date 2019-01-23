@@ -46,7 +46,7 @@ add-source-to-table: function [uri [string!] code [string!] blk [block!]][
 ]
 
 add-source: function [uri [string!] code [string!]][
-	if map? res: red-lexer/analysis code tail code [
+	if map? res: red-lexer/analysis code [
 		add-source-to-table uri code res/stack
 		range: red-lexer/to-range res/pos res/pos
 		line-cs: charset [#"^M" #"^/"]
