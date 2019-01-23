@@ -435,7 +435,6 @@ red-syntax: context [
 						find [does context] expr [
 							put-syntax pc/2/syntax reduce [
 								'ctx expr
-								'ctx-index 1
 							]
 							exp-type? next pc
 							step: step + 1
@@ -502,6 +501,9 @@ red-syntax: context [
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		pc: top/1/expr
+		put-syntax top/1/syntax reduce [
+			'ctx 'context
+		]
 
 		exp-all pc
 		raise-global top
@@ -544,8 +546,6 @@ red-syntax: context [
 	]
 
 	raise-global: function [top [block!]][
-		globals: clear []
-		top/1/syntax/extra: globals
 		raise?: function [pc [block! paren!]][
 			dpar: get-parent top pc/1
 			raise*?: function [par [block! paren!]][
@@ -563,9 +563,14 @@ red-syntax: context [
 					false
 				]
 				if all [
-					par = top
 					par = dpar
+					par/1/syntax/ctx = 'context
 				][
+					either par/1/syntax/extra [
+						append par/1/syntax/extra pc/1
+					][
+						par/1/syntax/extra: reduce [pc/1]
+					]
 					return false
 				]
 				if all [
@@ -592,21 +597,8 @@ red-syntax: context [
 				]
 				if all [
 					par/1/syntax/ctx = 'does
-					par/1/syntax/ctx-index = 1
 				][
 					return true
-				]
-				if all [
-					par = dpar
-					par/1/syntax/ctx = 'context
-					par/1/syntax/ctx-index = 1
-				][
-					either par/1/syntax/extra [
-						append par/1/syntax/extra pc/1
-					][
-						par/1/syntax/extra: reduce [pc/1]
-					]
-					return false
 				]
 
 				npc: head par
@@ -644,6 +636,11 @@ red-syntax: context [
 					][
 						if raise? pc [
 							append/only globals pc/1
+							either top/1/syntax/globals [
+								append top/1/syntax/globals pc/1
+							][
+								top/1/syntax/globals: reduce [pc/1]
+							]
 						]
 					]
 				]
