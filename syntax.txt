@@ -1766,12 +1766,16 @@ Type HELP for starting information.
                 end: [36 37]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: y
                 start: [36 38]
                 end: [36 39]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /local
+                )
             )]
         )
     ) #(
@@ -1780,12 +1784,16 @@ Type HELP for starting information.
         end: [36 37]
         syntax: #(
             name: "func-args"
+            paren: /local
         )
     ) #(
         expr: y
         start: [36 38]
         end: [36 39]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            paren: /local
+        )
     )]
     start: [36 9]
     end: [36 40]
@@ -1939,12 +1947,16 @@ Type HELP for starting information.
                         end: [36 37]
                         syntax: #(
                             name: "func-args"
+                            paren: /local
                         )
                     ) #(
                         expr: y
                         start: [36 38]
                         end: [36 39]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            paren: /local
+                        )
                     )]
                 )
             ) #(
@@ -1953,12 +1965,16 @@ Type HELP for starting information.
                 end: [36 37]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: y
                 start: [36 38]
                 end: [36 39]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /local
+                )
             )]
         )
     ) #(
@@ -2029,12 +2045,16 @@ Type HELP for starting information.
                         end: [36 37]
                         syntax: #(
                             name: "func-args"
+                            paren: /local
                         )
                     ) #(
                         expr: y
                         start: [36 38]
                         end: [36 39]
-                        syntax: #()
+                        syntax: #(
+                            name: "func-args"
+                            paren: /local
+                        )
                     )]
                 )
             ) #(
@@ -2043,12 +2063,16 @@ Type HELP for starting information.
                 end: [36 37]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: y
                 start: [36 38]
                 end: [36 39]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /local
+                )
             )]
         )
     ) #(
@@ -2187,12 +2211,16 @@ Type HELP for starting information.
                     end: [36 37]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
                     start: [36 38]
                     end: [36 39]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -2201,12 +2229,16 @@ Type HELP for starting information.
             end: [36 37]
             syntax: #(
                 name: "func-args"
+                paren: /local
             )
         ) #(
             expr: y
             start: [36 38]
             end: [36 39]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                paren: /local
+            )
         )]
         name: "block"
     )
@@ -3050,6 +3082,7 @@ Type HELP for starting information.
         end: [51 47]
         syntax: #(
             name: "func-args"
+            paren: /return
             spec: [#(
                 expr: integer!
                 start: [51 49]
@@ -3116,6 +3149,7 @@ Type HELP for starting information.
                 end: [51 99]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: y
@@ -3123,12 +3157,16 @@ Type HELP for starting information.
                 end: [51 101]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: z
                 start: [51 102]
                 end: [51 103]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /local
+                )
             )]
         )
     ) #(
@@ -3143,6 +3181,7 @@ Type HELP for starting information.
                 message: "double define: a"
             )
             name: "func-args"
+            paren: /c
             spec: [#(
                 expr: integer!
                 start: [51 78]
@@ -3180,6 +3219,7 @@ Type HELP for starting information.
                 end: [51 99]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: y
@@ -3187,12 +3227,16 @@ Type HELP for starting information.
                 end: [51 101]
                 syntax: #(
                     name: "func-args"
+                    paren: /local
                 )
             ) #(
                 expr: z
                 start: [51 102]
                 end: [51 103]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /local
+                )
             )]
         )
     ) #(
@@ -3201,6 +3245,7 @@ Type HELP for starting information.
         end: [51 99]
         syntax: #(
             name: "func-args"
+            paren: /local
         )
     ) #(
         expr: y
@@ -3208,12 +3253,16 @@ Type HELP for starting information.
         end: [51 101]
         syntax: #(
             name: "func-args"
+            paren: /local
         )
     ) #(
         expr: z
         start: [51 102]
         end: [51 103]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            paren: /local
+        )
     )]
     start: [51 10]
     end: [51 104]
@@ -3307,6 +3356,7 @@ Type HELP for starting information.
                     end: [51 47]
                     syntax: #(
                         name: "func-args"
+                        paren: /return
                         spec: [#(
                             expr: integer!
                             start: [51 49]
@@ -3373,6 +3423,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3380,12 +3431,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3400,6 +3455,7 @@ Type HELP for starting information.
                             message: "double define: a"
                         )
                         name: "func-args"
+                        paren: /c
                         spec: [#(
                             expr: integer!
                             start: [51 78]
@@ -3437,6 +3493,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3444,12 +3501,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3458,6 +3519,7 @@ Type HELP for starting information.
                     end: [51 99]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
@@ -3465,12 +3527,16 @@ Type HELP for starting information.
                     end: [51 101]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -3520,6 +3586,7 @@ Type HELP for starting information.
                     end: [51 47]
                     syntax: #(
                         name: "func-args"
+                        paren: /return
                         spec: [#(
                             expr: integer!
                             start: [51 49]
@@ -3586,6 +3653,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3593,12 +3661,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3613,6 +3685,7 @@ Type HELP for starting information.
                             message: "double define: a"
                         )
                         name: "func-args"
+                        paren: /c
                         spec: [#(
                             expr: integer!
                             start: [51 78]
@@ -3650,6 +3723,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3657,12 +3731,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3671,6 +3749,7 @@ Type HELP for starting information.
                     end: [51 99]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
@@ -3678,12 +3757,16 @@ Type HELP for starting information.
                     end: [51 101]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -3735,6 +3818,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3742,12 +3826,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3762,6 +3850,7 @@ Type HELP for starting information.
                             message: "double define: a"
                         )
                         name: "func-args"
+                        paren: /c
                         spec: [#(
                             expr: integer!
                             start: [51 78]
@@ -3799,6 +3888,7 @@ Type HELP for starting information.
                             end: [51 99]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: y
@@ -3806,12 +3896,16 @@ Type HELP for starting information.
                             end: [51 101]
                             syntax: #(
                                 name: "func-args"
+                                paren: /local
                             )
                         ) #(
                             expr: z
                             start: [51 102]
                             end: [51 103]
-                            syntax: #()
+                            syntax: #(
+                                name: "func-args"
+                                paren: /local
+                            )
                         )]
                     )
                 ) #(
@@ -3820,6 +3914,7 @@ Type HELP for starting information.
                     end: [51 99]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
@@ -3827,12 +3922,16 @@ Type HELP for starting information.
                     end: [51 101]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -3956,6 +4055,7 @@ Type HELP for starting information.
             end: [51 47]
             syntax: #(
                 name: "func-args"
+                paren: /return
                 spec: [#(
                     expr: integer!
                     start: [51 49]
@@ -4022,6 +4122,7 @@ Type HELP for starting information.
                     end: [51 99]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
@@ -4029,12 +4130,16 @@ Type HELP for starting information.
                     end: [51 101]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -4049,6 +4154,7 @@ Type HELP for starting information.
                     message: "double define: a"
                 )
                 name: "func-args"
+                paren: /c
                 spec: [#(
                     expr: integer!
                     start: [51 78]
@@ -4086,6 +4192,7 @@ Type HELP for starting information.
                     end: [51 99]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: y
@@ -4093,12 +4200,16 @@ Type HELP for starting information.
                     end: [51 101]
                     syntax: #(
                         name: "func-args"
+                        paren: /local
                     )
                 ) #(
                     expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #()
+                    syntax: #(
+                        name: "func-args"
+                        paren: /local
+                    )
                 )]
             )
         ) #(
@@ -4107,6 +4218,7 @@ Type HELP for starting information.
             end: [51 99]
             syntax: #(
                 name: "func-args"
+                paren: /local
             )
         ) #(
             expr: y
@@ -4114,12 +4226,16 @@ Type HELP for starting information.
             end: [51 101]
             syntax: #(
                 name: "func-args"
+                paren: /local
             )
         ) #(
             expr: z
             start: [51 102]
             end: [51 103]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+                paren: /local
+            )
         )]
         name: "block"
     )
@@ -4188,12 +4304,16 @@ Type HELP for starting information.
                 end: [56 17]
                 syntax: #(
                     name: "func-args"
+                    paren: /ref
                 )
             ) #(
                 expr: b
                 start: [56 18]
                 end: [56 19]
-                syntax: #()
+                syntax: #(
+                    name: "func-args"
+                    paren: /ref
+                )
             )]
         )
     ) #(
@@ -4202,12 +4322,16 @@ Type HELP for starting information.
         end: [56 17]
         syntax: #(
             name: "func-args"
+            paren: /ref
         )
     ) #(
         expr: b
         start: [56 18]
         end: [56 19]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+            paren: /ref
+        )
     )]
     start: [56 10]
     end: [56 20]
@@ -4259,7 +4383,9 @@ Type HELP for starting information.
         expr: b
         start: [57 13]
         end: [57 14]
-        syntax: #()
+        syntax: #(
+            name: "func-args"
+        )
     )]
     start: [57 10]
     end: [57 15]
@@ -4287,7 +4413,9 @@ Type HELP for starting information.
             expr: b
             start: [57 13]
             end: [57 14]
-            syntax: #()
+            syntax: #(
+                name: "func-args"
+            )
         )]
         name: "block"
     )

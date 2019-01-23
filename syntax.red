@@ -135,14 +135,15 @@ red-syntax: context [
 				append words word
 			]
 		]
-		check-args: function [npc [block!]][
+		check-args: function [npc [block!] par [refinement! none!]][
 			double-check npc
+			put-syntax npc/1/syntax reduce [
+				'name "func-args"
+				'paren	par
+			]
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
-			put-syntax npc/1/syntax reduce [
-				'name "func-args"
-			]
 			case [
 				type = string! [
 					put-syntax npc/1/syntax reduce [
@@ -186,12 +187,12 @@ red-syntax: context [
 		]
 		check-refines: function [npc [block!]][
 			double-check npc
-			npc2: skip-semicolon-next npc
-			if tail? npc2 [return npc2]
-			type: type? npc2/1/expr
 			put-syntax npc/1/syntax reduce [
 				'name "func-refines"
 			]
+			npc2: skip-semicolon-next npc
+			if tail? npc2 [return npc2]
+			type: type? npc2/1/expr
 			case [
 				type = string! [
 					put-syntax npc/1/syntax reduce [
@@ -200,7 +201,8 @@ red-syntax: context [
 					npc3: skip-semicolon-next npc2
 					while [not tail? npc3][
 						either word? npc3/1/expr [
-							if tail? npc3: check-args npc3 [return npc3]
+							append npc/1/syntax/spec npc3/1
+							if tail? npc3: check-args npc3 npc/1/expr [return npc3]
 						][
 							either refinement? npc3/1/expr [
 								return npc3
@@ -219,13 +221,13 @@ red-syntax: context [
 					while [not tail? npc2][
 						either word? npc2/1/expr [
 							append npc/1/syntax/spec npc2/1
-							if tail? npc2: check-args npc2 [return npc2]
+							if tail? npc2: check-args npc2 npc/1/expr [return npc2]
 						][
 							either refinement? npc2/1/expr [
 								return npc2
 							][
 								create-error-at npc2/1/syntax 'Error 'invalid-arg mold npc2/1/expr
-								return next npc2
+								npc2: next npc2
 							]
 						]
 					]
@@ -250,9 +252,9 @@ red-syntax: context [
 		until [
 			expr: pc/1/expr
 			case [
-				expr = to set-word! 'return [
+				expr = to set-word! /return [
 					return-pc: pc
-					pc: check-args pc
+					pc: check-args pc /return
 				]
 				refinement? expr [
 					pc: check-refines pc
@@ -261,7 +263,7 @@ red-syntax: context [
 					if return-pc [
 						create-error-at return-pc/1/syntax 'Error 'return-place none
 					]
-					pc: check-args pc
+					pc: check-args pc none
 				]
 				true [
 					create-error-at pc/1/syntax 'Error 'invalid-arg mold expr
