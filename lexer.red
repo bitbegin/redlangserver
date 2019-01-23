@@ -51,13 +51,12 @@ red-lexer: context [
 		]
 	]
 
-	push-stack: function [stack [block!] expr start [string!] end [string!] origin [block! paren! none!]][
+	push-stack: function [stack [block!] expr start [string!] end [string!]][
 		append stack make map! reduce [
 			'expr expr
 			'start form-pos start
 			'end form-pos end
 			'syntax make map! 4
-			'origin origin
 		]
 	]
 
@@ -81,7 +80,7 @@ red-lexer: context [
 								npos: end
 							]
 						][npos: end]
-						push-stack stack copy/part pos npos pos npos none
+						push-stack stack copy/part pos npos pos npos
 						pos: npos
 					]
 					true [break]
@@ -106,21 +105,25 @@ red-lexer: context [
 					not empty? out/1
 				][
 					start2: next pos end2: back npos
-					stack2: analysis start2 end2
-					push-stack stack stack2 pos npos out/1
+					if map? stack2: analysis* start2 end2 [
+						return stack2
+					]
+					push-stack stack stack2 pos npos
 				]
 				all [
 					paren? out/1
 					not empty? out/1
 				][
 					start2: next pos end2: back npos
-					stack2: analysis start2 end2
+					if map? stack2: analysis* start2 end2 [
+						return stack2
+					]
 					paren: make paren! 4
 					append paren stack2
-					push-stack stack paren pos npos out/1
+					push-stack stack paren pos npos
 				]
 				true [
-					push-stack stack out/1 pos npos none
+					push-stack stack out/1 pos npos
 				]
 			]
 			pos: npos
@@ -134,7 +137,8 @@ red-lexer: context [
 		if map? sub: analysis* start end [
 			return sub
 		]
-		push-stack stack sub start end none
+		push-stack stack sub start end
+		stack/1/source: start
 		stack
 	]
 ]
