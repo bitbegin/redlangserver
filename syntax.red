@@ -477,6 +477,14 @@ red-syntax: context [
 	]
 
 	exp-all: function [pc [block! paren!]][
+		unless pc/1/expr = 'Red [
+			create-error-at pc/1/syntax 'Error 'miss-head-red none
+		]
+		unless block? pc/2/expr [
+			create-error-at pc/2/syntax 'Error 'miss-head-block none
+		]
+		put-syntax pc/1/syntax ['meta 1]
+		put-syntax pc/2/syntax ['meta 2]
 		while [not tail? pc][
 			either map? pc/1 [
 				type: exp-type? pc
@@ -487,18 +495,17 @@ red-syntax: context [
 		]
 	]
 
-	analysis: function [pc [block!]][
-		unless pc/1/expr = 'Red [
-			create-error-at pc/1/syntax 'Error 'miss-head-red none
-		]
-		unless block? pc/2/expr [
-			create-error-at pc/2/syntax 'Error 'miss-head-block none
-		]
+	analysis: function [top [block!]][
+		if empty? top [exit]
+		unless all [
+			top/1/expr
+			block? top/1/expr
+		][throw-error 'analysis "expr isn't a block!" top/1]
+		pc: top/1/expr
+
 		exp-all pc
-		raise-global pc
-		resolve-unknown pc
-		put-syntax pc/1/syntax ['meta 1]
-		put-syntax pc/2/syntax ['meta 2]
+		raise-global top
+		resolve-unknown top
 	]
 
 	collect-errors: function [top [block! paren!]][
@@ -733,30 +740,28 @@ red-syntax: context [
 		get-parent*: function [pc [block! paren!] par [block! paren!]][
 			forall pc [
 				if all [
-					map? pc/1
 					item/start = pc/1/start
 					item/end = pc/1/end
 				][return par]
 				if all [
-					map? pc/1
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
 					]
 					not empty? pc/1/expr
 				][
-					if temp: get-parent* pc/1/expr pc [return temp]
+					if ret: get-parent* pc/1/expr pc [return ret]
 				]
 			]
 			false
 		]
-		get-parent* top clear []
+		get-parent* top/1/expr top
 	]
 
 	position?: function [top [block! paren!] line [integer!] column [integer!]][
 		position*: function [pc [block! paren!] line [integer!] column [integer!]][
 			cascade: [
-				either all [
+				if all [
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
@@ -764,15 +769,12 @@ red-syntax: context [
 					not empty? pc/1/expr
 				][
 					if ret: position* pc/1/expr line column [return ret]
-					return pc
-				][
-					return pc
 				]
+				return pc
 			]
 			ret: none
 			forall pc [
 				if all [
-					map? pc/1
 					any [
 						pc/1/start/1 < line
 						all [
@@ -796,7 +798,6 @@ red-syntax: context [
 							any [
 								tail? next pc
 								all [
-									map? pc/2
 									pc/2/start/1 >= line
 									pc/2/start/2 <> column
 								]
@@ -807,10 +808,9 @@ red-syntax: context [
 					]
 				]
 			]
-			return none
+			none
 		]
-		if ret: position* top line column [return ret]
-		top
+		position* top line column
 	]
 
 	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
