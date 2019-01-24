@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->> do %tests/red-test.red
+>>  do %tests/red-test.red
 [#(
     expr: [#(
         expr: Red
@@ -10,10 +10,6 @@ Type HELP for starting information.
         syntax: #(
             meta: 1
             name: "keyword"
-            expr: Red
-            type: tuple!
-            CompletionItemKind: 14
-            SymbolKind: 6
         )
     ) #(
         expr: he:
@@ -29,9 +25,9 @@ Type HELP for starting information.
             meta: 2
             name: "set-word"
             cast: #(
-                name: "block"
+                start: [1 9]
+                end: [1 11]
             )
-            follow: 1
         )
     ) #(
         expr: []
@@ -47,12 +43,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "literal"
-                type: lit-word!
-                CompletionItemKind: 21
-                SymbolKind: 14
+                start: [3 4]
+                end: [3 9]
             )
-            follow: 1
         )
     ) #(
         expr: 'test
@@ -60,9 +53,6 @@ Type HELP for starting information.
         end: [3 9]
         syntax: #(
             name: "literal"
-            type: lit-word!
-            CompletionItemKind: 21
-            SymbolKind: 14
         )
     ) #(
         expr: b:
@@ -71,14 +61,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: context
-                type: function!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 1
+                start: [4 4]
+                end: [4 11]
             )
-            follow: 2
         )
     ) #(
         expr: context
@@ -86,11 +71,10 @@ Type HELP for starting information.
         end: [4 11]
         syntax: #(
             name: "keyword"
-            expr: context
-            type: function!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            follow: 1
+            body: #(
+                start: [4 12]
+                end: [31 2]
+            )
         )
     ) #(
         expr: [#(
@@ -100,12 +84,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
+                    start: [5 5]
+                    end: [5 6]
                 )
-                follow: 1
             )
         ) #(
             expr: 4
@@ -113,9 +94,6 @@ Type HELP for starting information.
             end: [5 6]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         ) #(
             expr: d:
@@ -124,14 +102,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "keyword"
-                    expr: context
-                    type: function!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 1
+                    start: [6 5]
+                    end: [6 12]
                 )
-                follow: 2
             )
         ) #(
             expr: context
@@ -139,11 +112,10 @@ Type HELP for starting information.
             end: [6 12]
             syntax: #(
                 name: "keyword"
-                expr: context
-                type: function!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 1
+                body: #(
+                    start: [6 13]
+                    end: [26 3]
+                )
             )
         ) #(
             expr: [#(
@@ -153,12 +125,9 @@ Type HELP for starting information.
                 syntax: #(
                     name: "set-word"
                     cast: #(
-                        name: "literal"
-                        type: binary!
-                        CompletionItemKind: 21
-                        SymbolKind: 18
+                        start: [7 6]
+                        end: [7 11]
                     )
-                    follow: 1
                 )
             ) #(
                 expr: #{12}
@@ -166,9 +135,6 @@ Type HELP for starting information.
                 end: [7 11]
                 syntax: #(
                     name: "literal"
-                    type: binary!
-                    CompletionItemKind: 21
-                    SymbolKind: 18
                 )
             ) #(
                 expr: f:
@@ -177,14 +143,9 @@ Type HELP for starting information.
                 syntax: #(
                     name: "set-word"
                     cast: #(
-                        name: "keyword"
-                        expr: func
-                        type: native!
-                        CompletionItemKind: 14
-                        SymbolKind: 6
-                        follow: 2
+                        start: [8 6]
+                        end: [8 10]
                     )
-                    follow: 3
                 )
             ) #(
                 expr: func
@@ -192,11 +153,14 @@ Type HELP for starting information.
                 end: [8 10]
                 syntax: #(
                     name: "keyword"
-                    expr: func
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
+                    spec: #(
+                        start: [8 11]
+                        end: [8 36]
+                    )
+                    body: #(
+                        start: [8 36]
+                        end: [24 4]
+                    )
                 )
             ) #(
                 expr: [#(
@@ -205,52 +169,67 @@ Type HELP for starting information.
                     end: [8 13]
                     syntax: #(
                         name: "func-args"
-                        spec: [#(
-                            expr: block!
-                            start: [8 15]
-                            end: [8 21]
-                            syntax: #()
-                        )]
+                        spec: #(
+                            start: [8 14]
+                            end: [8 22]
+                        )
                     )
                 ) #(
                     expr: [#(
                         expr: block!
                         start: [8 15]
                         end: [8 21]
-                        syntax: #()
+                        syntax: #(
+                            name: "keyword"
+                        )
                     )]
                     start: [8 14]
                     end: [8 22]
-                    syntax: #()
+                    syntax: #(
+                        name: "block"
+                        parent: #(
+                            start: [8 12]
+                            end: [8 13]
+                        )
+                    )
                 ) #(
                     expr: y
                     start: [8 23]
                     end: [8 24]
                     syntax: #(
                         name: "func-args"
-                        spec: [#(
-                            expr: integer!
-                            start: [8 26]
-                            end: [8 34]
-                            syntax: #()
-                        )]
+                        spec: #(
+                            start: [8 25]
+                            end: [8 35]
+                        )
                     )
                 ) #(
                     expr: [#(
                         expr: integer!
                         start: [8 26]
                         end: [8 34]
-                        syntax: #()
+                        syntax: #(
+                            name: "keyword"
+                        )
                     )]
                     start: [8 25]
                     end: [8 35]
-                    syntax: #()
+                    syntax: #(
+                        name: "block"
+                        parent: #(
+                            start: [8 23]
+                            end: [8 24]
+                        )
+                    )
                 )]
                 start: [8 11]
                 end: [8 36]
                 syntax: #(
-                    ctx: func
-                    ctx-index: 1
+                    name: "block"
+                    parent: #(
+                        start: [8 6]
+                        end: [8 10]
+                    )
                 )
             ) #(
                 expr: [#(
@@ -260,14 +239,9 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "keyword"
-                            expr: function
-                            type: native!
-                            CompletionItemKind: 14
-                            SymbolKind: 6
-                            follow: 2
+                            start: [9 8]
+                            end: [9 16]
                         )
-                        follow: 3
                     )
                 ) #(
                     expr: function
@@ -275,11 +249,14 @@ Type HELP for starting information.
                     end: [9 16]
                     syntax: #(
                         name: "keyword"
-                        expr: function
-                        type: native!
-                        CompletionItemKind: 14
-                        SymbolKind: 6
-                        follow: 2
+                        spec: #(
+                            start: [9 17]
+                            end: [9 43]
+                        )
+                        body: #(
+                            start: [9 43]
+                            end: [17 5]
+                        )
                     )
                 ) #(
                     expr: [#(
@@ -288,52 +265,67 @@ Type HELP for starting information.
                         end: [9 19]
                         syntax: #(
                             name: "func-args"
-                            spec: [#(
-                                expr: integer!
-                                start: [9 21]
-                                end: [9 29]
-                                syntax: #()
-                            )]
+                            spec: #(
+                                start: [9 20]
+                                end: [9 30]
+                            )
                         )
                     ) #(
                         expr: [#(
                             expr: integer!
                             start: [9 21]
                             end: [9 29]
-                            syntax: #()
+                            syntax: #(
+                                name: "keyword"
+                            )
                         )]
                         start: [9 20]
                         end: [9 30]
-                        syntax: #()
+                        syntax: #(
+                            name: "block"
+                            parent: #(
+                                start: [9 18]
+                                end: [9 19]
+                            )
+                        )
                     ) #(
                         expr: b
                         start: [9 31]
                         end: [9 32]
                         syntax: #(
                             name: "func-args"
-                            spec: [#(
-                                expr: binary!
-                                start: [9 34]
-                                end: [9 41]
-                                syntax: #()
-                            )]
+                            spec: #(
+                                start: [9 33]
+                                end: [9 42]
+                            )
                         )
                     ) #(
                         expr: [#(
                             expr: binary!
                             start: [9 34]
                             end: [9 41]
-                            syntax: #()
+                            syntax: #(
+                                name: "keyword"
+                            )
                         )]
                         start: [9 33]
                         end: [9 42]
-                        syntax: #()
+                        syntax: #(
+                            name: "block"
+                            parent: #(
+                                start: [9 31]
+                                end: [9 32]
+                            )
+                        )
                     )]
                     start: [9 17]
                     end: [9 43]
                     syntax: #(
-                        ctx: function
-                        ctx-index: 1
+                        name: "block"
+                        parent: #(
+                            start: [9 8]
+                            end: [9 16]
+                        )
                     )
                 ) #(
                     expr: [#(
@@ -343,12 +335,9 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "literal"
-                                type: string!
-                                CompletionItemKind: 21
-                                SymbolKind: 15
+                                start: [10 9]
+                                end: [10 15]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: "test"
@@ -356,9 +345,6 @@ Type HELP for starting information.
                         end: [10 15]
                         syntax: #(
                             name: "literal"
-                            type: string!
-                            CompletionItemKind: 21
-                            SymbolKind: 15
                         )
                     ) #(
                         expr: f2:
@@ -367,48 +353,16 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "resolved"
-                                expr: x
-                                cast: #(
-                                    expr: x
-                                    start: [8 12]
-                                    end: [8 13]
-                                    syntax: #(
-                                        name: "func-args"
-                                        spec: [#(
-                                            expr: block!
-                                            start: [8 15]
-                                            end: [8 21]
-                                            syntax: #()
-                                        )]
-                                    )
-                                )
-                                resolved-type: spec
+                                start: [11 9]
+                                end: [11 10]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: x
                         start: [11 9]
                         end: [11 10]
                         syntax: #(
-                            name: "resolved"
-                            expr: x
-                            cast: #(
-                                expr: x
-                                start: [8 12]
-                                end: [8 13]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: block!
-                                        start: [8 15]
-                                        end: [8 21]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
+                            name: "unknown"
                         )
                     ) #(
                         expr: f3:
@@ -417,50 +371,16 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "resolved"
-                                expr: f1
-                                cast: #(
-                                    expr: f1:
-                                    start: [10 5]
-                                    end: [10 8]
-                                    syntax: #(
-                                        name: "set-word"
-                                        cast: #(
-                                            name: "literal"
-                                            type: string!
-                                            CompletionItemKind: 21
-                                            SymbolKind: 15
-                                        )
-                                        follow: 1
-                                    )
-                                )
-                                resolved-type: function
+                                start: [12 9]
+                                end: [12 11]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: f1
                         start: [12 9]
                         end: [12 11]
                         syntax: #(
-                            name: "resolved"
-                            expr: f1
-                            cast: #(
-                                expr: f1:
-                                start: [10 5]
-                                end: [10 8]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "literal"
-                                        type: string!
-                                        CompletionItemKind: 21
-                                        SymbolKind: 15
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: function
+                            name: "unknown"
                         )
                     ) #(
                         expr: f4:
@@ -469,44 +389,16 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "resolved"
-                                expr: l
-                                cast: #(
-                                    expr: l:
-                                    start: [33 1]
-                                    end: [33 3]
-                                    syntax: #(
-                                        name: "set-word"
-                                        cast: #(
-                                            name: "paren"
-                                        )
-                                        follow: 1
-                                    )
-                                )
-                                resolved-type: context
+                                start: [13 9]
+                                end: [13 10]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: l
                         start: [13 9]
                         end: [13 10]
                         syntax: #(
-                            name: "resolved"
-                            expr: l
-                            cast: #(
-                                expr: l:
-                                start: [33 1]
-                                end: [33 3]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "paren"
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: context
+                            name: "unknown"
                         )
                     ) #(
                         expr: f5:
@@ -515,12 +407,9 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "literal"
-                                type: get-word!
-                                CompletionItemKind: 21
-                                SymbolKind: 14
+                                start: [14 9]
+                                end: [14 11]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: :f
@@ -528,9 +417,6 @@ Type HELP for starting information.
                         end: [14 11]
                         syntax: #(
                             name: "literal"
-                            type: get-word!
-                            CompletionItemKind: 21
-                            SymbolKind: 14
                         )
                     ) #(
                         expr: f6:
@@ -539,50 +425,16 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "resolved"
-                                expr: f5
-                                cast: #(
-                                    expr: f5:
-                                    start: [14 5]
-                                    end: [14 8]
-                                    syntax: #(
-                                        name: "set-word"
-                                        cast: #(
-                                            name: "literal"
-                                            type: get-word!
-                                            CompletionItemKind: 21
-                                            SymbolKind: 14
-                                        )
-                                        follow: 1
-                                    )
-                                )
-                                resolved-type: function
+                                start: [15 9]
+                                end: [15 11]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: f5
                         start: [15 9]
                         end: [15 11]
                         syntax: #(
-                            name: "resolved"
-                            expr: f5
-                            cast: #(
-                                expr: f5:
-                                start: [14 5]
-                                end: [14 8]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "literal"
-                                        type: get-word!
-                                        CompletionItemKind: 21
-                                        SymbolKind: 14
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: function
+                            name: "unknown"
                         )
                     ) #(
                         expr: f7:
@@ -591,48 +443,16 @@ Type HELP for starting information.
                         syntax: #(
                             name: "set-word"
                             cast: #(
-                                name: "resolved"
-                                expr: a
-                                cast: #(
-                                    expr: a
-                                    start: [9 18]
-                                    end: [9 19]
-                                    syntax: #(
-                                        name: "func-args"
-                                        spec: [#(
-                                            expr: integer!
-                                            start: [9 21]
-                                            end: [9 29]
-                                            syntax: #()
-                                        )]
-                                    )
-                                )
-                                resolved-type: spec
+                                start: [16 9]
+                                end: [16 10]
                             )
-                            follow: 1
                         )
                     ) #(
                         expr: a
                         start: [16 9]
                         end: [16 10]
                         syntax: #(
-                            name: "resolved"
-                            expr: a
-                            cast: #(
-                                expr: a
-                                start: [9 18]
-                                end: [9 19]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: integer!
-                                        start: [9 21]
-                                        end: [9 29]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
+                            name: "unknown"
                         )
                     ) #(
                         expr: +
@@ -640,10 +460,6 @@ Type HELP for starting information.
                         end: [16 12]
                         syntax: #(
                             name: "keyword"
-                            expr: +
-                            type: op!
-                            CompletionItemKind: 14
-                            SymbolKind: 6
                         )
                     ) #(
                         expr: length?
@@ -651,252 +467,23 @@ Type HELP for starting information.
                         end: [16 20]
                         syntax: #(
                             name: "keyword"
-                            expr: length?
-                            type: action!
-                            CompletionItemKind: 14
-                            SymbolKind: 6
                         )
                     ) #(
                         expr: b
                         start: [16 21]
                         end: [16 22]
                         syntax: #(
-                            name: "resolved"
-                            expr: b
-                            cast: #(
-                                expr: b
-                                start: [9 31]
-                                end: [9 32]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: binary!
-                                        start: [9 34]
-                                        end: [9 41]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
+                            name: "unknown"
                         )
                     )]
                     start: [9 43]
                     end: [17 5]
                     syntax: #(
-                        ctx: function
-                        ctx-index: 2
-                        spec: [#(
-                            expr: a
-                            start: [9 18]
-                            end: [9 19]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: integer!
-                                    start: [9 21]
-                                    end: [9 29]
-                                    syntax: #()
-                                )]
-                            )
-                        ) #(
-                            expr: [#(
-                                expr: integer!
-                                start: [9 21]
-                                end: [9 29]
-                                syntax: #()
-                            )]
-                            start: [9 20]
-                            end: [9 30]
-                            syntax: #()
-                        ) #(
-                            expr: b
-                            start: [9 31]
-                            end: [9 32]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: binary!
-                                    start: [9 34]
-                                    end: [9 41]
-                                    syntax: #()
-                                )]
-                            )
-                        ) #(
-                            expr: [#(
-                                expr: binary!
-                                start: [9 34]
-                                end: [9 41]
-                                syntax: #()
-                            )]
-                            start: [9 33]
-                            end: [9 42]
-                            syntax: #()
-                        )]
                         name: "block"
-                        vars: [#(
-                            expr: f1:
-                            start: [10 5]
-                            end: [10 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "literal"
-                                    type: string!
-                                    CompletionItemKind: 21
-                                    SymbolKind: 15
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f2:
-                            start: [11 5]
-                            end: [11 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: x
-                                    cast: #(
-                                        expr: x
-                                        start: [8 12]
-                                        end: [8 13]
-                                        syntax: #(
-                                            name: "func-args"
-                                            spec: [#(
-                                                expr: block!
-                                                start: [8 15]
-                                                end: [8 21]
-                                                syntax: #()
-                                            )]
-                                        )
-                                    )
-                                    resolved-type: spec
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f3:
-                            start: [12 5]
-                            end: [12 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: f1
-                                    cast: #(
-                                        expr: f1:
-                                        start: [10 5]
-                                        end: [10 8]
-                                        syntax: #(
-                                            name: "set-word"
-                                            cast: #(
-                                                name: "literal"
-                                                type: string!
-                                                CompletionItemKind: 21
-                                                SymbolKind: 15
-                                            )
-                                            follow: 1
-                                        )
-                                    )
-                                    resolved-type: function
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f4:
-                            start: [13 5]
-                            end: [13 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: l
-                                    cast: #(
-                                        expr: l:
-                                        start: [33 1]
-                                        end: [33 3]
-                                        syntax: #(
-                                            name: "set-word"
-                                            cast: #(
-                                                name: "paren"
-                                            )
-                                            follow: 1
-                                        )
-                                    )
-                                    resolved-type: context
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f5:
-                            start: [14 5]
-                            end: [14 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "literal"
-                                    type: get-word!
-                                    CompletionItemKind: 21
-                                    SymbolKind: 14
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f6:
-                            start: [15 5]
-                            end: [15 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: f5
-                                    cast: #(
-                                        expr: f5:
-                                        start: [14 5]
-                                        end: [14 8]
-                                        syntax: #(
-                                            name: "set-word"
-                                            cast: #(
-                                                name: "literal"
-                                                type: get-word!
-                                                CompletionItemKind: 21
-                                                SymbolKind: 14
-                                            )
-                                            follow: 1
-                                        )
-                                    )
-                                    resolved-type: function
-                                )
-                                follow: 1
-                            )
-                        ) #(
-                            expr: f7:
-                            start: [16 5]
-                            end: [16 8]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: a
-                                    cast: #(
-                                        expr: a
-                                        start: [9 18]
-                                        end: [9 19]
-                                        syntax: #(
-                                            name: "func-args"
-                                            spec: [#(
-                                                expr: integer!
-                                                start: [9 21]
-                                                end: [9 29]
-                                                syntax: #()
-                                            )]
-                                        )
-                                    )
-                                    resolved-type: spec
-                                )
-                                follow: 1
-                            )
-                        )]
+                        parent: #(
+                            start: [9 8]
+                            end: [9 16]
+                        )
                     )
                 ) #(
                     expr: x:
@@ -905,12 +492,9 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "literal"
-                            type: integer!
-                            CompletionItemKind: 21
-                            SymbolKind: 16
+                            start: [18 7]
+                            end: [18 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: 1
@@ -918,9 +502,6 @@ Type HELP for starting information.
                     end: [18 8]
                     syntax: #(
                         name: "literal"
-                        type: integer!
-                        CompletionItemKind: 21
-                        SymbolKind: 16
                     )
                 ) #(
                     expr: y:
@@ -929,12 +510,9 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "literal"
-                            type: integer!
-                            CompletionItemKind: 21
-                            SymbolKind: 16
+                            start: [19 7]
+                            end: [19 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: 1
@@ -942,9 +520,6 @@ Type HELP for starting information.
                     end: [19 8]
                     syntax: #(
                         name: "literal"
-                        type: integer!
-                        CompletionItemKind: 21
-                        SymbolKind: 16
                     )
                 ) #(
                     expr: e:
@@ -953,48 +528,16 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "resolved"
-                            expr: x
-                            cast: #(
-                                expr: x
-                                start: [8 12]
-                                end: [8 13]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: block!
-                                        start: [8 15]
-                                        end: [8 21]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
+                            start: [20 7]
+                            end: [20 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: x
                     start: [20 7]
                     end: [20 8]
                     syntax: #(
-                        name: "resolved"
-                        expr: x
-                        cast: #(
-                            expr: x
-                            start: [8 12]
-                            end: [8 13]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: block!
-                                    start: [8 15]
-                                    end: [8 21]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: +
@@ -1002,33 +545,13 @@ Type HELP for starting information.
                     end: [20 10]
                     syntax: #(
                         name: "keyword"
-                        expr: +
-                        type: op!
-                        CompletionItemKind: 14
-                        SymbolKind: 6
                     )
                 ) #(
                     expr: y
                     start: [20 11]
                     end: [20 12]
                     syntax: #(
-                        name: "resolved"
-                        expr: y
-                        cast: #(
-                            expr: y
-                            start: [8 23]
-                            end: [8 24]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: integer!
-                                    start: [8 26]
-                                    end: [8 34]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: o:
@@ -1037,44 +560,16 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "resolved"
-                            expr: g
-                            cast: #(
-                                expr: g:
-                                start: [25 3]
-                                end: [25 5]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "block"
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: context
+                            start: [21 7]
+                            end: [21 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: g
                     start: [21 7]
                     end: [21 8]
                     syntax: #(
-                        name: "resolved"
-                        expr: g
-                        cast: #(
-                            expr: g:
-                            start: [25 3]
-                            end: [25 5]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "block"
-                                )
-                                follow: 1
-                            )
-                        )
-                        resolved-type: context
+                        name: "unknown"
                     )
                 ) #(
                     expr: t:
@@ -1083,50 +578,16 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "resolved"
-                            expr: h
-                            cast: #(
-                                expr: h:
-                                start: [27 2]
-                                end: [27 4]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "literal"
-                                        type: map!
-                                        CompletionItemKind: 21
-                                        SymbolKind: 20
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: context
+                            start: [22 7]
+                            end: [22 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: h
                     start: [22 7]
                     end: [22 8]
                     syntax: #(
-                        name: "resolved"
-                        expr: h
-                        cast: #(
-                            expr: h:
-                            start: [27 2]
-                            end: [27 4]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "literal"
-                                    type: map!
-                                    CompletionItemKind: 21
-                                    SymbolKind: 20
-                                )
-                                follow: 1
-                            )
-                        )
-                        resolved-type: context
+                        name: "unknown"
                     )
                 ) #(
                     expr: u:
@@ -1135,103 +596,26 @@ Type HELP for starting information.
                     syntax: #(
                         name: "set-word"
                         cast: #(
-                            name: "resolved"
-                            expr: x
-                            cast: #(
-                                expr: x
-                                start: [8 12]
-                                end: [8 13]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: block!
-                                        start: [8 15]
-                                        end: [8 21]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
+                            start: [23 7]
+                            end: [23 8]
                         )
-                        follow: 1
                     )
                 ) #(
                     expr: x
                     start: [23 7]
                     end: [23 8]
                     syntax: #(
-                        name: "resolved"
-                        expr: x
-                        cast: #(
-                            expr: x
-                            start: [8 12]
-                            end: [8 13]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: block!
-                                    start: [8 15]
-                                    end: [8 21]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 )]
                 start: [8 36]
                 end: [24 4]
                 syntax: #(
-                    ctx: func
-                    ctx-index: 2
-                    spec: [#(
-                        expr: x
-                        start: [8 12]
-                        end: [8 13]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: block!
-                                start: [8 15]
-                                end: [8 21]
-                                syntax: #()
-                            )]
-                        )
-                    ) #(
-                        expr: [#(
-                            expr: block!
-                            start: [8 15]
-                            end: [8 21]
-                            syntax: #()
-                        )]
-                        start: [8 14]
-                        end: [8 22]
-                        syntax: #()
-                    ) #(
-                        expr: y
-                        start: [8 23]
-                        end: [8 24]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: integer!
-                                start: [8 26]
-                                end: [8 34]
-                                syntax: #()
-                            )]
-                        )
-                    ) #(
-                        expr: [#(
-                            expr: integer!
-                            start: [8 26]
-                            end: [8 34]
-                            syntax: #()
-                        )]
-                        start: [8 25]
-                        end: [8 35]
-                        syntax: #()
-                    )]
                     name: "block"
+                    parent: #(
+                        start: [8 6]
+                        end: [8 10]
+                    )
                 )
             ) #(
                 expr: g:
@@ -1240,9 +624,9 @@ Type HELP for starting information.
                 syntax: #(
                     name: "set-word"
                     cast: #(
-                        name: "block"
+                        start: [25 6]
+                        end: [25 8]
                     )
-                    follow: 1
                 )
             ) #(
                 expr: []
@@ -1255,50 +639,11 @@ Type HELP for starting information.
             start: [6 13]
             end: [26 3]
             syntax: #(
-                ctx: context
                 name: "block"
-                vars: [#(
-                    expr: e:
-                    start: [7 3]
-                    end: [7 5]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "literal"
-                            type: binary!
-                            CompletionItemKind: 21
-                            SymbolKind: 18
-                        )
-                        follow: 1
-                    )
-                ) #(
-                    expr: f:
-                    start: [8 3]
-                    end: [8 5]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "keyword"
-                            expr: func
-                            type: native!
-                            CompletionItemKind: 14
-                            SymbolKind: 6
-                            follow: 2
-                        )
-                        follow: 3
-                    )
-                ) #(
-                    expr: g:
-                    start: [25 3]
-                    end: [25 5]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "block"
-                        )
-                        follow: 1
-                    )
-                )]
+                parent: #(
+                    start: [6 5]
+                    end: [6 12]
+                )
             )
         ) #(
             expr: h:
@@ -1307,12 +652,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "literal"
-                    type: map!
-                    CompletionItemKind: 21
-                    SymbolKind: 20
+                    start: [27 5]
+                    end: [27 12]
                 )
-                follow: 1
             )
         ) #(
             expr: #(
@@ -1322,9 +664,6 @@ Type HELP for starting information.
             end: [27 12]
             syntax: #(
                 name: "literal"
-                type: map!
-                CompletionItemKind: 21
-                SymbolKind: 20
             )
         ) #(
             expr: i:
@@ -1333,16 +672,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "unknown"
-                    expr: x
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word: x"
-                    )
+                    start: [28 5]
+                    end: [28 6]
                 )
-                follow: 1
             )
         ) #(
             expr: x
@@ -1350,13 +682,6 @@ Type HELP for starting information.
             end: [28 6]
             syntax: #(
                 name: "unknown"
-                expr: x
-                error: #(
-                    severity: 2
-                    code: "unknown-word"
-                    source: "Syntax"
-                    message: "unknown word: x"
-                )
             )
         ) #(
             expr: j:
@@ -1365,76 +690,16 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "resolved"
-                    expr: e
-                    cast: #(
-                        expr: e:
-                        start: [20 4]
-                        end: [20 6]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "resolved"
-                                expr: x
-                                cast: #(
-                                    expr: x
-                                    start: [8 12]
-                                    end: [8 13]
-                                    syntax: #(
-                                        name: "func-args"
-                                        spec: [#(
-                                            expr: block!
-                                            start: [8 15]
-                                            end: [8 21]
-                                            syntax: #()
-                                        )]
-                                    )
-                                )
-                                resolved-type: spec
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
+                    start: [29 5]
+                    end: [29 6]
                 )
-                follow: 1
             )
         ) #(
             expr: e
             start: [29 5]
             end: [29 6]
             syntax: #(
-                name: "resolved"
-                expr: e
-                cast: #(
-                    expr: e:
-                    start: [20 4]
-                    end: [20 6]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "resolved"
-                            expr: x
-                            cast: #(
-                                expr: x
-                                start: [8 12]
-                                end: [8 13]
-                                syntax: #(
-                                    name: "func-args"
-                                    spec: [#(
-                                        expr: block!
-                                        start: [8 15]
-                                        end: [8 21]
-                                        syntax: #()
-                                    )]
-                                )
-                            )
-                            resolved-type: spec
-                        )
-                        follow: 1
-                    )
-                )
-                resolved-type: context
+                name: "unknown"
             )
         ) #(
             expr: k:
@@ -1443,231 +708,26 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "resolved"
-                    expr: t
-                    cast: #(
-                        expr: t:
-                        start: [22 4]
-                        end: [22 6]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "resolved"
-                                expr: h
-                                cast: #(
-                                    expr: h:
-                                    start: [27 2]
-                                    end: [27 4]
-                                    syntax: #(
-                                        name: "set-word"
-                                        cast: #(
-                                            name: "literal"
-                                            type: map!
-                                            CompletionItemKind: 21
-                                            SymbolKind: 20
-                                        )
-                                        follow: 1
-                                    )
-                                )
-                                resolved-type: context
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
+                    start: [30 5]
+                    end: [30 6]
                 )
-                follow: 1
             )
         ) #(
             expr: t
             start: [30 5]
             end: [30 6]
             syntax: #(
-                name: "resolved"
-                expr: t
-                cast: #(
-                    expr: t:
-                    start: [22 4]
-                    end: [22 6]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "resolved"
-                            expr: h
-                            cast: #(
-                                expr: h:
-                                start: [27 2]
-                                end: [27 4]
-                                syntax: #(
-                                    name: "set-word"
-                                    cast: #(
-                                        name: "literal"
-                                        type: map!
-                                        CompletionItemKind: 21
-                                        SymbolKind: 20
-                                    )
-                                    follow: 1
-                                )
-                            )
-                            resolved-type: context
-                        )
-                        follow: 1
-                    )
-                )
-                resolved-type: context
+                name: "unknown"
             )
         )]
         start: [4 12]
         end: [31 2]
         syntax: #(
-            ctx: context
             name: "block"
-            vars: [#(
-                expr: c:
-                start: [5 2]
-                end: [5 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "literal"
-                        type: integer!
-                        CompletionItemKind: 21
-                        SymbolKind: 16
-                    )
-                    follow: 1
-                )
-            ) #(
-                expr: d:
-                start: [6 2]
-                end: [6 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "keyword"
-                        expr: context
-                        type: function!
-                        CompletionItemKind: 14
-                        SymbolKind: 6
-                        follow: 1
-                    )
-                    follow: 2
-                )
-            ) #(
-                expr: h:
-                start: [27 2]
-                end: [27 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "literal"
-                        type: map!
-                        CompletionItemKind: 21
-                        SymbolKind: 20
-                    )
-                    follow: 1
-                )
-            ) #(
-                expr: i:
-                start: [28 2]
-                end: [28 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "unknown"
-                        expr: x
-                        error: #(
-                            severity: 2
-                            code: "unknown-word"
-                            source: "Syntax"
-                            message: "unknown word: x"
-                        )
-                    )
-                    follow: 1
-                )
-            ) #(
-                expr: j:
-                start: [29 2]
-                end: [29 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "resolved"
-                        expr: e
-                        cast: #(
-                            expr: e:
-                            start: [20 4]
-                            end: [20 6]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: x
-                                    cast: #(
-                                        expr: x
-                                        start: [8 12]
-                                        end: [8 13]
-                                        syntax: #(
-                                            name: "func-args"
-                                            spec: [#(
-                                                expr: block!
-                                                start: [8 15]
-                                                end: [8 21]
-                                                syntax: #()
-                                            )]
-                                        )
-                                    )
-                                    resolved-type: spec
-                                )
-                                follow: 1
-                            )
-                        )
-                        resolved-type: context
-                    )
-                    follow: 1
-                )
-            ) #(
-                expr: k:
-                start: [30 2]
-                end: [30 4]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "resolved"
-                        expr: t
-                        cast: #(
-                            expr: t:
-                            start: [22 4]
-                            end: [22 6]
-                            syntax: #(
-                                name: "set-word"
-                                cast: #(
-                                    name: "resolved"
-                                    expr: h
-                                    cast: #(
-                                        expr: h:
-                                        start: [27 2]
-                                        end: [27 4]
-                                        syntax: #(
-                                            name: "set-word"
-                                            cast: #(
-                                                name: "literal"
-                                                type: map!
-                                                CompletionItemKind: 21
-                                                SymbolKind: 20
-                                            )
-                                            follow: 1
-                                        )
-                                    )
-                                    resolved-type: context
-                                )
-                                follow: 1
-                            )
-                        )
-                        resolved-type: context
-                    )
-                    follow: 1
-                )
-            )]
+            parent: #(
+                start: [4 4]
+                end: [4 11]
+            )
         )
     ) #(
         expr: l:
@@ -1676,9 +736,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "paren"
+                start: [33 4]
+                end: [33 15]
             )
-            follow: 1
         )
     ) #(
         expr: (#(
@@ -1688,12 +748,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
+                    start: [33 8]
+                    end: [33 9]
                 )
-                follow: 1
             )
         ) #(
             expr: 3
@@ -1701,9 +758,6 @@ Type HELP for starting information.
             end: [33 9]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         ) #(
             expr: n:
@@ -1712,50 +766,16 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "resolved"
-                    expr: a
-                    cast: #(
-                        expr: a:
-                        start: [3 1]
-                        end: [3 3]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "literal"
-                                type: lit-word!
-                                CompletionItemKind: 21
-                                SymbolKind: 14
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
+                    start: [33 13]
+                    end: [33 14]
                 )
-                follow: 1
             )
         ) #(
             expr: a
             start: [33 13]
             end: [33 14]
             syntax: #(
-                name: "resolved"
-                expr: a
-                cast: #(
-                    expr: a:
-                    start: [3 1]
-                    end: [3 3]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "literal"
-                            type: lit-word!
-                            CompletionItemKind: 21
-                            SymbolKind: 14
-                        )
-                        follow: 1
-                    )
-                )
-                resolved-type: context
+                name: "unknown"
             )
         ))
         start: [33 4]
@@ -1770,44 +790,16 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "resolved"
-                expr: l
-                cast: #(
-                    expr: l:
-                    start: [33 1]
-                    end: [33 3]
-                    syntax: #(
-                        name: "set-word"
-                        cast: #(
-                            name: "paren"
-                        )
-                        follow: 1
-                    )
-                )
-                resolved-type: context
+                start: [34 4]
+                end: [34 5]
             )
-            follow: 1
         )
     ) #(
         expr: l
         start: [34 4]
         end: [34 5]
         syntax: #(
-            name: "resolved"
-            expr: l
-            cast: #(
-                expr: l:
-                start: [33 1]
-                end: [33 3]
-                syntax: #(
-                    name: "set-word"
-                    cast: #(
-                        name: "paren"
-                    )
-                    follow: 1
-                )
-            )
-            resolved-type: context
+            name: "unknown"
         )
     ) #(
         expr: r:
@@ -1816,14 +808,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: func
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 2
+                start: [36 4]
+                end: [36 8]
             )
-            follow: 3
         )
     ) #(
         expr: func
@@ -1831,11 +818,14 @@ Type HELP for starting information.
         end: [36 8]
         syntax: #(
             name: "keyword"
-            expr: func
-            type: native!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            follow: 2
+            spec: #(
+                start: [36 9]
+                end: [36 40]
+            )
+            body: #(
+                start: [36 40]
+                end: [39 2]
+            )
         )
     ) #(
         expr: [#(
@@ -1844,19 +834,10 @@ Type HELP for starting information.
             end: [36 11]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: test
-                    start: [36 13]
-                    end: [36 17]
-                    syntax: #(
-                        error: #(
-                            severity: 1
-                            code: "invalid-datatype"
-                            source: "Syntax"
-                            message: "invalid datatype! in block!: test"
-                        )
-                    )
-                )]
+                spec: #(
+                    start: [36 12]
+                    end: [36 18]
+                )
             )
         ) #(
             expr: [#(
@@ -1864,6 +845,7 @@ Type HELP for starting information.
                 start: [36 13]
                 end: [36 17]
                 syntax: #(
+                    name: "unknown"
                     error: #(
                         severity: 1
                         code: "invalid-datatype"
@@ -1874,26 +856,23 @@ Type HELP for starting information.
             )]
             start: [36 12]
             end: [36 18]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [36 10]
+                    end: [36 11]
+                )
+            )
         ) #(
             expr: b
             start: [36 19]
             end: [36 20]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: test!
-                    start: [36 22]
-                    end: [36 27]
-                    syntax: #(
-                        error: #(
-                            severity: 1
-                            code: "invalid-datatype"
-                            source: "Syntax"
-                            message: "invalid datatype! in block!: test!"
-                        )
-                    )
-                )]
+                spec: #(
+                    start: [36 21]
+                    end: [36 28]
+                )
             )
         ) #(
             expr: [#(
@@ -1901,6 +880,7 @@ Type HELP for starting information.
                 start: [36 22]
                 end: [36 27]
                 syntax: #(
+                    name: "unknown"
                     error: #(
                         severity: 1
                         code: "invalid-datatype"
@@ -1911,7 +891,13 @@ Type HELP for starting information.
             )]
             start: [36 21]
             end: [36 28]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [36 19]
+                    end: [36 20]
+                )
+            )
         ) #(
             expr: /local
             start: [36 29]
@@ -1919,21 +905,11 @@ Type HELP for starting information.
             syntax: #(
                 name: "func-refines"
                 spec: [#(
-                    expr: x
                     start: [36 36]
                     end: [36 37]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
                 ) #(
-                    expr: y
                     start: [36 38]
                     end: [36 39]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
                 )]
             )
         ) #(
@@ -1942,7 +918,10 @@ Type HELP for starting information.
             end: [36 37]
             syntax: #(
                 name: "func-args"
-                paren: /local
+                parent: #(
+                    start: [36 29]
+                    end: [36 35]
+                )
             )
         ) #(
             expr: y
@@ -1950,14 +929,20 @@ Type HELP for starting information.
             end: [36 39]
             syntax: #(
                 name: "func-args"
-                paren: /local
+                parent: #(
+                    start: [36 29]
+                    end: [36 35]
+                )
             )
         )]
         start: [36 9]
         end: [36 40]
         syntax: #(
-            ctx: func
-            ctx-index: 1
+            name: "block"
+            parent: #(
+                start: [36 4]
+                end: [36 8]
+            )
         )
     ) #(
         expr: [#(
@@ -1967,12 +952,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
+                    start: [37 5]
+                    end: [37 6]
                 )
-                follow: 1
             )
         ) #(
             expr: 1
@@ -1980,9 +962,6 @@ Type HELP for starting information.
             end: [37 6]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         ) #(
             expr: y:
@@ -1991,12 +970,9 @@ Type HELP for starting information.
             syntax: #(
                 name: "set-word"
                 cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
+                    start: [37 10]
+                    end: [37 11]
                 )
-                follow: 1
             )
         ) #(
             expr: 1
@@ -2004,39 +980,13 @@ Type HELP for starting information.
             end: [37 11]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         ) #(
             expr: a
             start: [38 2]
             end: [38 3]
             syntax: #(
-                name: "resolved"
-                expr: a
-                cast: #(
-                    expr: a
-                    start: [36 10]
-                    end: [36 11]
-                    syntax: #(
-                        name: "func-args"
-                        spec: [#(
-                            expr: test
-                            start: [36 13]
-                            end: [36 17]
-                            syntax: #(
-                                error: #(
-                                    severity: 1
-                                    code: "invalid-datatype"
-                                    source: "Syntax"
-                                    message: "invalid datatype! in block!: test"
-                                )
-                            )
-                        )]
-                    )
-                )
-                resolved-type: spec
+                name: "unknown"
             )
         ) #(
             expr: +
@@ -2044,40 +994,13 @@ Type HELP for starting information.
             end: [38 5]
             syntax: #(
                 name: "keyword"
-                expr: +
-                type: op!
-                CompletionItemKind: 14
-                SymbolKind: 6
             )
         ) #(
             expr: b
             start: [38 6]
             end: [38 7]
             syntax: #(
-                name: "resolved"
-                expr: b
-                cast: #(
-                    expr: b
-                    start: [36 19]
-                    end: [36 20]
-                    syntax: #(
-                        name: "func-args"
-                        spec: [#(
-                            expr: test!
-                            start: [36 22]
-                            end: [36 27]
-                            syntax: #(
-                                error: #(
-                                    severity: 1
-                                    code: "invalid-datatype"
-                                    source: "Syntax"
-                                    message: "invalid datatype! in block!: test!"
-                                )
-                            )
-                        )]
-                    )
-                )
-                resolved-type: spec
+                name: "unknown"
             )
         ) #(
             expr: +
@@ -2085,10 +1008,6 @@ Type HELP for starting information.
             end: [38 9]
             syntax: #(
                 name: "keyword"
-                expr: +
-                type: op!
-                CompletionItemKind: 14
-                SymbolKind: 6
             )
         ) #(
             expr: 1
@@ -2096,9 +1015,6 @@ Type HELP for starting information.
             end: [38 11]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         ) #(
             expr: +
@@ -2106,10 +1022,6 @@ Type HELP for starting information.
             end: [38 13]
             syntax: #(
                 name: "keyword"
-                expr: +
-                type: op!
-                CompletionItemKind: 14
-                SymbolKind: 6
             )
         ) #(
             expr: 1
@@ -2117,132 +1029,16 @@ Type HELP for starting information.
             end: [38 15]
             syntax: #(
                 name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
             )
         )]
         start: [36 40]
         end: [39 2]
         syntax: #(
-            ctx: func
-            ctx-index: 2
-            spec: [#(
-                expr: a
-                start: [36 10]
-                end: [36 11]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: test
-                        start: [36 13]
-                        end: [36 17]
-                        syntax: #(
-                            error: #(
-                                severity: 1
-                                code: "invalid-datatype"
-                                source: "Syntax"
-                                message: "invalid datatype! in block!: test"
-                            )
-                        )
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: test
-                    start: [36 13]
-                    end: [36 17]
-                    syntax: #(
-                        error: #(
-                            severity: 1
-                            code: "invalid-datatype"
-                            source: "Syntax"
-                            message: "invalid datatype! in block!: test"
-                        )
-                    )
-                )]
-                start: [36 12]
-                end: [36 18]
-                syntax: #()
-            ) #(
-                expr: b
-                start: [36 19]
-                end: [36 20]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: test!
-                        start: [36 22]
-                        end: [36 27]
-                        syntax: #(
-                            error: #(
-                                severity: 1
-                                code: "invalid-datatype"
-                                source: "Syntax"
-                                message: "invalid datatype! in block!: test!"
-                            )
-                        )
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: test!
-                    start: [36 22]
-                    end: [36 27]
-                    syntax: #(
-                        error: #(
-                            severity: 1
-                            code: "invalid-datatype"
-                            source: "Syntax"
-                            message: "invalid datatype! in block!: test!"
-                        )
-                    )
-                )]
-                start: [36 21]
-                end: [36 28]
-                syntax: #()
-            ) #(
-                expr: /local
-                start: [36 29]
-                end: [36 35]
-                syntax: #(
-                    name: "func-refines"
-                    spec: [#(
-                        expr: x
-                        start: [36 36]
-                        end: [36 37]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    ) #(
-                        expr: y
-                        start: [36 38]
-                        end: [36 39]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    )]
-                )
-            ) #(
-                expr: x
-                start: [36 36]
-                end: [36 37]
-                syntax: #(
-                    name: "func-args"
-                    paren: /local
-                )
-            ) #(
-                expr: y
-                start: [36 38]
-                end: [36 39]
-                syntax: #(
-                    name: "func-args"
-                    paren: /local
-                )
-            )]
             name: "block"
+            parent: #(
+                start: [36 4]
+                end: [36 8]
+            )
         )
     ) #(
         expr: s:
@@ -2251,14 +1047,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: function
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 2
+                start: [41 4]
+                end: [41 12]
             )
-            follow: 3
         )
     ) #(
         expr: function
@@ -2266,11 +1057,14 @@ Type HELP for starting information.
         end: [41 12]
         syntax: #(
             name: "keyword"
-            expr: function
-            type: native!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            follow: 2
+            spec: #(
+                start: [41 13]
+                end: [41 56]
+            )
+            body: #(
+                start: [41 56]
+                end: [47 2]
+            )
         )
     ) #(
         expr: [#(
@@ -2279,75 +1073,96 @@ Type HELP for starting information.
             end: [41 17]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: string!
-                    start: [41 19]
-                    end: [41 26]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [41 18]
+                    end: [41 27]
+                )
             )
         ) #(
             expr: [#(
                 expr: string!
                 start: [41 19]
                 end: [41 26]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [41 18]
             end: [41 27]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [41 14]
+                    end: [41 17]
+                )
+            )
         ) #(
             expr: code
             start: [41 28]
             end: [41 32]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: string!
-                    start: [41 34]
-                    end: [41 41]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [41 33]
+                    end: [41 42]
+                )
             )
         ) #(
             expr: [#(
                 expr: string!
                 start: [41 34]
                 end: [41 41]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [41 33]
             end: [41 42]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [41 28]
+                    end: [41 32]
+                )
+            )
         ) #(
             expr: blk
             start: [41 43]
             end: [41 46]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: block!
-                    start: [41 48]
-                    end: [41 54]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [41 47]
+                    end: [41 55]
+                )
             )
         ) #(
             expr: [#(
                 expr: block!
                 start: [41 48]
                 end: [41 54]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [41 47]
             end: [41 55]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [41 43]
+                    end: [41 46]
+                )
+            )
         )]
         start: [41 13]
         end: [41 56]
         syntax: #(
-            ctx: function
-            ctx-index: 1
+            name: "block"
+            parent: #(
+                start: [41 4]
+                end: [41 12]
+            )
         )
     ) #(
         expr: [#(
@@ -2356,33 +1171,13 @@ Type HELP for starting information.
             end: [42 8]
             syntax: #(
                 name: "keyword"
-                expr: either
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
             )
         ) #(
             expr: uri
             start: [42 9]
             end: [42 12]
             syntax: #(
-                name: "resolved"
-                expr: uri
-                cast: #(
-                    expr: uri
-                    start: [41 14]
-                    end: [41 17]
-                    syntax: #(
-                        name: "func-args"
-                        spec: [#(
-                            expr: string!
-                            start: [41 19]
-                            end: [41 26]
-                            syntax: #()
-                        )]
-                    )
-                )
-                resolved-type: spec
+                name: "unknown"
             )
         ) #(
             expr: [#(
@@ -2391,10 +1186,6 @@ Type HELP for starting information.
                 end: [43 9]
                 syntax: #(
                     name: "keyword"
-                    expr: return
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
                 )
             ) #(
                 expr: reduce
@@ -2402,10 +1193,6 @@ Type HELP for starting information.
                 end: [43 16]
                 syntax: #(
                     name: "keyword"
-                    expr: reduce
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
                 )
             ) #(
                 expr: [#(
@@ -2413,69 +1200,21 @@ Type HELP for starting information.
                     start: [43 18]
                     end: [43 21]
                     syntax: #(
-                        name: "resolved"
-                        expr: uri
-                        cast: #(
-                            expr: uri
-                            start: [41 14]
-                            end: [41 17]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: string!
-                                    start: [41 19]
-                                    end: [41 26]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: code
                     start: [43 22]
                     end: [43 26]
                     syntax: #(
-                        name: "resolved"
-                        expr: code
-                        cast: #(
-                            expr: code
-                            start: [41 28]
-                            end: [41 32]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: string!
-                                    start: [41 34]
-                                    end: [41 41]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: blk
                     start: [43 27]
                     end: [43 30]
                     syntax: #(
-                        name: "resolved"
-                        expr: blk
-                        cast: #(
-                            expr: blk
-                            start: [41 43]
-                            end: [41 46]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: block!
-                                    start: [41 48]
-                                    end: [41 54]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 )]
                 start: [43 17]
@@ -2496,10 +1235,6 @@ Type HELP for starting information.
                 end: [45 9]
                 syntax: #(
                     name: "keyword"
-                    expr: return
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
                 )
             ) #(
                 expr: reduce
@@ -2507,10 +1242,6 @@ Type HELP for starting information.
                 end: [45 16]
                 syntax: #(
                     name: "keyword"
-                    expr: reduce
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
                 )
             ) #(
                 expr: [#(
@@ -2518,69 +1249,21 @@ Type HELP for starting information.
                     start: [45 18]
                     end: [45 21]
                     syntax: #(
-                        name: "resolved"
-                        expr: uri
-                        cast: #(
-                            expr: uri
-                            start: [41 14]
-                            end: [41 17]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: string!
-                                    start: [41 19]
-                                    end: [41 26]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: code
                     start: [45 22]
                     end: [45 26]
                     syntax: #(
-                        name: "resolved"
-                        expr: code
-                        cast: #(
-                            expr: code
-                            start: [41 28]
-                            end: [41 32]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: string!
-                                    start: [41 34]
-                                    end: [41 41]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 ) #(
                     expr: blk
                     start: [45 27]
                     end: [45 30]
                     syntax: #(
-                        name: "resolved"
-                        expr: blk
-                        cast: #(
-                            expr: blk
-                            start: [41 43]
-                            end: [41 46]
-                            syntax: #(
-                                name: "func-args"
-                                spec: [#(
-                                    expr: block!
-                                    start: [41 48]
-                                    end: [41 54]
-                                    syntax: #()
-                                )]
-                            )
-                        )
-                        resolved-type: spec
+                        name: "unknown"
                     )
                 )]
                 start: [45 17]
@@ -2598,79 +1281,11 @@ Type HELP for starting information.
         start: [41 56]
         end: [47 2]
         syntax: #(
-            ctx: function
-            ctx-index: 2
-            spec: [#(
-                expr: uri
-                start: [41 14]
-                end: [41 17]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: string!
-                        start: [41 19]
-                        end: [41 26]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: string!
-                    start: [41 19]
-                    end: [41 26]
-                    syntax: #()
-                )]
-                start: [41 18]
-                end: [41 27]
-                syntax: #()
-            ) #(
-                expr: code
-                start: [41 28]
-                end: [41 32]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: string!
-                        start: [41 34]
-                        end: [41 41]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: string!
-                    start: [41 34]
-                    end: [41 41]
-                    syntax: #()
-                )]
-                start: [41 33]
-                end: [41 42]
-                syntax: #()
-            ) #(
-                expr: blk
-                start: [41 43]
-                end: [41 46]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: block!
-                        start: [41 48]
-                        end: [41 54]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: block!
-                    start: [41 48]
-                    end: [41 54]
-                    syntax: #()
-                )]
-                start: [41 47]
-                end: [41 55]
-                syntax: #()
-            )]
             name: "block"
+            parent: #(
+                start: [41 4]
+                end: [41 12]
+            )
         )
     ) #(
         expr: fff:
@@ -2679,12 +1294,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "literal"
-                type: integer!
-                CompletionItemKind: 21
-                SymbolKind: 16
+                start: [49 6]
+                end: [49 7]
             )
-            follow: 1
         )
     ) #(
         expr: 3
@@ -2692,9 +1304,6 @@ Type HELP for starting information.
         end: [49 7]
         syntax: #(
             name: "literal"
-            type: integer!
-            CompletionItemKind: 21
-            SymbolKind: 16
         )
     ) #(
         expr: ft:
@@ -2703,14 +1312,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: func
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 2
+                start: [51 5]
+                end: [51 9]
             )
-            follow: 3
         )
     ) #(
         expr: func
@@ -2718,11 +1322,14 @@ Type HELP for starting information.
         end: [51 9]
         syntax: #(
             name: "keyword"
-            expr: func
-            type: native!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            follow: 2
+            spec: #(
+                start: [51 10]
+                end: [51 104]
+            )
+            body: #(
+                start: [51 104]
+                end: [54 2]
+            )
         )
     ) #(
         expr: [#(
@@ -2731,69 +1338,79 @@ Type HELP for starting information.
             end: [51 12]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: block!
-                    start: [51 14]
-                    end: [51 20]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [51 13]
+                    end: [51 21]
+                )
             )
         ) #(
             expr: [#(
                 expr: block!
                 start: [51 14]
                 end: [51 20]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [51 13]
             end: [51 21]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [51 11]
+                    end: [51 12]
+                )
+            )
         ) #(
             expr: b
             start: [51 22]
             end: [51 23]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: map!
-                    start: [51 25]
-                    end: [51 29]
-                    syntax: #()
-                ) #(
-                    expr: integer!
-                    start: [51 30]
-                    end: [51 38]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [51 24]
+                    end: [51 39]
+                )
             )
         ) #(
             expr: [#(
                 expr: map!
                 start: [51 25]
                 end: [51 29]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             ) #(
                 expr: integer!
                 start: [51 30]
                 end: [51 38]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [51 24]
             end: [51 39]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [51 22]
+                    end: [51 23]
+                )
+            )
         ) #(
             expr: return:
             start: [51 40]
             end: [51 47]
             syntax: #(
-                name: "func-args"
-                paren: /return
-                spec: [#(
-                    expr: integer!
-                    start: [51 49]
-                    end: [51 57]
-                    syntax: #()
-                )]
+                name: "func-return"
+                cast: #(
+                    start: [51 48]
+                    end: [51 58]
+                )
+                spec: #(
+                    start: [51 48]
+                    end: [51 58]
+                )
                 error: #(
                     severity: 1
                     code: "return-place"
@@ -2806,70 +1423,63 @@ Type HELP for starting information.
                 expr: integer!
                 start: [51 49]
                 end: [51 57]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [51 48]
             end: [51 58]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [51 40]
+                    end: [51 47]
+                )
+            )
         ) #(
             expr: c
             start: [51 59]
             end: [51 60]
             syntax: #(
                 name: "func-args"
-                spec: [#(
-                    expr: integer!
-                    start: [51 62]
-                    end: [51 70]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [51 61]
+                    end: [51 71]
+                )
             )
         ) #(
             expr: [#(
                 expr: integer!
                 start: [51 62]
                 end: [51 70]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [51 61]
             end: [51 71]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [51 59]
+                    end: [51 60]
+                )
+            )
         ) #(
             expr: /c
             start: [51 72]
             end: [51 74]
             syntax: #(
+                name: "func-refines"
                 error: #(
                     severity: 1
                     code: "double-define"
                     source: "Syntax"
                     message: "double define: c"
                 )
-                name: "func-refines"
                 spec: [#(
-                    expr: x
-                    start: [51 98]
-                    end: [51 99]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
-                ) #(
-                    expr: y
-                    start: [51 100]
-                    end: [51 101]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
-                ) #(
-                    expr: z
-                    start: [51 102]
-                    end: [51 103]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
+                    start: [51 75]
+                    end: [51 76]
                 )]
             )
         ) #(
@@ -2877,31 +1487,40 @@ Type HELP for starting information.
             start: [51 75]
             end: [51 76]
             syntax: #(
+                name: "func-args"
+                parent: #(
+                    start: [51 72]
+                    end: [51 74]
+                )
                 error: #(
                     severity: 1
                     code: "double-define"
                     source: "Syntax"
                     message: "double define: a"
                 )
-                name: "func-args"
-                paren: /c
-                spec: [#(
-                    expr: integer!
-                    start: [51 78]
-                    end: [51 86]
-                    syntax: #()
-                )]
+                spec: #(
+                    start: [51 77]
+                    end: [51 87]
+                )
             )
         ) #(
             expr: [#(
                 expr: integer!
                 start: [51 78]
                 end: [51 86]
-                syntax: #()
+                syntax: #(
+                    name: "keyword"
+                )
             )]
             start: [51 77]
             end: [51 87]
-            syntax: #()
+            syntax: #(
+                name: "block"
+                parent: #(
+                    start: [51 75]
+                    end: [51 76]
+                )
+            )
         ) #(
             expr: /d
             start: [51 88]
@@ -2916,29 +1535,14 @@ Type HELP for starting information.
             syntax: #(
                 name: "func-refines"
                 spec: [#(
-                    expr: x
                     start: [51 98]
                     end: [51 99]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
                 ) #(
-                    expr: y
                     start: [51 100]
                     end: [51 101]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
                 ) #(
-                    expr: z
                     start: [51 102]
                     end: [51 103]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /local
-                    )
                 )]
             )
         ) #(
@@ -2947,7 +1551,10 @@ Type HELP for starting information.
             end: [51 99]
             syntax: #(
                 name: "func-args"
-                paren: /local
+                parent: #(
+                    start: [51 91]
+                    end: [51 97]
+                )
             )
         ) #(
             expr: y
@@ -2955,7 +1562,10 @@ Type HELP for starting information.
             end: [51 101]
             syntax: #(
                 name: "func-args"
-                paren: /local
+                parent: #(
+                    start: [51 91]
+                    end: [51 97]
+                )
             )
         ) #(
             expr: z
@@ -2963,14 +1573,20 @@ Type HELP for starting information.
             end: [51 103]
             syntax: #(
                 name: "func-args"
-                paren: /local
+                parent: #(
+                    start: [51 91]
+                    end: [51 97]
+                )
             )
         )]
         start: [51 10]
         end: [51 104]
         syntax: #(
-            ctx: func
-            ctx-index: 1
+            name: "block"
+            parent: #(
+                start: [51 5]
+                end: [51 9]
+            )
         )
     ) #(
         expr: [#(
@@ -2979,10 +1595,6 @@ Type HELP for starting information.
             end: [52 8]
             syntax: #(
                 name: "keyword"
-                expr: reduce
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
             )
         ) #(
             expr: [#(
@@ -2990,74 +1602,21 @@ Type HELP for starting information.
                 start: [52 10]
                 end: [52 11]
                 syntax: #(
-                    name: "resolved"
-                    expr: a
-                    cast: #(
-                        expr: a
-                        start: [51 11]
-                        end: [51 12]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: block!
-                                start: [51 14]
-                                end: [51 20]
-                                syntax: #()
-                            )]
-                        )
-                    )
-                    resolved-type: spec
+                    name: "unknown"
                 )
             ) #(
                 expr: b
                 start: [52 12]
                 end: [52 13]
                 syntax: #(
-                    name: "resolved"
-                    expr: b
-                    cast: #(
-                        expr: b
-                        start: [51 22]
-                        end: [51 23]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: map!
-                                start: [51 25]
-                                end: [51 29]
-                                syntax: #()
-                            ) #(
-                                expr: integer!
-                                start: [51 30]
-                                end: [51 38]
-                                syntax: #()
-                            )]
-                        )
-                    )
-                    resolved-type: spec
+                    name: "unknown"
                 )
             ) #(
                 expr: c
                 start: [52 14]
                 end: [52 15]
                 syntax: #(
-                    name: "resolved"
-                    expr: c
-                    cast: #(
-                        expr: c
-                        start: [51 59]
-                        end: [51 60]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: integer!
-                                start: [51 62]
-                                end: [51 70]
-                                syntax: #()
-                            )]
-                        )
-                    )
-                    resolved-type: spec
+                    name: "unknown"
                 )
             ) #(
                 expr: d
@@ -3065,13 +1624,6 @@ Type HELP for starting information.
                 end: [52 17]
                 syntax: #(
                     name: "unknown"
-                    expr: d
-                    error: #(
-                        severity: 2
-                        code: "unknown-word"
-                        source: "Syntax"
-                        message: "unknown word: d"
-                    )
                 )
             )]
             start: [52 9]
@@ -3085,9 +1637,6 @@ Type HELP for starting information.
             end: [53 12]
             syntax: #(
                 name: "literal"
-                type: path!
-                CompletionItemKind: 21
-                SymbolKind: 19
             )
         ) #(
             expr: "adb"
@@ -3095,9 +1644,6 @@ Type HELP for starting information.
             end: [53 18]
             syntax: #(
                 name: "literal"
-                type: string!
-                CompletionItemKind: 21
-                SymbolKind: 15
             )
         ) #(
             expr: "a"
@@ -3105,258 +1651,16 @@ Type HELP for starting information.
             end: [53 22]
             syntax: #(
                 name: "literal"
-                type: string!
-                CompletionItemKind: 21
-                SymbolKind: 15
             )
         )]
         start: [51 104]
         end: [54 2]
         syntax: #(
-            ctx: func
-            ctx-index: 2
-            spec: [#(
-                expr: a
-                start: [51 11]
-                end: [51 12]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: block!
-                        start: [51 14]
-                        end: [51 20]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: block!
-                    start: [51 14]
-                    end: [51 20]
-                    syntax: #()
-                )]
-                start: [51 13]
-                end: [51 21]
-                syntax: #()
-            ) #(
-                expr: b
-                start: [51 22]
-                end: [51 23]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: map!
-                        start: [51 25]
-                        end: [51 29]
-                        syntax: #()
-                    ) #(
-                        expr: integer!
-                        start: [51 30]
-                        end: [51 38]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: map!
-                    start: [51 25]
-                    end: [51 29]
-                    syntax: #()
-                ) #(
-                    expr: integer!
-                    start: [51 30]
-                    end: [51 38]
-                    syntax: #()
-                )]
-                start: [51 24]
-                end: [51 39]
-                syntax: #()
-            ) #(
-                expr: return:
-                start: [51 40]
-                end: [51 47]
-                syntax: #(
-                    name: "func-args"
-                    paren: /return
-                    spec: [#(
-                        expr: integer!
-                        start: [51 49]
-                        end: [51 57]
-                        syntax: #()
-                    )]
-                    error: #(
-                        severity: 1
-                        code: "return-place"
-                        source: "Syntax"
-                        message: "invalid place for 'return:'"
-                    )
-                )
-            ) #(
-                expr: [#(
-                    expr: integer!
-                    start: [51 49]
-                    end: [51 57]
-                    syntax: #()
-                )]
-                start: [51 48]
-                end: [51 58]
-                syntax: #()
-            ) #(
-                expr: c
-                start: [51 59]
-                end: [51 60]
-                syntax: #(
-                    name: "func-args"
-                    spec: [#(
-                        expr: integer!
-                        start: [51 62]
-                        end: [51 70]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: integer!
-                    start: [51 62]
-                    end: [51 70]
-                    syntax: #()
-                )]
-                start: [51 61]
-                end: [51 71]
-                syntax: #()
-            ) #(
-                expr: /c
-                start: [51 72]
-                end: [51 74]
-                syntax: #(
-                    error: #(
-                        severity: 1
-                        code: "double-define"
-                        source: "Syntax"
-                        message: "double define: c"
-                    )
-                    name: "func-refines"
-                    spec: [#(
-                        expr: x
-                        start: [51 98]
-                        end: [51 99]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    ) #(
-                        expr: y
-                        start: [51 100]
-                        end: [51 101]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    ) #(
-                        expr: z
-                        start: [51 102]
-                        end: [51 103]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    )]
-                )
-            ) #(
-                expr: a
-                start: [51 75]
-                end: [51 76]
-                syntax: #(
-                    error: #(
-                        severity: 1
-                        code: "double-define"
-                        source: "Syntax"
-                        message: "double define: a"
-                    )
-                    name: "func-args"
-                    paren: /c
-                    spec: [#(
-                        expr: integer!
-                        start: [51 78]
-                        end: [51 86]
-                        syntax: #()
-                    )]
-                )
-            ) #(
-                expr: [#(
-                    expr: integer!
-                    start: [51 78]
-                    end: [51 86]
-                    syntax: #()
-                )]
-                start: [51 77]
-                end: [51 87]
-                syntax: #()
-            ) #(
-                expr: /d
-                start: [51 88]
-                end: [51 90]
-                syntax: #(
-                    name: "func-refines"
-                )
-            ) #(
-                expr: /local
-                start: [51 91]
-                end: [51 97]
-                syntax: #(
-                    name: "func-refines"
-                    spec: [#(
-                        expr: x
-                        start: [51 98]
-                        end: [51 99]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    ) #(
-                        expr: y
-                        start: [51 100]
-                        end: [51 101]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    ) #(
-                        expr: z
-                        start: [51 102]
-                        end: [51 103]
-                        syntax: #(
-                            name: "func-args"
-                            paren: /local
-                        )
-                    )]
-                )
-            ) #(
-                expr: x
-                start: [51 98]
-                end: [51 99]
-                syntax: #(
-                    name: "func-args"
-                    paren: /local
-                )
-            ) #(
-                expr: y
-                start: [51 100]
-                end: [51 101]
-                syntax: #(
-                    name: "func-args"
-                    paren: /local
-                )
-            ) #(
-                expr: z
-                start: [51 102]
-                end: [51 103]
-                syntax: #(
-                    name: "func-args"
-                    paren: /local
-                )
-            )]
             name: "block"
+            parent: #(
+                start: [51 5]
+                end: [51 9]
+            )
         )
     ) #(
         expr: fh1:
@@ -3365,20 +1669,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: has
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                error: #(
-                    severity: 1
-                    code: "miss-block"
-                    source: "Syntax"
-                    message: "missing a block!: has"
-                )
-                follow: 1
+                start: [56 6]
+                end: [56 9]
             )
-            follow: 2
         )
     ) #(
         expr: has
@@ -3386,17 +1679,11 @@ Type HELP for starting information.
         end: [56 9]
         syntax: #(
             name: "keyword"
-            expr: has
-            type: native!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            error: #(
-                severity: 1
-                code: "miss-block"
-                source: "Syntax"
-                message: "missing a block!: has"
+            spec: #(
+                start: [56 10]
+                end: [56 20]
             )
-            follow: 1
+            need: "body"
         )
     ) #(
         expr: [#(
@@ -3404,29 +1691,19 @@ Type HELP for starting information.
             start: [56 11]
             end: [56 15]
             syntax: #(
+                name: "func-refines"
                 error: #(
                     severity: 1
                     code: "forbidden-refine"
                     source: "Syntax"
                     message: "forbidden refinement here: /ref"
                 )
-                name: "func-refines"
                 spec: [#(
-                    expr: a
                     start: [56 16]
                     end: [56 17]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /ref
-                    )
                 ) #(
-                    expr: b
                     start: [56 18]
                     end: [56 19]
-                    syntax: #(
-                        name: "func-args"
-                        paren: /ref
-                    )
                 )]
             )
         ) #(
@@ -3435,7 +1712,10 @@ Type HELP for starting information.
             end: [56 17]
             syntax: #(
                 name: "func-args"
-                paren: /ref
+                parent: #(
+                    start: [56 11]
+                    end: [56 15]
+                )
             )
         ) #(
             expr: b
@@ -3443,14 +1723,20 @@ Type HELP for starting information.
             end: [56 19]
             syntax: #(
                 name: "func-args"
-                paren: /ref
+                parent: #(
+                    start: [56 11]
+                    end: [56 15]
+                )
             )
         )]
         start: [56 10]
         end: [56 20]
         syntax: #(
-            ctx: has
-            ctx-index: 1
+            name: "block"
+            parent: #(
+                start: [56 6]
+                end: [56 9]
+            )
         )
     ) #(
         expr: fh2:
@@ -3459,14 +1745,9 @@ Type HELP for starting information.
         syntax: #(
             name: "set-word"
             cast: #(
-                name: "keyword"
-                expr: has
-                type: native!
-                CompletionItemKind: 14
-                SymbolKind: 6
-                follow: 2
+                start: [57 6]
+                end: [57 9]
             )
-            follow: 3
         )
     ) #(
         expr: has
@@ -3474,11 +1755,14 @@ Type HELP for starting information.
         end: [57 9]
         syntax: #(
             name: "keyword"
-            expr: has
-            type: native!
-            CompletionItemKind: 14
-            SymbolKind: 6
-            follow: 2
+            spec: #(
+                start: [57 10]
+                end: [57 15]
+            )
+            body: #(
+                start: [57 15]
+                end: [57 17]
+            )
         )
     ) #(
         expr: [#(
@@ -3499,365 +1783,48 @@ Type HELP for starting information.
         start: [57 10]
         end: [57 15]
         syntax: #(
-            ctx: has
-            ctx-index: 1
+            name: "block"
+            parent: #(
+                start: [57 6]
+                end: [57 9]
+            )
         )
     ) #(
         expr: []
         start: [57 15]
         end: [57 17]
         syntax: #(
-            ctx: has
-            ctx-index: 2
-            spec: [#(
-                expr: a
-                start: [57 11]
-                end: [57 12]
-                syntax: #(
-                    name: "func-args"
-                )
-            ) #(
-                expr: b
-                start: [57 13]
-                end: [57 14]
-                syntax: #(
-                    name: "func-args"
-                )
-            )]
             name: "block"
+            parent: #(
+                start: [57 6]
+                end: [57 9]
+            )
+        )
+    ) #(
+        expr: z:
+        start: [59 1]
+        end: [59 3]
+        syntax: #(
+            name: "set-word"
+            cast: #(
+                start: [59 4]
+                end: [59 5]
+            )
+        )
+    ) #(
+        expr: z
+        start: [59 4]
+        end: [59 5]
+        syntax: #(
+            name: "unknown"
         )
     )]
     start: [1 1]
-    end: [58 1]
+    end: [60 1]
     syntax: #(
         ctx: context
-        vars: [#(
-            expr: he:
-            start: [1 5]
-            end: [1 8]
-            syntax: #(
-                error: #(
-                    severity: 1
-                    code: "miss-head-block"
-                    source: "Syntax"
-                    message: "missing '[]' at head"
-                )
-                meta: 2
-                name: "set-word"
-                cast: #(
-                    name: "block"
-                )
-                follow: 1
-            )
-        ) #(
-            expr: a:
-            start: [3 1]
-            end: [3 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "literal"
-                    type: lit-word!
-                    CompletionItemKind: 21
-                    SymbolKind: 14
-                )
-                follow: 1
-            )
-        ) #(
-            expr: b:
-            start: [4 1]
-            end: [4 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: context
-                    type: function!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 1
-                )
-                follow: 2
-            )
-        ) #(
-            expr: ff:
-            start: [9 4]
-            end: [9 7]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: function
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
-                )
-                follow: 3
-            )
-        ) #(
-            expr: e:
-            start: [20 4]
-            end: [20 6]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "resolved"
-                    expr: x
-                    cast: #(
-                        expr: x
-                        start: [8 12]
-                        end: [8 13]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: block!
-                                start: [8 15]
-                                end: [8 21]
-                                syntax: #()
-                            )]
-                        )
-                    )
-                    resolved-type: spec
-                )
-                follow: 1
-            )
-        ) #(
-            expr: t:
-            start: [22 4]
-            end: [22 6]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "resolved"
-                    expr: h
-                    cast: #(
-                        expr: h:
-                        start: [27 2]
-                        end: [27 4]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "literal"
-                                type: map!
-                                CompletionItemKind: 21
-                                SymbolKind: 20
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
-                )
-                follow: 1
-            )
-        ) #(
-            expr: u:
-            start: [23 4]
-            end: [23 6]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "resolved"
-                    expr: x
-                    cast: #(
-                        expr: x
-                        start: [8 12]
-                        end: [8 13]
-                        syntax: #(
-                            name: "func-args"
-                            spec: [#(
-                                expr: block!
-                                start: [8 15]
-                                end: [8 21]
-                                syntax: #()
-                            )]
-                        )
-                    )
-                    resolved-type: spec
-                )
-                follow: 1
-            )
-        ) #(
-            expr: l:
-            start: [33 1]
-            end: [33 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "paren"
-                )
-                follow: 1
-            )
-        ) #(
-            expr: m:
-            start: [33 5]
-            end: [33 7]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
-                )
-                follow: 1
-            )
-        ) #(
-            expr: n:
-            start: [33 10]
-            end: [33 12]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "resolved"
-                    expr: a
-                    cast: #(
-                        expr: a:
-                        start: [3 1]
-                        end: [3 3]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "literal"
-                                type: lit-word!
-                                CompletionItemKind: 21
-                                SymbolKind: 14
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
-                )
-                follow: 1
-            )
-        ) #(
-            expr: o:
-            start: [34 1]
-            end: [34 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "resolved"
-                    expr: l
-                    cast: #(
-                        expr: l:
-                        start: [33 1]
-                        end: [33 3]
-                        syntax: #(
-                            name: "set-word"
-                            cast: #(
-                                name: "paren"
-                            )
-                            follow: 1
-                        )
-                    )
-                    resolved-type: context
-                )
-                follow: 1
-            )
-        ) #(
-            expr: r:
-            start: [36 1]
-            end: [36 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: func
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
-                )
-                follow: 3
-            )
-        ) #(
-            expr: s:
-            start: [41 1]
-            end: [41 3]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: function
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
-                )
-                follow: 3
-            )
-        ) #(
-            expr: fff:
-            start: [49 1]
-            end: [49 5]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "literal"
-                    type: integer!
-                    CompletionItemKind: 21
-                    SymbolKind: 16
-                )
-                follow: 1
-            )
-        ) #(
-            expr: ft:
-            start: [51 1]
-            end: [51 4]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: func
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
-                )
-                follow: 3
-            )
-        ) #(
-            expr: fh1:
-            start: [56 1]
-            end: [56 5]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: has
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    error: #(
-                        severity: 1
-                        code: "miss-block"
-                        source: "Syntax"
-                        message: "missing a block!: has"
-                    )
-                    follow: 1
-                )
-                follow: 2
-            )
-        ) #(
-            expr: fh2:
-            start: [57 1]
-            end: [57 5]
-            syntax: #(
-                name: "set-word"
-                cast: #(
-                    name: "keyword"
-                    expr: has
-                    type: native!
-                    CompletionItemKind: 14
-                    SymbolKind: 6
-                    follow: 2
-                )
-                follow: 3
-            )
-        )]
     )
-    source: {Red he: []^/^/a: 'test^/b: context [^/^-c: 4^/^-d: context [^/^-^-e: #{12}^/^-^-f: func [x [block!] y [integer!]][^/^-^-^-ff: function [a [integer!] b [binary!]][^/^-^-^-^-f1: "test"^/^-^-^-^-f2: x^/^-^-^-^-f3: f1^/^-^-^-^-f4: l^/^-^-^-^-f5: :f^/^-^-^-^-f6: f5^/^-^-^-^-f7: a + length? b^/^-^-^-]^/^-^-^-x: 1^/^-^-^-y: 1^/^-^-^-e: x + y^/^-^-^-o: g^/^-^-^-t: h^/^-^-^-u: x^/^-^-]^/^-^-g: []^/^-]^/^-h: #(a: 3)^/^-i: x^/^-j: e^/^-k: t^/]^/^/l: (m: 3 n: a)^/o: l^/^/r: func [a [test] b [test!] /local x y][^/^-x: 1 y: 1^/^-a + b + 1 + 1^/]^/^/s: function [uri [string!] code [string!] blk [block!]][^/^-either uri [^/^-^-return reduce [uri code blk]^/^-][^/^-^-return reduce [uri code blk]^/^-]^/]^/^/fff: 3^/^/ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /d /local x y z][^/^-reduce [a b c d]^/^-find/match "adb" "a"^/]^/^/fh1: has [/ref a b]^/fh2: has [a b][]^/}
+    source: {Red he: []^/^/a: 'test^/b: context [^/^-c: 4^/^-d: context [^/^-^-e: #{12}^/^-^-f: func [x [block!] y [integer!]][^/^-^-^-ff: function [a [integer!] b [binary!]][^/^-^-^-^-f1: "test"^/^-^-^-^-f2: x^/^-^-^-^-f3: f1^/^-^-^-^-f4: l^/^-^-^-^-f5: :f^/^-^-^-^-f6: f5^/^-^-^-^-f7: a + length? b^/^-^-^-]^/^-^-^-x: 1^/^-^-^-y: 1^/^-^-^-e: x + y^/^-^-^-o: g^/^-^-^-t: h^/^-^-^-u: x^/^-^-]^/^-^-g: []^/^-]^/^-h: #(a: 3)^/^-i: x^/^-j: e^/^-k: t^/]^/^/l: (m: 3 n: a)^/o: l^/^/r: func [a [test] b [test!] /local x y][^/^-x: 1 y: 1^/^-a + b + 1 + 1^/]^/^/s: function [uri [string!] code [string!] blk [block!]][^/^-either uri [^/^-^-return reduce [uri code blk]^/^-][^/^-^-return reduce [uri code blk]^/^-]^/]^/^/fff: 3^/^/ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /d /local x y z][^/^-reduce [a b c d]^/^-find/match "adb" "a"^/]^/^/fh1: has [/ref a b]^/fh2: has [a b][]^/^/z: z^/}
 )]
 Error/Warning: ---------------------------------------
 [#(
@@ -3873,21 +1840,6 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 0
             character: 7
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word: x"
-    range: #(
-        start: #(
-            line: 27
-            character: 4
-        )
-        end: #(
-            line: 27
-            character: 5
         )
     )
 ) #(
@@ -3963,36 +1915,6 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 50
             character: 75
-        )
-    )
-) #(
-    severity: 2
-    code: "unknown-word"
-    source: "Syntax"
-    message: "unknown word: d"
-    range: #(
-        start: #(
-            line: 51
-            character: 15
-        )
-        end: #(
-            line: 51
-            character: 16
-        )
-    )
-) #(
-    severity: 1
-    code: "miss-block"
-    source: "Syntax"
-    message: "missing a block!: has"
-    range: #(
-        start: #(
-            line: 55
-            character: 5
-        )
-        end: #(
-            line: 55
-            character: 8
         )
     )
 ) #(

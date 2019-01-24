@@ -55,3 +55,5 @@ ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [int
 
 fh1: has [/ref a b]
 fh2: has [a b][]
+
+z: z
