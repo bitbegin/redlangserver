@@ -26,6 +26,7 @@ red-syntax: context [
 		'double-define			"double define"
 		'return-place			"invalid place for 'return:'"
 		'forbidden-refine		"forbidden refinement here"
+		'no-need-desc			"no need descriptions for"
 		'include-not-file		"#include requires a file argument"
 	]
 
@@ -126,7 +127,20 @@ red-syntax: context [
 		npc
 	]
 
+	create-pos: function [where [block! paren! none!]][
+		if where = none [return none]
+		make map! reduce [
+			'start	where/1/start
+			'end	where/1/end
+		]
+	]
+	
 	check-has-spec: function [pc [block!]][
+		npc: skip-semicolon-next pc
+		if string? npc/1/expr [
+			create-error-at pc/1/syntax 'Error 'no-need-desc "has"
+			pc: npc
+		]
 		forall pc [
 			if refinement? pc/1/expr [
 				create-error-at pc/1/syntax 'Error 'forbidden-refine mold pc/1/expr
@@ -134,7 +148,7 @@ red-syntax: context [
 		]
 	]
 
-	check-func-spec: function [pc [block!]][
+	check-func-spec: function [pc [block!] par [block! paren!]][
 		words: clear []
 		word: none
 		double-check: function [pc][
@@ -144,20 +158,18 @@ red-syntax: context [
 				append words word
 			]
 		]
-		check-args: function [npc [block!] par [refinement! none!]][
+		check-args: function [npc [block!] par [block! paren! none!]][
+			syntax: npc/1/syntax
+			syntax/name: "func-args"
+			syntax/parent: create-pos par
 			double-check npc
-			put-syntax npc/1/syntax reduce [
-				'name "func-args"
-				'paren	par
-			]
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					put-syntax npc/1/syntax reduce [
-						'desc npc2/1/expr
-					]
+					syntax/desc: create-pos npc2
+					npc2/1/syntax/parent: create-pos npc
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if block? npc3/1/expr [
@@ -183,64 +195,90 @@ red-syntax: context [
 							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
 					]
-					put-syntax npc/1/syntax reduce [
-						'spec expr2
-					]
+					syntax/spec: create-pos npc2
+					npc2/1/syntax/parent: create-pos npc
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
-					if string? npc3/1/expr [return next npc3]
+					if string? npc3/1/expr [
+						syntax/desc: create-pos npc3
+						npc3/1/syntax/parent: create-pos npc
+						return next npc3
+					]
 					return npc3
 				]
 			]
 			npc2
 		]
-		check-refines: function [npc [block!]][
+		check-return: function [npc [block!]][
+			syntax: npc/1/syntax
+			syntax/name: "func-return"
 			double-check npc
-			put-syntax npc/1/syntax reduce [
-				'name "func-refines"
+			npc2: skip-semicolon-next npc
+			if tail? npc2 [
+				create-error-at npc/1/syntax 'Error 'miss-expr "return:"
+				return npc2
 			]
+			unless block? npc2/1/expr [
+				create-error-at npc/1/syntax 'Error 'miss-block "return:"
+				return npc2
+			]
+			expr2: npc2/1/expr
+			forall expr2 [
+				expr3: expr2/1/expr
+				unless any [
+					all [
+						value? expr3
+						datatype? get expr3
+					]
+					all [
+						value? expr3
+						typeset? get expr3
+					]
+				][
+					create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
+				]
+			]
+			syntax/spec: create-pos npc2
+			npc2/1/syntax/parent: create-pos npc
+			skip-semicolon-next npc2
+		]
+		check-refines: function [npc [block!]][
+			collect-args: function [npc [block!] par [block!]][
+				while [not tail? npc] [
+					either word? npc/1/expr [
+						either par/1/syntax/spec [
+							append par/1/syntax/spec create-pos npc
+						][
+							par/1/syntax/spec: reduce [create-pos npc]
+						]
+						npc/1/syntax/parent: create-pos par
+						if tail? npc: check-args npc par [return npc]
+					][
+						either refinement? npc/1/expr [
+							return npc
+						][
+							create-error-at npc/1/syntax 'Error 'invalid-arg mold npc/1/expr
+							npc: next npc
+						]
+					]
+				]
+				return npc
+			]
+			syntax: npc/1/syntax
+			syntax/name: "func-refines"
+			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					put-syntax npc/1/syntax reduce [
-						'desc npc2/1/expr
-					]
+					syntax/desc: create-pos npc2
+					npc2/1/syntax/parent: create-pos npc
 					npc3: skip-semicolon-next npc2
-					while [not tail? npc3][
-						either word? npc3/1/expr [
-							append npc/1/syntax/spec npc3/1
-							if tail? npc3: check-args npc3 npc/1/expr [return npc3]
-						][
-							either refinement? npc3/1/expr [
-								return npc3
-							][
-								create-error-at npc3/1/syntax 'Error 'invalid-arg mold npc3/1/expr
-								npc3: next npc3
-							]
-						]
-					]
-					return npc3
+					return collect-args npc3 npc
 				]
 				type = word! [
-					put-syntax npc/1/syntax reduce [
-						'spec clear []
-					]
-					while [not tail? npc2][
-						either word? npc2/1/expr [
-							append npc/1/syntax/spec npc2/1
-							if tail? npc2: check-args npc2 npc/1/expr [return npc2]
-						][
-							either refinement? npc2/1/expr [
-								return npc2
-							][
-								create-error-at npc2/1/syntax 'Error 'invalid-arg mold npc2/1/expr
-								npc2: next npc2
-							]
-						]
-					]
-					return npc2
+					return collect-args npc2 npc
 				]
 				type = refinement! [
 					return npc2
@@ -251,19 +289,18 @@ red-syntax: context [
 				]
 			]
 		]
-		if all [
-			string? pc/1/expr
-			pc/1/syntax/name = "literal"
-		][
-			pc: next pc
+		npc: skip-semicolon-next pc
+		if string? npc/1/expr [
+			par/1/syntax/desc: create-pos npc
+			pc: npc
 		]
 		return-pc: none
 		until [
 			expr: pc/1/expr
 			case [
-				expr = to set-word! /return [
+				expr = to set-word! 'return [
 					return-pc: pc
-					pc: check-args pc /return
+					pc: check-return pc
 				]
 				refinement? expr [
 					pc: check-refines pc
@@ -276,17 +313,10 @@ red-syntax: context [
 				]
 				true [
 					create-error-at pc/1/syntax 'Error 'invalid-arg mold expr
-					pc: next pc
+					pc: skip-semicolon-next pc
 				]
 			]
 			tail? pc
-		]
-	]
-
-	create-pos: function [where [block! paren!]][
-		make map! reduce [
-			'start	where/1/start
-			'end	where/1/end
 		]
 	]
 
@@ -412,11 +442,12 @@ red-syntax: context [
 							syntax/need: "spec"
 							return reduce [create-pos pc 1]
 						]
-						syntax/spec: spec/1
+						syntax/spec: ret/1
+						spec/1/syntax/parent: create-pos pc
 						if expr = 'has [
 							check-has-spec spec/1/expr
 						]
-						check-func-spec spec/1/expr
+						check-func-spec spec/1/expr spec
 
 						ret: exp-type? next next pc
 						if ret/2 = 0 [
@@ -430,7 +461,8 @@ red-syntax: context [
 							syntax/need: "body"
 							return reduce [create-pos pc 2]
 						]
-						syntax/body: body/1
+						syntax/body: ret/1
+						body/1/syntax/parent: create-pos pc
 						return reduce [create-pos pc 3]
 					]
 
@@ -446,7 +478,8 @@ red-syntax: context [
 						syntax/need: "body"
 						return reduce [create-pos pc 1]
 					]
-					syntax/body: body/1
+					syntax/body: ret/1
+					body/1/syntax/parent: create-pos pc
 					return reduce [create-pos pc 2]
 				]
 				;if find [action! native! function! routine!] type [
@@ -459,7 +492,7 @@ red-syntax: context [
 		unknown-type?: [
 			if expr-type = word! [
 				syntax/name: "unknown"
-				return reduce [pc/1 1]
+				return reduce [create-pos pc 1]
 			]
 		]
 
