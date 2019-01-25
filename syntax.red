@@ -413,6 +413,71 @@ red-syntax: context [
 			]
 		]
 
+		context-type?: [
+			if all [
+				expr-type = word!
+				find [has func function does context] expr
+			][
+				syntax/name: "context"
+				if find [has func function] expr [
+					ret: exp-type? next pc
+					if ret/2 = 0 [
+						create-error-at syntax 'Error 'miss-spec to string! expr
+						return reduce [create-pos pc 1]
+					]
+					unless spec: find-expr syntax-top ret/1 [
+						throw-error 'keyword-type? "can't find expr at" ret/1
+					]
+					if spec/1/syntax/name <> "block" [
+						syntax/need: "spec"
+						return reduce [create-pos pc 1]
+					]
+					syntax/spec: ret/1
+					spec/1/syntax/parent: create-pos pc
+					spec/1/syntax/ctx: reduce [expr 'spec]
+					if expr = 'has [
+						check-has-spec spec/1/expr
+					]
+					check-func-spec spec/1/expr spec
+
+					ret: exp-type? next next pc
+					if ret/2 = 0 [
+						create-error-at syntax 'Error 'miss-body to string! expr
+						return reduce [create-pos pc 2]
+					]
+					unless body: find-expr syntax-top ret/1 [
+						throw-error 'keyword-type? "can't find expr at" ret/1
+					]
+					if body/1/syntax/name <> "block" [
+						syntax/need: "body"
+						return reduce [create-pos pc 2]
+					]
+					syntax/body: ret/1
+					body/1/syntax/parent: create-pos pc
+					body/1/syntax/ctx: reduce [expr 'body]
+					body/1/syntax/spec: syntax/spec
+					return reduce [create-pos pc 3]
+				]
+
+				ret: exp-type? next pc
+				if ret/2 = 0 [
+					create-error-at syntax 'Error 'miss-body to string! expr
+					return reduce [create-pos pc 1]
+				]
+				unless body: find-expr syntax-top ret/1 [
+					throw-error 'keyword-type? "can't find expr at" ret/1
+				]
+				if body/1/syntax/name <> "block" [
+					syntax/need: "body"
+					return reduce [create-pos pc 1]
+				]
+				syntax/body: ret/1
+				body/1/syntax/parent: create-pos pc
+				body/1/syntax/ctx: reduce [expr 'body]
+				return reduce [create-pos pc 2]
+			]
+		]
+
 		keyword-type?: [
 			if all [
 				expr-type = word!
@@ -420,68 +485,8 @@ red-syntax: context [
 			][
 				syntax/name: "keyword"
 				type: type? get expr
-
-				if find [has func function does context] expr [
-					if find [has func function] expr [
-						ret: exp-type? next pc
-						if ret/2 = 0 [
-							create-error-at syntax 'Error 'miss-spec to string! expr
-							return reduce [create-pos pc 1]
-						]
-						unless spec: find-expr syntax-top ret/1 [
-							throw-error 'keyword-type? "can't find expr at" ret/1
-						]
-						if spec/1/syntax/name <> "block" [
-							syntax/need: "spec"
-							return reduce [create-pos pc 1]
-						]
-						syntax/spec: ret/1
-						spec/1/syntax/parent: create-pos pc
-						spec/1/syntax/ctx: reduce [expr 'spec]
-						if expr = 'has [
-							check-has-spec spec/1/expr
-						]
-						check-func-spec spec/1/expr spec
-
-						ret: exp-type? next next pc
-						if ret/2 = 0 [
-							create-error-at syntax 'Error 'miss-body to string! expr
-							return reduce [create-pos pc 2]
-						]
-						unless body: find-expr syntax-top ret/1 [
-							throw-error 'keyword-type? "can't find expr at" ret/1
-						]
-						if body/1/syntax/name <> "block" [
-							syntax/need: "body"
-							return reduce [create-pos pc 2]
-						]
-						syntax/body: ret/1
-						body/1/syntax/parent: create-pos pc
-						body/1/syntax/ctx: reduce [expr 'body]
-						body/1/syntax/spec: syntax/spec
-						return reduce [create-pos pc 3]
-					]
-
-					ret: exp-type? next pc
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-body to string! expr
-						return reduce [create-pos pc 1]
-					]
-					unless body: find-expr syntax-top ret/1 [
-						throw-error 'keyword-type? "can't find expr at" ret/1
-					]
-					if body/1/syntax/name <> "block" [
-						syntax/need: "body"
-						return reduce [create-pos pc 1]
-					]
-					syntax/body: ret/1
-					body/1/syntax/parent: create-pos pc
-					body/1/syntax/ctx: reduce [expr 'body]
-					return reduce [create-pos pc 2]
-				]
 				;if find [action! native! function! routine!] type [
 				;]
-
 				return reduce [create-pos pc 1]
 			]
 		]
@@ -500,6 +505,7 @@ red-syntax: context [
 		do set-path-type?
 		do block-type?
 		do paren-type?
+		do context-type?
 		do keyword-type?
 		do unknown-type?
 		throw-error 'exp-type "not support!" pc/1/expr

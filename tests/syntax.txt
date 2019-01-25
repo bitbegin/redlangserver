@@ -82,7 +82,7 @@ Type HELP for starting information.
         start: [4 4]
         end: [4 11]
         syntax: #(
-            name: "keyword"
+            name: "context"
             body: #(
                 start: [4 12]
                 end: [31 2]
@@ -131,7 +131,7 @@ Type HELP for starting information.
             start: [6 5]
             end: [6 12]
             syntax: #(
-                name: "keyword"
+                name: "context"
                 body: #(
                     start: [6 13]
                     end: [26 3]
@@ -180,7 +180,7 @@ Type HELP for starting information.
                 start: [8 6]
                 end: [8 10]
                 syntax: #(
-                    name: "keyword"
+                    name: "context"
                     spec: #(
                         start: [8 11]
                         end: [8 36]
@@ -281,7 +281,7 @@ Type HELP for starting information.
                     start: [9 8]
                     end: [9 16]
                     syntax: #(
-                        name: "keyword"
+                        name: "context"
                         spec: #(
                             start: [9 17]
                             end: [9 43]
@@ -927,7 +927,7 @@ Type HELP for starting information.
         start: [36 4]
         end: [36 8]
         syntax: #(
-            name: "keyword"
+            name: "context"
             spec: #(
                 start: [36 9]
                 end: [36 40]
@@ -1184,7 +1184,7 @@ Type HELP for starting information.
         start: [41 4]
         end: [41 12]
         syntax: #(
-            name: "keyword"
+            name: "context"
             spec: #(
                 start: [41 13]
                 end: [41 56]
@@ -1463,7 +1463,7 @@ Type HELP for starting information.
         start: [51 5]
         end: [51 9]
         syntax: #(
-            name: "keyword"
+            name: "context"
             spec: #(
                 start: [51 10]
                 end: [51 104]
@@ -1830,7 +1830,7 @@ Type HELP for starting information.
         start: [56 6]
         end: [56 9]
         syntax: #(
-            name: "keyword"
+            name: "context"
             spec: #(
                 start: [56 10]
                 end: [56 20]
@@ -1911,7 +1911,7 @@ Type HELP for starting information.
         start: [57 6]
         end: [57 9]
         syntax: #(
-            name: "keyword"
+            name: "context"
             spec: #(
                 start: [57 10]
                 end: [57 15]
