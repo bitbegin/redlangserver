@@ -562,6 +562,7 @@ red-syntax: context [
 							create-error-at syntax 'Error 'miss-spec to string! expr
 							return reduce [create-pos pc step]
 						]
+						step: step + ret2/2
 					]
 					syntax/spec: ret/1
 					spec/1/syntax/ctx/type: reduce [expr 'spec]
@@ -590,7 +591,7 @@ red-syntax: context [
 				]
 				step: step + ret2/2
 				syntax/body: ret/1
-				body/1/syntax/spec: syntax/spec
+				body/1/syntax/ctx/spec: syntax/spec
 				body/1/syntax/ctx/type: reduce [expr 'body]
 				body/1/syntax/ctx/parent: create-pos pc
 				return reduce [create-pos pc step]
@@ -706,17 +707,29 @@ red-syntax: context [
 					npc/1/syntax/name = "set-word"
 					word = to word! npc/1/expr
 				][
-					unless cast: find-expr top npc/1/cast [
+					unless cast: find-expr top npc/1/syntax/cast [
 						throw-error 'match? "can't find expr at" npc/1/cast
+					]
+					if word? cast/1/expr [
+						ret: either blk? [
+							find-set-word/blk? top cast
+						][
+							find-set-word top cast
+						]
+						if ret [
+							cast/1/syntax/ctx/define: create-pos ret
+							cast/1/syntax/name: "resolved"
+							return ret
+						]
 					]
 					case [
 						blk? [
 							if block? cast/1/expr [
-								return npc
+								return cast
 							]
 						]
 						true [
-							return npc
+							return cast
 						]
 					]
 				]
@@ -794,7 +807,7 @@ red-syntax: context [
 							lit-word? pc/1/expr
 						]
 						pc/1/syntax
-						pc/1/syntax/ctx
+						pc/1/syntax/ctx/type
 					][
 						resolve pc
 					]
@@ -848,18 +861,18 @@ red-syntax: context [
 			raise?: function [par [block! paren!]][
 				if all [
 					par/1/syntax/name = "block"
-					ctx: par/1/syntax/ctx
-					ctx/type/2 = 'body
+					type: par/1/syntax/ctx/type
+					type/2 = 'body
 				][
-					switch ctx/type/1 [
+					switch type/1 [
 						function [
-							if pos: func-arg? top par/1/syntax/spec to word! pc/1/expr [
+							if pos: func-arg? top par/1/syntax/ctx/spec to word! pc/1/expr [
 								pc/1/syntax/parent: pos
 							]
 							return false
 						]
 						func has [
-							if pos: func-arg? top par/1/syntax/spec to word! pc/1/expr [
+							if pos: func-arg? top par/1/syntax/ctx/spec to word! pc/1/expr [
 								pc/1/syntax/parent: pos
 								return false
 							]
