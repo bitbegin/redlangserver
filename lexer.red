@@ -56,7 +56,9 @@ red-lexer: context [
 			'expr expr
 			'start form-pos start
 			'end form-pos end
-			'syntax make map! 4
+			'syntax make map! reduce [
+				'ctx make map! 3
+			]
 		]
 	]
 

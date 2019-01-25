@@ -20,6 +20,8 @@ red-syntax: context [
 		'miss-spec				"missing a block! for function's spec"
 		'miss-body				"missing a block! for function's body"
 		'miss-ctx				"missing context for bind"
+		'miss-define			"missing define for"
+		'miss-blk-define		"missing block! define for"
 		'unresolve 				"need resolve unknown type"
 		'invalid-refine			"invalid refinement"
 		'invalid-datatype		"invalid datatype! in block!"
@@ -329,6 +331,7 @@ red-syntax: context [
 		spec: none
 		body: none
 		step: none
+		npc: none
 		bind?: none
 
 		check-tail: function [where [block! paren!] result [block!]][
@@ -442,19 +445,15 @@ red-syntax: context [
 					create-error-at syntax 'Error 'miss-body to string! expr
 					return reduce [create-pos pc step]
 				]
-				either set-word? body/1/expr [
-					ret2: exp-type? skip pc step
-					if ret2/2 = 1 [
-						create-error-at syntax 'Error 'miss-body to string! expr
-						return reduce [create-pos pc step + 1]
-					]
-					step: step + ret2/2
-				][
-					step: step + 1
+				ret2: exp-type? skip pc step
+				if ret2/2 = 0 [
+					create-error-at syntax 'Error 'miss-body to string! expr
+					return reduce [create-pos pc step]
 				]
+				step: step + ret2/2
 				syntax/body: ret/1
-				body/1/syntax/ctx-parent: create-pos pc
-				body/1/syntax/ctx: reduce [expr 'body]
+				body/1/syntax/ctx/type: reduce [expr 'body]
+				body/1/syntax/ctx/parent: create-pos pc
 				return reduce [create-pos pc step]
 			]
 		]
@@ -473,7 +472,7 @@ red-syntax: context [
 				]
 				if body/1/expr = 'bind [
 					bind?: true
-					body/1/syntax/ctx-parent: create-pos pc
+					body/1/syntax/ctx/parent: create-pos pc
 					step: step + 1
 					ret: exp-type? skip pc step
 					if ret/2 = 0 [
@@ -492,19 +491,15 @@ red-syntax: context [
 					create-error-at syntax 'Error 'miss-body "do"
 					return reduce [create-pos pc step]
 				]
-				either set-word? body/1/expr [
-					ret2: exp-type? skip pc step
-					if ret2/2 = 1 [
-						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [create-pos pc step + 1]
-					]
-					step: step + ret2/2
-				][
-					step: step + 1
+				ret2: exp-type? skip pc step
+				if ret2/2 = 0 [
+					create-error-at syntax 'Error 'miss-ctx "do"
+					return reduce [create-pos pc step]
 				]
+				step: step + ret2/2
 				syntax/body: ret/1
-				body/1/syntax/ctx-parent: create-pos pc
-				body/1/syntax/ctx: reduce [expr 'body]
+				body/1/syntax/ctx/type: reduce [expr 'body]
+				body/1/syntax/ctx/parent: create-pos pc
 				if bind? [
 					ret: exp-type? skip pc step
 					if ret/2 = 0 [
@@ -522,19 +517,14 @@ red-syntax: context [
 						create-error-at syntax 'Error 'miss-ctx "do"
 						return reduce [create-pos pc step]
 					]
-					either set-word? body/1/expr [
-						ret2: exp-type? skip pc step
-						if ret2/2 = 1 [
-							create-error-at syntax 'Error 'miss-ctx "do"
-							return reduce [create-pos pc step + 1]
-						]
-						step: step + ret2/2
-					][
-						step: step + 1
+					ret2: exp-type? skip pc step
+					if ret2/2 = 0 [
+						create-error-at syntax 'Error 'miss-ctx "do"
+						return reduce [create-pos pc step]
 					]
 					syntax/bind: ret/1
-					body/1/syntax/ctx-parent: create-pos pc
-					body/1/syntax/ctx: reduce [expr 'bind]
+					body/1/syntax/ctx/type: reduce [expr 'bind]
+					body/1/syntax/ctx/parent: create-pos pc
 				]
 				return reduce [create-pos pc step]
 			]
@@ -567,20 +557,15 @@ red-syntax: context [
 							create-error-at syntax 'Error 'miss-spec to string! expr
 							return reduce [create-pos pc 1]
 						]
-						either set-word? spec/1/expr [
-							ret2: exp-type? skip pc step
-							if ret2/2 = 1 [
-								create-error-at syntax 'Error 'miss-spec to string! expr
-								return reduce [create-pos pc step + 1]
-							]
-							step: step + ret2/2
-						][
-							step: step + 1
+						ret2: exp-type? skip pc step
+						if ret2/2 = 0 [
+							create-error-at syntax 'Error 'miss-spec to string! expr
+							return reduce [create-pos pc step]
 						]
 					]
 					syntax/spec: ret/1
-					spec/1/syntax/ctx-parent: create-pos pc
-					spec/1/syntax/ctx: reduce [expr 'spec]
+					spec/1/syntax/ctx/type: reduce [expr 'spec]
+					spec/1/syntax/ctx/parent: create-pos pc
 				]
 				ret: exp-type? skip pc step
 				if ret/2 = 0 [
@@ -598,20 +583,16 @@ red-syntax: context [
 					create-error-at syntax 'Error 'miss-body to string! expr
 					return reduce [create-pos pc step]
 				]
-				either set-word? body/1/expr [
-					ret2: exp-type? skip pc step
-					if ret2/2 = 1 [
-						create-error-at syntax 'Error 'miss-body to string! expr
-						return reduce [create-pos pc step + 1]
-					]
-					step: step + ret2/2
-				][
-					step: step + 1
+				ret2: exp-type? skip pc step
+				if ret2/2 = 0 [
+					create-error-at syntax 'Error 'miss-body to string! expr
+					return reduce [create-pos pc step]
 				]
+				step: step + ret2/2
 				syntax/body: ret/1
-				body/1/syntax/ctx-parent: create-pos pc
-				body/1/syntax/ctx: reduce [expr 'body]
 				body/1/syntax/spec: syntax/spec
+				body/1/syntax/ctx/type: reduce [expr 'body]
+				body/1/syntax/ctx/parent: create-pos pc
 				return reduce [create-pos pc step]
 			]
 		]
@@ -666,7 +647,7 @@ red-syntax: context [
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		pc: top/1/expr
-		top/1/syntax/ctx: [context body]
+		top/1/syntax/ctx/type: [context body]
 		top/1/syntax/name: "block"
 		unless pc/1/expr = 'Red [
 			create-error-at pc/1/syntax 'Error 'miss-head-red none
@@ -677,6 +658,7 @@ red-syntax: context [
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
 		exp-all pc
+		resolve-ctx top
 		raise-set-word top
 		;resolve-unknown top
 	]
@@ -716,11 +698,138 @@ red-syntax: context [
 		ret
 	]
 
+	find-set-word: function [top [block!] pc [block! paren!] /blk?][
+		word: to word! pc/1/expr
+		match?: function [npc [block! paren!]][
+			forall npc [
+				if all [
+					npc/1/syntax/name = "set-word"
+					word = to word! npc/1/expr
+				][
+					unless cast: find-expr top npc/1/cast [
+						throw-error 'match? "can't find expr at" npc/1/cast
+					]
+					case [
+						blk? [
+							if block? cast/1/expr [
+								return npc
+							]
+						]
+						true [
+							return npc
+						]
+					]
+				]
+			]
+			false
+		]
+		par: pc
+		until [
+			if ret: match? head par [return ret]
+			par: get-parent top par/1
+		]
+		false
+	]
+
+	resolve-ctx: function [top [block!]][
+		resolve: function [pc [block! paren!]][
+			type: pc/1/syntax/ctx/type
+			if type = [do bind][
+				unless ret: find-set-word top pc [
+					create-error-at pc/1/syntax 'Error 'miss-define to string! pc/1/expr
+					exit
+				]
+				pc/1/syntax/ctx/define: create-pos ret
+				exit
+			]
+			if any [
+				type = [all body]
+				type = [any body]
+			][
+				unless ret: find-set-word/blk? top pc [
+					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+					exit
+				]
+				pc/1/syntax/ctx/define: create-pos ret
+				exit
+			]
+			if type/2 = 'spec [
+				unless ret: find-set-word/blk? top pc [
+					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+					exit
+				]
+				unless par: find-expr top pc/1/syntax/ctx/parent [
+					throw-error 'resolve "can't find expr at" pc/1/syntax/ctx/parent
+				]
+				if par/1/expr = 'has [
+					check-has-spec ret/1/expr
+				]
+				check-func-spec ret/1/expr ret
+				pc/1/syntax/ctx/define: create-pos ret
+				exit
+			]
+			if type/2 = 'body [
+				unless ret: find-set-word/blk? top pc [
+					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+					exit
+				]
+				pc/1/syntax/ctx/define: create-pos ret
+				exit
+			]
+		]
+		resolve-ctx*: function [pc [block! paren!]][
+			forall pc [
+				either all [
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					resolve-ctx* pc/1/expr
+				][
+					if all [
+						any [
+							word? pc/1/expr
+							lit-word? pc/1/expr
+						]
+						pc/1/syntax
+						pc/1/syntax/ctx
+					][
+						resolve pc
+					]
+				]
+			]
+		]
+		resolve-ctx* top/1/expr
+	]
+
 	func-arg?: function [top [block!] pos [map!] word [word!]][
 		unless spec*: find-expr top pos [
 			throw-error 'func-arg? "can't find expr at" pos
 		]
-		spec: spec*/1/expr
+		unless block? spec: spec*/1/expr [
+			either any [
+				all [
+					word? spec/1/expr
+					npos: spec/1/syntax/ctx/define
+				]
+				all [
+					set-word? spec/1/expr
+					npos: spec/1/syntax/cast
+				]
+			][
+				unless spec: find-expr top npos [
+					throw-error 'func-arg? "can't find expr at" npos
+				]
+				while [set-word? spec/1/expr][
+					npos: spec/1/syntax/cast
+					unless spec: find-expr top npos [
+						throw-error 'func-arg? "can't find expr at" npos
+					]
+				]
+			][exit]
+		]
 		if block? spec [
 			forall spec [
 				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
@@ -740,9 +849,9 @@ red-syntax: context [
 				if all [
 					par/1/syntax/name = "block"
 					ctx: par/1/syntax/ctx
-					ctx/2 = 'body
+					ctx/type/2 = 'body
 				][
-					switch ctx/1 [
+					switch ctx/type/1 [
 						function [
 							if pos: func-arg? top par/1/syntax/spec to word! pc/1/expr [
 								pc/1/syntax/parent: pos
