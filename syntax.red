@@ -131,6 +131,7 @@ red-syntax: context [
 	
 	check-has-spec: function [pc [block!]][
 		npc: skip-semicolon-next pc
+		if tail? npc [exit]
 		if string? npc/1/expr [
 			create-error-at pc/1/syntax 'Error 'no-need-desc "has"
 			pc: npc
@@ -284,6 +285,7 @@ red-syntax: context [
 			]
 		]
 		npc: skip-semicolon-next pc
+		if tail? npc [exit]
 		if string? npc/1/expr [
 			par/1/syntax/desc: create-pos npc
 			pc: npc
@@ -429,7 +431,6 @@ red-syntax: context [
 				]
 				if body/1/expr = 'bind [
 					body/1/syntax/parent: create-pos pc
-					syntax/bind?: true
 
 					step: step + 1
 					ret: exp-type? next next pc
@@ -496,7 +497,7 @@ red-syntax: context [
 							check-has-spec spec/1/expr
 						]
 						check-func-spec spec/1/expr spec
-					]
+					][
 						unless any [
 							word? spec/1/expr
 							set-word? spec/1/expr
@@ -532,6 +533,7 @@ red-syntax: context [
 				syntax/body: ret/1
 				body/1/syntax/parent: create-pos pc
 				body/1/syntax/ctx: reduce [expr 'body]
+				body/1/syntax/spec: syntax/spec
 				return reduce [create-pos pc step + 1]
 			]
 		]
@@ -586,6 +588,7 @@ red-syntax: context [
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		pc: top/1/expr
 		top/1/syntax/ctx: [context body]
+		top/1/syntax/name: "block"
 		unless pc/1/expr = 'Red [
 			create-error-at pc/1/syntax 'Error 'miss-head-red none
 		]
