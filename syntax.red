@@ -841,7 +841,7 @@ red-syntax: context [
 						throw-error 'func-arg? "can't find expr at" npos
 					]
 				]
-			][exit]
+			][return false]
 		]
 		if block? spec [
 			forall spec [
