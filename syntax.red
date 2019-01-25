@@ -324,10 +324,12 @@ red-syntax: context [
 		expr-type: type? expr
 		syntax: pc/1/syntax
 		ret: none
+		ret2: none
 		type: none
 		spec: none
 		body: none
 		step: none
+		bind?: none
 
 		check-tail: function [where [block! paren!] result [block!]][
 			if result/2 = 0 [
@@ -417,11 +419,51 @@ red-syntax: context [
 			]
 		]
 
+		all-any-type?: [
+			if any [
+				expr = 'all
+				expr = 'any
+			][
+				syntax/name: "all/any"
+				step: 1
+				ret: exp-type? skip pc step
+				if ret/2 = 0 [
+					create-error-at syntax 'Error 'miss-body to string! expr
+					return reduce [create-pos pc 1]
+				]
+				unless body: find-expr syntax-top ret/1 [
+					throw-error 'do-type? "can't find expr at" ret/1
+				]
+				unless any [
+					block? body/1/expr
+					word? body/1/expr
+					set-word? body/1/expr
+				][
+					create-error-at syntax 'Error 'miss-body to string! expr
+					return reduce [create-pos pc step]
+				]
+				either set-word? body/1/expr [
+					ret2: exp-type? skip pc step
+					if ret2/2 = 1 [
+						create-error-at syntax 'Error 'miss-body to string! expr
+						return reduce [create-pos pc step + 1]
+					]
+					step: step + ret2/2
+				][
+					step: step + 1
+				]
+				syntax/body: ret/1
+				body/1/syntax/ctx-parent: create-pos pc
+				body/1/syntax/ctx: reduce [expr 'body]
+				return reduce [create-pos pc step]
+			]
+		]
+
 		do-type?: [
 			if expr = 'do [
 				syntax/name: "do"
 				step: 1
-				ret: exp-type? next pc
+				ret: exp-type? skip pc step
 				if ret/2 = 0 [
 					create-error-at syntax 'Error 'miss-spec "do"
 					return reduce [create-pos pc 1]
@@ -430,10 +472,10 @@ red-syntax: context [
 					throw-error 'do-type? "can't find expr at" ret/1
 				]
 				if body/1/expr = 'bind [
-					body/1/syntax/parent: create-pos pc
-
+					bind?: true
+					body/1/syntax/ctx-parent: create-pos pc
 					step: step + 1
-					ret: exp-type? next next pc
+					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-body "do"
 						return reduce [create-pos pc 2]
@@ -450,12 +492,21 @@ red-syntax: context [
 					create-error-at syntax 'Error 'miss-body "do"
 					return reduce [create-pos pc step]
 				]
-				syntax/body: ret/1
-				body/1/syntax/parent: create-pos pc
-				body/1/syntax/ctx: reduce [expr 'body]
-				if step = 2 [
+				either set-word? body/1/expr [
+					ret2: exp-type? skip pc step
+					if ret2/2 = 1 [
+						create-error-at syntax 'Error 'miss-ctx "do"
+						return reduce [create-pos pc step + 1]
+					]
+					step: step + ret2/2
+				][
 					step: step + 1
-					ret: exp-type? next next next pc
+				]
+				syntax/body: ret/1
+				body/1/syntax/ctx-parent: create-pos pc
+				body/1/syntax/ctx: reduce [expr 'body]
+				if bind? [
+					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-ctx "do"
 						return reduce [create-pos pc step]
@@ -471,11 +522,21 @@ red-syntax: context [
 						create-error-at syntax 'Error 'miss-ctx "do"
 						return reduce [create-pos pc step]
 					]
+					either set-word? body/1/expr [
+						ret2: exp-type? skip pc step
+						if ret2/2 = 1 [
+							create-error-at syntax 'Error 'miss-ctx "do"
+							return reduce [create-pos pc step + 1]
+						]
+						step: step + ret2/2
+					][
+						step: step + 1
+					]
 					syntax/bind: ret/1
-					body/1/syntax/parent: create-pos pc
+					body/1/syntax/ctx-parent: create-pos pc
 					body/1/syntax/ctx: reduce [expr 'bind]
 				]
-				return reduce [create-pos pc step + 1]
+				return reduce [create-pos pc step]
 			]
 		]
 
@@ -483,8 +544,8 @@ red-syntax: context [
 			if find [has func function does context] expr [
 				syntax/name: "context"
 				step: 1
-				either find [has func function] expr [
-					ret: exp-type? next pc
+				if find [has func function] expr [
+					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-spec to string! expr
 						return reduce [create-pos pc 1]
@@ -497,6 +558,7 @@ red-syntax: context [
 							check-has-spec spec/1/expr
 						]
 						check-func-spec spec/1/expr spec
+						step: step + 1
 					][
 						unless any [
 							word? spec/1/expr
@@ -505,16 +567,22 @@ red-syntax: context [
 							create-error-at syntax 'Error 'miss-spec to string! expr
 							return reduce [create-pos pc 1]
 						]
+						either set-word? spec/1/expr [
+							ret2: exp-type? skip pc step
+							if ret2/2 = 1 [
+								create-error-at syntax 'Error 'miss-spec to string! expr
+								return reduce [create-pos pc step + 1]
+							]
+							step: step + ret2/2
+						][
+							step: step + 1
+						]
 					]
 					syntax/spec: ret/1
-					spec/1/syntax/parent: create-pos pc
+					spec/1/syntax/ctx-parent: create-pos pc
 					spec/1/syntax/ctx: reduce [expr 'spec]
-
-					step: step + 1
-					ret: exp-type? next next pc
-				][
-					ret: exp-type? next pc
 				]
+				ret: exp-type? skip pc step
 				if ret/2 = 0 [
 					create-error-at syntax 'Error 'miss-body to string! expr
 					return reduce [create-pos pc step]
@@ -530,11 +598,21 @@ red-syntax: context [
 					create-error-at syntax 'Error 'miss-body to string! expr
 					return reduce [create-pos pc step]
 				]
+				either set-word? body/1/expr [
+					ret2: exp-type? skip pc step
+					if ret2/2 = 1 [
+						create-error-at syntax 'Error 'miss-body to string! expr
+						return reduce [create-pos pc step + 1]
+					]
+					step: step + ret2/2
+				][
+					step: step + 1
+				]
 				syntax/body: ret/1
-				body/1/syntax/parent: create-pos pc
+				body/1/syntax/ctx-parent: create-pos pc
 				body/1/syntax/ctx: reduce [expr 'body]
 				body/1/syntax/spec: syntax/spec
-				return reduce [create-pos pc step + 1]
+				return reduce [create-pos pc step]
 			]
 		]
 
@@ -565,6 +643,7 @@ red-syntax: context [
 		do set-path-type?
 		do block-type?
 		do paren-type?
+		do all-any-type?
 		do do-type?
 		do context-type?
 		do keyword-type?
@@ -642,10 +721,12 @@ red-syntax: context [
 			throw-error 'func-arg? "can't find expr at" pos
 		]
 		spec: spec*/1/expr
-		forall spec [
-			if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-				if (to word! spec/1/expr) = word [
-					return create-pos spec
+		if block? spec [
+			forall spec [
+				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+					if (to word! spec/1/expr) = word [
+						return create-pos spec
+					]
 				]
 			]
 		]
@@ -682,7 +763,6 @@ red-syntax: context [
 						]
 					]
 				]
-
 				npc: head par
 				forall npc [
 					if all [
