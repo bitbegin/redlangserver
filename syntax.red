@@ -70,13 +70,6 @@ red-syntax: context [
 		]
 	]
 
-	put-syntax: func [syn [map!] item [block!]][
-		forall item [
-			put syn item/1 item/2
-			item: next item
-		]
-	]
-
 	literal-type: reduce [
 		binary! char! date! email! file! float!
 		get-path! get-word! lit-path! lit-word!
@@ -444,6 +437,7 @@ red-syntax: context [
 						]
 						syntax/spec: ret/1
 						spec/1/syntax/parent: create-pos pc
+						spec/1/syntax/ctx: reduce [expr 'spec]
 						if expr = 'has [
 							check-has-spec spec/1/expr
 						]
@@ -463,6 +457,8 @@ red-syntax: context [
 						]
 						syntax/body: ret/1
 						body/1/syntax/parent: create-pos pc
+						body/1/syntax/ctx: reduce [expr 'body]
+						body/1/syntax/spec: syntax/spec
 						return reduce [create-pos pc 3]
 					]
 
@@ -480,6 +476,7 @@ red-syntax: context [
 					]
 					syntax/body: ret/1
 					body/1/syntax/parent: create-pos pc
+					body/1/syntax/ctx: reduce [expr 'body]
 					return reduce [create-pos pc 2]
 				]
 				;if find [action! native! function! routine!] type [
@@ -523,19 +520,17 @@ red-syntax: context [
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		pc: top/1/expr
-		put-syntax top/1/syntax reduce [
-			'ctx 'context
-		]
+		top/1/syntax/ctx: [context body]
 		unless pc/1/expr = 'Red [
 			create-error-at pc/1/syntax 'Error 'miss-head-red none
 		]
 		unless block? pc/2/expr [
 			create-error-at pc/2/syntax 'Error 'miss-head-block none
 		]
-		put-syntax pc/1/syntax ['meta 1]
-		put-syntax pc/2/syntax ['meta 2]
+		pc/1/syntax/meta: 1
+		pc/2/syntax/meta: 2
 		exp-all pc
-		;raise-variables top
+		raise-set-word top
 		;resolve-unknown top
 	]
 
@@ -574,60 +569,49 @@ red-syntax: context [
 		ret
 	]
 
-	func-arg?: function [pc [block! paren!] par [block! paren!]][
-		if block? spec: par/1/syntax/spec [
-			forall spec [
-				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-					if (to word! spec/1/expr) = to word! pc/1/expr [
-						return spec/1
-					]
+	func-arg?: function [top [block!] pos [map!] word [word!]][
+		unless spec*: find-expr top pos [
+			throw-error 'func-arg? "can't find expr at" pos
+		]
+		spec: spec*/1/expr
+		forall spec [
+			if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
+				if (to word! spec/1/expr) = word [
+					return create-pos spec
 				]
 			]
 		]
 		false
 	]
 
-	raise-variables: function [top [block!]][
-		raise?: function [pc [block! paren!]][
+	raise-set-word: function [top [block!]][
+		raise: function [pc [block! paren!]][
 			dpar: get-parent top pc/1
-			raise*?: function [par [block! paren!]][
+			raise?: function [par [block! paren!]][
 				if all [
-					par = dpar
-					par/1/syntax/ctx = 'context
+					ctx: par/1/syntax/ctx
+					ctx/2 = 'body
 				][
-					either par/1/syntax/vars [
-						append par/1/syntax/vars pc/1
-					][
-						par/1/syntax/vars: reduce [pc/1]
-					]
-					return false
-				]
-				if all [
-					par/1/syntax/ctx = 'function
-					par/1/syntax/ctx-index = 2
-				][
-					unless func-arg? pc par [
-						either par/1/syntax/vars [
-							append par/1/syntax/vars pc/1
-						][
-							par/1/syntax/vars: reduce [pc/1]
+					switch ctx/1 [
+						function [
+							if pos: func-arg? top par/1/syntax/spec to word! pc/1/expr [
+								pc/1/syntax/parent: pos
+							]
+							return false
+						]
+						func has [
+							if pos: func-arg? top par/1/syntax/spec to word! pc/1/expr [
+								pc/1/syntax/parent: pos
+								return false
+							]
+						]
+						context [
+							if par = dpar [
+								pc/1/syntax/parent: create-pos par
+								return false
+							]
 						]
 					]
-					return false
-				]
-				if all [
-					any [
-						par/1/syntax/ctx = 'func
-						par/1/syntax/ctx = 'has
-					]
-					par/1/syntax/ctx-index = 2
-				][
-					return not func-arg? pc par
-				]
-				if all [
-					par/1/syntax/ctx = 'does
-				][
-					return true
 				]
 
 				npc: head par
@@ -637,18 +621,39 @@ red-syntax: context [
 						npc/1/syntax/name = "set-word"
 						pc/1/expr = npc/1/expr
 					][
+						pc/1/syntax/parent: create-pos npc
 						return false
 					]
 				]
 				return true
 			]
+			; if not first appear, mark it as first one's child
+			hpc: head pc
+			while [hpc <> pc][
+				if all [
+					hpc/1/syntax
+					hpc/1/syntax/name = "set-word"
+					hpc/1/expr = pc/1/expr
+				][
+					pc/1/syntax/parent: create-pos hpc
+					exit
+				]
+				hpc: next hpc
+			]
+			; now mark first appear set-word!
 			par: pc
 			while [par: get-parent top par/1][
-				unless raise*? par [return false]
+				unless raise? par [exit]
 			]
-			true
+			; mark it as global word
+			either top/1/syntax/extra [
+				append top/1/syntax/extra create-pos pc
+			][
+				top/1/syntax/extra: reduce [create-pos pc]
+			]
+			pc/1/syntax/parent: create-pos top
 		]
-		raise-vars*: function [pc [block! paren!]][
+		raise-set-word*: function [pc [block! paren!]][
 			forall pc [
 				either all [
 					any [
@@ -657,25 +662,19 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					raise-vars* pc/1/expr
+					raise-set-word* pc/1/expr
 				][
 					if all [
 						pc/1/syntax
 						pc/1/syntax/name = "set-word"
 					][
-						if raise? pc [
-							either top/1/syntax/vars [
-								append top/1/syntax/vars pc/1
-							][
-								top/1/syntax/vars: reduce [pc/1]
-							]
-						]
+						raise pc
 					]
 				]
 			]
 		]
 
-		raise-vars* top/1/expr
+		raise-set-word* top/1/expr
 	]
 
 	resolve-unknown: function [top [block!]][
@@ -781,6 +780,7 @@ red-syntax: context [
 			]
 			none
 		]
+		if top/1 = item [return none]
 		get-parent* top/1/expr top
 	]
 

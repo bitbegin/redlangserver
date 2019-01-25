@@ -1,7 +1,7 @@
 --== Red 0.6.4 ==-- 
 Type HELP for starting information. 
 
->>  do %tests/red-test.red
+>> do %tests/red-test.red
 [#(
     expr: [#(
         expr: Red
@@ -28,6 +28,10 @@ Type HELP for starting information.
                 start: [1 9]
                 end: [1 11]
             )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
+            )
         )
     ) #(
         expr: []
@@ -46,6 +50,10 @@ Type HELP for starting information.
                 start: [3 4]
                 end: [3 9]
             )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
+            )
         )
     ) #(
         expr: 'test
@@ -63,6 +71,10 @@ Type HELP for starting information.
             cast: #(
                 start: [4 4]
                 end: [4 11]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -87,6 +99,10 @@ Type HELP for starting information.
                     start: [5 5]
                     end: [5 6]
                 )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
+                )
             )
         ) #(
             expr: 4
@@ -104,6 +120,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [6 5]
                     end: [6 12]
+                )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
                 )
             )
         ) #(
@@ -128,6 +148,10 @@ Type HELP for starting information.
                         start: [7 6]
                         end: [7 11]
                     )
+                    parent: #(
+                        start: [6 13]
+                        end: [26 3]
+                    )
                 )
             ) #(
                 expr: #{12}
@@ -145,6 +169,10 @@ Type HELP for starting information.
                     cast: #(
                         start: [8 6]
                         end: [8 10]
+                    )
+                    parent: #(
+                        start: [6 13]
+                        end: [26 3]
                     )
                 )
             ) #(
@@ -230,6 +258,7 @@ Type HELP for starting information.
                         start: [8 6]
                         end: [8 10]
                     )
+                    ctx: [func spec]
                 )
             ) #(
                 expr: [#(
@@ -241,6 +270,10 @@ Type HELP for starting information.
                         cast: #(
                             start: [9 8]
                             end: [9 16]
+                        )
+                        parent: #(
+                            start: [1 1]
+                            end: [60 1]
                         )
                     )
                 ) #(
@@ -326,6 +359,7 @@ Type HELP for starting information.
                             start: [9 8]
                             end: [9 16]
                         )
+                        ctx: [function spec]
                     )
                 ) #(
                     expr: [#(
@@ -484,6 +518,11 @@ Type HELP for starting information.
                             start: [9 8]
                             end: [9 16]
                         )
+                        ctx: [function body]
+                        spec: #(
+                            start: [9 17]
+                            end: [9 43]
+                        )
                     )
                 ) #(
                     expr: x:
@@ -494,6 +533,10 @@ Type HELP for starting information.
                         cast: #(
                             start: [18 7]
                             end: [18 8]
+                        )
+                        parent: #(
+                            start: [8 12]
+                            end: [8 13]
                         )
                     )
                 ) #(
@@ -513,6 +556,10 @@ Type HELP for starting information.
                             start: [19 7]
                             end: [19 8]
                         )
+                        parent: #(
+                            start: [8 23]
+                            end: [8 24]
+                        )
                     )
                 ) #(
                     expr: 1
@@ -530,6 +577,10 @@ Type HELP for starting information.
                         cast: #(
                             start: [20 7]
                             end: [20 8]
+                        )
+                        parent: #(
+                            start: [7 3]
+                            end: [7 5]
                         )
                     )
                 ) #(
@@ -563,6 +614,10 @@ Type HELP for starting information.
                             start: [21 7]
                             end: [21 8]
                         )
+                        parent: #(
+                            start: [34 1]
+                            end: [34 3]
+                        )
                     )
                 ) #(
                     expr: g
@@ -580,6 +635,10 @@ Type HELP for starting information.
                         cast: #(
                             start: [22 7]
                             end: [22 8]
+                        )
+                        parent: #(
+                            start: [1 1]
+                            end: [60 1]
                         )
                     )
                 ) #(
@@ -599,6 +658,10 @@ Type HELP for starting information.
                             start: [23 7]
                             end: [23 8]
                         )
+                        parent: #(
+                            start: [1 1]
+                            end: [60 1]
+                        )
                     )
                 ) #(
                     expr: x
@@ -616,6 +679,11 @@ Type HELP for starting information.
                         start: [8 6]
                         end: [8 10]
                     )
+                    ctx: [func body]
+                    spec: #(
+                        start: [8 11]
+                        end: [8 36]
+                    )
                 )
             ) #(
                 expr: g:
@@ -626,6 +694,10 @@ Type HELP for starting information.
                     cast: #(
                         start: [25 6]
                         end: [25 8]
+                    )
+                    parent: #(
+                        start: [6 13]
+                        end: [26 3]
                     )
                 )
             ) #(
@@ -644,6 +716,7 @@ Type HELP for starting information.
                     start: [6 5]
                     end: [6 12]
                 )
+                ctx: [context body]
             )
         ) #(
             expr: h:
@@ -654,6 +727,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [27 5]
                     end: [27 12]
+                )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
                 )
             )
         ) #(
@@ -675,6 +752,10 @@ Type HELP for starting information.
                     start: [28 5]
                     end: [28 6]
                 )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
+                )
             )
         ) #(
             expr: x
@@ -692,6 +773,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [29 5]
                     end: [29 6]
+                )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
                 )
             )
         ) #(
@@ -711,6 +796,10 @@ Type HELP for starting information.
                     start: [30 5]
                     end: [30 6]
                 )
+                parent: #(
+                    start: [4 12]
+                    end: [31 2]
+                )
             )
         ) #(
             expr: t
@@ -728,6 +817,7 @@ Type HELP for starting information.
                 start: [4 4]
                 end: [4 11]
             )
+            ctx: [context body]
         )
     ) #(
         expr: l:
@@ -738,6 +828,10 @@ Type HELP for starting information.
             cast: #(
                 start: [33 4]
                 end: [33 15]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -750,6 +844,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [33 8]
                     end: [33 9]
+                )
+                parent: #(
+                    start: [1 1]
+                    end: [60 1]
                 )
             )
         ) #(
@@ -768,6 +866,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [33 13]
                     end: [33 14]
+                )
+                parent: #(
+                    start: [1 1]
+                    end: [60 1]
                 )
             )
         ) #(
@@ -793,6 +895,10 @@ Type HELP for starting information.
                 start: [34 4]
                 end: [34 5]
             )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
+            )
         )
     ) #(
         expr: l
@@ -810,6 +916,10 @@ Type HELP for starting information.
             cast: #(
                 start: [36 4]
                 end: [36 8]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -943,6 +1053,7 @@ Type HELP for starting information.
                 start: [36 4]
                 end: [36 8]
             )
+            ctx: [func spec]
         )
     ) #(
         expr: [#(
@@ -954,6 +1065,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [37 5]
                     end: [37 6]
+                )
+                parent: #(
+                    start: [36 36]
+                    end: [36 37]
                 )
             )
         ) #(
@@ -972,6 +1087,10 @@ Type HELP for starting information.
                 cast: #(
                     start: [37 10]
                     end: [37 11]
+                )
+                parent: #(
+                    start: [36 38]
+                    end: [36 39]
                 )
             )
         ) #(
@@ -1039,6 +1158,11 @@ Type HELP for starting information.
                 start: [36 4]
                 end: [36 8]
             )
+            ctx: [func body]
+            spec: #(
+                start: [36 9]
+                end: [36 40]
+            )
         )
     ) #(
         expr: s:
@@ -1049,6 +1173,10 @@ Type HELP for starting information.
             cast: #(
                 start: [41 4]
                 end: [41 12]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1163,6 +1291,7 @@ Type HELP for starting information.
                 start: [41 4]
                 end: [41 12]
             )
+            ctx: [function spec]
         )
     ) #(
         expr: [#(
@@ -1286,6 +1415,11 @@ Type HELP for starting information.
                 start: [41 4]
                 end: [41 12]
             )
+            ctx: [function body]
+            spec: #(
+                start: [41 13]
+                end: [41 56]
+            )
         )
     ) #(
         expr: fff:
@@ -1296,6 +1430,10 @@ Type HELP for starting information.
             cast: #(
                 start: [49 6]
                 end: [49 7]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1314,6 +1452,10 @@ Type HELP for starting information.
             cast: #(
                 start: [51 5]
                 end: [51 9]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1587,6 +1729,7 @@ Type HELP for starting information.
                 start: [51 5]
                 end: [51 9]
             )
+            ctx: [func spec]
         )
     ) #(
         expr: [#(
@@ -1661,6 +1804,11 @@ Type HELP for starting information.
                 start: [51 5]
                 end: [51 9]
             )
+            ctx: [func body]
+            spec: #(
+                start: [51 10]
+                end: [51 104]
+            )
         )
     ) #(
         expr: fh1:
@@ -1671,6 +1819,10 @@ Type HELP for starting information.
             cast: #(
                 start: [56 6]
                 end: [56 9]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1737,6 +1889,7 @@ Type HELP for starting information.
                 start: [56 6]
                 end: [56 9]
             )
+            ctx: [has spec]
         )
     ) #(
         expr: fh2:
@@ -1747,6 +1900,10 @@ Type HELP for starting information.
             cast: #(
                 start: [57 6]
                 end: [57 9]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1788,6 +1945,7 @@ Type HELP for starting information.
                 start: [57 6]
                 end: [57 9]
             )
+            ctx: [has spec]
         )
     ) #(
         expr: []
@@ -1799,6 +1957,11 @@ Type HELP for starting information.
                 start: [57 6]
                 end: [57 9]
             )
+            ctx: [has body]
+            spec: #(
+                start: [57 10]
+                end: [57 15]
+            )
         )
     ) #(
         expr: z:
@@ -1809,6 +1972,10 @@ Type HELP for starting information.
             cast: #(
                 start: [59 4]
                 end: [59 5]
+            )
+            parent: #(
+                start: [1 1]
+                end: [60 1]
             )
         )
     ) #(
@@ -1822,7 +1989,23 @@ Type HELP for starting information.
     start: [1 1]
     end: [60 1]
     syntax: #(
-        ctx: context
+        ctx: [context body]
+        extra: [#(
+            start: [9 4]
+            end: [9 7]
+        ) #(
+            start: [22 4]
+            end: [22 6]
+        ) #(
+            start: [23 4]
+            end: [23 6]
+        ) #(
+            start: [33 5]
+            end: [33 7]
+        ) #(
+            start: [33 10]
+            end: [33 12]
+        )]
     )
     source: {Red he: []^/^/a: 'test^/b: context [^/^-c: 4^/^-d: context [^/^-^-e: #{12}^/^-^-f: func [x [block!] y [integer!]][^/^-^-^-ff: function [a [integer!] b [binary!]][^/^-^-^-^-f1: "test"^/^-^-^-^-f2: x^/^-^-^-^-f3: f1^/^-^-^-^-f4: l^/^-^-^-^-f5: :f^/^-^-^-^-f6: f5^/^-^-^-^-f7: a + length? b^/^-^-^-]^/^-^-^-x: 1^/^-^-^-y: 1^/^-^-^-e: x + y^/^-^-^-o: g^/^-^-^-t: h^/^-^-^-u: x^/^-^-]^/^-^-g: []^/^-]^/^-h: #(a: 3)^/^-i: x^/^-j: e^/^-k: t^/]^/^/l: (m: 3 n: a)^/o: l^/^/r: func [a [test] b [test!] /local x y][^/^-x: 1 y: 1^/^-a + b + 1 + 1^/]^/^/s: function [uri [string!] code [string!] blk [block!]][^/^-either uri [^/^-^-return reduce [uri code blk]^/^-][^/^-^-return reduce [uri code blk]^/^-]^/]^/^/fff: 3^/^/ft: func [a [block!] b [map! integer!] return: [integer!] c [integer!] /c a [integer!] /d /local x y z][^/^-reduce [a b c d]^/^-find/match "adb" "a"^/]^/^/fh1: has [/ref a b]^/fh2: has [a b][]^/^/z: z^/}
 )]
@@ -1939,5 +2122,16 @@ Error/Warning: ---------------------------------------
     source: "Syntax"
     message: "missing '[]' at head"
     range: #(
-    ...
+        start: #(
+            line: 0
+            character: 4
+        )
+        end: #(
+            line: 0
+            character: 7
+        )
+    )
+) #(
+    severity: 1
+    code: "inva...
 >> 
