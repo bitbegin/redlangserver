@@ -51,11 +51,19 @@ red-lexer: context [
 		]
 	]
 
+	form-range: function [range [block!]][
+		start: reduce [range/1 range/2]
+		end: reduce [range/3 range/4]
+		to-range start end
+	]
+
 	push-stack: function [stack [block!] expr start [string!] end [string!]][
+		range: make block! 4
+		append range form-pos start
+		append range form-pos end
 		append stack make map! reduce [
 			'expr expr
-			'start form-pos start
-			'end form-pos end
+			'range range
 			'syntax make map! reduce [
 				'ctx make map! 4
 			]

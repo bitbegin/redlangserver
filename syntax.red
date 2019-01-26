@@ -122,14 +122,6 @@ red-syntax: context [
 		]
 		npc
 	]
-
-	create-pos: function [where [block! paren! none!]][
-		if where = none [return none]
-		make map! reduce [
-			'start	where/1/start
-			'end	where/1/end
-		]
-	]
 	
 	check-has-spec: function [pc [block!]][
 		npc: skip-semicolon-next pc
@@ -158,15 +150,15 @@ red-syntax: context [
 		check-args: function [npc [block!] par [block! paren! none!]][
 			syntax: npc/1/syntax
 			syntax/name: "func-args"
-			syntax/parent: create-pos par
+			if par [syntax/parent: par/1/range]
 			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/desc: create-pos npc2
-					npc2/1/syntax/parent: create-pos npc
+					syntax/desc: npc2/1/range
+					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if block? npc3/1/expr [
@@ -192,13 +184,13 @@ red-syntax: context [
 							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
 					]
-					syntax/spec: create-pos npc2
-					npc2/1/syntax/parent: create-pos npc
+					syntax/spec: npc2/1/range
+					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if string? npc3/1/expr [
-						syntax/desc: create-pos npc3
-						npc3/1/syntax/parent: create-pos npc
+						syntax/desc: npc3/1/range
+						npc3/1/syntax/parent: npc/1/range
 						return next npc3
 					]
 					return npc3
@@ -235,8 +227,8 @@ red-syntax: context [
 					create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 				]
 			]
-			syntax/spec: create-pos npc2
-			npc2/1/syntax/parent: create-pos npc
+			syntax/spec: npc2/1/range
+			npc2/1/syntax/parent: npc/1/range
 			skip-semicolon-next npc2
 		]
 		check-refines: function [npc [block!]][
@@ -244,11 +236,11 @@ red-syntax: context [
 				while [not tail? npc] [
 					either word? npc/1/expr [
 						either par/1/syntax/spec [
-							append par/1/syntax/spec create-pos npc
+							append par/1/syntax/spec npc/1/range
 						][
-							par/1/syntax/spec: reduce [create-pos npc]
+							par/1/syntax/spec: reduce [npc/1/range]
 						]
-						npc/1/syntax/parent: create-pos par
+						npc/1/syntax/parent: par/1/range
 						if tail? npc: check-args npc par [return npc]
 					][
 						either refinement? npc/1/expr [
@@ -269,8 +261,8 @@ red-syntax: context [
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/desc: create-pos npc2
-					npc2/1/syntax/parent: create-pos npc
+					syntax/desc: npc2/1/range
+					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					return collect-args npc3 npc
 				]
@@ -289,7 +281,7 @@ red-syntax: context [
 		npc: skip-semicolon-next pc
 		if tail? npc [exit]
 		if string? npc/1/expr [
-			par/1/syntax/desc: create-pos npc
+			par/1/syntax/desc: npc/1/range
 			pc: npc
 		]
 		return-pc: none
@@ -369,14 +361,14 @@ red-syntax: context [
 					create-error-at syntax 'Error 'include-not-file mold ret/1/expr
 				]
 				syntax/cast: ret/1
-				return reduce [create-pos pc ret/2 + 1]
+				return reduce [pc/1/range ret/2 + 1]
 			]
 		]
 
 		literal-type?: [
 			if simple-literal? expr-type [
 				syntax/name: "literal"
-				return reduce [create-pos pc 1]
+				return reduce [pc/1/range 1]
 			]
 		]
 
@@ -408,7 +400,7 @@ red-syntax: context [
 				unless empty? expr [
 					exp-all expr
 				]
-				return reduce [create-pos pc 1]
+				return reduce [pc/1/range 1]
 			]
 		]
 
@@ -418,7 +410,7 @@ red-syntax: context [
 				unless empty? expr [
 					exp-all expr
 				]
-				return reduce [create-pos pc 1]
+				return reduce [pc/1/range 1]
 			]
 		]
 
@@ -432,7 +424,7 @@ red-syntax: context [
 				ret: exp-type? skip pc step
 				if ret/2 = 0 [
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc 1]
+					return reduce [pc/1/range 1]
 				]
 				unless body: find-expr syntax-top ret/1 [
 					throw-error 'do-type? "can't find expr at" ret/1
@@ -443,18 +435,18 @@ red-syntax: context [
 					set-word? body/1/expr
 				][
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				ret2: exp-type? skip pc step
 				if ret2/2 = 0 [
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				step: step + ret2/2
 				syntax/body: ret/1
 				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: create-pos pc
-				return reduce [create-pos pc step]
+				body/1/syntax/ctx/parent: pc/1/range
+				return reduce [pc/1/range step]
 			]
 		]
 
@@ -465,19 +457,19 @@ red-syntax: context [
 				ret: exp-type? skip pc step
 				if ret/2 = 0 [
 					create-error-at syntax 'Error 'miss-spec "do"
-					return reduce [create-pos pc 1]
+					return reduce [pc/1/range 1]
 				]
 				unless body: find-expr syntax-top ret/1 [
 					throw-error 'do-type? "can't find expr at" ret/1
 				]
 				if body/1/expr = 'bind [
 					bind?: true
-					body/1/syntax/ctx/parent: create-pos pc
+					body/1/syntax/ctx/parent: pc/1/range
 					step: step + 1
 					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-body "do"
-						return reduce [create-pos pc 2]
+						return reduce [pc/1/range 2]
 					]
 					unless body: find-expr syntax-top ret/1 [
 						throw-error 'do-type? "can't find expr at" ret/1
@@ -489,22 +481,22 @@ red-syntax: context [
 					set-word? body/1/expr
 				][
 					create-error-at syntax 'Error 'miss-body "do"
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				ret2: exp-type? skip pc step
 				if ret2/2 = 0 [
 					create-error-at syntax 'Error 'miss-ctx "do"
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				step: step + ret2/2
 				syntax/body: ret/1
 				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: create-pos pc
+				body/1/syntax/ctx/parent: pc/1/range
 				if bind? [
 					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [create-pos pc step]
+						return reduce [pc/1/range step]
 					]
 					unless body: find-expr syntax-top ret/1 [
 						throw-error 'do-type? "can't find expr at" ret/1
@@ -515,18 +507,18 @@ red-syntax: context [
 						set-word? body/1/expr
 					][
 						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [create-pos pc step]
+						return reduce [pc/1/range step]
 					]
 					ret2: exp-type? skip pc step
 					if ret2/2 = 0 [
 						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [create-pos pc step]
+						return reduce [pc/1/range step]
 					]
 					syntax/bind: ret/1
 					body/1/syntax/ctx/type: reduce [expr 'bind]
-					body/1/syntax/ctx/parent: create-pos pc
+					body/1/syntax/ctx/parent: pc/1/range
 				]
-				return reduce [create-pos pc step]
+				return reduce [pc/1/range step]
 			]
 		]
 
@@ -538,7 +530,7 @@ red-syntax: context [
 					ret: exp-type? skip pc step
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-spec to string! expr
-						return reduce [create-pos pc 1]
+						return reduce [pc/1/range 1]
 					]
 					unless spec: find-expr syntax-top ret/1 [
 						throw-error 'context-type? "can't find expr at" ret/1
@@ -555,23 +547,23 @@ red-syntax: context [
 							set-word? spec/1/expr
 						][
 							create-error-at syntax 'Error 'miss-spec to string! expr
-							return reduce [create-pos pc 1]
+							return reduce [pc/1/range 1]
 						]
 						ret2: exp-type? skip pc step
 						if ret2/2 = 0 [
 							create-error-at syntax 'Error 'miss-spec to string! expr
-							return reduce [create-pos pc step]
+							return reduce [pc/1/range step]
 						]
 						step: step + ret2/2
 					]
 					syntax/spec: ret/1
 					spec/1/syntax/ctx/type: reduce [expr 'spec]
-					spec/1/syntax/ctx/parent: create-pos pc
+					spec/1/syntax/ctx/parent: pc/1/range
 				]
 				ret: exp-type? skip pc step
 				if ret/2 = 0 [
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				unless body: find-expr syntax-top ret/1 [
 					throw-error 'context-type? "can't find expr at" ret/1
@@ -582,19 +574,19 @@ red-syntax: context [
 					set-word? body/1/expr
 				][
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				ret2: exp-type? skip pc step
 				if ret2/2 = 0 [
 					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [create-pos pc step]
+					return reduce [pc/1/range step]
 				]
 				step: step + ret2/2
 				syntax/body: ret/1
 				body/1/syntax/ctx/spec: syntax/spec
 				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: create-pos pc
-				return reduce [create-pos pc step]
+				body/1/syntax/ctx/parent: pc/1/range
+				return reduce [pc/1/range step]
 			]
 		]
 
@@ -607,14 +599,14 @@ red-syntax: context [
 				type: type? get expr
 				;if find [action! native! function! routine!] type [
 				;]
-				return reduce [create-pos pc 1]
+				return reduce [pc/1/range 1]
 			]
 		]
 
 		unknown-type?: [
 			if expr-type = word! [
 				syntax/name: "unknown"
-				return reduce [create-pos pc 1]
+				return reduce [pc/1/range 1]
 			]
 		]
 
@@ -673,7 +665,7 @@ red-syntax: context [
 					pc/1/syntax/error
 				][
 					error: copy pc/1/syntax/error
-					error/range: red-lexer/to-range pc/1/start pc/1/end
+					error/range: red-lexer/form-range pc/1/range
 					append ret error
 				]
 			]
@@ -717,7 +709,7 @@ red-syntax: context [
 							find-set-word top cast
 						]
 						if ret [
-							cast/1/syntax/ctx/define: create-pos ret
+							cast/1/syntax/ctx/define: ret/1/range
 							cast/1/syntax/name: "resolved"
 							return ret
 						]
@@ -752,7 +744,7 @@ red-syntax: context [
 					create-error-at pc/1/syntax 'Error 'miss-define to string! pc/1/expr
 					exit
 				]
-				pc/1/syntax/ctx/define: create-pos ret
+				pc/1/syntax/ctx/define: ret/1/range
 				exit
 			]
 			if any [
@@ -763,7 +755,7 @@ red-syntax: context [
 					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
 					exit
 				]
-				pc/1/syntax/ctx/define: create-pos ret
+				pc/1/syntax/ctx/define: ret/1/range
 				exit
 			]
 			if type/2 = 'spec [
@@ -778,7 +770,7 @@ red-syntax: context [
 					check-has-spec ret/1/expr
 				]
 				check-func-spec ret/1/expr ret
-				pc/1/syntax/ctx/define: create-pos ret
+				pc/1/syntax/ctx/define: ret/1/range
 				exit
 			]
 			if type/2 = 'body [
@@ -786,7 +778,7 @@ red-syntax: context [
 					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
 					exit
 				]
-				pc/1/syntax/ctx/define: create-pos ret
+				pc/1/syntax/ctx/define: ret/1/range
 				exit
 			]
 		]
@@ -847,7 +839,7 @@ red-syntax: context [
 			forall spec [
 				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
 					if (to word! spec/1/expr) = word [
-						return create-pos spec
+						return spec/1/range
 					]
 				]
 			]
@@ -879,7 +871,7 @@ red-syntax: context [
 						]
 						context [
 							if par = dpar [
-								pc/1/syntax/parent: create-pos par
+								pc/1/syntax/parent: par/1/range
 								return false
 							]
 						]
@@ -892,7 +884,7 @@ red-syntax: context [
 						npc/1/syntax/name = "set-word"
 						pc/1/expr = npc/1/expr
 					][
-						pc/1/syntax/parent: create-pos npc
+						pc/1/syntax/parent: npc/1/range
 						return false
 					]
 				]
@@ -906,7 +898,7 @@ red-syntax: context [
 					hpc/1/syntax/name = "set-word"
 					hpc/1/expr = pc/1/expr
 				][
-					pc/1/syntax/parent: create-pos hpc
+					pc/1/syntax/parent: hpc/1/range
 					exit
 				]
 				hpc: next hpc
@@ -918,11 +910,11 @@ red-syntax: context [
 			]
 			; mark it as global word
 			either top/1/syntax/extra [
-				append top/1/syntax/extra create-pos pc
+				append top/1/syntax/extra pc/1/range
 			][
-				top/1/syntax/extra: reduce [create-pos pc]
+				top/1/syntax/extra: reduce [pc/1/range]
 			]
-			pc/1/syntax/parent: create-pos top
+			pc/1/syntax/parent: top/1/range
 		]
 		raise-set-word*: function [pc [block! paren!]][
 			forall pc [
@@ -1035,10 +1027,7 @@ red-syntax: context [
 	get-parent: function [top [block!] item [map!]][
 		get-parent*: function [pc [block! paren!] par [block! paren!]][
 			forall pc [
-				if all [
-					item/start = pc/1/start
-					item/end = pc/1/end
-				][return par]
+				if item/range = pc/1/range [return par]
 				if all [
 					any [
 						block? pc/1/expr
@@ -1055,13 +1044,10 @@ red-syntax: context [
 		get-parent* top/1/expr top
 	]
 
-	find-expr: function [top [block! paren!] pos [map!]][
-		find-expr*: function [pc [block! paren!] pos [map!]][
+	find-expr: function [top [block! paren!] pos [block!]][
+		find-expr*: function [pc [block! paren!] pos [block!]][
 			forall pc [
-				if all [
-					pc/1/start = pos/start
-					pc/1/end   = pos/end
-				][
+				if pc/1/range = pos [
 					return pc
 				]
 				if all [
@@ -1097,30 +1083,30 @@ red-syntax: context [
 			forall pc [
 				if all [
 					any [
-						pc/1/start/1 < line
+						pc/1/range/1 < line
 						all [
-							pc/1/start/1 = line
-							pc/1/start/2 <= column
+							pc/1/range/1 = line
+							pc/1/range/2 <= column
 						]
 					]
 				][
 					either any [
-						pc/1/end/1 > line
+						pc/1/range/3 > line
 						all [
-							pc/1/end/1 = line
-							pc/1/end/2 > column
+							pc/1/range/3 = line
+							pc/1/range/4 > column
 						]
 					][
 						do cascade
 					][
 						if all [
-							pc/1/end/1 = line
-							pc/1/end/2 = column
+							pc/1/range/3 = line
+							pc/1/range/4 = column
 							any [
 								tail? next pc
 								all [
-									pc/2/start/1 >= line
-									pc/2/start/2 <> column
+									pc/2/range/3 >= line
+									pc/2/range/4 <> column
 								]
 							]
 						][
