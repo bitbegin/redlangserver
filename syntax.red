@@ -418,9 +418,15 @@ red-syntax: context [
 		]
 
 		keyword?: [
-			if all [
-				expr-type = word!
-				find system-words/system-words expr
+			if any [
+				all [
+					expr-type = word!
+					find system-words/system-words expr
+				]
+				all [
+					expr-type = path!
+					find system-words/system-words expr/1
+				]
 			][
 				step: 1
 				unless spec: system-words/get-spec expr [
