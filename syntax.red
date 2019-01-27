@@ -122,7 +122,335 @@ red-syntax: context [
 		]
 		npc
 	]
-	
+
+	exp-type?: function [pc [block! paren!]][
+		if tail? pc [
+			return reduce [none 0]
+		]
+		expr: pc/1/expr
+		expr-type: type? expr
+		syntax: pc/1/syntax
+		ret: none
+		type: none
+		spec: none
+		name: none
+		rname: none
+		params: none
+		rparams: none
+		refinements: none
+		res: none
+		body: none
+		step: none
+
+		check-tail: function [where [block! paren!] result [block!]][
+			if result/2 = 0 [
+				create-error-at where/1/syntax 'Error 'miss-expr rejoin [mold where/1/expr ": need a type"]
+			]
+		]
+
+		semicolon-type?: [
+			if any [
+				all [
+					string? expr
+					not empty? expr
+					expr/1 = #";"
+				]
+				expr = none
+			][
+				syntax/name: "semicolon"
+				ret: exp-type? next pc
+				check-tail pc ret
+				ret/2: ret/2 + 1
+				return ret
+			]
+		]
+
+		include-type?: [
+			if all [
+				expr-type = issue! 
+				"include" = to string! expr
+			][
+				syntax/name: "include"
+				ret: exp-type? next pc
+				check-tail pc ret
+				unless file? ret/1/expr [
+					create-error-at syntax 'Error 'include-not-file mold ret/1/expr
+				]
+				syntax/cast: ret/1
+				return reduce [pc/1/range ret/2 + 1]
+			]
+		]
+
+		literal-type?: [
+			if simple-literal? expr-type [
+				syntax/name: "literal"
+				return reduce [pc/1/range 1]
+			]
+		]
+
+		set-word-type?: [
+			if set-word? expr [
+				syntax/name: "set-word"
+				ret: exp-type? next pc
+				check-tail pc ret
+				syntax/cast: ret/1
+				ret/2: ret/2 + 1
+				return ret
+			]
+		]
+
+		set-path-type?: [
+			if set-path? expr [
+				syntax/name: "set-path"
+				ret: exp-type? next pc
+				check-tail pc ret
+				syntax/cast: ret/1
+				ret/2: ret/2 + 1
+				return ret
+			]
+		]
+
+		block-type?: [
+			if block? expr [
+				syntax/name: "block"
+				unless empty? expr [
+					exp-all expr
+				]
+				return reduce [pc/1/range 1]
+			]
+		]
+
+		paren-type?: [
+			if paren? expr [
+				syntax/name: "paren"
+				unless empty? expr [
+					exp-all expr
+				]
+				return reduce [pc/1/range 1]
+			]
+		]
+
+		function*?: [
+			step: 1
+			unless spec: system-words/get-spec expr [
+				throw-error 'keyword? "can't find spec for" expr
+			]
+			syntax/spec: spec
+			params: spec/params refinements: spec/refinements
+			forall params [
+				ret: exp-type? skip pc step
+				name: params/1/name
+				type: params/1/type
+				if ret/2 = 0 [
+					create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold name ": need type of '" mold type "'"]
+					return reduce [pc/1/range step]
+				]
+				unless body: find-expr syntax-top ret/1 [
+					throw-error 'keyword? "can't find expr at" ret/1
+				]
+				put syntax/args name body/1/range
+				body/1/syntax/keyword: expr
+				body/1/syntax/args: make map! 3
+				body/1/syntax/args/parent: pc/1/range
+				body/1/syntax/args/name: name
+				body/1/syntax/args/type: type
+				step: step + ret/2
+			]
+			if expr-type = word! [
+				return reduce [pc/1/range step]
+			]
+			forall refinements [
+				rname: refinements/1/name
+				rparams: refinements/1/params
+				if empty? rparams [continue]
+				unless find expr rname [continue]
+				res: make map! 4
+				forall rparams [
+					params: rparams/1
+					ret: exp-type? skip pc step
+					name: params/name
+					type: params/type
+					if ret/2 = 0 [
+						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
+						return reduce [pc/1/range step]
+					]
+					unless body: find-expr syntax-top ret/1 [
+						throw-error 'keyword? "can't find expr at" ret/1
+					]
+					put res name body/1/range
+					body/1/syntax/keyword: expr
+					body/1/syntax/refs: make map! 4
+					body/1/syntax/refs/parent: pc/1/range
+					body/1/syntax/refs/name: name
+					body/1/syntax/refs/type: type
+					body/1/syntax/refs/refname: rname
+					step: step + ret/2
+				]
+				put syntax/refs to word! rname res
+			]
+			return reduce [pc/1/range step]
+		]
+
+		keyword-type?: [
+			if any [
+				all [
+					expr-type = word!
+					find system-words/system-words expr
+				]
+				all [
+					expr-type = path!
+					find system-words/system-words expr/1
+				]
+			][
+				syntax/name: "keyword"
+				if any [
+					all [
+						expr-type = word!
+						find reduce [native! action! function! routine!] type? get expr
+					]
+					all [
+						expr-type = path!
+						find reduce [native! action! function! routine!] type? get expr/1
+					]
+				][
+					syntax/function?: true
+					syntax/args: make map! 4
+					syntax/refs: make map! 4
+					;-- TBD
+					;syntax/return: make map! 1
+					do function*?
+				]
+				return reduce [pc/1/range 1]
+			]
+		]
+
+		unknown-type?: [
+			if expr-type = word! [
+				syntax/name: "unknown"
+				return reduce [pc/1/range 1]
+			]
+		]
+
+		do semicolon-type?
+		do include-type?
+		do literal-type?
+		do set-word-type?
+		do set-path-type?
+		do block-type?
+		do paren-type?
+		do keyword-type?
+		do unknown-type?
+		throw-error 'exp-type "not support!" pc/1/expr
+	]
+
+	exp-all: function [pc [block! paren!]][
+		while [not tail? pc][
+			type: exp-type? pc
+			pc: skip pc type/2
+		]
+	]
+
+	analysis: function [top [block!]][
+		set 'syntax-top top
+		if empty? top [exit]
+		unless all [
+			top/1/expr
+			block? top/1/expr
+		][throw-error 'analysis "expr isn't a block!" top/1]
+		pc: top/1/expr
+		unless pc/1/expr = 'Red [
+			create-error-at pc/1/syntax 'Error 'miss-head-red none
+		]
+		unless block? pc/2/expr [
+			create-error-at pc/2/syntax 'Error 'miss-head-block none
+		]
+		pc/1/syntax/meta: 1
+		pc/2/syntax/meta: 2
+		exp-all pc
+		probe top
+		resolve-spec top
+		raise-set-word top
+		;resolve-unknown top
+	]
+
+	collect-errors: function [top [block! paren!]][
+		ret: clear []
+		collect-errors*: function [pc [block! paren!]][
+			blk: [
+				if all [
+					pc/1/syntax
+					pc/1/syntax/error
+				][
+					error: copy pc/1/syntax/error
+					error/range: red-lexer/form-range pc/1/range
+					append ret error
+				]
+			]
+			forall pc [
+				either all [
+					map? pc/1
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					do blk
+					collect-errors* pc/1/expr
+				][
+					if map? pc/1 [
+						do blk
+					]
+				]
+			]
+		]
+		collect-errors* top
+		ret
+	]
+
+	find-set-word: function [top [block!] pc [block! paren!] /datatype type][
+		word: to word! pc/1/expr
+		match?: function [npc [block! paren!]][
+			forall npc [
+				if all [
+					npc/1/syntax/name = "set-word"
+					word = to word! npc/1/expr
+				][
+					unless cast: find-expr top npc/1/syntax/cast [
+						throw-error 'match? "can't find expr at" npc/1/cast
+					]
+					if word? cast/1/expr [
+						ret: either datatype [
+							find-set-word/datatype top cast type
+						][
+							find-set-word top cast
+						]
+						if ret [
+							cast/1/syntax/ctx/define: ret/1/range
+							cast/1/syntax/name: "resolved"
+							return ret
+						]
+					]
+					either datatype [
+						fn: get type
+						if fn cast/1/expr [
+							return cast
+						]
+					][
+						return cast
+					]
+				]
+			]
+			false
+		]
+		par: pc
+		until [
+			if ret: match? head par [return ret]
+			par: get-parent top par/1
+		]
+		false
+	]
+
 	check-has-spec: function [pc [block!]][
 		npc: skip-semicolon-next pc
 		if tail? npc [exit]
@@ -310,336 +638,19 @@ red-syntax: context [
 		]
 	]
 
-	exp-type?: function [pc [block! paren!]][
-		if tail? pc [
-			return reduce [none 0]
-		]
-		expr: pc/1/expr
-		expr-type: type? expr
-		syntax: pc/1/syntax
-		ret: none
-		type: none
-		spec: none
-		name: none
-		rname: none
-		params: none
-		rparams: none
-		refinements: none
-		res: none
-		body: none
-		step: none
-
-		check-tail: function [where [block! paren!] result [block!]][
-			if result/2 = 0 [
-				create-error-at where/1/syntax 'Error 'miss-expr rejoin [mold where/1/expr ": need a type"]
+	resolve-spec: function [top [block!]][
+		resolve-func: function [pc [block! paren!]][
+			unless args: pc/1/syntax/args [
+				throw-error 'resolve-func "parse func error!" mold pc/1
 			]
-		]
-
-		semicolon-type?: [
-			if any [
-				all [
-					string? expr
-					not empty? expr
-					expr/1 = #";"
+			if args/name = 'spec [
+				unless ret: find-set-word/datatype top pc 'block? [
+					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+					exit
 				]
-				expr = none
-			][
-				syntax/name: "semicolon"
-				ret: exp-type? next pc
-				check-tail pc ret
-				ret/2: ret/2 + 1
-				return ret
-			]
-		]
 
-		include-type?: [
-			if all [
-				expr-type = issue! 
-				"include" = to string! expr
-			][
-				syntax/name: "include"
-				ret: exp-type? next pc
-				check-tail pc ret
-				unless file? ret/1/expr [
-					create-error-at syntax 'Error 'include-not-file mold ret/1/expr
-				]
-				syntax/cast: ret/1
-				return reduce [pc/1/range ret/2 + 1]
 			]
 		]
-
-		literal-type?: [
-			if simple-literal? expr-type [
-				syntax/name: "literal"
-				return reduce [pc/1/range 1]
-			]
-		]
-
-		set-word-type?: [
-			if set-word? expr [
-				syntax/name: "set-word"
-				ret: exp-type? next pc
-				check-tail pc ret
-				syntax/cast: ret/1
-				ret/2: ret/2 + 1
-				return ret
-			]
-		]
-
-		set-path-type?: [
-			if set-path? expr [
-				syntax/name: "set-path"
-				ret: exp-type? next pc
-				check-tail pc ret
-				syntax/cast: ret/1
-				ret/2: ret/2 + 1
-				return ret
-			]
-		]
-
-		block-type?: [
-			if block? expr [
-				syntax/name: "block"
-				unless empty? expr [
-					exp-all expr
-				]
-				return reduce [pc/1/range 1]
-			]
-		]
-
-		paren-type?: [
-			if paren? expr [
-				syntax/name: "paren"
-				unless empty? expr [
-					exp-all expr
-				]
-				return reduce [pc/1/range 1]
-			]
-		]
-
-		function*?: [
-			step: 1
-			unless spec: system-words/get-spec expr [
-				throw-error 'keyword? "can't find spec for" expr
-			]
-			syntax/spec: spec
-			params: spec/params refinements: spec/refinements
-			forall params [
-				ret: exp-type? skip pc step
-				name: params/1/name
-				type: params/1/type
-				if ret/2 = 0 [
-					create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold name ": need type of '" mold type "'"]
-					return reduce [pc/1/range step]
-				]
-				unless body: find-expr syntax-top ret/1 [
-					throw-error 'keyword? "can't find expr at" ret/1
-				]
-				put syntax/args name body/1/range
-				body/1/syntax/args: make map! 4
-				body/1/syntax/args/parent: pc/1/range
-				body/1/syntax/args/name: name
-				body/1/syntax/args/type: type
-				step: step + ret/2
-			]
-			if expr-type = word! [
-				return reduce [pc/1/range step]
-			]
-			forall refinements [
-				rname: refinements/1/name
-				rparams: refinements/1/params
-				if empty? rparams [continue]
-				unless find expr rname [continue]
-				res: make map! 4
-				forall rparams [
-					params: rparams/1
-					ret: exp-type? skip pc step
-					name: params/name
-					type: params/type
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
-						return reduce [pc/1/range step]
-					]
-					unless body: find-expr syntax-top ret/1 [
-						throw-error 'keyword? "can't find expr at" ret/1
-					]
-					put res name body/1/range
-					body/1/syntax/refs: make map! 4
-					body/1/syntax/refs/parent: pc/1/range
-					body/1/syntax/refs/name: name
-					body/1/syntax/refs/type: type
-					body/1/syntax/refs/refname: rname
-					step: step + ret/2
-				]
-				put syntax/refs to word! rname res
-			]
-			return reduce [pc/1/range step]
-		]
-
-		keyword-type?: [
-			if any [
-				all [
-					expr-type = word!
-					find system-words/system-words expr
-				]
-				all [
-					expr-type = path!
-					find system-words/system-words expr/1
-				]
-			][
-				syntax/name: "keyword"
-				if any [
-					all [
-						expr-type = word!
-						find reduce [native! action! function! routine!] type? get expr
-					]
-					all [
-						expr-type = path!
-						find reduce [native! action! function! routine!] type? get expr/1
-					]
-				][
-					syntax/function?: true
-					syntax/args: make map! 4
-					syntax/refs: make map! 4
-					;-- TBD
-					;syntax/return: make map! 1
-					;syntax/local: make map! 4
-					do function*?
-				]
-				return reduce [pc/1/range 1]
-			]
-		]
-
-		unknown-type?: [
-			if expr-type = word! [
-				syntax/name: "unknown"
-				return reduce [pc/1/range 1]
-			]
-		]
-
-		do semicolon-type?
-		do include-type?
-		do literal-type?
-		do set-word-type?
-		do set-path-type?
-		do block-type?
-		do paren-type?
-		do keyword-type?
-		do unknown-type?
-		throw-error 'exp-type "not support!" pc/1/expr
-	]
-
-	exp-all: function [pc [block! paren!]][
-		while [not tail? pc][
-			type: exp-type? pc
-			pc: skip pc type/2
-		]
-	]
-
-	analysis: function [top [block!]][
-		set 'syntax-top top
-		if empty? top [exit]
-		unless all [
-			top/1/expr
-			block? top/1/expr
-		][throw-error 'analysis "expr isn't a block!" top/1]
-		pc: top/1/expr
-		unless pc/1/expr = 'Red [
-			create-error-at pc/1/syntax 'Error 'miss-head-red none
-		]
-		unless block? pc/2/expr [
-			create-error-at pc/2/syntax 'Error 'miss-head-block none
-		]
-		pc/1/syntax/meta: 1
-		pc/2/syntax/meta: 2
-		exp-all pc
-		probe top
-		resolve-ctx top
-		raise-set-word top
-		;resolve-unknown top
-	]
-
-	collect-errors: function [top [block! paren!]][
-		ret: clear []
-		collect-errors*: function [pc [block! paren!]][
-			blk: [
-				if all [
-					pc/1/syntax
-					pc/1/syntax/error
-				][
-					error: copy pc/1/syntax/error
-					error/range: red-lexer/form-range pc/1/range
-					append ret error
-				]
-			]
-			forall pc [
-				either all [
-					map? pc/1
-					any [
-						block? pc/1/expr
-						paren? pc/1/expr
-					]
-					not empty? pc/1/expr
-				][
-					do blk
-					collect-errors* pc/1/expr
-				][
-					if map? pc/1 [
-						do blk
-					]
-				]
-			]
-		]
-		collect-errors* top
-		ret
-	]
-
-	find-set-word: function [top [block!] pc [block! paren!] /blk?][
-		word: to word! pc/1/expr
-		match?: function [npc [block! paren!]][
-			forall npc [
-				if all [
-					npc/1/syntax/name = "set-word"
-					word = to word! npc/1/expr
-				][
-					unless cast: find-expr top npc/1/syntax/cast [
-						throw-error 'match? "can't find expr at" npc/1/cast
-					]
-					if word? cast/1/expr [
-						ret: either blk? [
-							find-set-word/blk? top cast
-						][
-							find-set-word top cast
-						]
-						if ret [
-							cast/1/syntax/ctx/define: ret/1/range
-							cast/1/syntax/name: "resolved"
-							return ret
-						]
-					]
-					case [
-						blk? [
-							if block? cast/1/expr [
-								return cast
-							]
-						]
-						true [
-							return cast
-						]
-					]
-				]
-			]
-			false
-		]
-		par: pc
-		until [
-			if ret: match? head par [return ret]
-			par: get-parent top par/1
-		]
-		false
-	]
-
-	resolve-ctx: function [top [block!]][
 		resolve: function [pc [block! paren!]][
 			type: pc/1/syntax/ctx/type
 			if type = [do bind][
@@ -685,7 +696,7 @@ red-syntax: context [
 				exit
 			]
 		]
-		resolve-ctx*: function [pc [block! paren!]][
+		resolve-spec*: function [pc [block! paren!]][
 			forall pc [
 				either all [
 					any [
@@ -694,22 +705,17 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					resolve-ctx* pc/1/expr
+					resolve-spec* pc/1/expr
 				][
-					if all [
-						any [
-							word? pc/1/expr
-							lit-word? pc/1/expr
-						]
-						pc/1/syntax
-						pc/1/syntax/ctx/type
-					][
-						resolve pc
+					keyword: pc/1/syntax/keyword
+					if find [func function has does do bind all any] keyword [
+						fn: to word! append copy "resolve-" to string! keyword
+						do bind fn resolve-spec
 					]
 				]
 			]
 		]
-		resolve-ctx* top/1/expr
+		resolve-spec* top/1/expr
 	]
 
 	func-arg?: function [top [block!] pos [map!] word [word!]][
