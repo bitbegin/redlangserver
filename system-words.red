@@ -26,82 +26,25 @@ system-words: context [
 		][none]
 	]
 
-	ws: charset " ^-^M"
-	word-char: complement charset {/\^^,[](){}"#%$@:;}
+	;-- for speed up
+	func-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'func
+	has-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'has
+	does-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'does
+	function-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'function
+	context-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'context
+	do-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'do
+	bind-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'bind
+	all-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'all
+	any-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'any
 
-	append-last: function [blk [block!] v][
-		if block? l: last blk [
-			append l v
-			exit
+	get-spec: function [word [word!]][
+		if find [func has does function context do bind all any] word [
+			spec: to word! append to string! word "-spec"
+			return do spec
 		]
-		if none? l [
-			append/only blk reduce [v]
-			exit
-		]
-		remove back tail blk
-		append/only blk reduce [l v]
-	]
-
-	get-spec: function [word [word!] field [word!]][
-		type: type? get word
-		unless any [
-			type = action!
-			type = native!
-			type = function!
-			type = routine!
-			type = op!
-		][return none]
-		info: get-word-info word
-		switch field [
-			args [		
-				if parse info [thru "ARGUMENTS:^/" to word-char copy blk to ["^/^/" | "REFINEMENTS:^/" | "RETURNS:^/" | end] thru end][
-					lines: split blk "^/"
-					forall lines [
-						clear find lines/1 "^""
-					]
-					blk: clear []
-					forall lines [
-						args: load lines/1
-						either block? args [
-							unless empty? args [
-								append/only blk args
-							]
-						][
-							append/only blk reduce [args]
-						]
-					]
-					return blk
-				]
-			]
-			refines [
-				if parse info [thru "REFINEMENTS:^/" to word-char copy blk to ["^/^/" | "RETURNS:^/" | end] thru end][
-					lines: split blk "^/"
-					forall lines [
-						clear find lines/1 "^""
-						clear find lines/1 "=>"
-					]
-					blk: clear []
-					forall lines [
-						refs: load lines/1
-						case [
-							refinement? refs [
-								append/only blk reduce [refs]
-							]
-							not none? refs [
-								append-last blk refs
-							]
-						]
-					]
-					return blk
-				]
-			]
-			returns [
-				if parse info [thru "RETURNS:^/" to word-char copy blk to ["^/^/" | end] thru end][
-					return load blk
-				]
-			]
-		]
-		none
+		either find system-words word [
+			help-ctx/func-spec-ctx/parse-func-spec do to get-word! word
+		][none]
 	]
 
 	form-completion: function [completions [block!]][
