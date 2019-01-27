@@ -204,7 +204,7 @@ red-syntax: context [
 			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [
-				create-error-at npc/1/syntax 'Error 'miss-expr "return:"
+				create-error-at npc/1/syntax 'Error 'miss-expr {"return:" need a block!}
 				return npc2
 			]
 			unless block? npc2/1/expr [
@@ -318,17 +318,20 @@ red-syntax: context [
 		expr-type: type? expr
 		syntax: pc/1/syntax
 		ret: none
-		ret2: none
 		type: none
 		spec: none
+		name: none
+		rname: none
+		params: none
+		rparams: none
+		refinements: none
+		res: none
 		body: none
 		step: none
-		npc: none
-		bind?: none
 
 		check-tail: function [where [block! paren!] result [block!]][
 			if result/2 = 0 [
-				create-error-at where/1/syntax 'Error 'miss-expr mold where/1/expr
+				create-error-at where/1/syntax 'Error 'miss-expr rejoin [mold where/1/expr ": need a type"]
 			]
 		]
 
@@ -414,192 +417,62 @@ red-syntax: context [
 			]
 		]
 
-		all-any-type?: [
-			if any [
-				expr = 'all
-				expr = 'any
-			][
-				syntax/name: "all/any"
-				step: 1
-				ret: exp-type? skip pc step
-				if ret/2 = 0 [
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range 1]
-				]
-				unless body: find-expr syntax-top ret/1 [
-					throw-error 'do-type? "can't find expr at" ret/1
-				]
-				unless any [
-					block? body/1/expr
-					word? body/1/expr
-					set-word? body/1/expr
-				][
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range step]
-				]
-				ret2: exp-type? skip pc step
-				if ret2/2 = 0 [
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range step]
-				]
-				step: step + ret2/2
-				syntax/body: ret/1
-				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: pc/1/range
-				return reduce [pc/1/range step]
-			]
-		]
-
-		do-type?: [
-			if expr = 'do [
-				syntax/name: "do"
-				step: 1
-				ret: exp-type? skip pc step
-				if ret/2 = 0 [
-					create-error-at syntax 'Error 'miss-spec "do"
-					return reduce [pc/1/range 1]
-				]
-				unless body: find-expr syntax-top ret/1 [
-					throw-error 'do-type? "can't find expr at" ret/1
-				]
-				if body/1/expr = 'bind [
-					bind?: true
-					body/1/syntax/ctx/parent: pc/1/range
-					step: step + 1
-					ret: exp-type? skip pc step
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-body "do"
-						return reduce [pc/1/range 2]
-					]
-					unless body: find-expr syntax-top ret/1 [
-						throw-error 'do-type? "can't find expr at" ret/1
-					]
-				]
-				unless any [
-					block? body/1/expr
-					word? body/1/expr
-					set-word? body/1/expr
-				][
-					create-error-at syntax 'Error 'miss-body "do"
-					return reduce [pc/1/range step]
-				]
-				ret2: exp-type? skip pc step
-				if ret2/2 = 0 [
-					create-error-at syntax 'Error 'miss-ctx "do"
-					return reduce [pc/1/range step]
-				]
-				step: step + ret2/2
-				syntax/body: ret/1
-				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: pc/1/range
-				if bind? [
-					ret: exp-type? skip pc step
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [pc/1/range step]
-					]
-					unless body: find-expr syntax-top ret/1 [
-						throw-error 'do-type? "can't find expr at" ret/1
-					]
-					unless any [
-						word? body/1/expr
-						lit-word? body/1/expr
-						set-word? body/1/expr
-					][
-						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [pc/1/range step]
-					]
-					ret2: exp-type? skip pc step
-					if ret2/2 = 0 [
-						create-error-at syntax 'Error 'miss-ctx "do"
-						return reduce [pc/1/range step]
-					]
-					syntax/bind: ret/1
-					body/1/syntax/ctx/type: reduce [expr 'bind]
-					body/1/syntax/ctx/parent: pc/1/range
-				]
-				return reduce [pc/1/range step]
-			]
-		]
-
-		context-type?: [
-			if find [has func function does context] expr [
-				syntax/name: "context"
-				step: 1
-				if find [has func function] expr [
-					ret: exp-type? skip pc step
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-spec to string! expr
-						return reduce [pc/1/range 1]
-					]
-					unless spec: find-expr syntax-top ret/1 [
-						throw-error 'context-type? "can't find expr at" ret/1
-					]
-					either spec/1/syntax/name = "block" [
-						if expr = 'has [
-							check-has-spec spec/1/expr
-						]
-						check-func-spec spec/1/expr spec
-						step: step + 1
-					][
-						unless any [
-							word? spec/1/expr
-							set-word? spec/1/expr
-						][
-							create-error-at syntax 'Error 'miss-spec to string! expr
-							return reduce [pc/1/range 1]
-						]
-						ret2: exp-type? skip pc step
-						if ret2/2 = 0 [
-							create-error-at syntax 'Error 'miss-spec to string! expr
-							return reduce [pc/1/range step]
-						]
-						step: step + ret2/2
-					]
-					syntax/spec: ret/1
-					spec/1/syntax/ctx/type: reduce [expr 'spec]
-					spec/1/syntax/ctx/parent: pc/1/range
-				]
-				ret: exp-type? skip pc step
-				if ret/2 = 0 [
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range step]
-				]
-				unless body: find-expr syntax-top ret/1 [
-					throw-error 'context-type? "can't find expr at" ret/1
-				]
-				unless any [
-					block? body/1/expr
-					word? body/1/expr
-					set-word? body/1/expr
-				][
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range step]
-				]
-				ret2: exp-type? skip pc step
-				if ret2/2 = 0 [
-					create-error-at syntax 'Error 'miss-body to string! expr
-					return reduce [pc/1/range step]
-				]
-				step: step + ret2/2
-				syntax/body: ret/1
-				body/1/syntax/ctx/spec: syntax/spec
-				body/1/syntax/ctx/type: reduce [expr 'body]
-				body/1/syntax/ctx/parent: pc/1/range
-				return reduce [pc/1/range step]
-			]
-		]
-
-		keyword-type?: [
+		keyword?: [
 			if all [
 				expr-type = word!
 				find system-words/system-words expr
 			][
-				syntax/name: "keyword"
-				type: type? get expr
-				;if find [action! native! function! routine!] type [
-				;]
-				return reduce [pc/1/range 1]
+				step: 1
+				unless spec: system-words/get-spec expr [
+					throw-error 'keyword? "can't find spec for" expr
+				]
+				syntax/spec: spec
+				params: spec/params refinements: spec/refinements
+				
+				forall params [
+					ret: exp-type? skip pc step
+					name: params/1/name
+					type: params/1/type
+					if ret/2 = 0 [
+						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold name ": need type of '" mold type "'"]
+						return reduce [pc/1/range step]
+					]
+					unless body: find-expr syntax-top ret/1 [
+						throw-error 'keyword? "can't find expr at" ret/1
+					]
+					put syntax/args name body/1/range
+					body/1/syntax/args/parent: pc/1/range
+					body/1/syntax/args/name: name
+					body/1/syntax/args/type: type
+					step: step + ret/2
+				]
+				forall refinements [
+					rname: refinements/1/name
+					rparams: refinements/1/params
+					if empty? rparams [continue]
+					res: make map! 4
+					forall rparams [
+						params: rparams/1
+						ret: exp-type? skip pc step
+						name: params/1/name
+						type: params/1/type
+						if ret/2 = 0 [
+							create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
+							return reduce [pc/1/range step]
+						]
+						unless body: find-expr syntax-top ret/1 [
+							throw-error 'keyword? "can't find expr at" ret/1
+						]
+						put res name body/1/range
+						body/1/syntax/refs/parent: pc/1/range
+						body/1/syntax/refs/name: name
+						body/1/syntax/refs/type: type
+						body/1/syntax/refs/refname: rname
+						step: step + ret/2
+					]
+					put syntax/args rname res
+				]
+				return reduce [pc/1/range step]
 			]
 		]
 
@@ -617,9 +490,6 @@ red-syntax: context [
 		do set-path-type?
 		do block-type?
 		do paren-type?
-		do all-any-type?
-		do do-type?
-		do context-type?
 		do keyword-type?
 		do unknown-type?
 		throw-error 'exp-type "not support!" pc/1/expr

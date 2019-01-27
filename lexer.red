@@ -65,7 +65,10 @@ red-lexer: context [
 			'expr expr
 			'range range
 			'syntax make map! reduce [
-				'ctx make map! 4
+				'args make map! 4
+				'refs make map! 4
+				'return make map! 1
+				'local make map! 4
 			]
 		]
 	]
