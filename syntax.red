@@ -417,7 +417,61 @@ red-syntax: context [
 			]
 		]
 
-		keyword?: [
+		function*?: [
+			step: 1
+			unless spec: system-words/get-spec expr [
+				throw-error 'keyword? "can't find spec for" expr
+			]
+			syntax/spec: spec
+			params: spec/params refinements: spec/refinements
+			
+			forall params [
+				ret: exp-type? skip pc step
+				name: params/1/name
+				type: params/1/type
+				if ret/2 = 0 [
+					create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold name ": need type of '" mold type "'"]
+					return reduce [pc/1/range step]
+				]
+				unless body: find-expr syntax-top ret/1 [
+					throw-error 'keyword? "can't find expr at" ret/1
+				]
+				put syntax/args name body/1/range
+				body/1/syntax/args/parent: pc/1/range
+				body/1/syntax/args/name: name
+				body/1/syntax/args/type: type
+				step: step + ret/2
+			]
+			forall refinements [
+				rname: refinements/1/name
+				rparams: refinements/1/params
+				if empty? rparams [continue]
+				res: make map! 4
+				forall rparams [
+					params: rparams/1
+					ret: exp-type? skip pc step
+					name: params/1/name
+					type: params/1/type
+					if ret/2 = 0 [
+						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
+						return reduce [pc/1/range step]
+					]
+					unless body: find-expr syntax-top ret/1 [
+						throw-error 'keyword? "can't find expr at" ret/1
+					]
+					put res name body/1/range
+					body/1/syntax/refs/parent: pc/1/range
+					body/1/syntax/refs/name: name
+					body/1/syntax/refs/type: type
+					body/1/syntax/refs/refname: rname
+					step: step + ret/2
+				]
+				put syntax/args rname res
+			]
+			return reduce [pc/1/range step]
+		]
+
+		keyword-type?: [
 			if any [
 				all [
 					expr-type = word!
@@ -428,57 +482,21 @@ red-syntax: context [
 					find system-words/system-words expr/1
 				]
 			][
-				step: 1
-				unless spec: system-words/get-spec expr [
-					throw-error 'keyword? "can't find spec for" expr
-				]
-				syntax/spec: spec
-				params: spec/params refinements: spec/refinements
-				
-				forall params [
-					ret: exp-type? skip pc step
-					name: params/1/name
-					type: params/1/type
-					if ret/2 = 0 [
-						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold name ": need type of '" mold type "'"]
-						return reduce [pc/1/range step]
+				syntax/name: "keyword"
+				if any [
+					all [
+						expr-type = word!
+						find [native! action! op! function! routine!] type? get expr
 					]
-					unless body: find-expr syntax-top ret/1 [
-						throw-error 'keyword? "can't find expr at" ret/1
+					all [
+						expr-type = path!
+						find [native! action! op! function! routine!] type? get expr/1
 					]
-					put syntax/args name body/1/range
-					body/1/syntax/args/parent: pc/1/range
-					body/1/syntax/args/name: name
-					body/1/syntax/args/type: type
-					step: step + ret/2
+				][
+					syntax/function?: true
+					do function*?
 				]
-				forall refinements [
-					rname: refinements/1/name
-					rparams: refinements/1/params
-					if empty? rparams [continue]
-					res: make map! 4
-					forall rparams [
-						params: rparams/1
-						ret: exp-type? skip pc step
-						name: params/1/name
-						type: params/1/type
-						if ret/2 = 0 [
-							create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
-							return reduce [pc/1/range step]
-						]
-						unless body: find-expr syntax-top ret/1 [
-							throw-error 'keyword? "can't find expr at" ret/1
-						]
-						put res name body/1/range
-						body/1/syntax/refs/parent: pc/1/range
-						body/1/syntax/refs/name: name
-						body/1/syntax/refs/type: type
-						body/1/syntax/refs/refname: rname
-						step: step + ret/2
-					]
-					put syntax/args rname res
-				]
-				return reduce [pc/1/range step]
+				return reduce [pc/1/range 1]
 			]
 		]
 
@@ -516,8 +534,6 @@ red-syntax: context [
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		pc: top/1/expr
-		top/1/syntax/ctx/type: [context body]
-		top/1/syntax/name: "block"
 		unless pc/1/expr = 'Red [
 			create-error-at pc/1/syntax 'Error 'miss-head-red none
 		]
@@ -527,6 +543,7 @@ red-syntax: context [
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
 		exp-all pc
+		probe top
 		resolve-ctx top
 		raise-set-word top
 		;resolve-unknown top

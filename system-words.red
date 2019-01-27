@@ -42,8 +42,8 @@ system-words: context [
 			spec: to word! append to string! word "-spec"
 			return do spec
 		]
-		either find system-words word [
-			help-ctx/func-spec-ctx/parse-func-spec do to get-word! word
+		either find [native! action! op! function! routine!] type? get word [
+			help-ctx/func-spec-ctx/parse-func-spec get word
 		][none]
 	]
 
