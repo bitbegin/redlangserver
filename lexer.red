@@ -64,12 +64,7 @@ red-lexer: context [
 		append stack make map! reduce [
 			'expr expr
 			'range range
-			'syntax make map! reduce [
-				'args make map! 4
-				'refs make map! 4
-				'return make map! 1
-				'local make map! 4
-			]
+			'syntax make map! 8
 		]
 	]
 

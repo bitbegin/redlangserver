@@ -27,22 +27,22 @@ system-words: context [
 	]
 
 	;-- for speed up
-	func-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'func
-	has-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'has
-	does-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'does
-	function-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'function
-	context-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'context
-	do-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'do
-	bind-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'bind
-	all-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'all
-	any-spec: help-ctx/func-spec-ctx/parse-func-spec do to get-word! 'any
+	func-spec: help-ctx/func-spec-ctx/parse-func-spec get 'func
+	has-spec: help-ctx/func-spec-ctx/parse-func-spec get 'has
+	does-spec: help-ctx/func-spec-ctx/parse-func-spec get 'does
+	function-spec: help-ctx/func-spec-ctx/parse-func-spec get 'function
+	context-spec: help-ctx/func-spec-ctx/parse-func-spec get 'context
+	do-spec: help-ctx/func-spec-ctx/parse-func-spec get 'do
+	bind-spec: help-ctx/func-spec-ctx/parse-func-spec get 'bind
+	all-spec: help-ctx/func-spec-ctx/parse-func-spec get 'all
+	any-spec: help-ctx/func-spec-ctx/parse-func-spec get 'any
 
 	get-spec: function [word [word!]][
 		if find [func has does function context do bind all any] word [
 			spec: to word! append to string! word "-spec"
-			return do spec
+			return do bind spec system/words/system-words
 		]
-		either find [native! action! op! function! routine!] type? get word [
+		either find reduce [native! action! op! function! routine!] type? get word [
 			help-ctx/func-spec-ctx/parse-func-spec get word
 		][none]
 	]

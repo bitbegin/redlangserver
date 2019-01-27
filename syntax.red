@@ -424,7 +424,6 @@ red-syntax: context [
 			]
 			syntax/spec: spec
 			params: spec/params refinements: spec/refinements
-			
 			forall params [
 				ret: exp-type? skip pc step
 				name: params/1/name
@@ -437,21 +436,26 @@ red-syntax: context [
 					throw-error 'keyword? "can't find expr at" ret/1
 				]
 				put syntax/args name body/1/range
+				body/1/syntax/args: make map! 4
 				body/1/syntax/args/parent: pc/1/range
 				body/1/syntax/args/name: name
 				body/1/syntax/args/type: type
 				step: step + ret/2
 			]
+			if expr-type = word! [
+				return reduce [pc/1/range step]
+			]
 			forall refinements [
 				rname: refinements/1/name
 				rparams: refinements/1/params
 				if empty? rparams [continue]
+				unless find expr rname [continue]
 				res: make map! 4
 				forall rparams [
 					params: rparams/1
 					ret: exp-type? skip pc step
-					name: params/1/name
-					type: params/1/type
+					name: params/name
+					type: params/type
 					if ret/2 = 0 [
 						create-error-at syntax 'Error 'miss-expr rejoin [mold expr "'s " mold rname ": need type of '" mold type "'"]
 						return reduce [pc/1/range step]
@@ -460,13 +464,14 @@ red-syntax: context [
 						throw-error 'keyword? "can't find expr at" ret/1
 					]
 					put res name body/1/range
+					body/1/syntax/refs: make map! 4
 					body/1/syntax/refs/parent: pc/1/range
 					body/1/syntax/refs/name: name
 					body/1/syntax/refs/type: type
 					body/1/syntax/refs/refname: rname
 					step: step + ret/2
 				]
-				put syntax/args rname res
+				put syntax/refs to word! rname res
 			]
 			return reduce [pc/1/range step]
 		]
@@ -486,14 +491,19 @@ red-syntax: context [
 				if any [
 					all [
 						expr-type = word!
-						find [native! action! op! function! routine!] type? get expr
+						find reduce [native! action! function! routine!] type? get expr
 					]
 					all [
 						expr-type = path!
-						find [native! action! op! function! routine!] type? get expr/1
+						find reduce [native! action! function! routine!] type? get expr/1
 					]
 				][
 					syntax/function?: true
+					syntax/args: make map! 4
+					syntax/refs: make map! 4
+					;-- TBD
+					;syntax/return: make map! 1
+					;syntax/local: make map! 4
 					do function*?
 				]
 				return reduce [pc/1/range 1]
