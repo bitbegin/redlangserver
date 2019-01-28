@@ -19,7 +19,7 @@ auto-complete?: false
 open-logger?: false
 debug-on?: false
 
-code-symbols: clear []
+code-symbols: make block! 4
 last-uri: none
 last-completion: none
 last-line: none
@@ -513,7 +513,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-line line
 	set 'last-column column
 
-	comps: clear []
+	comps: make block! 4
 	completions: none
 	completions-type: none
 	kind: none
@@ -622,7 +622,7 @@ on-textDocument-symbol: function [params [map!]][
 	]
 
 	blk: item/1/3
-	symbols: clear []
+	symbols: make block! 4
 	symbol: none
 	forall blk [
 		if blk/1/1 = none [continue]

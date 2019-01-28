@@ -140,7 +140,7 @@ red-lexer: context [
 		stack
 	]
 	analysis: function [start [string!]][
-		stack: clear []
+		stack: make block! 1
 		end: tail start
 		if map? sub: analysis* start end [
 			return sub

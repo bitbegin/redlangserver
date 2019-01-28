@@ -235,7 +235,7 @@ red-syntax: context [
 			unless spec: system-words/get-spec expr [
 				throw-error 'keyword? "can't find spec for" expr
 			]
-			syntax/spec: spec
+			;syntax/spec: spec
 			params: spec/params refinements: spec/refinements
 			forall params [
 				ret: exp-type? skip pc step
@@ -367,14 +367,14 @@ red-syntax: context [
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
 		exp-all pc
-		probe top
 		resolve-spec top
+		probe top
 		raise-set-word top
 		;resolve-unknown top
 	]
 
 	collect-errors: function [top [block! paren!]][
-		ret: clear []
+		ret: make block! 4
 		collect-errors*: function [pc [block! paren!]][
 			blk: [
 				if all [
@@ -426,7 +426,7 @@ red-syntax: context [
 							find-set-word top cast
 						]
 						if ret [
-							cast/1/syntax/ctx/define: ret/1/range
+							cast/1/syntax/define: ret/1/range
 							cast/1/syntax/name: "resolved"
 							return ret
 						]
@@ -451,22 +451,8 @@ red-syntax: context [
 		false
 	]
 
-	check-has-spec: function [pc [block!]][
-		npc: skip-semicolon-next pc
-		if tail? npc [exit]
-		if string? npc/1/expr [
-			create-error-at pc/1/syntax 'Error 'no-need-desc "has"
-			pc: npc
-		]
-		forall pc [
-			if refinement? pc/1/expr [
-				create-error-at pc/1/syntax 'Error 'forbidden-refine mold pc/1/expr
-			]
-		]
-	]
-
-	check-func-spec: function [pc [block!] par [block! paren!]][
-		words: clear []
+	check-func-spec: function [pc [block!] keyword [word!]][
+		words: make block! 4
 		word: none
 		double-check: function [pc][
 			either find words word: to word! pc/1/expr [
@@ -502,7 +488,7 @@ red-syntax: context [
 					npc2/1/name: "func-type"
 					npc2/1/syntax/parent: npc/1/range
 					npc2/1/syntax/args: make map! 1
-					npc2/1/syntax/args/type: clear []
+					npc2/1/syntax/args/type: make block! 4
 					expr2: npc2/1/expr
 					forall expr2 [
 						expr3: expr2/1/expr
@@ -518,6 +504,7 @@ red-syntax: context [
 						][
 							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
+						expr2/1/name: "func-type-item"
 						append/only npc2/1/syntax/args/type expr3
 					]
 					npc3: skip-semicolon-next npc2
@@ -551,7 +538,7 @@ red-syntax: context [
 			npc2/1/name: "func-type"
 			npc2/1/syntax/parent: npc/1/range
 			npc2/1/syntax/args: make map! 1
-			npc2/1/syntax/args/type: clear []
+			npc2/1/syntax/args/type: make block! 4
 			expr2: npc2/1/expr
 			forall expr2 [
 				expr3: expr2/1/expr
@@ -567,6 +554,7 @@ red-syntax: context [
 				][
 					create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 				]
+				expr2/1/name: "func-type-item"
 				append/only npc2/1/syntax/args/type expr3
 			]
 			skip-semicolon-next npc2
@@ -591,7 +579,7 @@ red-syntax: context [
 			syntax: npc/1/syntax
 			syntax/name: "func-refines"
 			syntax/args: make map! 2
-			syntax/args/params: clear []
+			syntax/args/params: make block! 4
 			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
@@ -616,13 +604,15 @@ red-syntax: context [
 				]
 			]
 		]
+		desc: none
 		npc: skip-semicolon-next pc
-		if tail? npc [exit]
+		if tail? npc [return desc]
 		if string? npc/1/expr [
-			par/1/syntax/desc: npc/1/range
+			desc: npc/1/range
 			pc: npc
 		]
 		return-pc: none
+		local-pc: none
 		until [
 			expr: pc/1/expr
 			case [
@@ -631,7 +621,15 @@ red-syntax: context [
 					pc: check-return pc
 				]
 				refinement? expr [
-					pc: check-refines pc
+					if local-pc [
+						create-error-at pc/1/syntax 'Error 'forbidden-refine mold pc/1/expr
+					]
+					if expr = /local [local-pc: pc]
+					either keyword = 'has [
+						create-error-at pc/1/syntax 'Error 'forbidden-refine mold pc/1/expr
+					][
+						pc: check-refines pc
+					]
 				]
 				find [word! lit-word! get-word!] type? expr [
 					if return-pc [
@@ -646,66 +644,67 @@ red-syntax: context [
 			]
 			tail? pc
 		]
+		desc
+	]
+
+	collect-set-word: function [pc [block! paren!]][
+		extra: make block! 4
+		collect-set-word*: function [pc [block! paren!]][
+			forall pc [
+				either all [
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
+					]
+					not empty? pc/1/expr
+				][
+					collect-set-word* pc
+				][
+					if pc/1/syntax/name = "set-word" [
+						append extra pc/1/range
+					]
+				]
+			]
+		]
+		collect-set-word* pc
+		extra
 	]
 
 	resolve-spec: function [top [block!]][
-		resolve-func: function [pc [block! paren!]][
+		resolve-func: function [pc [block! paren!] keyword [word!]][
 			unless args: pc/1/syntax/args [
 				throw-error 'resolve-func "parse func error!" mold pc/1
 			]
-			if args/name = 'spec [
-				unless ret: find-set-word/datatype top pc 'block? [
-					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-					exit
+			if keyword <> 'does [
+				if args/name = 'spec [
+					unless ret: find-set-word/datatype top pc 'block? [
+						create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+						exit
+					]
+					desc: check-func-spec ret keyword
+					pc/1/syntax/desc: desc
 				]
+				if all [
+					keyword = 'function
+					args/name = 'body
+				][
+					pc/1/syntax/extra: collect-set-word pc/1/expr
+				]
+			]
+		]
 
-			]
+		resolve-all-any: function [pc [block! paren!] keyword [word!]][
+			
 		]
-		resolve: function [pc [block! paren!]][
-			type: pc/1/syntax/ctx/type
-			if type = [do bind][
-				unless ret: find-set-word top pc [
-					create-error-at pc/1/syntax 'Error 'miss-define to string! pc/1/expr
-					exit
-				]
-				pc/1/syntax/ctx/define: ret/1/range
-				exit
-			]
-			if any [
-				type = [all body]
-				type = [any body]
-			][
-				unless ret: find-set-word/blk? top pc [
-					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-					exit
-				]
-				pc/1/syntax/ctx/define: ret/1/range
-				exit
-			]
-			if type/2 = 'spec [
-				unless ret: find-set-word/blk? top pc [
-					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-					exit
-				]
-				unless par: find-expr top pc/1/syntax/ctx/parent [
-					throw-error 'resolve "can't find expr at" pc/1/syntax/ctx/parent
-				]
-				if par/1/expr = 'has [
-					check-has-spec ret/1/expr
-				]
-				check-func-spec ret/1/expr ret
-				pc/1/syntax/ctx/define: ret/1/range
-				exit
-			]
-			if type/2 = 'body [
-				unless ret: find-set-word/blk? top pc [
-					create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-					exit
-				]
-				pc/1/syntax/ctx/define: ret/1/range
-				exit
-			]
+
+		resolve-do: function [pc [block! paren!] keyword [word!]][
+
 		]
+
+		resolve-bind: function [pc [block! paren!] keyword [word!]][
+
+		]
+
 		resolve-spec*: function [pc [block! paren!]][
 			forall pc [
 				either all [
@@ -718,9 +717,19 @@ red-syntax: context [
 					resolve-spec* pc/1/expr
 				][
 					keyword: pc/1/syntax/keyword
-					if find [func function has does do bind all any] keyword [
-						fn: to word! append copy "resolve-" to string! keyword
-						do bind fn resolve-spec
+					case [
+						find [func function has does] keyword [
+							resolve-func pc keyword
+						]
+						find [all any] keyword [
+							resolve-all-any pc keyword
+						]
+						keyword = 'do [
+							resolve-do pc keyword
+						]
+						keyword = 'bind [
+							resolve-bind pc keyword
+						]
 					]
 				]
 			]
@@ -1040,7 +1049,7 @@ red-syntax: context [
 	]
 
 	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
-		words: clear []
+		words: make block! 4
 		unique?: function [word [string!]][
 			forall words [
 				if words/1/1 = word [return false]
