@@ -313,7 +313,6 @@ red-syntax: context [
 						find reduce [native! action! function! routine!] type? get expr/1
 					]
 				][
-					syntax/function?: true
 					syntax/args: make map! 4
 					syntax/refs: make map! 4
 					;-- TBD
@@ -445,7 +444,13 @@ red-syntax: context [
 		]
 		par: pc
 		until [
-			if ret: match? head par [return ret]
+			if ret: match? head par [
+				if word? pc/1/expr [
+					pc/1/syntax/define: ret/1/range
+					pc/1/syntax/name: "resolved"
+				]
+				return ret
+			]
 			par: get-parent top par/1
 		]
 		false
@@ -563,7 +568,7 @@ red-syntax: context [
 			collect-args: function [npc [block!] par [block!]][
 				while [not tail? npc] [
 					either word? npc/1/expr [
-						append par/1/syntax/params npc/1/range
+						append par/1/syntax/args/params npc/1/range
 						if tail? npc: check-args npc par [return npc]
 					][
 						either refinement? npc/1/expr [
@@ -647,67 +652,105 @@ red-syntax: context [
 		desc
 	]
 
-	collect-set-word: function [pc [block! paren!]][
-		extra: make block! 4
-		collect-set-word*: function [pc [block! paren!]][
-			forall pc [
-				either all [
-					any [
-						block? pc/1/expr
-						paren? pc/1/expr
-					]
-					not empty? pc/1/expr
-				][
-					collect-set-word* pc
-				][
-					if pc/1/syntax/name = "set-word" [
-						append extra pc/1/range
+	resolve-spec: function [top [block!]][
+		function-collect: function [pc [block! paren!]][
+			unless par: pc/1/syntax/parent [exit]
+			unless ret: find-expr top par [
+				throw-error 'function-collect "can't find expr at" par
+			]
+			spec: ret/1/syntax/args/spec
+			unless ret: find-expr top spec [
+				throw-error 'function-collect "can't find expr at" spec
+			]
+			spec: ret/1/expr
+			extra: make block! 4
+			collect?: false
+			collect-set-word*: function [npc [block! paren!]][
+				forall npc [
+					either all [
+						any [
+							block? npc/1/expr
+							paren? npc/1/expr
+						]
+						not empty? npc/1/expr
+					][
+						collect-set-word* npc
+					][
+						if npc/1/syntax/name = "set-word" [
+							collect?: true
+							forall spec [
+								if find reduce [word! lit-word! refinement!] type? spec/1/expr [
+									if (to word! spec/1/expr) = (to word! npc/1/expr) [
+										collect?: false
+									]
+								]
+							]
+							if collect? [append/only extra npc/1/range]
+						]
 					]
 				]
 			]
+			collect-set-word* pc/1/expr
+			pc/1/syntax/extra: extra
 		]
-		collect-set-word* pc
-		extra
-	]
-
-	resolve-spec: function [top [block!]][
-		resolve-func: function [pc [block! paren!] keyword [word!]][
+		resolve-func: function [pc [block! paren!]][
+			keyword: pc/1/syntax/keyword
 			unless args: pc/1/syntax/args [
 				throw-error 'resolve-func "parse func error!" mold pc/1
 			]
-			if keyword <> 'does [
+			if find [func function has] keyword [
 				if args/name = 'spec [
-					unless ret: find-set-word/datatype top pc 'block? [
-						create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-						exit
+					either pc/1/syntax/name = "block" [
+						ret: pc
+					][
+						unless ret: find-set-word/datatype top pc 'block? [
+							create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
+							exit
+						]
 					]
-					desc: check-func-spec ret keyword
+					desc: check-func-spec ret/1/expr keyword
 					pc/1/syntax/desc: desc
 				]
 				if all [
 					keyword = 'function
 					args/name = 'body
 				][
-					pc/1/syntax/extra: collect-set-word pc/1/expr
+					function-collect pc
 				]
 			]
 		]
 
-		resolve-all-any: function [pc [block! paren!] keyword [word!]][
+		resolve-all-any: function [pc [block! paren!]][
 			
 		]
 
-		resolve-do: function [pc [block! paren!] keyword [word!]][
+		resolve-do: function [pc [block! paren!]][
 
 		]
 
-		resolve-bind: function [pc [block! paren!] keyword [word!]][
+		resolve-bind: function [pc [block! paren!]][
 
 		]
 
 		resolve-spec*: function [pc [block! paren!]][
 			forall pc [
-				either all [
+				if keyword: pc/1/syntax/keyword [
+					case [
+						find [func function has does context] keyword [
+							resolve-func pc
+						]
+						find [all any] keyword [
+							resolve-all-any pc
+						]
+						keyword = 'do [
+							resolve-do pc
+						]
+						keyword = 'bind [
+							resolve-bind pc
+						]
+					]
+				]
+				if all [
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
@@ -715,22 +758,6 @@ red-syntax: context [
 					not empty? pc/1/expr
 				][
 					resolve-spec* pc/1/expr
-				][
-					keyword: pc/1/syntax/keyword
-					case [
-						find [func function has does] keyword [
-							resolve-func pc keyword
-						]
-						find [all any] keyword [
-							resolve-all-any pc keyword
-						]
-						keyword = 'do [
-							resolve-do pc keyword
-						]
-						keyword = 'bind [
-							resolve-bind pc keyword
-						]
-					]
 				]
 			]
 		]
