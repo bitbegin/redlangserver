@@ -416,7 +416,7 @@ red-syntax: context [
 						word = to word! npc/1/expr
 					][
 						unless cast: find-expr top npc/1/syntax/cast [
-							throw-error 'match? "can't find expr at" npc/1/cast
+							throw-error 'match? "can't find expr at" npc/1/syntax/cast
 						]
 						if word? cast/1/expr [
 							if ret: find-set-word cast [
@@ -450,7 +450,7 @@ red-syntax: context [
 			]
 			type = set-word! [
 				unless ret: find-expr top pc/1/syntax/cast [
-					throw-error 'match? "can't find expr at" pc/1/cast
+					throw-error 'match? "can't find expr at" pc/1/syntax/cast
 				]
 				return find-word-value top ret
 			]
@@ -695,17 +695,25 @@ red-syntax: context [
 			collect-set-word* pc/1/expr
 			pc/1/syntax/extra: extra
 		]
-		fetch-type: function [pc [block! paren!] type [datatype! typeset!]][
+		fetch-type: function [pc [block! paren!] type [block!]][
+			type*?: function [npc [block! paren!] stype [datatype! typeset!]][
+				fn: get to word! append to string! stype "?"
+				fn npc/1/expr
+			]
 			unless ret: find-word-value top pc [
 				create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword]
 				return none
 			]
-			fn: get to word! append to string! type "?"
-			if fn ret/1/expr [
-				create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword]
-				return none
+			forall type [
+				if any [
+					datatype? type/1
+					typeset? type/1
+				][
+					if type*? ret type/1 [return ret]
+				]
 			]
-			ret
+			create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword ", found: " mold ret/1/expr]
+			none
 		]
 		resolve-func: function [pc [block! paren!]][
 			keyword: pc/1/syntax/keyword
@@ -714,7 +722,7 @@ red-syntax: context [
 			]
 			if find [func function has] keyword [
 				if args/name = 'spec [
-					if ret: fetch-type pc block! [
+					if ret: fetch-type pc args/type [
 						desc: check-func-spec ret/1/expr keyword
 						pc/1/syntax/desc: desc
 					]
@@ -723,7 +731,7 @@ red-syntax: context [
 					keyword = 'function
 					args/name = 'body
 				][
-					if ret: fetch-type pc block! [
+					if ret: fetch-type pc args/type [
 						function-collect ret
 					]
 				]
@@ -735,7 +743,7 @@ red-syntax: context [
 				throw-error 'resolve-all-any "parse func error!" mold pc/1
 			]
 			if args/name = 'conds [
-				fetch-type pc block!
+				fetch-type pc args/type
 			]
 		]
 
@@ -745,12 +753,17 @@ red-syntax: context [
 			]
 			if args/name = 'value [
 				if pc/1/expr <> 'bind [
-					fetch-type pc block!
+					fetch-type pc args/type
 				]
 			]
 		]
 
 		resolve-bind: function [pc [block! paren!]][
+			;-- TBD: bind block/word to context
+			unless args: pc/1/syntax/args [
+				throw-error 'resolve-do "parse func error!" mold pc/1
+			]
+			fetch-type pc args/type
 		]
 
 		resolve-spec*: function [pc [block! paren!]][
