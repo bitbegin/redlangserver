@@ -302,7 +302,7 @@ red-syntax: context [
 					find system-words/system-words expr/1
 				]
 			][
-				syntax/name: "keyword"
+				syntax/name: "unknown-keyword"
 				if any [
 					all [
 						expr-type = word!
@@ -315,17 +315,15 @@ red-syntax: context [
 				][
 					syntax/args: make map! 4
 					syntax/refs: make map! 4
-					;-- TBD
-					;syntax/return: make map! 1
 					do function*?
 				]
 				return reduce [pc/1/range 1]
 			]
 		]
 
-		unknown-type?: [
+		unknown-word-type?: [
 			if expr-type = word! [
-				syntax/name: "unknown"
+				syntax/name: "unknown-word"
 				return reduce [pc/1/range 1]
 			]
 		]
@@ -338,7 +336,7 @@ red-syntax: context [
 		do block-type?
 		do paren-type?
 		do keyword-type?
-		do unknown-type?
+		do unknown-word-type?
 		throw-error 'exp-type "not support!" pc/1/expr
 	]
 
@@ -721,15 +719,12 @@ red-syntax: context [
 		]
 
 		resolve-all-any: function [pc [block! paren!]][
-			
 		]
 
 		resolve-do: function [pc [block! paren!]][
-
 		]
 
 		resolve-bind: function [pc [block! paren!]][
-
 		]
 
 		resolve-spec*: function [pc [block! paren!]][
