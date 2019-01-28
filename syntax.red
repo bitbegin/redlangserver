@@ -406,6 +406,7 @@ red-syntax: context [
 	]
 
 	find-set-word: function [top [block!] pc [block! paren!] /datatype type][
+		unless any-word? pc/1/expr [return false]
 		word: to word! pc/1/expr
 		match?: function [npc [block! paren!]][
 			forall npc [
@@ -698,16 +699,33 @@ red-syntax: context [
 			]
 			if find [func function has] keyword [
 				if args/name = 'spec [
-					either pc/1/syntax/name = "block" [
-						ret: pc
-					][
-						unless ret: find-set-word/datatype top pc 'block? [
-							create-error-at pc/1/syntax 'Error 'miss-blk-define to string! pc/1/expr
-							exit
+					name: pc/1/syntax/name
+					case [
+						name = "block" [
+							ret: pc
 						]
+						name = "set-word" [
+							unless cast: find-expr top pc/1/syntax/cast [
+								throw-error 'function-collect "can't find expr at" pc/1/syntax/cast
+							]
+							either cast/1/syntax/name = "block" [
+								ret: cast
+							][
+								unless ret: find-set-word/datatype top cast 'block? [
+									create-error-at pc/1/syntax 'Error 'miss-blk-define mold cast/1/expr
+									exit
+								]
+							]
+						]
+						true [
+							unless ret: find-set-word/datatype top pc 'block? [
+								create-error-at pc/1/syntax 'Error 'miss-blk-define mold pc/1/expr
+								exit
+							]
+						]
+						desc: check-func-spec ret/1/expr keyword
+						pc/1/syntax/desc: desc
 					]
-					desc: check-func-spec ret/1/expr keyword
-					pc/1/syntax/desc: desc
 				]
 				if all [
 					keyword = 'function
@@ -719,6 +737,25 @@ red-syntax: context [
 		]
 
 		resolve-all-any: function [pc [block! paren!]][
+			unless args: pc/1/syntax/args [
+				throw-error 'resolve-all-any "parse func error!" mold pc/1
+			]
+			if args/name = 'conds [
+				either pc/1/syntax/name = "set-word" [
+					unless cast: find-expr top pc/1/syntax/cast [
+						throw-error 'function-collect "can't find expr at" pc/1/syntax/cast
+					]
+					if cast/1/syntax/name <> "block" [
+						unless find-set-word/datatype top cast 'block? [
+							create-error-at pc/1/syntax 'Error 'miss-blk-define mold cast/1/expr
+						]
+					]
+				][
+					unless find-set-word/datatype top pc 'block? [
+						create-error-at pc/1/syntax 'Error 'miss-blk-define mold pc/1/expr
+					]
+				]
+			]
 		]
 
 		resolve-do: function [pc [block! paren!]][
