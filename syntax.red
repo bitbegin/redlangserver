@@ -22,6 +22,7 @@ red-syntax: context [
 		'miss-ctx				"missing context for bind"
 		'miss-define			"missing define for"
 		'miss-blk-define		"missing block! define for"
+		'miss-type				"missgin type"
 		'unresolve 				"need resolve unknown type"
 		'invalid-refine			"invalid refinement"
 		'invalid-datatype		"invalid datatype! in block!"
@@ -405,54 +406,56 @@ red-syntax: context [
 		ret
 	]
 
-	find-set-word: function [top [block!] pc [block! paren!] /datatype type][
-		unless any-word? pc/1/expr [return false]
-		word: to word! pc/1/expr
-		match?: function [npc [block! paren!]][
-			forall npc [
-				if all [
-					npc/1/syntax/name = "set-word"
-					word = to word! npc/1/expr
-				][
-					unless cast: find-expr top npc/1/syntax/cast [
-						throw-error 'match? "can't find expr at" npc/1/cast
-					]
-					if word? cast/1/expr [
-						ret: either datatype [
-							find-set-word/datatype top cast type
-						][
-							find-set-word top cast
-						]
-						if ret [
-							cast/1/syntax/define: ret/1/range
-							cast/1/syntax/name: "resolved"
-							return ret
-						]
-					]
-					either datatype [
-						fn: get type
-						if fn cast/1/expr [
-							return cast
-						]
+	find-word-value: function [top [block!] pc [block! paren!]][
+		find-set-word: function [pc [block! paren!]][
+			word: to word! pc/1/expr
+			match?: function [npc [block! paren!]][
+				forall npc [
+					if all [
+						npc/1/syntax/name = "set-word"
+						word = to word! npc/1/expr
 					][
+						unless cast: find-expr top npc/1/syntax/cast [
+							throw-error 'match? "can't find expr at" npc/1/cast
+						]
+						if word? cast/1/expr [
+							if ret: find-set-word cast [
+								cast/1/syntax/define: ret/1/range
+								cast/1/syntax/name: "resolved"
+								return ret
+							]
+						]
 						return cast
 					]
 				]
+				false
+			]
+			par: pc
+			until [
+				if ret: match? head par [
+					if word? pc/1/expr [
+						pc/1/syntax/define: ret/1/range
+						pc/1/syntax/name: "resolved"
+					]
+					return ret
+				]
+				par: get-parent top par/1
 			]
 			false
 		]
-		par: pc
-		until [
-			if ret: match? head par [
-				if word? pc/1/expr [
-					pc/1/syntax/define: ret/1/range
-					pc/1/syntax/name: "resolved"
-				]
-				return ret
+		type: type? pc/1/expr
+		case [
+			find reduce [word! get-word!] type [
+				return find-set-word pc
 			]
-			par: get-parent top par/1
+			type = set-word! [
+				unless ret: find-expr top pc/1/syntax/cast [
+					throw-error 'match? "can't find expr at" pc/1/cast
+				]
+				return find-word-value top ret
+			]
 		]
-		false
+		pc
 	]
 
 	check-func-spec: function [pc [block!] keyword [word!]][
@@ -692,6 +695,18 @@ red-syntax: context [
 			collect-set-word* pc/1/expr
 			pc/1/syntax/extra: extra
 		]
+		fetch-type: function [pc [block! paren!] type [datatype! typeset!]][
+			unless ret: find-word-value top pc [
+				create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword]
+				return none
+			]
+			fn: get to word! append to string! type "?"
+			if fn ret/1/expr [
+				create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword]
+				return none
+			]
+			ret
+		]
 		resolve-func: function [pc [block! paren!]][
 			keyword: pc/1/syntax/keyword
 			unless args: pc/1/syntax/args [
@@ -699,30 +714,7 @@ red-syntax: context [
 			]
 			if find [func function has] keyword [
 				if args/name = 'spec [
-					name: pc/1/syntax/name
-					case [
-						name = "block" [
-							ret: pc
-						]
-						name = "set-word" [
-							unless cast: find-expr top pc/1/syntax/cast [
-								throw-error 'function-collect "can't find expr at" pc/1/syntax/cast
-							]
-							either cast/1/syntax/name = "block" [
-								ret: cast
-							][
-								unless ret: find-set-word/datatype top cast 'block? [
-									create-error-at pc/1/syntax 'Error 'miss-blk-define mold cast/1/expr
-									exit
-								]
-							]
-						]
-						true [
-							unless ret: find-set-word/datatype top pc 'block? [
-								create-error-at pc/1/syntax 'Error 'miss-blk-define mold pc/1/expr
-								exit
-							]
-						]
+					if ret: fetch-type pc block! [
 						desc: check-func-spec ret/1/expr keyword
 						pc/1/syntax/desc: desc
 					]
@@ -731,7 +723,9 @@ red-syntax: context [
 					keyword = 'function
 					args/name = 'body
 				][
-					function-collect pc
+					if ret: fetch-type pc block! [
+						function-collect ret
+					]
 				]
 			]
 		]
@@ -741,24 +735,19 @@ red-syntax: context [
 				throw-error 'resolve-all-any "parse func error!" mold pc/1
 			]
 			if args/name = 'conds [
-				either pc/1/syntax/name = "set-word" [
-					unless cast: find-expr top pc/1/syntax/cast [
-						throw-error 'function-collect "can't find expr at" pc/1/syntax/cast
-					]
-					if cast/1/syntax/name <> "block" [
-						unless find-set-word/datatype top cast 'block? [
-							create-error-at pc/1/syntax 'Error 'miss-blk-define mold cast/1/expr
-						]
-					]
-				][
-					unless find-set-word/datatype top pc 'block? [
-						create-error-at pc/1/syntax 'Error 'miss-blk-define mold pc/1/expr
-					]
-				]
+				fetch-type pc block!
 			]
 		]
 
 		resolve-do: function [pc [block! paren!]][
+			unless args: pc/1/syntax/args [
+				throw-error 'resolve-do "parse func error!" mold pc/1
+			]
+			if args/name = 'value [
+				if pc/1/expr <> 'bind [
+					fetch-type pc block!
+				]
+			]
 		]
 
 		resolve-bind: function [pc [block! paren!]][
