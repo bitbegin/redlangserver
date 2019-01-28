@@ -250,8 +250,8 @@ red-syntax: context [
 				]
 				put syntax/args name body/1/range
 				body/1/syntax/keyword: expr
-				body/1/syntax/args: make map! 3
-				body/1/syntax/args/parent: pc/1/range
+				body/1/syntax/parent: pc/1/range
+				body/1/syntax/args: make map! 2
 				body/1/syntax/args/name: name
 				body/1/syntax/args/type: type
 				step: step + ret/2
@@ -279,8 +279,8 @@ red-syntax: context [
 					]
 					put res name body/1/range
 					body/1/syntax/keyword: expr
-					body/1/syntax/refs: make map! 4
-					body/1/syntax/refs/parent: pc/1/range
+					body/1/syntax/parent: pc/1/range
+					body/1/syntax/refs: make map! 3
 					body/1/syntax/refs/name: name
 					body/1/syntax/refs/type: type
 					body/1/syntax/refs/refname: rname
@@ -477,15 +477,17 @@ red-syntax: context [
 		]
 		check-args: function [npc [block!] par [block! paren! none!]][
 			syntax: npc/1/syntax
-			syntax/name: "func-args"
-			if par [syntax/parent: par/1/range]
+			syntax/name: "func-name"
+			syntax/args: make map! 3
+			if par [syntax/args/refs: par/1/range]
 			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/desc: npc2/1/range
+					syntax/args/desc: npc2/1/range
+					npc2/1/name: "func-desc"
 					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
@@ -496,6 +498,11 @@ red-syntax: context [
 					return npc3
 				]
 				type = block! [
+					syntax/args/type: npc2/1/range
+					npc2/1/name: "func-type"
+					npc2/1/syntax/parent: npc/1/range
+					npc2/1/syntax/args: make map! 1
+					npc2/1/syntax/args/type: clear []
 					expr2: npc2/1/expr
 					forall expr2 [
 						expr3: expr2/1/expr
@@ -511,13 +518,13 @@ red-syntax: context [
 						][
 							create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 						]
+						append/only npc2/1/syntax/args/type expr3
 					]
-					syntax/spec: npc2/1/range
-					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					if tail? npc3 [return npc3]
 					if string? npc3/1/expr [
-						syntax/desc: npc3/1/range
+						syntax/args/desc: npc3/1/range
+						npc3/1/name: "func-desc"
 						npc3/1/syntax/parent: npc/1/range
 						return next npc3
 					]
@@ -539,6 +546,12 @@ red-syntax: context [
 				create-error-at npc/1/syntax 'Error 'miss-block "return:"
 				return npc2
 			]
+			syntax/args: make map! 1
+			syntax/args/type: np2c/1/range
+			npc2/1/name: "func-type"
+			npc2/1/syntax/parent: npc/1/range
+			npc2/1/syntax/args: make map! 1
+			npc2/1/syntax/args/type: clear []
 			expr2: npc2/1/expr
 			forall expr2 [
 				expr3: expr2/1/expr
@@ -554,21 +567,15 @@ red-syntax: context [
 				][
 					create-error-at expr2/1/syntax 'Error 'invalid-datatype mold expr3
 				]
+				append/only npc2/1/syntax/args/type expr3
 			]
-			syntax/spec: npc2/1/range
-			npc2/1/syntax/parent: npc/1/range
 			skip-semicolon-next npc2
 		]
 		check-refines: function [npc [block!]][
 			collect-args: function [npc [block!] par [block!]][
 				while [not tail? npc] [
 					either word? npc/1/expr [
-						either par/1/syntax/spec [
-							append par/1/syntax/spec npc/1/range
-						][
-							par/1/syntax/spec: reduce [npc/1/range]
-						]
-						npc/1/syntax/parent: par/1/range
+						append par/1/syntax/params npc/1/range
 						if tail? npc: check-args npc par [return npc]
 					][
 						either refinement? npc/1/expr [
@@ -583,13 +590,16 @@ red-syntax: context [
 			]
 			syntax: npc/1/syntax
 			syntax/name: "func-refines"
+			syntax/args: make map! 2
+			syntax/args/params: clear []
 			double-check npc
 			npc2: skip-semicolon-next npc
 			if tail? npc2 [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/desc: npc2/1/range
+					syntax/args/desc: npc2/1/range
+					npc2/1/name: "func-desc"
 					npc2/1/syntax/parent: npc/1/range
 					npc3: skip-semicolon-next npc2
 					return collect-args npc3 npc
