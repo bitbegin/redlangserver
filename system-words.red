@@ -118,7 +118,7 @@ system-words: context [
 			spec: to word! append to string! word "-spec"
 			return do bind spec system/words/system-words
 		]
-		either find reduce [native! action! op! function! routine!] type? get word [
+		either find [native! action! op! function! routine!] type?/word get word [
 			func-spec-ctx/parse-func-spec get word
 		][none]
 	]

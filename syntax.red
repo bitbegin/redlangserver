@@ -307,11 +307,11 @@ red-syntax: context [
 				if any [
 					all [
 						expr-type = word!
-						find reduce [native! action! function! routine!] type? get expr
+						find [native! action! function! routine!] type?/word get expr
 					]
 					all [
 						expr-type = path!
-						find reduce [native! action! function! routine!] type? get expr/1
+						find [native! action! function! routine!] type?/word get expr/1
 					]
 				][
 					syntax/args: make map! 4
@@ -377,8 +377,15 @@ red-syntax: context [
 			blk: [
 				if pc/1/syntax/error [
 					error: copy pc/1/syntax/error
-					error/range: red-lexer/form-range pc/1/range
-					append ret error
+					either block? error [
+						forall error [
+							error/1/range: red-lexer/form-range pc/1/range
+							append ret error/1
+						]
+					][
+						error/range: red-lexer/form-range pc/1/range
+						append ret error
+					]
 				]
 			]
 			forall pc [
@@ -408,6 +415,9 @@ red-syntax: context [
 					npc/1/syntax/name = "set-word"
 					word = to word! npc/1/expr
 				][
+					if npc/1/syntax/cast = pc/1/range [
+						return false
+					]
 					unless cast: find-expr top npc/1/syntax/cast [
 						throw-error 'match? "can't find expr at" npc/1/syntax/cast
 					]
@@ -558,7 +568,7 @@ red-syntax: context [
 				return npc2
 			]
 			syntax/args: make map! 1
-			syntax/args/type: np2c/1/range
+			syntax/args/type: npc2/1/range
 			npc2/1/name: "func-type"
 			npc2/1/syntax/parent: npc/1/range
 			npc2/1/syntax/args: make map! 1
@@ -655,7 +665,7 @@ red-syntax: context [
 						pc: check-refines pc
 					]
 				]
-				find [word! lit-word! get-word!] type? expr [
+				find [word! lit-word! get-word!] type?/word expr [
 					if return-pc [
 						create-error-at return-pc/1/syntax 'Error 'return-place none
 					]
@@ -698,7 +708,7 @@ red-syntax: context [
 						if npc/1/syntax/name = "set-word" [
 							collect?: true
 							forall spec [
-								if find reduce [word! lit-word! refinement!] type? spec/1/expr [
+								if find [word! lit-word! refinement!] type?/word spec/1/expr [
 									if (to word! spec/1/expr) = (to word! npc/1/expr) [
 										collect?: false
 									]
@@ -747,6 +757,7 @@ red-syntax: context [
 			keyword: pc/1/syntax/keyword
 			if all [
 				pc/1/syntax/args
+				pc/1/syntax/args/name = 'spec
 				find [func function has] keyword
 			][
 				if all [
@@ -824,7 +835,7 @@ red-syntax: context [
 		expr: spec/1/expr
 		if block? expr [
 			forall expr [
-				if find reduce [word! lit-word! get-word! refinement!] type? expr/1/expr [
+				if find [word! lit-word! get-word! refinement!] type?/word expr/1/expr [
 					if (to word! expr/1/expr) = word [
 						return expr
 					]
