@@ -22,7 +22,7 @@ red-syntax: context [
 		'miss-ctx				"missing context for bind"
 		'miss-define			"missing define for"
 		'miss-blk-define		"missing block! define for"
-		'miss-type				"missgin type"
+		'miss-type				"missing type"
 		'unresolve 				"need resolve unknown type"
 		'invalid-refine			"invalid refinement"
 		'invalid-datatype		"invalid datatype! in block!"
@@ -303,7 +303,7 @@ red-syntax: context [
 					find system-words/system-words expr/1
 				]
 			][
-				syntax/name: "unknown-keyword"
+				syntax/name: "keyword"
 				if any [
 					all [
 						expr-type = word!
@@ -316,6 +316,7 @@ red-syntax: context [
 				][
 					syntax/args: make map! 4
 					syntax/refs: make map! 4
+					syntax/resolved: make map! 8
 					do function*?
 				]
 				return reduce [pc/1/range 1]
@@ -366,8 +367,8 @@ red-syntax: context [
 		pc/2/syntax/meta: 2
 		exp-all pc
 		resolve-spec top
-		probe top
 		raise-set-word top
+		probe top
 		;resolve-unknown top
 	]
 
@@ -695,24 +696,32 @@ red-syntax: context [
 			collect-set-word* pc/1/expr
 			pc/1/syntax/extra: extra
 		]
-		fetch-type: function [pc [block! paren!] type [block!]][
-			type*?: function [npc [block! paren!] stype [datatype! typeset!]][
-				fn: get to word! append to string! stype "?"
-				fn npc/1/expr
+		fetch-type: function [pc [block! paren!] type [block!] name [word!]][
+			type*?: function [npc [block! paren!] stype][
+				fn: get to word! replace to string! stype "!" "?"
+				if error? ret: try [fn npc/1/expr][
+					return true
+				]
+				ret
 			]
 			unless ret: find-word-value top pc [
-				create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword]
+				create-error-at pc/1/syntax 'Error 'miss-type rejoin [
+					mold type " for " to string! pc/1/syntax/keyword "'s field: " to string! name
+				]
 				return none
 			]
 			forall type [
 				if any [
-					datatype? type/1
-					typeset? type/1
+					datatype? reduce type/1
+					typeset? reduce type/1
 				][
+					if type/1 = 'any-type! [return ret]
 					if type*? ret type/1 [return ret]
 				]
 			]
-			create-error-at pc/1/syntax 'Error 'miss-type rejoin [mold type " for " to string! pc/1/syntax/keyword ", found: " mold ret/1/expr]
+			create-error-at pc/1/syntax 'Error 'miss-type rejoin [
+				mold type " for " to string! pc/1/syntax/keyword "'s field: " to string! name
+			]
 			none
 		]
 		resolve-func: function [pc [block! paren!]][
@@ -721,18 +730,23 @@ red-syntax: context [
 				throw-error 'resolve-func "parse func error!" mold pc/1
 			]
 			if find [func function has] keyword [
+				unless par: pc/1/syntax/parent [exit]
+				unless par: find-expr top par [
+					throw-error 'resolve-func "can't find expr at" par
+				]
 				if args/name = 'spec [
-					if ret: fetch-type pc args/type [
+					if ret: fetch-type pc args/type args/name [
+						par/1/syntax/resolved/spec: ret/1/range
 						desc: check-func-spec ret/1/expr keyword
 						pc/1/syntax/desc: desc
 					]
 				]
-				if all [
-					keyword = 'function
-					args/name = 'body
-				][
-					if ret: fetch-type pc args/type [
-						function-collect ret
+				if args/name = 'body [
+					if ret: fetch-type pc args/type args/name [
+						par/1/syntax/resolved/body: ret/1/range
+						if keyword = 'function [
+							function-collect ret
+						]
 					]
 				]
 			]
@@ -742,8 +756,14 @@ red-syntax: context [
 			unless args: pc/1/syntax/args [
 				throw-error 'resolve-all-any "parse func error!" mold pc/1
 			]
+			unless par: pc/1/syntax/parent [exit]
+			unless par: find-expr top par [
+				throw-error 'resolve-all-any "can't find expr at" par
+			]
 			if args/name = 'conds [
-				fetch-type pc args/type
+				if ret: fetch-type pc args/type args/name [
+					par/1/syntax/resolved/conds: ret/1/range
+				]
 			]
 		]
 
@@ -751,9 +771,15 @@ red-syntax: context [
 			unless args: pc/1/syntax/args [
 				throw-error 'resolve-do "parse func error!" mold pc/1
 			]
+			unless par: pc/1/syntax/parent [exit]
+			unless par: find-expr top par [
+				throw-error 'resolve-do "can't find expr at" par
+			]
 			if args/name = 'value [
 				if pc/1/expr <> 'bind [
-					fetch-type pc args/type
+					if ret: fetch-type pc args/type args/name [
+						par/1/syntax/resolved/value: ret/1/range
+					]
 				]
 			]
 		]
@@ -763,7 +789,20 @@ red-syntax: context [
 			unless args: pc/1/syntax/args [
 				throw-error 'resolve-do "parse func error!" mold pc/1
 			]
-			fetch-type pc args/type
+			unless par: pc/1/syntax/parent [exit]
+			unless par: find-expr top par [
+				throw-error 'resolve-do "can't find expr at" par
+			]
+			if args/name = 'word [
+				if ret: fetch-type pc args/type args/name [
+					par/1/syntax/resolved/word: ret/1/range
+				]
+			]
+			if args/name = 'context [
+				if ret: fetch-type pc args/type args/name [
+					par/1/syntax/resolved/context: ret/1/range
+				]
+			]
 		]
 
 		resolve-spec*: function [pc [block! paren!]][
@@ -799,30 +838,8 @@ red-syntax: context [
 	]
 
 	func-arg?: function [top [block!] pos [map!] word [word!]][
-		unless spec*: find-expr top pos [
+		unless spec: find-expr top pos [
 			throw-error 'func-arg? "can't find expr at" pos
-		]
-		unless block? spec: spec*/1/expr [
-			either any [
-				all [
-					word? spec/1/expr
-					npos: spec/1/syntax/ctx/define
-				]
-				all [
-					set-word? spec/1/expr
-					npos: spec/1/syntax/cast
-				]
-			][
-				unless spec: find-expr top npos [
-					throw-error 'func-arg? "can't find expr at" npos
-				]
-				while [set-word? spec/1/expr][
-					npos: spec/1/syntax/cast
-					unless spec: find-expr top npos [
-						throw-error 'func-arg? "can't find expr at" npos
-					]
-				]
-			][return false]
 		]
 		if block? spec [
 			forall spec [
@@ -841,19 +858,19 @@ red-syntax: context [
 			dpar: get-parent top pc/1
 			raise?: function [par [block! paren!]][
 				if all [
-					par/1/syntax/name = "block"
-					type: par/1/syntax/ctx/type
-					type/2 = 'body
+					find [func function has context] par/1/expr
+					par/1/syntax/resolved
+					spec: par/1/syntax/resolved/spec
 				][
-					switch type/1 [
+					switch par/1/expr [
 						function [
-							if pos: func-arg? top par/1/syntax/ctx/spec to word! pc/1/expr [
+							if pos: func-arg? top spec to word! pc/1/expr [
 								pc/1/syntax/parent: pos
 							]
 							return false
 						]
 						func has [
-							if pos: func-arg? top par/1/syntax/ctx/spec to word! pc/1/expr [
+							if pos: func-arg? top spec to word! pc/1/expr [
 								pc/1/syntax/parent: pos
 								return false
 							]
@@ -865,6 +882,14 @@ red-syntax: context [
 							]
 						]
 					]
+					
+				]
+				if all [
+					par = dpar
+					par = top
+				][
+					pc/1/syntax/parent: par/1/range
+					return false
 				]
 				npc: head par
 				forall npc [
@@ -883,11 +908,10 @@ red-syntax: context [
 			hpc: head pc
 			while [hpc <> pc][
 				if all [
-					hpc/1/syntax
 					hpc/1/syntax/name = "set-word"
 					hpc/1/expr = pc/1/expr
 				][
-					pc/1/syntax/parent: hpc/1/range
+					pc/1/syntax/define: hpc/1/range
 					exit
 				]
 				hpc: next hpc
@@ -899,7 +923,7 @@ red-syntax: context [
 			]
 			; mark it as global word
 			either top/1/syntax/extra [
-				append top/1/syntax/extra pc/1/range
+				append/only top/1/syntax/extra pc/1/range
 			][
 				top/1/syntax/extra: reduce [pc/1/range]
 			]
