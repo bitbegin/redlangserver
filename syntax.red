@@ -368,8 +368,7 @@ red-syntax: context [
 		exp-all pc
 		resolve-spec top
 		raise-set-word top
-		probe top
-		;resolve-unknown top
+		resolve-unknown top
 	]
 
 	collect-errors: function [top [block! paren!]][
@@ -401,69 +400,70 @@ red-syntax: context [
 		ret
 	]
 
-	find-word-value: function [top [block!] pc [block! paren!]][
-		find-set-word: function [pc [block! paren!]][
-			word: to word! pc/1/expr
-			match-set-word?: function [npc [block! paren!]][
-				forall npc [
-					if all [
-						npc/1/syntax/name = "set-word"
-						word = to word! npc/1/expr
-					][
-						unless cast: find-expr top npc/1/syntax/cast [
-							throw-error 'match? "can't find expr at" npc/1/syntax/cast
-						]
-						if word? cast/1/expr [
-							if ret: find-set-word cast [
-								cast/1/syntax/define: ret/1/range
-								cast/1/syntax/name: "resolved"
-								return ret
-							]
-						]
-						return cast
-					]
-				]
-				false
-			]
-			match-func-spec?: function [npc [block! paren!]][
+	find-set-word: function [top [block!] pc [block! paren!]][
+		word: to word! pc/1/expr
+		match-set-word?: function [npc [block! paren!]][
+			forall npc [
 				if all [
-					find [func function has] npc/1/syntax/keyword
-					npc/1/syntax/args
-					npc/1/syntax/args/name = 'body
+					npc/1/syntax/name = "set-word"
+					word = to word! npc/1/expr
 				][
-					unless par: find-expr top npc/1/syntax/parent [
-						throw-error 'match? "can't find expr at" npc/1/syntax/parent
+					unless cast: find-expr top npc/1/syntax/cast [
+						throw-error 'match? "can't find expr at" npc/1/syntax/cast
 					]
-					if all [
-						par/1/syntax/resolved
-						par/1/syntax/resolved/spec
-						ret: func-arg? top par/1/syntax/resolved/spec word
-					][
-						return ret
+					if cast/1/syntax/name = "unknown-word" [
+						if ret: find-set-word top cast [
+							cast/1/syntax/parent: ret/1/range
+							cast/1/syntax/name: "resolved"
+							return ret
+						]
 					]
+					return cast
 				]
-				false
-			]
-			par: pc
-			until [
-				if any [
-					ret: match-func-spec? par
-					ret: match-set-word? head par
-				][
-					if word? pc/1/expr [
-						pc/1/syntax/define: ret/1/range
-						pc/1/syntax/name: "resolved"
-					]
-					return ret
-				]
-				not par: get-parent top par/1
 			]
 			false
 		]
+		match-func-spec?: function [npc [block! paren!]][
+			if all [
+				find [func function has] npc/1/syntax/keyword
+				npc/1/syntax/args
+				npc/1/syntax/args/name = 'body
+			][
+				unless par: find-expr top npc/1/syntax/parent [
+					throw-error 'match? "can't find expr at" npc/1/syntax/parent
+				]
+				if all [
+					par/1/syntax/resolved
+					par/1/syntax/resolved/spec
+					ret: func-arg? top par/1/syntax/resolved/spec word
+				][
+					return ret
+				]
+			]
+			false
+		]
+		par: pc
+		until [
+			if any [
+				ret: match-func-spec? par
+				ret: match-set-word? head par
+			][
+				if pc/1/syntax/name = "unknown-word" [
+					pc/1/syntax/parent: ret/1/range
+					pc/1/syntax/name: "resolved"
+				]
+				return ret
+			]
+			not par: get-parent top par/1
+		]
+		false
+	]
+
+	find-word-value: function [top [block!] pc [block! paren!]][
 		type: type? pc/1/expr
 		case [
 			find reduce [word! get-word!] type [
-				return find-set-word pc
+				return find-set-word top pc
 			]
 			type = set-word! [
 				unless ret: find-expr top pc/1/syntax/cast [
@@ -892,7 +892,7 @@ red-syntax: context [
 					hpc/1/syntax/name = "set-word"
 					hpc/1/expr = pc/1/expr
 				][
-					pc/1/syntax/define: hpc/1/range
+					pc/1/syntax/parent: hpc/1/range
 					exit
 				]
 				hpc: next hpc
@@ -935,65 +935,9 @@ red-syntax: context [
 	]
 
 	resolve-unknown: function [top [block!]][
-		resolve-ctx: function [pc [block! paren!]][
-			resolve-ctx*: function [par [block! paren!]][
-				if all [
-					par/1/syntax/ctx = 'context
-					vars: par/1/syntax/vars
-				][
-					forall vars [
-						if pc/1/expr = to word! vars/1/expr [
-							pc/1/syntax/cast: vars/1
-							pc/1/syntax/name: "resolved"
-							pc/1/syntax/resolved-type: 'context
-							return true
-						]
-					]
-					return false
-				]
-				if any [
-					all [
-						any [
-							par/1/syntax/ctx = 'func
-							par/1/syntax/ctx = 'function
-							par/1/syntax/ctx = 'has
-						]
-						par/1/syntax/ctx-index = 2
-					]
-					par/1/syntax/ctx = 'does
-				][
-					if par/1/syntax/spec [
-						if ret: func-arg? pc par [
-							pc/1/syntax/cast: ret
-							pc/1/syntax/name: "resolved"
-							pc/1/syntax/resolved-type: 'spec
-							return true
-						]
-					]
-					if vars: par/1/syntax/vars [
-						forall vars [
-							if pc/1/expr = to word! vars/1/expr [
-								pc/1/syntax/cast: vars/1
-								pc/1/syntax/name: "resolved"
-								pc/1/syntax/resolved-type: 'function
-								return true
-							]
-						]
-					]
-					return false
-				]
-			]
-			par: pc
-			while [par: get-parent top par/1][
-				if resolve-ctx* par [return true]
-			]
-			false
-		]
-
 		resolve-unknown*: function [pc [block! paren!]][
 			forall pc [
 				either all [
-					map? pc/1
 					any [
 						block? pc/1/expr
 						paren? pc/1/expr
@@ -1002,12 +946,8 @@ red-syntax: context [
 				][
 					resolve-unknown* pc/1/expr
 				][
-					if all [
-						map? pc/1
-						pc/1/syntax
-						pc/1/syntax/name = "unknown"
-					][
-						unless resolve-ctx pc [
+					if pc/1/syntax/name = "unknown-word" [
+						unless find-set-word top pc [
 							create-error-at pc/1/syntax 'Warning 'unknown-word mold pc/1/expr
 						]
 					]
