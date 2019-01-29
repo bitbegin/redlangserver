@@ -404,7 +404,7 @@ red-syntax: context [
 	find-word-value: function [top [block!] pc [block! paren!]][
 		find-set-word: function [pc [block! paren!]][
 			word: to word! pc/1/expr
-			match?: function [npc [block! paren!]][
+			match-set-word?: function [npc [block! paren!]][
 				forall npc [
 					if all [
 						npc/1/syntax/name = "set-word"
@@ -425,9 +425,31 @@ red-syntax: context [
 				]
 				false
 			]
+			match-func-spec?: function [npc [block! paren!]][
+				if all [
+					find [func function has] npc/1/syntax/keyword
+					npc/1/syntax/args
+					npc/1/syntax/args/name = 'body
+				][
+					unless par: find-expr top npc/1/syntax/parent [
+						throw-error 'match? "can't find expr at" npc/1/syntax/parent
+					]
+					if all [
+						par/1/syntax/resolved
+						par/1/syntax/resolved/spec
+						ret: func-arg? top par/1/syntax/resolved/spec word
+					][
+						return ret
+					]
+				]
+				false
+			]
 			par: pc
 			until [
-				if ret: match? head par [
+				if any [
+					ret: match-func-spec? par
+					ret: match-set-word? head par
+				][
 					if word? pc/1/expr [
 						pc/1/syntax/define: ret/1/range
 						pc/1/syntax/name: "resolved"
@@ -795,15 +817,16 @@ red-syntax: context [
 		resolve-spec* top/1/expr
 	]
 
-	func-arg?: function [top [block!] pos [map!] word [word!]][
+	func-arg?: function [top [block!] pos [block!] word [word!]][
 		unless spec: find-expr top pos [
 			throw-error 'func-arg? "can't find expr at" pos
 		]
-		if block? spec [
-			forall spec [
-				if find [word! lit-word! get-word! refinement!] type? spec/1/expr [
-					if (to word! spec/1/expr) = word [
-						return spec/1/range
+		expr: spec/1/expr
+		if block? expr [
+			forall expr [
+				if find reduce [word! lit-word! get-word! refinement!] type? expr/1/expr [
+					if (to word! expr/1/expr) = word [
+						return expr
 					]
 				]
 			]
@@ -822,14 +845,14 @@ red-syntax: context [
 				][
 					switch par/1/expr [
 						function [
-							if pos: func-arg? top spec to word! pc/1/expr [
-								pc/1/syntax/parent: pos
+							if ret: func-arg? top spec to word! pc/1/expr [
+								pc/1/syntax/parent: ret/1/range
 							]
 							return false
 						]
 						func has [
-							if pos: func-arg? top spec to word! pc/1/expr [
-								pc/1/syntax/parent: pos
+							if ret: func-arg? top spec to word! pc/1/expr [
+								pc/1/syntax/parent: ret/1/range
 								return false
 							]
 						]
