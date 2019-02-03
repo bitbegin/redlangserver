@@ -19,6 +19,9 @@ system-words: context [
 		words
 	]
 	system-words: get-words
+	system?: func [word [word!]][
+		to logic! find system-words word
+	]
 
 	get-word-info: func [word [word!]][
 		either find system-words word [
