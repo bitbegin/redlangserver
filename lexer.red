@@ -57,7 +57,7 @@ red-lexer: context [
 		to-range start end
 	]
 
-	push-stack: function [stack [block!] expr start [string!] end [string!]][
+	push-stack: function [stack [block!] expr start [string!] end [string!] depth [integer!]][
 		range: make block! 4
 		append range form-pos start
 		append range form-pos end
@@ -65,10 +65,11 @@ red-lexer: context [
 			'expr expr
 			'range range
 			'syntax make map! 8
+			'depth depth
 		]
 	]
 
-	analysis*: function [start [string!] end [string!]][
+	analysis*: function [start [string!] end [string!] depth [integer!]][
 		stack: make block! 10000
 
 		pos: start
@@ -88,7 +89,7 @@ red-lexer: context [
 								npos: end
 							]
 						][npos: end]
-						push-stack stack copy/part pos npos pos npos
+						push-stack stack copy/part pos npos pos npos depth
 						pos: npos
 					]
 					true [break]
@@ -113,25 +114,25 @@ red-lexer: context [
 					not empty? out/1
 				][
 					start2: next pos end2: back npos
-					if map? stack2: analysis* start2 end2 [
+					if map? stack2: analysis* start2 end2 depth + 1 [
 						return stack2
 					]
-					push-stack stack stack2 pos npos
+					push-stack stack stack2 pos npos depth
 				]
 				all [
 					paren? out/1
 					not empty? out/1
 				][
 					start2: next pos end2: back npos
-					if map? stack2: analysis* start2 end2 [
+					if map? stack2: analysis* start2 end2 depth + 1 [
 						return stack2
 					]
 					paren: make paren! 4
 					append paren stack2
-					push-stack stack paren pos npos
+					push-stack stack paren pos npos depth
 				]
 				true [
-					push-stack stack out/1 pos npos
+					push-stack stack out/1 pos npos depth
 				]
 			]
 			pos: npos
@@ -142,10 +143,10 @@ red-lexer: context [
 	analysis: function [start [string!]][
 		stack: make block! 1
 		end: tail start
-		if map? sub: analysis* start end [
+		if map? sub: analysis* start end 1 [
 			return sub
 		]
-		push-stack stack sub start end
+		push-stack stack sub start end 0
 		stack/1/source: start
 		stack
 	]
