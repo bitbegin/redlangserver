@@ -97,7 +97,7 @@ red-syntax: context [
 		step: 1
 		pc: next pc
 		while [not tail? pc][
-			if pc/1/syntax/name = "semicolon" [
+			either pc/1/syntax/name = "semicolon" [
 				pc: skip pc 1
 				step: step + 1
 			][
@@ -345,7 +345,10 @@ red-syntax: context [
 
 	resolve-refer: function [top [block!] pc [block! paren!]][
 		forall pc [
-			if find [word! get-word!] type?/word pc/1/expr [
+			if any [
+				word? pc/1/expr
+				get-word? pc/1/expr
+			][
 				if npc: mark-word top pc [
 					if all [
 						(head npc) = head pc
@@ -384,15 +387,10 @@ red-syntax: context [
 		resolve-user-func: function [pc [block! paren!]][
 			
 		]
-		resolve-spec: function [pc [block! paren!] refs [word! none!] name [word! lit-word!] type [block!]][
+		resolve-spec: function [par [block! paren!] pc [block! paren!] name [word! lit-word!] type [block!]][
 			cast-expr: function [direct [block! paren!] resolved [block! paren!]][
-				put pc/1/syntax/args name direct
-				put pc/1/syntax/resolved name resolved
-				resolved/1/syntax/keyword: pc/1/expr
-				resolved/1/syntax/parent: pc
-				resolved/1/syntax/args-name: name
-				resolved/1/syntax/args-type: type
-				resolved/1/syntax/args-refs: refs
+				put par/1/syntax/args name direct
+				put par/1/syntax/resolved name resolved
 			]
 			npc: none
 			step: none
@@ -418,11 +416,10 @@ red-syntax: context [
 			][
 				cast: npc
 			]
-			step: step + 1
 			;-- recursive resolve
-			if cast/1/syntax/name = "unknown" [
+			if cast/1/syntax/name = "unknown-keyword" [
 				resolve-keyword* cast
-				if cast/1/syntax/name = "unknown" [
+				if cast/1/syntax/name = "unknown-keyword" [
 					return reduce [false step]
 				]
 			]
@@ -436,7 +433,7 @@ red-syntax: context [
 						return reduce [false step]
 					]
 					resolve-keyword* dst
-					if dst/1/syntax/name = "unknown" [
+					if dst/1/syntax/name = "unknown-keyword" [
 						return reduce [false step]
 					]
 				]
@@ -455,12 +452,10 @@ red-syntax: context [
 			reduce [true step]
 		]
 		resolve-keyword*: function [pc [block! paren!]][
+			par: pc
 			expr: pc/1/expr
 			syntax: pc/1/syntax
 			word: either word? expr [expr][expr/1]
-			unless system-words/system? word [
-				return reduce [false pc 1]
-			]
 			type: type?/word get word
 			step: none
 			spec: none
@@ -485,11 +480,12 @@ red-syntax: context [
 					syntax/params: params
 					syntax/refinements: refinements
 					forall params [
-						ret: resolve-spec pc none params/1/name params/1/type
+						ret: resolve-spec par pc params/1/name params/1/type
 						unless ret/1 [
 							return reduce [false pc ret/2]
 						]
 						step: step + ret/2
+						pc: skip pc step
 					]
 					;-- path?
 					if word? expr [
@@ -503,11 +499,12 @@ red-syntax: context [
 						forall rparams [
 							refs?: true
 							params: rparams/1
-							ret: resolve-spec pc rname params/1/name params/1/type
+							ret: resolve-spec par pc params/1/name params/1/type
 							unless ret/1 [
 								return reduce [false pc ret/2]
 							]
 							step: step + ret/2
+							pc: skip pc step
 						]
 					]
 					unless refs? [
@@ -544,7 +541,7 @@ red-syntax: context [
 							word? pc/1/expr
 							path? pc/1/expr
 						]
-						pc/1/syntax/name = "unknown"
+						pc/1/syntax/name = "unknown-keyword"
 					][
 						resolve-keyword* pc
 					]
@@ -564,7 +561,7 @@ red-syntax: context [
 
 		max-depth: top/1/max-depth
 		repeat depth max-depth [
-			resolve-depth top depth
+			resolve-depth top/1/expr depth
 		]
 	]
 
@@ -685,7 +682,11 @@ red-syntax: context [
 					word: either word? expr [expr][expr/1]
 					if system-words/system? word [
 						type: type?/word get word
-						unless find [native! action! function! routine! op! object!] type [
+						either find [native! action! function! routine! op! object!] type [
+							syntax/name: "unknown-keyword"
+							syntax/step: 1
+							return reduce [pc 1]
+						][
 							syntax/name: "keyword-value"
 							syntax/step: 1
 							return reduce [pc 1]
@@ -738,7 +739,7 @@ red-syntax: context [
 
 		max-depth: top/1/max-depth
 		repeat depth max-depth [
-			exp-depth top depth
+			exp-depth top/1/expr depth
 		]
 	]
 
@@ -748,6 +749,8 @@ red-syntax: context [
 			top/1/expr
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
+		top/1/syntax/name: "top"
+		top/1/syntax/step: 1
 		pc: top/1/expr
 		unless pc/1/expr = 'Red [
 			syntax-error pc 'miss-head
@@ -758,7 +761,7 @@ red-syntax: context [
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
 		exp-all top
-		;resolve-keyword top
+		resolve-keyword top
 	]
 
 	format: function [top [block!]][
@@ -832,29 +835,29 @@ red-syntax: context [
 					append buffer mold/flat pc/1/syntax/parent/1/range
 				]
 
-				if pc/1/syntax/keyword [
-					newline pad + 6
-					append buffer "keyword: "
-					append buffer pc/1/syntax/keyword
-				]
+				;if pc/1/syntax/keyword [
+				;	newline pad + 6
+				;	append buffer "keyword: "
+				;	append buffer pc/1/syntax/keyword
+				;]
 
-				if pc/1/syntax/args-name [
-					newline pad + 6
-					append buffer "args-name: "
-					append buffer pc/1/syntax/args-name
-				]
+				;if pc/1/syntax/args-name [
+				;	newline pad + 6
+				;	append buffer "args-name: "
+				;	append buffer pc/1/syntax/args-name
+				;]
 
-				if pc/1/syntax/args-type [
-					newline pad + 6
-					append buffer "args-type: "
-					append buffer pc/1/syntax/args-type
-				]
+				;if pc/1/syntax/args-type [
+				;	newline pad + 6
+				;	append buffer "args-type: "
+				;	append buffer pc/1/syntax/args-type
+				;]
 
-				if pc/1/syntax/args-refs [
-					newline pad + 6
-					append buffer "args-refs: "
-					append buffer pc/1/syntax/args-refs
-				]
+				;if pc/1/syntax/args-refs [
+				;	newline pad + 6
+				;	append buffer "args-refs: "
+				;	append buffer pc/1/syntax/args-refs
+				;]
 
 				if pc/1/syntax/args [
 					newline pad + 6
