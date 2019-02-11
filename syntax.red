@@ -10,8 +10,6 @@ Red [
 red-syntax: context [
 	throw-error: register-error 'red-syntax
 
-	syntax-top: none
-
 	error-code: [
 		'miss-head-red			"missing 'Red' at head"
 		'miss-head-block		"missing '[]' at head"
@@ -38,7 +36,7 @@ red-syntax: context [
 		'unknown-word			"unknown word"
 	]
 
-	create-error: function [syntax [map!] type [word!] word [word!] more [string! none!]][
+	create-error: function [syntax [map!] type [word!] word [word!] message [string! none!]][
 		error: make map! reduce [
 			'severity DiagnosticSeverity/(type)
 			'code to string! word
@@ -273,7 +271,7 @@ red-syntax: context [
 						get-word? cast/1/expr
 					][
 						if ret: mark-word top cast [
-							cast/1/syntax/parent: ret/1
+							cast/1/syntax/parent: ret
 							cast/1/syntax/name: "refer"
 							return ret
 						]
@@ -310,7 +308,7 @@ red-syntax: context [
 					word? pc/1/expr
 					get-word? pc/1/expr
 				][
-					pc/1/syntax/parent: ret/1
+					pc/1/syntax/parent: ret
 					pc/1/syntax/name: "refer"
 				]
 				return ret
@@ -348,12 +346,22 @@ red-syntax: context [
 	resolve-refer: function [top [block!] pc [block! paren!]][
 		forall pc [
 			if find [word! get-word!] type?/word pc/1/expr [
-				mark-word top pc
+				if npc: mark-word top pc [
+					if all [
+						(head npc) = head pc
+						(index? npc) > index? pc
+					][
+						unless find [function func does has context] npc/1/expr [
+							create-error pc/1/syntax 'Error 'beyond-scope
+								rejoin ["find define at: " mold red-lexer/form-range npc/1/range ", but beyond scope"]
+						]
+					]
+				]
 			]
 		]
 	]
 
-	resolve-keyword: function [top [block!] pc [block! paren!]][
+	resolve-keyword: function [top [block!]][
 		type*?: function [pc [block! paren!] stype][
 			fn: get to word! replace to string! stype "!" "?"
 			if error? ret: try [fn pc/1/expr][
@@ -372,6 +380,9 @@ red-syntax: context [
 				]
 			]
 			false
+		]
+		resolve-user-func: function [pc [block! paren!]][
+			
 		]
 		resolve-spec: function [pc [block! paren!] refs [word! none!] name [word! lit-word!] type [block!]][
 			cast-expr: function [direct [block! paren!] resolved [block! paren!]][
@@ -416,44 +427,33 @@ red-syntax: context [
 					return reduce [false step]
 				]
 			]
-			either cast/1/syntax/name = "refer" [
+			dst: cast
+			if cast/1/syntax/name = "refer" [
 				ret: word-value? cast
+				dst: ret/2
 				unless ret/1 [
-					if set-word? ret/2/1/expr [
+					;-- tail
+					if set-word? dst/1/expr [
 						return reduce [false step]
 					]
-					
+					resolve-keyword* dst
+					if dst/1/syntax/name = "unknown" [
+						return reduce [false step]
+					]
 				]
-
-			]
-			;-- nested value
-			ret: word-value? cast
-			type2: type? ret/2/1/expr
-			unless ret/1 [
-				if type2 = set-word! [
-
-				]
-			]
 			]
 			case [
-				type = set-word! [
-					
-					unless cast [
-						return reduce [false step + 1]
-					]
-					if find/match cast/1/syntax/name "keyword-" [
-						return reduce [true npc ]
-					]
+				find [does has context] dst/1/expr [
+					cast-expr npc dst
+					return reduce [true step]
+				]
+				find [func function] dst/1/expr [
+					cast-expr npc dst
+					return reduce [true step]
 				]
 			]
-			ret: word-value? npc
-			
-			npc2: ret/2
-			if set-word? npc2/1/expr [
-				syntax-error pc 'miss-expr
-				return reduce [false ]
-			]
-
+			cast-expr npc dst
+			reduce [true step]
 		]
 		resolve-keyword*: function [pc [block! paren!]][
 			expr: pc/1/expr
@@ -465,13 +465,12 @@ red-syntax: context [
 			type: type?/word get word
 			step: none
 			spec: none
-			name: none
 			rname: none
 			params: none
 			rparams: none
 			refinements: none
 			ret: none
-			body: none
+			refs?: none
 
 			function*?: [
 				if find [native! action! function! routine!] type [
@@ -487,32 +486,35 @@ red-syntax: context [
 					syntax/params: params
 					syntax/refinements: refinements
 					forall params [
-						name: params/1/name
-						type: params/1/type
-						ret: fetch-expr skip pc step name
-						unless ret/1 [return ret]
-						body: ret/2
-						put syntax/args name body
-						body/1/syntax/keyword: expr
-						body/1/syntax/parent: pc
-						body/1/syntax/args: make map! 2
-						body/1/syntax/args/name: name
-						body/1/syntax/args/type: type
-						step: step + ret/3
+						ret: resolve-spec pc none params/1/name params/1/type
+						unless ret/1 [
+							return reduce [false pc ret/2]
+						]
+						step: step + ret/2
 					]
 					;-- path?
 					if word? expr [
-						if step = 0 [step: 1]
-						return reduce [true pc step]
+						return reduce [true pc 1]
 					]
-					syntax/refs: make map! 4
 					forall refinements [
 						rname: refinements/1/name
 						rparams: refinements/1/params
 						if empty? rparams [continue]
 						unless find expr rname [continue]
-						
+						forall rparams [
+							refs?: true
+							params: rparams/1
+							ret: resolve-spec pc rname params/1/name params/1/type
+							unless ret/1 [
+								return reduce [false pc ret/2]
+							]
+							step: step + ret/2
+						]
 					]
+					unless refs? [
+						return reduce [false pc step]
+					]
+					return reduce [true pc step]
 				]
 			]
 
@@ -534,17 +536,36 @@ red-syntax: context [
 			throw-error 'resolve-keyword* "not support!" expr
 		]
 
-		while [not tail? pc][
-			if all [
-				any [
-					word? pc/1/expr
-					path? pc/1/expr
+		resolve-depth: function [pc [block! paren!] depth [integer!]][
+			if pc/1/depth > depth [exit]
+			forall pc [
+				either pc/1/depth = depth [
+					if all [
+						any [
+							word? pc/1/expr
+							path? pc/1/expr
+						]
+						pc/1/syntax/name = "unknown"
+					][
+						resolve-keyword* pc
+					]
+				][
+					if all [
+						any [
+							block? pc/1/expr
+							paren? pc/1/expr
+						]
+						not empty? pc/1/expr
+					][
+						resolve-depth pc/1/expr depth
+					]
 				]
-				pc/1/syntax/name = "unknown"
-			][
-				ret: resolve-keyword* pc
-				pc: skip pc ret/3
 			]
+		]
+
+		max-depth: top/1/max-depth
+		repeat depth max-depth [
+			resolve-depth top depth
 		]
 	]
 
@@ -678,10 +699,33 @@ red-syntax: context [
 			]
 			resolve-refer top pc
 		]
+
+		exp-depth: function [pc [block! paren!] depth [integer!]][
+			if pc/1/depth > depth [exit]
+			forall pc [
+				either pc/1/depth = depth [
+					exp-all* pc
+				][
+					if all [
+						any [
+							block? pc/1/expr
+							paren? pc/1/expr
+						]
+						not empty? pc/1/expr
+					][
+						exp-depth pc/1/expr depth
+					]
+				]
+			]
+		]
+
+		max-depth: top/1/max-depth
+		repeat depth max-depth [
+			exp-depth top depth
+		]
 	]
 
 	analysis: function [top [block!]][
-		set 'syntax-top top
 		if empty? top [exit]
 		unless all [
 			top/1/expr
@@ -696,12 +740,92 @@ red-syntax: context [
 		]
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
-		exp-all pc
-		;-- pre resolve for resolve-spec
-		resolve-word top
-		resolve-spec top
-		raise-set-word top
-		resolve-word top
+		exp-all top
+		resolve-keyword top
+	]
+
+	format: function [top [block!]][
+		buffer: make string! 1000
+		newline: function [cnt [integer!]] [
+			append buffer lf
+			append/dup buffer " " cnt
+		]
+		format*: function [pc [block! paren!]][
+			pad: pc/1/depth * 4
+			newline pad
+			either block? pc [
+				blk?: true
+				append buffer "["
+			][
+				append buffer "("
+			]
+			forall pc [
+				newline pad + 2
+				append buffer "#(expr: "
+				either any [
+					block? pc/1/expr
+					paren? pc/1/expr
+				][
+					either empty? pc/1/expr [
+						either block? pc/1/expr [
+							append buffer "[]"
+						][
+							append buffer "()"
+						]
+					][
+						format* pc/1/expr
+					]
+				][
+					append buffer mold/flat pc/1/expr
+				]
+				newline pad + 4
+				append buffer "range: "
+				append buffer mold pc/1/range
+				newline pad + 4
+				append buffer "depth: "
+				append buffer mold pc/1/depth
+				if pc/1/max-depth [
+					newline pad + 4
+					append buffer "max-depth: "
+					append buffer mold pc/1/max-depth
+				]
+				newline pad + 4
+				append buffer "syntax: #("
+				newline pad + 6
+				append buffer "name: "
+				append buffer pc/1/syntax/name
+				newline pad + 6
+				append buffer "step: "
+				append buffer pc/1/syntax/step
+				if pc/1/syntax/error [
+					newline pad + 6
+					append buffer "error: "
+					append buffer mold/flat pc/1/syntax/error
+				]
+				if pc/1/syntax/cast [
+					newline pad + 6
+					append buffer "cast: "
+					append buffer mold/flat pc/1/syntax/cast/1/range
+				]
+				if pc/1/syntax/parent [
+					newline pad + 6
+					append buffer "parent: "
+					append buffer mold/flat pc/1/syntax/parent/1/range
+				]
+				newline pad + 4
+				append buffer ")"
+				newline pad + 2
+				append buffer ")"
+			]
+			newline pad
+			either blk? [
+				append buffer "]"
+			][
+				append buffer ")"
+			]
+		]
+		format* top
+		buffer
 	]
 
 	collect-errors: function [top [block! paren!]][
@@ -739,10 +863,6 @@ red-syntax: context [
 		collect-errors* top
 		ret
 	]
-
-
-
-
 
 	clear-syntax: function [pc [block! paren!]][
 		forall pc [
@@ -1080,112 +1200,6 @@ red-syntax: context [
 		]
 		resolve-spec* top/1/expr
 	]
-
-
-
-	raise-set-word: function [top [block!]][
-		raise: function [pc [block! paren!]][
-			dpar: get-parent top pc/1
-			raise?: function [par [block! paren!]][
-				if all [
-					find [func function has context] par/1/expr
-					par/1/syntax/resolved
-					spec: par/1/syntax/resolved/spec
-				][
-					switch par/1/expr [
-						function [
-							if ret: func-arg? top spec to word! pc/1/expr [
-								pc/1/syntax/parent: ret/1/range
-							]
-							return false
-						]
-						func has [
-							if ret: func-arg? top spec to word! pc/1/expr [
-								pc/1/syntax/parent: ret/1/range
-								return false
-							]
-						]
-						context [
-							if par = dpar [
-								pc/1/syntax/parent: par/1/range
-								return false
-							]
-						]
-					]
-					
-				]
-				if all [
-					par = dpar
-					par = top
-				][
-					pc/1/syntax/parent: par/1/range
-					return false
-				]
-				npc: head par
-				forall npc [
-					if all [
-						npc/1/syntax
-						npc/1/syntax/name = "set-word"
-						pc/1/expr = npc/1/expr
-					][
-						pc/1/syntax/parent: npc/1/range
-						return false
-					]
-				]
-				return true
-			]
-			; if not first appear, mark it as first one's child
-			hpc: head pc
-			while [hpc <> pc][
-				if all [
-					hpc/1/syntax/name = "set-word"
-					hpc/1/expr = pc/1/expr
-				][
-					pc/1/syntax/parent: hpc/1/range
-					exit
-				]
-				hpc: next hpc
-			]
-			; now mark first appear set-word!
-			par: pc
-			while [par: get-parent top par/1][
-				unless raise? par [exit]
-			]
-			; mark it as global word
-			either top/1/syntax/extra [
-				append/only top/1/syntax/extra pc/1/range
-			][
-				top/1/syntax/extra: reduce [pc/1/range]
-			]
-			pc/1/syntax/parent: top/1/range
-		]
-		raise-set-word*: function [pc [block! paren!]][
-			forall pc [
-				either all [
-					any [
-						block? pc/1/expr
-						paren? pc/1/expr
-					]
-					not empty? pc/1/expr
-				][
-					raise-set-word* pc/1/expr
-				][
-					if all [
-						pc/1/syntax
-						pc/1/syntax/name = "set-word"
-					][
-						raise pc
-					]
-				]
-			]
-		]
-
-		raise-set-word* top/1/expr
-	]
-
-
-
-
 
 	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
 		words: make block! 4

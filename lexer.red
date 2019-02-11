@@ -57,6 +57,8 @@ red-lexer: context [
 		to-range start end
 	]
 
+	max-depth: 0
+
 	push-stack: function [stack [block!] expr start [string!] end [string!] depth [integer!]][
 		range: make block! 4
 		append range form-pos start
@@ -67,6 +69,7 @@ red-lexer: context [
 			'syntax make map! 8
 			'depth depth
 		]
+		if depth > max-depth [set 'max-depth depth]
 	]
 
 	analysis*: function [start [string!] end [string!] depth [integer!]][
@@ -141,6 +144,7 @@ red-lexer: context [
 		stack
 	]
 	analysis: function [start [string!]][
+		set 'max-depth 0
 		stack: make block! 1
 		end: tail start
 		if map? sub: analysis* start end 1 [
@@ -148,6 +152,7 @@ red-lexer: context [
 		]
 		push-stack stack sub start end 0
 		stack/1/source: start
+		stack/1/max-depth: max-depth
 		stack
 	]
 ]
