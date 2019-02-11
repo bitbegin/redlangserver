@@ -390,10 +390,9 @@ red-syntax: context [
 				put pc/1/syntax/resolved name resolved
 				resolved/1/syntax/keyword: pc/1/expr
 				resolved/1/syntax/parent: pc
-				resolved/1/syntax/args: make map! 3
-				resolved/1/syntax/name: name
-				resolved/1/syntax/type: type
-				resolved/1/syntax/refs: refs
+				resolved/1/syntax/args-name: name
+				resolved/1/syntax/args-type: type
+				resolved/1/syntax/args-refs: refs
 			]
 			npc: none
 			step: none
@@ -474,7 +473,7 @@ red-syntax: context [
 
 			function*?: [
 				if find [native! action! function! routine!] type [
-					system/name: "keyword-function"
+					syntax/name: "keyword-function"
 					syntax/args: make map! 4
 					syntax/resolved: make map! 8
 					step: 0
@@ -520,13 +519,13 @@ red-syntax: context [
 
 			op*?: [
 				if type = 'op! [
-					system/name: "keyword-op"
+					syntax/name: "keyword-op"
 				]
 			]
 
 			object*?: [
 				if type = 'object! [
-					system/name: "keyword-object"
+					syntax/name: "keyword-object"
 				]
 			]
 
@@ -577,7 +576,7 @@ red-syntax: context [
 			expr: pc/1/expr
 			syntax: pc/1/syntax
 			ret: none
-			type: type?/word expr
+			type: none
 
 			semicolon-type?: [
 				if any [
@@ -663,17 +662,35 @@ red-syntax: context [
 				]
 			]
 
-			keyword-type?: [
-				unless find [native! action! function! routine! op! object!] type [
-					syntax/name: "keyword-value"
+			get-type?: [
+				if any [
+					get-word? expr
+					get-path? expr
+				][
+					either get-word? expr [
+						syntax/name: "get-word"
+					][
+						syntax/name: "get-path"
+					]
 					syntax/step: 1
 					return reduce [pc 1]
 				]
-
 			]
 
-			unknown-type?: [
-				if find [word! path! get-word! get-path!] type [
+			word-type?: [
+				if any [
+					word? expr
+					path? expr
+				][
+					word: either word? expr [expr][expr/1]
+					if system-words/system? word [
+						type: type?/word get word
+						unless find [native! action! function! routine! op! object!] type [
+							syntax/name: "keyword-value"
+							syntax/step: 1
+							return reduce [pc 1]
+						]
+					]
 					syntax/name: "unknown"
 					syntax/step: 1
 					return reduce [pc 1]
@@ -686,8 +703,8 @@ red-syntax: context [
 			do set-type?
 			do block-type?
 			do paren-type?
-			do keyword-type?
-			do unknown-type?
+			do get-type?
+			do word-type?
 			throw-error 'exp-type? "not support!" expr
 		]
 
@@ -741,7 +758,7 @@ red-syntax: context [
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
 		exp-all top
-		resolve-keyword top
+		;resolve-keyword top
 	]
 
 	format: function [top [block!]][
@@ -761,7 +778,9 @@ red-syntax: context [
 			]
 			forall pc [
 				newline pad + 2
-				append buffer "#(expr: "
+				append buffer "#("
+				newline pad + 4
+				append buffer "expr: "
 				either any [
 					block? pc/1/expr
 					paren? pc/1/expr
@@ -812,6 +831,61 @@ red-syntax: context [
 					append buffer "parent: "
 					append buffer mold/flat pc/1/syntax/parent/1/range
 				]
+
+				if pc/1/syntax/keyword [
+					newline pad + 6
+					append buffer "keyword: "
+					append buffer pc/1/syntax/keyword
+				]
+
+				if pc/1/syntax/args-name [
+					newline pad + 6
+					append buffer "args-name: "
+					append buffer pc/1/syntax/args-name
+				]
+
+				if pc/1/syntax/args-type [
+					newline pad + 6
+					append buffer "args-type: "
+					append buffer pc/1/syntax/args-type
+				]
+
+				if pc/1/syntax/args-refs [
+					newline pad + 6
+					append buffer "args-refs: "
+					append buffer pc/1/syntax/args-refs
+				]
+
+				if pc/1/syntax/args [
+					newline pad + 6
+					append buffer "args: #("
+					args: words-of pc/1/syntax/args
+					forall args [
+						newline pad + 8
+						append buffer mold args/1
+						append buffer ": "
+						pos: pc/1/syntax/args/(args/1)
+						append buffer mold/flat pos/1/range
+					]
+					newline pad + 6
+					append buffer ")"
+				]
+
+				if pc/1/syntax/resolved [
+					newline pad + 6
+					append buffer "resolved: #("
+					resolved: words-of pc/1/syntax/resolved
+					forall resolved [
+						newline pad + 8
+						append buffer mold resolved/1
+						append buffer ": "
+						pos: pc/1/syntax/resolved/(resolved/1)
+						append buffer mold/flat pos/1/range
+					]
+					newline pad + 6
+					append buffer ")"
+				]
+
 				newline pad + 4
 				append buffer ")"
 				newline pad + 2
