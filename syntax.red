@@ -269,7 +269,7 @@ red-syntax: context [
 			case [
 				type = string! [
 					syntax/args/desc: npc2
-					npc2/1/name: "func-desc"
+					npc2/1/syntax/name: "func-desc"
 					npc2/1/syntax/parent: npc
 					ret: next-type npc2
 					npc3: ret/1
@@ -282,7 +282,7 @@ red-syntax: context [
 				]
 				type = block! [
 					syntax/args/type: npc2
-					npc2/1/name: "func-type"
+					npc2/1/syntax/name: "func-type"
 					npc2/1/syntax/parent: npc
 					npc2/1/syntax/args: make map! 1
 					npc2/1/syntax/args/types: make block! 4
@@ -301,7 +301,7 @@ red-syntax: context [
 						][
 							syntax-error expr2 'invalid-datatype mold expr3
 						]
-						expr2/1/name: "func-type-item"
+						expr2/1/syntax/name: "func-type-item"
 						append/only npc2/1/syntax/args/types expr3
 					]
 					ret: next-type npc2
@@ -309,7 +309,7 @@ red-syntax: context [
 					if tail? npc3 [return npc3]
 					if string? npc3/1/expr [
 						syntax/args/desc: npc3
-						npc3/1/name: "func-desc"
+						npc3/1/syntax/name: "func-desc"
 						npc3/1/syntax/parent: npc
 						return next npc3
 					]
@@ -334,7 +334,7 @@ red-syntax: context [
 			]
 			syntax/args: make map! 1
 			syntax/args/type: npc2
-			npc2/1/name: "func-type"
+			npc2/1/syntax/name: "func-type"
 			npc2/1/syntax/parent: npc
 			npc2/1/syntax/args: make map! 1
 			npc2/1/syntax/args/types: make block! 4
@@ -353,7 +353,7 @@ red-syntax: context [
 				][
 					syntax-error expr2 'invalid-datatype mold expr3
 				]
-				expr2/1/name: "func-type-item"
+				expr2/1/syntax/name: "func-type-item"
 				append/only npc2/1/syntax/args/types expr3
 			]
 			ret: next-type npc2
@@ -388,7 +388,7 @@ red-syntax: context [
 			case [
 				type = string! [
 					syntax/args/desc: npc2
-					npc2/1/name: "func-desc"
+					npc2/1/syntax/name: "func-desc"
 					npc2/1/syntax/parent: npc
 					ret: next-type npc2
 					npc3: ret/1
@@ -408,13 +408,11 @@ red-syntax: context [
 		]
 		par: pc
 		pc: par/1/expr
-		desc: none
-		ret: next-type pc
-		npc: ret/1
-		if tail? npc [return desc]
-		if string? npc/1/expr [
-			desc: npc/1/range
-			pc: npc
+		if string? pc/1/expr [
+			par/1/syntax/desc: pc
+			pc/1/syntax/name: "func-desc"
+			ret: next-type pc
+			if tail? pc: ret/1 [exit]
 		]
 		return-pc: none
 		local-pc: none
@@ -450,7 +448,6 @@ red-syntax: context [
 			]
 			tail? pc
 		]
-		par/1/syntax/desc: desc
 	]
 
 	func-arg?: function [spec [block! paren!] word [word!]][
@@ -470,12 +467,14 @@ red-syntax: context [
 	parent-of-spec: function [top [block!] pc [block! paren!]][
 		par: head pc
 		until [
-			if all [
-				find [func function has] par/1/expr
-				par/1/syntax/resolved
-				par/1/syntax/resolved/spec = pc
-			][
-				return par
+			forall par [
+				if all [
+					find [func function has] par/1/expr
+					par/1/syntax/resolved
+					par/1/syntax/resolved/spec = pc
+				][
+					return par
+				]
 			]
 			not par: get-parent top par/1
 		]
@@ -485,12 +484,14 @@ red-syntax: context [
 	parent-is-set: function [top [block!] pc [block! paren!]][
 		par: head pc
 		until [
-			if all [
-				set-word? par/1/expr
-				par/1/syntax/name = "set"
-				par/1/syntax/cast = pc
-			][
-				return par
+			forall par [
+				if all [
+					set-word? par/1/expr
+					par/1/syntax/name = "set"
+					par/1/syntax/cast = pc
+				][
+					return par
+				]
 			]
 			not par: get-parent top par/1
 		]
@@ -1042,7 +1043,12 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					exp-depth pc/1/expr depth
+					unless all [
+						block? pc/1/expr
+						parent-of-spec top pc
+					][
+						exp-depth pc/1/expr depth
+					]
 				]
 			]
 		]
@@ -1154,7 +1160,7 @@ red-syntax: context [
 				if pc/1/syntax/desc [
 					newline pad + 6
 					append buffer "desc: "
-					append buffer pc/1/syntax/desc
+					append buffer mold/flat pc/1/syntax/desc/1/range
 				]
 
 				if pc/1/syntax/args [
@@ -1168,12 +1174,12 @@ red-syntax: context [
 					if pc/1/syntax/args/desc [
 						newline pad + 8
 						append buffer "desc: "
-						append buffer pc/1/syntax/args/desc/1/range
+						append buffer mold/flat pc/1/syntax/args/desc/1/range
 					]
 					if pc/1/syntax/args/type [
 						newline pad + 8
 						append buffer "type: "
-						append buffer pc/1/syntax/args/type/1/range
+						append buffer mold/flat pc/1/syntax/args/type/1/range
 					]
 					if pc/1/syntax/args/types [
 						newline pad + 8
@@ -1190,6 +1196,8 @@ red-syntax: context [
 						newline pad + 8
 						append buffer "]"
 					]
+					newline pad + 6
+					append buffer ")"
 				]
 
 				if pc/1/syntax/casts [
