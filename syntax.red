@@ -682,6 +682,7 @@ red-syntax: context [
 					word: either word? expr [expr][expr/1]
 					if system-words/system? word [
 						type: type?/word get word
+						syntax/keyword: word
 						either find [native! action! function! routine! op! object!] type [
 							syntax/name: "unknown-keyword"
 							syntax/step: 1
@@ -835,29 +836,12 @@ red-syntax: context [
 					append buffer mold/flat pc/1/syntax/parent/1/range
 				]
 
-				;if pc/1/syntax/keyword [
-				;	newline pad + 6
-				;	append buffer "keyword: "
-				;	append buffer pc/1/syntax/keyword
-				;]
+				if pc/1/syntax/keyword [
+					newline pad + 6
+					append buffer "keyword: "
+					append buffer pc/1/syntax/keyword
+				]
 
-				;if pc/1/syntax/args-name [
-				;	newline pad + 6
-				;	append buffer "args-name: "
-				;	append buffer pc/1/syntax/args-name
-				;]
-
-				;if pc/1/syntax/args-type [
-				;	newline pad + 6
-				;	append buffer "args-type: "
-				;	append buffer pc/1/syntax/args-type
-				;]
-
-				;if pc/1/syntax/args-refs [
-				;	newline pad + 6
-				;	append buffer "args-refs: "
-				;	append buffer pc/1/syntax/args-refs
-				;]
 
 				if pc/1/syntax/args [
 					newline pad + 6
