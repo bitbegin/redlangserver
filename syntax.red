@@ -464,7 +464,7 @@ red-syntax: context [
 		none
 	]
 
-	parent-of-spec: function [top [block!] pc [block! paren!]][
+	parent-of-func-spec: function [top [block!] pc [block! paren!]][
 		par: head pc
 		until [
 			forall par [
@@ -472,6 +472,23 @@ red-syntax: context [
 					find [func function has] par/1/expr
 					par/1/syntax/resolved
 					par/1/syntax/resolved/spec = pc
+				][
+					return par
+				]
+			]
+			not par: get-parent top par/1
+		]
+		none
+	]
+
+	parent-of-switch-cases: function [top [block!] pc [block! paren!]][
+		par: head pc
+		until [
+			forall par [
+				if all [
+					par/1/expr = 'switch
+					par/1/syntax/resolved
+					par/1/syntax/resolved/cases = pc
 				][
 					return par
 				]
@@ -534,7 +551,7 @@ red-syntax: context [
 		find-func-spec: function [npc [block! paren!]][
 			if all [
 				npc/1/syntax/name = "block"
-				spec: parent-of-spec top npc
+				spec: parent-of-func-spec top npc
 				ret: func-arg? spec word
 			][
 				return ret
@@ -871,6 +888,8 @@ red-syntax: context [
 					]
 					syntax/name: "keyword-set"
 					syntax/set-word: cast
+					cast/1/syntax/name: "refer-set"
+					cast/1/syntax/refer: pc
 					step: ret/2 + 1
 					ret: exp-type? skip pc step
 					if tail? cast: ret/1 [
@@ -920,7 +939,11 @@ red-syntax: context [
 					syntax/word: word
 					if system-words/system? word [
 						type: type?/word get word
-						unless find [native! action! function! routine! op! object!] type [
+						either find [native! action! function! routine! op! object!] type [
+							syntax/name: "unknown-keyword"
+							syntax/step: 1
+							return reduce [pc 1]
+						][
 							syntax/name: "keyword-value"
 							syntax/step: 1
 							return reduce [pc 1]
@@ -951,11 +974,26 @@ red-syntax: context [
 			]
 		]
 
+		resolve-refer: function [pc [block! paren!]][
+			forall pc [
+				if all [
+					word? pc/1/expr
+					find/match pc/1/syntax/name "unknown"
+				][
+					if refer: word-value? top pc [
+						pc/1/syntax/name: "refer"
+						pc/1/syntax/refer: refer
+					]
+				]
+			]
+		]
+
 		exp-func?: function [pc [block! paren!]][
 			if all [
-				pc/1/syntax/name = "unknown"
-				find [func has does function context] pc/1/expr
+				pc/1/syntax/name = "unknown-keyword"
+				find [func has does function context all any] pc/1/syntax/word
 			][
+				pc/1/syntax/name: append copy "keyword-" to string! pc/1/syntax/word
 				npc: none
 				step: none
 				ret: next-type pc
@@ -974,7 +1012,21 @@ red-syntax: context [
 				either block? npc/1/expr [
 					spec: npc
 				][
-					unless spec: word-value? top npc [
+					unless any [
+						set-word? npc/1/expr
+						word? npc/1/expr
+					][
+						syntax-error pc 'miss-expr "block!"
+						return step + 1
+					]
+					either spec: npc/1/syntax/cast [
+						unless block? spec/1/expr [
+							spec: spec/1/syntax/refer
+						]
+					][
+						spec: npc/1/syntax/refer
+					]
+					unless spec [
 						syntax-error pc 'miss-expr "block!"
 						return step + 1
 					]
@@ -986,12 +1038,16 @@ red-syntax: context [
 				pc/1/syntax/resolved: make map! 2
 				either pc/1/syntax/word = 'does [
 					pc/1/syntax/resolved/body: spec
+					spec/1/syntax/into: true
 				][
 					pc/1/syntax/resolved/spec: spec
+					if find [context all any] pc/1/syntax/word [
+						spec/1/syntax/into: true
+					]
 				]
-				if find [does context] pc/1/syntax/word [return step + 1]
+				if find [does context all any] pc/1/syntax/word [return step + 1]
 				check-func-spec spec pc/1/syntax/word
-				ret: next-type npc
+				ret: next-type skip pc step
 				step: step + ret/2
 				if tail? npc: ret/1 [
 					syntax-error pc 'miss-expr "block!"
@@ -1002,7 +1058,21 @@ red-syntax: context [
 				either block? npc/1/expr [
 					body: npc
 				][
-					unless body: word-value? top npc [
+					unless any [
+						set-word? npc/1/expr
+						word? npc/1/expr
+					][
+						syntax-error pc 'miss-expr "block!"
+						return step + 1
+					]
+					either body: npc/1/syntax/cast [
+						unless block? body/1/expr [
+							body: body/1/syntax/refer
+						]
+					][
+						body: npc/1/syntax/refer
+					]
+					unless body [
 						syntax-error pc 'miss-expr "block!"
 						return step + 1
 					]
@@ -1012,6 +1082,7 @@ red-syntax: context [
 					]
 				]
 				pc/1/syntax/resolved/body: body
+				body/1/syntax/into: true
 				return 1 + step
 			]
 			none
@@ -1032,6 +1103,7 @@ red-syntax: context [
 			if pc/1/depth > depth [exit]
 			if pc/1/depth = depth [
 				resolve-type pc
+				resolve-refer pc
 				resolve-func pc
 				exit
 			]
@@ -1043,10 +1115,7 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					unless all [
-						block? pc/1/expr
-						parent-of-spec top pc
-					][
+					if pc/1/syntax/into [
 						exp-depth pc/1/expr depth
 					]
 				]
@@ -1140,6 +1209,11 @@ red-syntax: context [
 					append buffer "error: "
 					append buffer mold/flat pc/1/syntax/error
 				]
+				if pc/1/syntax/meta [
+					newline pad + 6
+					append buffer "meta: "
+					append buffer pc/1/syntax/meta
+				]
 				if pc/1/syntax/cast [
 					newline pad + 6
 					append buffer "cast: "
@@ -1150,7 +1224,11 @@ red-syntax: context [
 					append buffer "parent: "
 					append buffer mold/flat pc/1/syntax/parent/1/range
 				]
-
+				if pc/1/syntax/refer [
+					newline pad + 6
+					append buffer "refer: "
+					append buffer mold/flat pc/1/syntax/refer/1/range
+				]
 				if pc/1/syntax/word [
 					newline pad + 6
 					append buffer "word: "
@@ -1230,6 +1308,12 @@ red-syntax: context [
 					append buffer ")"
 				]
 
+				if pc/1/syntax/into [
+					newline pad + 6
+					append buffer "into: "
+					append buffer mold pc/1/syntax/into
+				]
+
 				newline pad + 4
 				append buffer ")"
 				newline pad + 2
@@ -1303,125 +1387,6 @@ red-syntax: context [
 				]
 			]
 		]
-	]
-
-
-	resolve-spec: function [top [block!]][
-		function-collect: function [pc [block! paren!]][
-			unless par: pc/1/syntax/parent [exit]
-			unless ret: find-expr top par [
-				throw-error 'function-collect "can't find expr at" par
-			]
-			spec: ret/1/syntax/args/spec
-			unless ret: find-expr top spec [
-				throw-error 'function-collect "can't find expr at" spec
-			]
-			spec: ret/1/expr
-			extra: make block! 4
-			collect?: false
-			collect-set-word*: function [npc [block! paren!]][
-				forall npc [
-					either all [
-						any [
-							block? npc/1/expr
-							paren? npc/1/expr
-						]
-						not empty? npc/1/expr
-					][
-						collect-set-word* npc
-					][
-						if npc/1/syntax/name = "set-word" [
-							collect?: true
-							forall spec [
-								if find [word! lit-word! refinement!] type?/word spec/1/expr [
-									if (to word! spec/1/expr) = (to word! npc/1/expr) [
-										collect?: false
-									]
-								]
-							]
-							if collect? [append/only extra npc/1/range]
-						]
-					]
-				]
-			]
-			collect-set-word* pc/1/expr
-			pc/1/syntax/extra: extra
-		]
-
-		resolve-func: function [pc [block! paren!] par [block! paren!]][
-			keyword: pc/1/syntax/keyword
-			if all [
-				pc/1/syntax/args
-				pc/1/syntax/args/name = 'spec
-				find [func function has] keyword
-			][
-				if all [
-					par/1/syntax/resolved
-					ret: par/1/syntax/resolved/spec
-				][
-					unless spec: find-expr top ret [
-						throw-error 'resolve-spec* "can't find expr at" ret
-					]
-					clear-syntax spec/1/expr
-					desc: check-func-spec spec/1/expr keyword
-					pc/1/syntax/desc: desc
-				]
-			]
-		]
-
-		resolve-bind: function [pc [block! paren!] par [block! paren!]][
-			;-- TBD: bind block/word to context
-		]
-
-		resolve: function [pc [block! paren!] par [block! paren!]][
-			args: pc/1/syntax/args
-			refs: pc/1/syntax/refs
-			if all [
-				args
-				args/name
-			][
-				if ret: fetch-type pc args/type args/name [
-					put par/1/syntax/resolved args/name ret/1/range
-				]
-			]
-			if all [
-				refs
-				refs/name
-			][
-				if ret: fetch-type pc refs/type refs/name [
-					put par/1/syntax/resolved refs/name ret/1/range
-				]
-			]
-		]
-
-		resolve-spec*: function [pc [block! paren!]][
-			forall pc [
-				if keyword: pc/1/syntax/keyword [
-					unless par: find-expr top pc/1/syntax/parent [
-						throw-error 'resolve-spec* "can't find expr at" pc/1/syntax/parent
-					]
-					resolve pc par
-					case [
-						find [func function has does context] keyword [
-							resolve-func pc par
-						]
-						keyword = 'bind [
-							resolve-bind pc par
-						]
-					]
-				]
-				if all [
-					any [
-						block? pc/1/expr
-						paren? pc/1/expr
-					]
-					not empty? pc/1/expr
-				][
-					resolve-spec* pc/1/expr
-				]
-			]
-		]
-		resolve-spec* top/1/expr
 	]
 
 	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
