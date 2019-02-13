@@ -508,7 +508,7 @@ red-syntax: context [
 				][
 					;-- tail
 					unless cast: npc/1/syntax/cast [
-						return none
+						return reduce [npc cast]
 					]
 					;-- recursive define
 					if cast = pc [
@@ -516,15 +516,16 @@ red-syntax: context [
 						return none
 					]
 					;-- nested define
-					if any [
-						word? cast/1/expr
-						get-word? cast/1/expr
-					][
-						if ret: word-value? top cast [
-							return ret
+					if all [
+						any [
+							word? cast/1/expr
+							get-word? cast/1/expr
 						]
+						ret: word-value? top cast
+					][
+						return ret
 					]
-					return cast
+					return reduce [npc cast]
 				]
 			]
 			none
@@ -536,7 +537,7 @@ red-syntax: context [
 				spec: spec-of-func-body top par
 				ret: func-arg? spec word
 			][
-				return ret
+				return reduce [ret none]
 			]
 			none
 		]
@@ -945,11 +946,12 @@ red-syntax: context [
 						pc/1/syntax/name = "set"
 					]
 				][
-					either refer: word-value? top pc [
+					either ret: word-value? top pc [
 						if word? pc/1/expr [
 							pc/1/syntax/name: "refer"
 						]
-						pc/1/syntax/refer: refer
+						pc/1/syntax/refer: ret/1
+						pc/1/syntax/value: ret/2
 					][
 						if all [
 							set-word? pc/1/expr
@@ -997,10 +999,10 @@ red-syntax: context [
 					]
 					either spec: npc/1/syntax/cast [
 						unless block? spec/1/expr [
-							spec: spec/1/syntax/refer
+							spec: spec/1/syntax/value
 						]
 					][
-						spec: npc/1/syntax/refer
+						spec: npc/1/syntax/value
 					]
 					unless spec [
 						syntax-error pc 'miss-expr "block!"
@@ -1043,10 +1045,10 @@ red-syntax: context [
 					]
 					either body: npc/1/syntax/cast [
 						unless block? body/1/expr [
-							body: body/1/syntax/refer
+							body: body/1/syntax/value
 						]
 					][
-						body: npc/1/syntax/refer
+						body: npc/1/syntax/value
 					]
 					unless body [
 						syntax-error pc 'miss-expr "block!"
@@ -1210,6 +1212,11 @@ red-syntax: context [
 					newline pad + 6
 					append buffer "refer: "
 					append buffer mold/flat pc/1/syntax/refer/1/range
+				]
+				if pc/1/syntax/value [
+					newline pad + 6
+					append buffer "value: "
+					append buffer mold/flat pc/1/syntax/value/1/range
 				]
 				if pc/1/syntax/word [
 					newline pad + 6

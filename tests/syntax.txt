@@ -26,7 +26,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           error: #(severity: 1 code: "miss-expr" source: "Syntax" message: "he: -- need a type: block! for Red File header")
           meta: 2
           cast: [1 9 1 11]
-          refer: [1 9 1 11]
         )
       )
       #(
@@ -46,7 +45,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [3 4 3 9]
-          refer: [3 4 3 9]
         )
       )
       #(
@@ -66,7 +64,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [4 4 4 11]
-          refer: [4 4 4 11]
         )
       )
       #(
@@ -97,7 +94,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [5 5 5 6]
-              refer: [5 5 5 6]
             )
           )
           #(
@@ -117,7 +113,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [6 5 6 12]
-              refer: [6 5 6 12]
             )
           )
           #(
@@ -148,7 +143,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                   name: set
                   step: 2
                   cast: [7 6 7 11]
-                  refer: [7 6 7 11]
                 )
               )
               #(
@@ -168,7 +162,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                   name: set
                   step: 2
                   cast: [8 6 8 10]
-                  refer: [8 6 8 10]
                 )
               )
               #(
@@ -278,7 +271,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                       name: set
                       step: 2
                       cast: [9 8 9 16]
-                      refer: [9 8 9 16]
                     )
                   )
                   #(
@@ -388,7 +380,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [10 9 10 15]
-                          refer: [10 9 10 15]
                         )
                       )
                       #(
@@ -408,7 +399,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [11 9 11 10]
-                          refer: [8 12 8 13]
                         )
                       )
                       #(
@@ -430,7 +420,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [12 9 12 11]
-                          refer: [10 9 10 15]
                         )
                       )
                       #(
@@ -440,7 +429,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                         syntax: #(
                           name: refer
                           step: 1
-                          refer: [10 9 10 15]
+                          refer: [10 5 10 8]
+                          value: [10 9 10 15]
                           word: f1
                         )
                       )
@@ -452,7 +442,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [13 9 13 10]
-                          refer: [33 4 33 15]
                         )
                       )
                       #(
@@ -462,7 +451,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                         syntax: #(
                           name: refer
                           step: 1
-                          refer: [33 4 33 15]
+                          refer: [33 1 33 3]
+                          value: [33 4 33 15]
                           word: l
                         )
                       )
@@ -474,7 +464,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [14 9 14 11]
-                          refer: [8 6 8 10]
                         )
                       )
                       #(
@@ -484,7 +473,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                         syntax: #(
                           name: get
                           step: 1
-                          refer: [8 6 8 10]
+                          refer: [8 3 8 5]
+                          value: [8 6 8 10]
                         )
                       )
                       #(
@@ -495,7 +485,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [15 9 15 11]
-                          refer: [8 6 8 10]
                         )
                       )
                       #(
@@ -505,7 +494,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                         syntax: #(
                           name: refer
                           step: 1
-                          refer: [8 6 8 10]
+                          refer: [8 3 8 5]
+                          value: [8 6 8 10]
                           word: f5
                         )
                       )
@@ -517,7 +507,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                           name: set
                           step: 2
                           cast: [16 9 16 10]
-                          refer: [9 18 9 19]
                         )
                       )
                       #(
@@ -618,7 +607,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                       name: set
                       step: 2
                       cast: [20 7 20 8]
-                      refer: [8 12 8 13]
+                      refer: [7 3 7 5]
+                      value: [7 6 7 11]
                     )
                   )
                   #(
@@ -661,7 +651,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                       name: set
                       step: 2
                       cast: [21 7 21 8]
-                      refer: [25 6 25 8]
+                      refer: [33 1 33 3]
+                      value: [33 4 33 15]
                     )
                   )
                   #(
@@ -671,7 +662,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     syntax: #(
                       name: refer
                       step: 1
-                      refer: [25 6 25 8]
+                      refer: [25 3 25 5]
+                      value: [25 6 25 8]
                       word: g
                     )
                   )
@@ -683,7 +675,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                       name: set
                       step: 2
                       cast: [22 7 22 8]
-                      refer: [27 5 27 12]
                     )
                   )
                   #(
@@ -693,7 +684,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     syntax: #(
                       name: refer
                       step: 1
-                      refer: [27 5 27 12]
+                      refer: [27 2 27 4]
+                      value: [27 5 27 12]
                       word: h
                     )
                   )
@@ -705,7 +697,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                       name: set
                       step: 2
                       cast: [23 7 23 8]
-                      refer: [8 12 8 13]
                     )
                   )
                   #(
@@ -735,7 +726,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                   name: set
                   step: 2
                   cast: [25 6 25 8]
-                  refer: [25 6 25 8]
                 )
               )
               #(
@@ -763,7 +753,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [27 5 27 12]
-              refer: [27 5 27 12]
             )
           )
           #(
@@ -783,7 +772,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [28 5 28 6]
-              refer: [28 5 28 6]
             )
           )
           #(
@@ -804,7 +792,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [29 5 29 6]
-              refer: [29 5 29 6]
             )
           )
           #(
@@ -825,7 +812,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [30 5 30 6]
-              refer: [30 5 30 6]
             )
           )
           #(
@@ -854,7 +840,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [33 4 33 15]
-          refer: [33 4 33 15]
         )
       )
       #(
@@ -869,7 +854,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [33 8 33 9]
-              refer: [33 8 33 9]
             )
           )
           #(
@@ -889,7 +873,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [33 13 33 14]
-              refer: [3 4 3 9]
             )
           )
           #(
@@ -899,7 +882,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             syntax: #(
               name: refer
               step: 1
-              refer: [3 4 3 9]
+              refer: [3 1 3 3]
+              value: [3 4 3 9]
               word: a
             )
           )
@@ -918,7 +902,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [34 4 34 5]
-          refer: [33 4 33 15]
         )
       )
       #(
@@ -928,7 +911,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         syntax: #(
           name: refer
           step: 1
-          refer: [33 4 33 15]
+          refer: [33 1 33 3]
+          value: [33 4 33 15]
           word: l
         )
       )
@@ -940,7 +924,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [36 4 36 8]
-          refer: [36 4 36 8]
         )
       )
       #(
@@ -995,7 +978,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: func-type
               parent: [36 10 36 11]
               args: #(
-                types: [test]
+                types: []
               )
             )
           )
@@ -1029,7 +1012,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: func-type
               parent: [36 19 36 20]
               args: #(
-                types: [test!]
+                types: []
               )
             )
           )
@@ -1207,7 +1190,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [41 4 41 12]
-          refer: [41 4 41 12]
         )
       )
       #(
@@ -1501,7 +1483,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [49 6 49 7]
-          refer: [49 6 49 7]
         )
       )
       #(
@@ -1521,7 +1502,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [51 5 51 9]
-          refer: [51 5 51 9]
         )
       )
       #(
@@ -1913,7 +1893,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [56 6 56 9]
-          refer: [56 6 56 9]
         )
       )
       #(
@@ -1991,7 +1970,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [57 6 57 9]
-          refer: [57 6 57 9]
         )
       )
       #(
@@ -2049,7 +2027,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           step: 2
           error: #(severity: 1 code: "recursive-define" source: "Syntax" message: "z: -- recursive define")
           cast: [59 4 59 5]
-          refer: [59 4 59 5]
         )
       )
       #(
@@ -2070,7 +2047,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [61 6 61 12]
-          refer: [61 6 61 12]
         )
       )
       #(
@@ -2108,7 +2084,6 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           name: set
           step: 2
           cast: [62 6 62 13]
-          refer: [62 6 62 13]
         )
       )
       #(
@@ -2139,7 +2114,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               name: set
               step: 2
               cast: [63 5 63 9]
-              refer: [63 5 63 9]
+              refer: [3 1 3 3]
+              value: [3 4 3 9]
             )
           )
           #(
@@ -2187,7 +2163,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         syntax: #(
           name: refer
           step: 1
-          refer: [61 6 61 12]
+          refer: [61 1 61 5]
+          value: [61 6 61 12]
           word: blk
         )
       )
@@ -2198,7 +2175,8 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         syntax: #(
           name: refer
           step: 1
-          refer: [62 6 62 13]
+          refer: [62 1 62 5]
+          value: [62 6 62 13]
           word: ctx
         )
       )
@@ -2208,6 +2186,13 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
     syntax: #(
       name: top
       step: 1
+      extra: [
+        [33 5 33 7]
+        [33 10 33 12]
+        [9 4 9 7]
+        [22 4 22 6]
+        [23 4 23 6]
+      ]
     )
   )
 ]
@@ -2350,3 +2335,4 @@ Error/Warning: ---------------------------------------
 )]
 [9 43 17 5]
 []
+PS D:\vscode-ext\VScode-extension\server>
