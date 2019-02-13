@@ -57,3 +57,10 @@ fh1: has [/ref a b]
 fh2: has [a b][]
 
 z: z
+
+blk: [a: 1]
+ctx: context [
+	a: none
+]
+
+do bind blk ctx

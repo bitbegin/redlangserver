@@ -1304,9 +1304,8 @@ red-syntax: context [
 		collect-set-word: function [pc [block! paren!]][
 			forall pc [
 				if all [
-					map? pc/1
-					pc/1/syntax
-					pc/1/syntax/name = "set-word"
+					word? pc/1/expr
+					pc/1/syntax/name = "set"
 				][
 					word: to string! pc/1/expr
 					if any [
@@ -1331,10 +1330,10 @@ red-syntax: context [
 			]
 			not empty? pc/1/expr
 			any [
-				pc/1/end/1 > line
+				pc/1/range/3 > line
 				all [
-					pc/1/end/1 = line
-					pc/1/end/2 > column
+					pc/1/range/3 = line
+					pc/1/range/4 > column
 				]
 			]
 		][
