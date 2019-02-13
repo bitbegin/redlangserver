@@ -264,7 +264,7 @@ red-syntax: context [
 					expr2: npc2/1/expr
 					forall expr2 [
 						expr3: expr2/1/expr
-						unless any [
+						either any [
 							all [
 								value? expr3
 								datatype? get expr3
@@ -274,10 +274,11 @@ red-syntax: context [
 								typeset? get expr3
 							]
 						][
+							append/only npc2/1/syntax/args/types expr3
+						][
 							syntax-error expr2 'invalid-datatype mold expr3
 						]
 						expr2/1/syntax/name: "func-type-item"
-						append/only npc2/1/syntax/args/types expr3
 					]
 					ret: next-type npc2
 					npc3: ret/1
@@ -316,7 +317,7 @@ red-syntax: context [
 			expr2: npc2/1/expr
 			forall expr2 [
 				expr3: expr2/1/expr
-				unless any [
+				either any [
 					all [
 						value? expr3
 						datatype? get expr3
@@ -326,10 +327,11 @@ red-syntax: context [
 						typeset? get expr3
 					]
 				][
+					append/only npc2/1/syntax/args/types expr3
+				][
 					syntax-error expr2 'invalid-datatype mold expr3
 				]
 				expr2/1/syntax/name: "func-type-item"
-				append/only npc2/1/syntax/args/types expr3
 			]
 			ret: next-type npc2
 			ret/1
@@ -451,12 +453,55 @@ red-syntax: context [
 		none
 	]
 
+	context-spec?: function [top [block!] pc [block! paren!]][
+		if top = pc [return true]
+		npc: head pc
+		forall npc [
+			if all [
+				npc/1/syntax/word = 'context
+				npc/1/syntax/resolved
+				npc/1/syntax/resolved/spec = pc
+			][
+				return true
+			]
+		]
+		false
+	]
+
+	function-body?: function [top [block!] pc [block! paren!]][
+		npc: head pc
+		forall npc [
+			if all [
+				npc/1/syntax/word = 'function
+				npc/1/syntax/resolved
+				npc/1/syntax/resolved/body = pc
+			][
+				return true
+			]
+		]
+		false
+	]
+
+	belong-to-function?: function [top [block!] pc [block! paren!]][
+		until [
+			if all [
+				pc/1/syntax/name = "block"
+				function-body? top pc
+			][
+				return true
+			]
+			pc: get-parent top pc/1
+		]
+		false
+	]
+
 	word-value?: function [top [block!] pc [block! paren!]][
 		unless any-word? pc/1/expr [return none]
 		word: to word! pc/1/expr
 		find-set-word: function [npc [block! paren!]][
 			forall npc [
 				if all [
+					pc <> npc
 					npc/1/syntax/name = "set"
 					set-word? npc/1/expr
 					word = to word! npc/1/expr
@@ -900,11 +945,20 @@ red-syntax: context [
 						pc/1/syntax/name = "set"
 					]
 				][
-					if refer: word-value? top pc [
+					either refer: word-value? top pc [
 						if word? pc/1/expr [
 							pc/1/syntax/name: "refer"
 						]
 						pc/1/syntax/refer: refer
+					][
+						if all [
+							set-word? pc/1/expr
+							par: get-parent top pc/1
+							not context-spec? top par
+							not belong-to-function? top par
+						][
+							append top/1/syntax/extra pc/1
+						]
 					]
 				]
 			]
@@ -1061,6 +1115,7 @@ red-syntax: context [
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		top/1/syntax/name: "top"
 		top/1/syntax/step: 1
+		top/1/syntax/extra: make block! 20
 		pc: top/1/expr
 		unless pc/1/expr = 'Red [
 			syntax-error pc 'miss-expr "'Red' for Red File header"
@@ -1239,6 +1294,17 @@ red-syntax: context [
 					newline pad + 6
 					append buffer "into: "
 					append buffer mold pc/1/syntax/into
+				]
+
+				if extra: pc/1/syntax/extra [
+					newline pad + 6
+					append buffer "extra: ["
+					forall extra [
+						newline pad + 8
+						append buffer mold/flat extra/1/range
+					]
+					newline pad + 6
+					append buffer "]"
 				]
 
 				newline pad + 4
