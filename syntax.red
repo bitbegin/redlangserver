@@ -20,9 +20,9 @@ red-syntax: context [
 		either none? syntax/error [
 			syntax/error: error
 		][
-			either errors: block? syntax/error [
+			either block? errors: syntax/error [
 				forall errors [
-					if errors/code = error/code [exit]
+					if errors/1/code = error/code [exit]
 				]
 				append syntax/error error
 			][
@@ -202,31 +202,6 @@ red-syntax: context [
 				create-error pc/1/syntax 'Error 'recursive-define
 					rejoin [mold pc/1/expr " -- recursive define"]
 			]
-			need-file [
-				create-error pc/1/syntax 'Error 'need-file
-					rejoin [mold pc/1/expr " -- need a file! literal"]
-			]
-			miss-head [
-				create-error pc/1/syntax 'Error 'miss-head "miss 'Red' for Red File header"
-			]
-			miss-head-block [
-				create-error pc/1/syntax 'Error 'miss-head "miss block! for Red File header"
-			]
-			unsupport [
-				create-error pc/1/syntax 'Error 'unsupport "unsupport for now"
-			]
-			miss-define [
-				create-error pc/1/syntax 'Error 'miss-define
-					rejoin [mold pc/1/expr " -- need a definition"]
-			]
-			unsupport-refs [
-				create-error pc/1/syntax 'Error 'unsupport-refs
-					rejoin [mold pc/1/expr " -- unsupport refinement"]
-			]
-			need-block [
-				create-error pc/1/syntax 'Error 'need-block
-					rejoin [mold pc/1/expr " -- need a block!"]
-			]
 			double-define [
 				create-error pc/1/syntax 'Error 'double-define
 					rejoin [mold pc/1/expr " -- double define: " args]
@@ -258,7 +233,7 @@ red-syntax: context [
 		]
 		check-args: function [npc [block!] par [block! paren! none!]][
 			syntax: npc/1/syntax
-			syntax/name: "func-name"
+			syntax/name: "func-param"
 			syntax/args: make map! 3
 			syntax/args/refs: par
 			double-check npc
@@ -325,11 +300,11 @@ red-syntax: context [
 			ret: next-type npc
 			npc2: ret/1
 			if tail? npc2 [
-				syntax-error npc 'need-block none
+				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
 			unless block? npc2/1/expr [
-				syntax-error npc 'need-block none
+				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
 			syntax/args: make map! 1
@@ -377,7 +352,7 @@ red-syntax: context [
 				return npc
 			]
 			syntax: npc/1/syntax
-			syntax/name: "func-refines"
+			syntax/name: "func-refinement"
 			syntax/args: make map! 2
 			syntax/args/params: make block! 4
 			double-check npc
@@ -424,15 +399,14 @@ red-syntax: context [
 					pc: check-return pc
 				]
 				refinement? expr [
-					if local-pc [
+					if any [
+						local-pc
+						keyword = 'has
+					][
 						syntax-error pc 'forbidden-refine mold pc/1/expr
 					]
 					if expr = /local [local-pc: pc]
-					either keyword = 'has [
-						syntax-error pc 'forbidden-refine mold pc/1/expr
-					][
-						pc: check-refines pc
-					]
+					pc: check-refines pc
 				]
 				find [word! lit-word! get-word!] type?/word expr [
 					if return-pc [
@@ -570,27 +544,6 @@ red-syntax: context [
 		]
 		none
 	]
-
-	;resolve-refer: function [top [block!] pc [block! paren!]][
-	;	forall pc [
-	;		if any [
-	;			word? pc/1/expr
-	;			get-word? pc/1/expr
-	;		][
-	;			if npc: mark-word top pc [
-	;				if all [
-	;					(head npc) = head pc
-	;					(index? npc) > index? pc
-	;				][
-	;					unless find [function func does has context] npc/1/expr [
-	;						create-error pc/1/syntax 'Error 'beyond-scope
-	;							rejoin ["find define at: " mold red-lexer/form-range npc/1/range ", but beyond scope"]
-	;					]
-	;				]
-	;			]
-	;		]
-	;	]
-	;]
 
 	resolve-keyword: function [top [block!]][
 		type*?: function [pc [block! paren!] stype][
@@ -1138,10 +1091,10 @@ red-syntax: context [
 		top/1/syntax/step: 1
 		pc: top/1/expr
 		unless pc/1/expr = 'Red [
-			syntax-error pc 'miss-head
+			syntax-error pc 'miss-expr "'Red' for Red File header"
 		]
 		unless block? pc/2/expr [
-			syntax-error next pc 'miss-head-block
+			syntax-error next pc 'miss-expr "block! for Red File header"
 		]
 		pc/1/syntax/meta: 1
 		pc/2/syntax/meta: 2
@@ -1201,9 +1154,11 @@ red-syntax: context [
 				newline pad + 6
 				append buffer "name: "
 				append buffer pc/1/syntax/name
-				newline pad + 6
-				append buffer "step: "
-				append buffer pc/1/syntax/step
+				if pc/1/syntax/step [
+					newline pad + 6
+					append buffer "step: "
+					append buffer pc/1/syntax/step
+				]
 				if pc/1/syntax/error [
 					newline pad + 6
 					append buffer "error: "
@@ -1247,7 +1202,7 @@ red-syntax: context [
 					if pc/1/syntax/args/refs [
 						newline pad + 8
 						append buffer "refs: "
-						append buffer pc/1/syntax/args/refs/1/range
+						append buffer mold/flat pc/1/syntax/args/refs/1/range
 					]
 					if pc/1/syntax/args/desc [
 						newline pad + 8
@@ -1364,29 +1319,6 @@ red-syntax: context [
 		]
 		collect-errors* top
 		ret
-	]
-
-	clear-syntax: function [pc [block! paren!]][
-		forall pc [
-			either all [
-				any [
-					block? pc/1/expr
-					paren? pc/1/expr
-				]
-				not empty? pc/1/expr
-			][
-				clear-syntax pc/1/expr
-			][
-				clear pc/1/syntax
-				pc/1/syntax/step: 1
-				if all [
-					string? pc/1/expr
-					#";" = pc/1/expr/1
-				][
-					pc/1/syntax/step: 2
-				]
-			]
-		]
 	]
 
 	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
