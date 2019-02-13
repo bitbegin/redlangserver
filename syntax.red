@@ -425,8 +425,7 @@ red-syntax: context [
 	]
 
 	func-arg?: function [spec [block! paren!] word [word!]][
-		expr: spec/1/expr
-		if block? expr [
+		if block? expr: spec/1/expr [
 			forall expr [
 				if find [word! lit-word! get-word! refinement!] type?/word expr/1/expr [
 					if word = to word! expr/1/expr [
@@ -438,53 +437,16 @@ red-syntax: context [
 		none
 	]
 
-	parent-of-func-spec: function [top [block!] pc [block! paren!]][
-		par: head pc
-		until [
-			forall par [
-				if all [
-					find [func function has] par/1/expr
-					par/1/syntax/resolved
-					par/1/syntax/resolved/spec = pc
-				][
-					return par
-				]
+	spec-of-func-body: function [top [block!] pc [block! paren!]][
+		npc: head pc
+		forall npc [
+			if all [
+				find [func function has] npc/1/syntax/word
+				npc/1/syntax/resolved
+				npc/1/syntax/resolved/body = pc
+			][
+				return npc/1/syntax/resolved/spec
 			]
-			not par: get-parent top par/1
-		]
-		none
-	]
-
-	parent-of-switch-cases: function [top [block!] pc [block! paren!]][
-		par: head pc
-		until [
-			forall par [
-				if all [
-					par/1/expr = 'switch
-					par/1/syntax/resolved
-					par/1/syntax/resolved/cases = pc
-				][
-					return par
-				]
-			]
-			not par: get-parent top par/1
-		]
-		none
-	]
-
-	parent-is-set: function [top [block!] pc [block! paren!]][
-		par: head pc
-		until [
-			forall par [
-				if all [
-					set-word? par/1/expr
-					par/1/syntax/name = "set"
-					par/1/syntax/cast = pc
-				][
-					return par
-				]
-			]
-			not par: get-parent top par/1
 		]
 		none
 	]
@@ -522,25 +484,27 @@ red-syntax: context [
 			]
 			none
 		]
-		find-func-spec: function [npc [block! paren!]][
+		find-func-spec: function [par [block! paren! none!]][
+			unless par [return none]
 			if all [
-				npc/1/syntax/name = "block"
-				spec: parent-of-func-spec top npc
+				par/1/syntax/name = "block"
+				spec: spec-of-func-body top par
 				ret: func-arg? spec word
 			][
 				return ret
 			]
 			none
 		]
-		par: pc
+		npc: pc
 		until [
+			par: get-parent top npc/1
 			if any [
 				ret: find-func-spec par
-				ret: find-set-word head par
+				ret: find-set-word head npc
 			][
 				return ret
 			]
-			not par: get-parent top par/1
+			not npc: par
 		]
 		none
 	]
@@ -713,29 +677,22 @@ red-syntax: context [
 			throw-error 'resolve-keyword* "not support!" expr
 		]
 
+		resolve-keyword**: function [][]
+
 		resolve-depth: function [pc [block! paren!] depth [integer!]][
 			if pc/1/depth > depth [exit]
+			if pc/1/depth = depth [
+				resolve-keyword* pc
+			]
 			forall pc [
-				either pc/1/depth = depth [
-					if all [
-						any [
-							word? pc/1/expr
-							path? pc/1/expr
-						]
-						pc/1/syntax/name = "unknown-keyword"
-					][
-						resolve-keyword* pc
+				if all [
+					any [
+						block? pc/1/expr
+						paren? pc/1/expr
 					]
+					not empty? pc/1/expr
 				][
-					if all [
-						any [
-							block? pc/1/expr
-							paren? pc/1/expr
-						]
-						not empty? pc/1/expr
-					][
-						resolve-depth pc/1/expr depth
-					]
+					resolve-depth pc/1/expr depth
 				]
 			]
 		]
@@ -929,12 +886,24 @@ red-syntax: context [
 
 		resolve-refer: function [pc [block! paren!]][
 			forall pc [
-				if all [
-					word? pc/1/expr
-					find/match pc/1/syntax/name "unknown"
+				if any [
+					all [
+						word? pc/1/expr
+						find/match pc/1/syntax/name "unknown"
+					]
+					all [
+						get-word? pc/1/expr
+						pc/1/syntax/name = "get"
+					]
+					all [
+						set-word? pc/1/expr
+						pc/1/syntax/name = "set"
+					]
 				][
 					if refer: word-value? top pc [
-						pc/1/syntax/name: "refer"
+						if word? pc/1/expr [
+							pc/1/syntax/name: "refer"
+						]
 						pc/1/syntax/refer: refer
 					]
 				]
@@ -1068,7 +1037,10 @@ red-syntax: context [
 					]
 					not empty? pc/1/expr
 				][
-					if pc/1/syntax/into [
+					if any [
+						paren? pc/1/expr
+						pc/1/syntax/into
+					][
 						exp-depth pc/1/expr depth
 					]
 				]
@@ -1121,6 +1093,9 @@ red-syntax: context [
 				newline pad + 2
 				append buffer "#("
 				newline pad + 4
+				append buffer "range: "
+				append buffer mold pc/1/range
+				newline pad + 4
 				append buffer "expr: "
 				either any [
 					block? pc/1/expr
@@ -1138,9 +1113,6 @@ red-syntax: context [
 				][
 					append buffer mold/flat pc/1/expr
 				]
-				newline pad + 4
-				append buffer "range: "
-				append buffer mold pc/1/range
 				newline pad + 4
 				append buffer "depth: "
 				append buffer mold pc/1/depth
