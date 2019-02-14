@@ -1137,8 +1137,8 @@ red-syntax: context [
 			append buffer lf
 			append/dup buffer " " cnt
 		]
-		format*: function [pc [block! paren!]][
-			pad: pc/1/depth * 4
+		format*: function [pc [block! paren!] depth [integer!]][
+			pad: depth * 4
 			newline pad
 			either block? pc [
 				blk?: true
@@ -1165,7 +1165,7 @@ red-syntax: context [
 							append buffer "()"
 						]
 					][
-						format* pc/1/expr
+						format* pc/1/expr depth + 1
 					]
 				][
 					append buffer mold/flat pc/1/expr
@@ -1326,7 +1326,7 @@ red-syntax: context [
 				append buffer ")"
 			]
 		]
-		format* top
+		format* top 0
 		buffer
 	]
 
@@ -1366,35 +1366,60 @@ red-syntax: context [
 		ret
 	]
 
-	collect-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
+	collect-completions: function [top [block!] str [string!] line [integer!] column [integer!]][
 		words: make block! 4
 		unique?: function [word [string!]][
 			forall words [
-				if words/1/1 = word [return false]
+				if word = to string! words/1/expr [return false]
 			]
 			true
 		]
 		collect-set-word: function [pc [block! paren!]][
 			forall pc [
-				if all [
-					word? pc/1/expr
-					pc/1/syntax/name = "set"
-				][
+				if set-word? pc/1/expr [
 					word: to string! pc/1/expr
 					if any [
 						empty? str
 						find/match word str
 					][
 						if unique? word [
-							append/only words reduce [word pc/1]
+							append words pc/1
 						]
 					]
 				]
 			]
 		]
 
+		collect-arg: function [spec [block! paren!]][
+			if block? pc: spec/1/expr [
+				forall pc [
+					if find [word! lit-word! get-word! refinement!] type?/word pc/1/expr [
+						word: to string! pc/1/expr
+						if any [
+							empty? str
+							find/match word str
+						][
+							if unique? word [
+								append words pc/1
+							]
+						]
+					]
+				]
+			]
+		]
+
+		collect-func-spec: function [par [block! paren! none!]][
+			unless par [exit]
+			if all [
+				par/1/syntax/name = "block"
+				spec: spec-of-func-body top par
+			][
+				collect-arg spec
+			]
+		]
+
 		unless pc: position? top line column [
-			pc: top
+			return words
 		]
 		if all [
 			any [
@@ -1410,17 +1435,16 @@ red-syntax: context [
 				]
 			]
 		][
+			collect-func-spec pc
 			collect-set-word pc/1/expr
 		]
-		collect-set-word head pc
-		if top = head pc [return words]
-		par: pc
-		while [par: get-parent top par/1][
-			either empty? par [
-				break
-			][
-				collect-set-word head par
-			]
+
+		npc: pc
+		until [
+			par: get-parent top npc/1
+			collect-func-spec par
+			collect-set-word head npc
+			not npc: par
 		]
 		words
 	]

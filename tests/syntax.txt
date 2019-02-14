@@ -2333,6 +2333,137 @@ Error/Warning: ---------------------------------------
         )
     )
 )]
-[9 43 17 5]
-[]
+
+[
+  #(
+    range: [10 5 10 8]
+    expr: f1:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [10 9 10 15]
+    )
+  )
+  #(
+    range: [11 5 11 8]
+    expr: f2:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [11 9 11 10]
+    )
+  )
+  #(
+    range: [12 5 12 8]
+    expr: f3:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [12 9 12 11]
+    )
+  )
+  #(
+    range: [13 5 13 8]
+    expr: f4:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [13 9 13 10]
+    )
+  )
+  #(
+    range: [14 5 14 8]
+    expr: f5:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [14 9 14 11]
+    )
+  )
+  #(
+    range: [15 5 15 8]
+    expr: f6:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [15 9 15 11]
+    )
+  )
+  #(
+    range: [16 5 16 8]
+    expr: f7:
+    depth: 5
+    syntax: #(
+      name: set
+      step: 2
+      cast: [16 9 16 10]
+    )
+  )
+  #(
+    range: [9 4 9 7]
+    expr: ff:
+    depth: 4
+    syntax: #(
+      name: set
+      step: 2
+      cast: [9 8 9 16]
+    )
+  )
+  #(
+    range: [8 3 8 5]
+    expr: f:
+    depth: 3
+    syntax: #(
+      name: set
+      step: 2
+      cast: [8 6 8 10]
+    )
+  )
+  #(
+    range: [49 1 49 5]
+    expr: fff:
+    depth: 1
+    syntax: #(
+      name: set
+      step: 2
+      cast: [49 6 49 7]
+    )
+  )
+  #(
+    range: [51 1 51 4]
+    expr: ft:
+    depth: 1
+    syntax: #(
+      name: set
+      step: 2
+      cast: [51 5 51 9]
+    )
+  )
+  #(
+    range: [56 1 56 5]
+    expr: fh1:
+    depth: 1
+    syntax: #(
+      name: set
+      step: 2
+      cast: [56 6 56 9]
+    )
+  )
+  #(
+    range: [57 1 57 5]
+    expr: fh2:
+    depth: 1
+    syntax: #(
+      name: set
+      step: 2
+      cast: [57 6 57 9]
+    )
+  )
+]
 PS D:\vscode-ext\VScode-extension\server>
