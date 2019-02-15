@@ -19,4 +19,4 @@ print red-syntax/format code-analysis
 print "Error/Warning: ---------------------------------------"
 probe red-syntax/collect-errors code-analysis
 
-print red-syntax/format red-syntax/collect-completions code-analysis "f" 12 1
+print red-syntax/format red-syntax/collect-completions code-analysis 17 5

@@ -14,6 +14,7 @@ b: context [
 				f5: :f
 				f6: f5
 				f7: a + length? b
+				f
 			]
 			x: 1
 			y: 1

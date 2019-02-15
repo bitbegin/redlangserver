@@ -19,66 +19,12 @@ auto-complete?: false
 open-logger?: false
 debug-on?: false
 
-code-symbols: make block! 4
 last-uri: none
 last-completion: none
 last-line: none
 last-column: none
 client-caps: none
 shutdown?: no
-
-find-source: function [uri [string!]][
-	forall code-symbols [
-		if code-symbols/1/1 = uri [
-			return code-symbols
-		]
-	]
-	false
-]
-
-add-source-to-table: function [uri [string!] code [string!] blk [block!]][
-	either item: find-source uri [
-		item/1/2: code
-		item/1/3: blk
-	][
-		append/only code-symbols reduce [uri code blk]
-	]
-]
-
-add-source: function [uri [string!] code [string!]][
-	if map? res: red-lexer/analysis code [
-		add-source-to-table uri code res/stack
-		range: red-lexer/to-range res/pos res/pos
-		line-cs: charset [#"^M" #"^/"]
-		info: res/error/arg2
-		if part: find info line-cs [info: copy/part info part]
-		message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
-		return reduce [
-			make map! reduce [
-				'range range
-				'severity 1
-				'code 1
-				'source "lexer"
-				'message message
-			]
-		]
-	]
-	add-source-to-table uri code res
-	if error? err: try [red-syntax/analysis res][
-		pc: err/arg3
-		range: red-lexer/to-range pc/2 pc/2
-		return reduce [
-			make map! reduce [
-				'range range
-				'severity 1
-				'code 1
-				'source "syntax"
-				'message err/arg2
-			]
-		]
-	]
-	red-syntax/collect-errors res
-]
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -262,7 +208,7 @@ on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	diagnostics: add-source uri source
+	diagnostics: source-syntax/add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
@@ -274,7 +220,7 @@ on-textDocument-didOpen: function [params [map!]][
 on-textDocument-didClose: function [params [map!]][
 	uri: params/textDocument/uri
 	set 'last-uri none
-	if item: find-source uri [
+	if item: source-syntax/find-source uri [
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
 	]
@@ -284,7 +230,7 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	diagnostics: add-source uri source
+	diagnostics: source-syntax/add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri

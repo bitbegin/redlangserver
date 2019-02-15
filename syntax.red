@@ -1314,6 +1314,17 @@ red-syntax: context [
 					append buffer "]"
 				]
 
+				if completions: pc/1/syntax/completions [
+					newline pad + 6
+					append buffer "completions: ["
+					forall completions [
+						newline pad + 8
+						append buffer mold/flat completions/1/range
+					]
+					newline pad + 6
+					append buffer "]"
+				]
+
 				newline pad + 4
 				append buffer ")"
 				newline pad + 2
@@ -1366,43 +1377,46 @@ red-syntax: context [
 		ret
 	]
 
-	collect-completions: function [top [block!] str [string!] line [integer!] column [integer!]][
-		words: make block! 4
-		unique?: function [word [string!]][
-			forall words [
-				if word = to string! words/1/expr [return false]
+	collect-completions: function [top [block!] line [integer!] column [integer!]][
+		str: clear ""
+		top/1/syntax/completions: clear []
+		collect*: function [npc [block! paren!]][
+			unique?: function [word [string!]][
+				pc: top/1/syntax/completions
+				forall pc [
+					if word = to string! pc/1/expr [return false]
+				]
+				true
 			]
-			true
+			word: to string! npc/1/expr
+			if any [
+				empty? str
+				all [
+					str <> word
+					find/match word str
+				]
+			][
+				if all [
+					unique? word
+					npc <> pc
+				][
+					append top/1/syntax/completions npc/1
+				]
+			]
 		]
-		collect-set-word: function [pc [block! paren!]][
-			forall pc [
-				if set-word? pc/1/expr [
-					word: to string! pc/1/expr
-					if any [
-						empty? str
-						find/match word str
-					][
-						if unique? word [
-							append words pc/1
-						]
-					]
+		collect-set-word: function [npc [block! paren!]][
+			forall npc [
+				if set-word? npc/1/expr [
+					collect* npc
 				]
 			]
 		]
 
 		collect-arg: function [spec [block! paren!]][
-			if block? pc: spec/1/expr [
-				forall pc [
-					if find [word! lit-word! get-word! refinement!] type?/word pc/1/expr [
-						word: to string! pc/1/expr
-						if any [
-							empty? str
-							find/match word str
-						][
-							if unique? word [
-								append words pc/1
-							]
-						]
+			if block? npc: spec/1/expr [
+				forall npc [
+					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr [
+						collect* npc
 					]
 				]
 			]
@@ -1419,9 +1433,9 @@ red-syntax: context [
 		]
 
 		unless pc: position? top line column [
-			return words
+			return top/1/syntax/completions
 		]
-		if all [
+		either all [
 			any [
 				block? pc/1/expr
 				paren? pc/1/expr
@@ -1437,6 +1451,11 @@ red-syntax: context [
 		][
 			collect-func-spec pc
 			collect-set-word pc/1/expr
+		][
+			unless word? pc/1/expr [
+				return none
+			]
+			str: to string! pc/1/expr
 		]
 
 		npc: pc
@@ -1446,7 +1465,14 @@ red-syntax: context [
 			collect-set-word head npc
 			not npc: par
 		]
-		words
+		if npc: top/1/syntax/extra [
+			forall npc [
+				if set-word? npc/1/expr [
+					collect* npc
+				]
+			]
+		]
+		top/1/syntax/completions
 	]
 
 	get-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
@@ -1532,4 +1558,62 @@ red-syntax: context [
 		]
 		return none
 	]
+]
+
+source-syntax: context [
+	sources: make block! 4
+
+	find-source: function [uri [string!]][
+		forall sources [
+			if sources/1/1 = uri [
+				return sources
+			]
+		]
+		false
+	]
+
+	add-source-to-table: function [uri [string!] blk [block!]][
+		either item: find-source uri [
+			item/1/2: blk
+		][
+			append/only sources reduce [uri blk]
+		]
+	]
+
+	add-source: function [uri [string!] code [string!]][
+		if map? res: red-lexer/analysis code [
+			add-source-to-table uri res/stack
+			range: red-lexer/to-range res/pos res/pos
+			line-cs: charset [#"^M" #"^/"]
+			info: res/error/arg2
+			if part: find info line-cs [info: copy/part info part]
+			message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
+			return reduce [
+				make map! reduce [
+					'range range
+					'severity 1
+					'code 1
+					'source "lexer"
+					'message message
+				]
+			]
+		]
+		add-source-to-table uri res
+		if error? err: try [red-syntax/analysis res][
+			pc: err/arg3
+			range: red-lexer/to-range pc/2 pc/2
+			return reduce [
+				make map! reduce [
+					'range range
+					'severity 1
+					'code 1
+					'source "syntax"
+					'message err/arg2
+				]
+			]
+		]
+		red-syntax/collect-errors res
+	]
+
+	
 ]
