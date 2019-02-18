@@ -1476,42 +1476,6 @@ red-syntax: context [
 		]
 		ret
 	]
-
-	hover: function [top [block!] line [integer!] column [integer!]][
-		pc: position? top line column
-		range: red-lexer/to-range pc/1/start pc/1/end
-		expr: pc/1/expr
-		case [
-			pc/1/syntax/name = "set-word" [
-				res: rejoin [to string! expr " is a variable"]
-				return reduce [res range]
-			]
-			path? expr [
-				if find system-words/system-words expr/1 [
-					res: system-words/get-word-info expr/1
-					return reduce [res range]
-				]
-			]
-			word? expr [
-				if find system-words/system-words expr [
-					either datatype? get expr [
-						res: rejoin [to string! expr " is a base datatype!"]
-						return reduce [res range]
-					][
-						res: system-words/get-word-info expr
-						return reduce [res range]
-					]
-				]
-				res: either pc/1/syntax/name = "resolved" [
-					rejoin [to string! expr " is a resolved word"]
-				][
-					rejoin [to string! expr " is a unknown word"]
-				]
-				return reduce [res range]
-			]
-		]
-		return none
-	]
 ]
 
 source-syntax: context [
@@ -1665,5 +1629,16 @@ source-syntax: context [
 				CompletionItemKind/Variable
 			]
 		]
+	]
+
+	hover: function [uri [string!] line [integer!] column [integer!]][
+		unless item: find-source uri [
+			return none
+		]
+		top: item/1/2
+		unless pc: red-syntax/position? top line column [
+			return none
+		]
+		none
 	]
 ]

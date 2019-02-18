@@ -305,19 +305,12 @@ on-textDocument-symbol: function [params [map!]][
 
 on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
-	set 'last-uri uri
 	line: params/position/line
 	column: params/position/character
-	range: none
-	result: none
-	if item: find-source uri [
-		if blk: red-syntax/hover item/1/3 line + 1 column + 1 [
-			result: blk/1 range: blk/2
-		]
-	]
+	result: source-syntax/hover uri line column
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
-		'range range
+		'range none
 	]
 	response
 ]
