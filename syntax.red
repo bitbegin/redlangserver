@@ -74,7 +74,10 @@ red-syntax: context [
 		step: 1
 		pc: next pc
 		while [not tail? pc][
-			either pc/1/syntax/name = "semicolon" [
+			either all [
+				string? pc/1/expr
+				find/match pc/1/expr ";"
+			][
 				pc: skip pc 1
 				step: step + 1
 			][
@@ -789,7 +792,7 @@ red-syntax: context [
 						syntax-error pc 'miss-expr "file!"
 					][
 						syntax/cast: ret/1
-						unless file? ret/1/expr [
+						unless file? ret/1/1/expr [
 							syntax-error pc 'miss-expr "file!"
 						]
 					]

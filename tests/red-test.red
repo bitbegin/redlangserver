@@ -19,5 +19,6 @@ print red-syntax/format code-analysis
 print "Error/Warning: ---------------------------------------"
 probe red-syntax/collect-errors code-analysis
 
-red-syntax/collect-completions code-analysis red-syntax/position? code-analysis 17 5
-print red-syntax/format code-analysis/1/syntax/completions
+ret: red-syntax/collect-completions code-analysis red-syntax/position? code-analysis 17 5
+
+print red-syntax/format ret

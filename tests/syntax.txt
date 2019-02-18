@@ -2,7 +2,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
 
 [
   #(
-    range: [1 1 68 1]
+    range: [1 1 73 1]
     expr:
     [
       #(
@@ -947,36 +947,36 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           step: 3
           word: func
           casts: #(
-            spec: [37 9 37 40]
-            body: [37 40 40 2]
+            spec: [37 9 42 2]
+            body: [42 2 45 2]
           )
           resolved: #(
-            spec: [37 9 37 40]
-            body: [37 40 40 2]
+            spec: [37 9 42 2]
+            body: [42 2 45 2]
           )
         )
       )
       #(
-        range: [37 9 37 40]
+        range: [37 9 42 2]
         expr:
         [
           #(
-            range: [37 10 37 11]
+            range: [38 2 38 3]
             expr: a
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [37 12 37 18]
+                type: [38 4 38 10]
               )
             )
           )
           #(
-            range: [37 12 37 18]
+            range: [38 4 38 10]
             expr:
             [
               #(
-                range: [37 13 37 17]
+                range: [38 5 38 9]
                 expr: test
                 depth: 3
                 syntax: #(
@@ -988,29 +988,29 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [37 10 37 11]
+              parent: [38 2 38 3]
               args: #(
                 types: []
               )
             )
           )
           #(
-            range: [37 19 37 20]
+            range: [39 2 39 3]
             expr: b
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [37 21 37 28]
+                type: [39 4 39 11]
               )
             )
           )
           #(
-            range: [37 21 37 28]
+            range: [39 4 39 11]
             expr:
             [
               #(
-                range: [37 22 37 27]
+                range: [39 5 39 10]
                 expr: test!
                 depth: 3
                 syntax: #(
@@ -1022,46 +1022,87 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [37 19 37 20]
+              parent: [39 2 39 3]
               args: #(
                 types: []
               )
             )
           )
           #(
-            range: [37 29 37 35]
+            range: [40 2 40 9]
+            expr: return:
+            depth: 2
+            syntax: #(
+              name: func-return
+              args: #(
+                type: [40 10 40 18]
+              )
+            )
+          )
+          #(
+            range: [40 10 40 18]
+            expr:
+            [
+              #(
+                range: [40 11 40 17]
+                expr: block!
+                depth: 3
+                syntax: #(
+                  name: func-type-item
+                )
+              )
+            ]
+            depth: 2
+            syntax: #(
+              name: func-type
+              parent: [40 2 40 9]
+              args: #(
+                types: [block!]
+              )
+            )
+          )
+          #(
+            range: [40 19 40 27]
+            expr: ";--tests"
+            depth: 2
+            syntax: #(
+              name: none
+            )
+          )
+          #(
+            range: [41 2 41 8]
             expr: /local
             depth: 2
             syntax: #(
               name: func-refinement
               args: #(
                 types: [
-                  [37 36 37 37]
-                  [37 38 37 39]
-                  [37 38 37 39]
+                  [41 9 41 10]
+                  [41 11 41 12]
+                  [41 11 41 12]
                 ]
               )
             )
           )
           #(
-            range: [37 36 37 37]
+            range: [41 9 41 10]
             expr: x
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [37 29 37 35]
+                refs: [41 2 41 8]
               )
             )
           )
           #(
-            range: [37 38 37 39]
+            range: [41 11 41 12]
             expr: y
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [37 29 37 35]
+                refs: [41 2 41 8]
               )
             )
           )
@@ -1073,22 +1114,22 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [37 40 40 2]
+        range: [42 2 45 2]
         expr:
         [
           #(
-            range: [38 2 38 4]
+            range: [43 2 43 4]
             expr: x:
             depth: 2
             syntax: #(
               name: set
               step: 2
-              cast: [38 5 38 6]
-              refer: [37 36 37 37]
+              cast: [43 5 43 6]
+              refer: [41 9 41 10]
             )
           )
           #(
-            range: [38 5 38 6]
+            range: [43 5 43 6]
             expr: 1
             depth: 2
             syntax: #(
@@ -1097,18 +1138,18 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [38 7 38 9]
+            range: [43 7 43 9]
             expr: y:
             depth: 2
             syntax: #(
               name: set
               step: 2
-              cast: [38 10 38 11]
-              refer: [37 38 37 39]
+              cast: [43 10 43 11]
+              refer: [41 11 41 12]
             )
           )
           #(
-            range: [38 10 38 11]
+            range: [43 10 43 11]
             expr: 1
             depth: 2
             syntax: #(
@@ -1117,18 +1158,18 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [39 2 39 3]
+            range: [44 2 44 3]
             expr: a
             depth: 2
             syntax: #(
               name: refer
               step: 1
-              refer: [37 10 37 11]
+              refer: [38 2 38 3]
               word: a
             )
           )
           #(
-            range: [39 4 39 5]
+            range: [44 4 44 5]
             expr: +
             depth: 2
             syntax: #(
@@ -1138,18 +1179,18 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [39 6 39 7]
+            range: [44 6 44 7]
             expr: b
             depth: 2
             syntax: #(
               name: refer
               step: 1
-              refer: [37 19 37 20]
+              refer: [39 2 39 3]
               word: b
             )
           )
           #(
-            range: [39 8 39 9]
+            range: [44 8 44 9]
             expr: +
             depth: 2
             syntax: #(
@@ -1159,7 +1200,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [39 10 39 11]
+            range: [44 10 44 11]
             expr: 1
             depth: 2
             syntax: #(
@@ -1168,7 +1209,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [39 12 39 13]
+            range: [44 12 44 13]
             expr: +
             depth: 2
             syntax: #(
@@ -1178,7 +1219,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [39 14 39 15]
+            range: [44 14 44 15]
             expr: 1
             depth: 2
             syntax: #(
@@ -1195,17 +1236,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [42 1 42 3]
+        range: [47 1 47 3]
         expr: s:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [42 4 42 12]
+          cast: [47 4 47 12]
         )
       )
       #(
-        range: [42 4 42 12]
+        range: [47 4 47 12]
         expr: function
         depth: 1
         syntax: #(
@@ -1213,36 +1254,36 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           step: 3
           word: function
           casts: #(
-            spec: [42 13 42 56]
-            body: [42 56 48 2]
+            spec: [47 13 47 56]
+            body: [47 56 53 2]
           )
           resolved: #(
-            spec: [42 13 42 56]
-            body: [42 56 48 2]
+            spec: [47 13 47 56]
+            body: [47 56 53 2]
           )
         )
       )
       #(
-        range: [42 13 42 56]
+        range: [47 13 47 56]
         expr:
         [
           #(
-            range: [42 14 42 17]
+            range: [47 14 47 17]
             expr: uri
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [42 18 42 27]
+                type: [47 18 47 27]
               )
             )
           )
           #(
-            range: [42 18 42 27]
+            range: [47 18 47 27]
             expr:
             [
               #(
-                range: [42 19 42 26]
+                range: [47 19 47 26]
                 expr: string!
                 depth: 3
                 syntax: #(
@@ -1253,29 +1294,29 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [42 14 42 17]
+              parent: [47 14 47 17]
               args: #(
                 types: [string!]
               )
             )
           )
           #(
-            range: [42 28 42 32]
+            range: [47 28 47 32]
             expr: code
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [42 33 42 42]
+                type: [47 33 47 42]
               )
             )
           )
           #(
-            range: [42 33 42 42]
+            range: [47 33 47 42]
             expr:
             [
               #(
-                range: [42 34 42 41]
+                range: [47 34 47 41]
                 expr: string!
                 depth: 3
                 syntax: #(
@@ -1286,29 +1327,29 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [42 28 42 32]
+              parent: [47 28 47 32]
               args: #(
                 types: [string!]
               )
             )
           )
           #(
-            range: [42 43 42 46]
+            range: [47 43 47 46]
             expr: blk
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [42 47 42 55]
+                type: [47 47 47 55]
               )
             )
           )
           #(
-            range: [42 47 42 55]
+            range: [47 47 47 55]
             expr:
             [
               #(
-                range: [42 48 42 54]
+                range: [47 48 47 54]
                 expr: block!
                 depth: 3
                 syntax: #(
@@ -1319,7 +1360,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [42 43 42 46]
+              parent: [47 43 47 46]
               args: #(
                 types: [block!]
               )
@@ -1333,11 +1374,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [42 56 48 2]
+        range: [47 56 53 2]
         expr:
         [
           #(
-            range: [43 2 43 8]
+            range: [48 2 48 8]
             expr: either
             depth: 2
             syntax: #(
@@ -1347,22 +1388,22 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [43 9 43 12]
+            range: [48 9 48 12]
             expr: uri
             depth: 2
             syntax: #(
               name: refer
               step: 1
-              refer: [42 14 42 17]
+              refer: [47 14 47 17]
               word: uri
             )
           )
           #(
-            range: [43 13 45 3]
+            range: [48 13 50 3]
             expr:
             [
               #(
-                range: [44 3 44 9]
+                range: [49 3 49 9]
                 expr: return
                 depth: 3
                 syntax: #(
@@ -1370,7 +1411,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [44 10 44 16]
+                range: [49 10 49 16]
                 expr: reduce
                 depth: 3
                 syntax: #(
@@ -1378,11 +1419,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [44 17 44 31]
+                range: [49 17 49 31]
                 expr:
                 [
                   #(
-                    range: [44 18 44 21]
+                    range: [49 18 49 21]
                     expr: uri
                     depth: 4
                     syntax: #(
@@ -1390,7 +1431,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     )
                   )
                   #(
-                    range: [44 22 44 26]
+                    range: [49 22 49 26]
                     expr: code
                     depth: 4
                     syntax: #(
@@ -1398,7 +1439,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     )
                   )
                   #(
-                    range: [44 27 44 30]
+                    range: [49 27 49 30]
                     expr: blk
                     depth: 4
                     syntax: #(
@@ -1419,11 +1460,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [45 3 47 3]
+            range: [50 3 52 3]
             expr:
             [
               #(
-                range: [46 3 46 9]
+                range: [51 3 51 9]
                 expr: return
                 depth: 3
                 syntax: #(
@@ -1431,7 +1472,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [46 10 46 16]
+                range: [51 10 51 16]
                 expr: reduce
                 depth: 3
                 syntax: #(
@@ -1439,11 +1480,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [46 17 46 31]
+                range: [51 17 51 31]
                 expr:
                 [
                   #(
-                    range: [46 18 46 21]
+                    range: [51 18 51 21]
                     expr: uri
                     depth: 4
                     syntax: #(
@@ -1451,7 +1492,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     )
                   )
                   #(
-                    range: [46 22 46 26]
+                    range: [51 22 51 26]
                     expr: code
                     depth: 4
                     syntax: #(
@@ -1459,7 +1500,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                     )
                   )
                   #(
-                    range: [46 27 46 30]
+                    range: [51 27 51 30]
                     expr: blk
                     depth: 4
                     syntax: #(
@@ -1488,17 +1529,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [50 1 50 5]
+        range: [55 1 55 5]
         expr: fff:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [50 6 50 7]
+          cast: [55 6 55 7]
         )
       )
       #(
-        range: [50 6 50 7]
+        range: [55 6 55 7]
         expr: 3
         depth: 1
         syntax: #(
@@ -1507,17 +1548,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [52 1 52 4]
+        range: [57 1 57 4]
         expr: ft:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [52 5 52 9]
+          cast: [57 5 57 9]
         )
       )
       #(
-        range: [52 5 52 9]
+        range: [57 5 57 9]
         expr: func
         depth: 1
         syntax: #(
@@ -1525,36 +1566,36 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           step: 3
           word: func
           casts: #(
-            spec: [52 10 52 104]
-            body: [52 104 55 2]
+            spec: [57 10 57 104]
+            body: [57 104 60 2]
           )
           resolved: #(
-            spec: [52 10 52 104]
-            body: [52 104 55 2]
+            spec: [57 10 57 104]
+            body: [57 104 60 2]
           )
         )
       )
       #(
-        range: [52 10 52 104]
+        range: [57 10 57 104]
         expr:
         [
           #(
-            range: [52 11 52 12]
+            range: [57 11 57 12]
             expr: a
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [52 13 52 21]
+                type: [57 13 57 21]
               )
             )
           )
           #(
-            range: [52 13 52 21]
+            range: [57 13 57 21]
             expr:
             [
               #(
-                range: [52 14 52 20]
+                range: [57 14 57 20]
                 expr: block!
                 depth: 3
                 syntax: #(
@@ -1565,29 +1606,29 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [52 11 52 12]
+              parent: [57 11 57 12]
               args: #(
                 types: [block!]
               )
             )
           )
           #(
-            range: [52 22 52 23]
+            range: [57 22 57 23]
             expr: b
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [52 24 52 39]
+                type: [57 24 57 39]
               )
             )
           )
           #(
-            range: [52 24 52 39]
+            range: [57 24 57 39]
             expr:
             [
               #(
-                range: [52 25 52 29]
+                range: [57 25 57 29]
                 expr: map!
                 depth: 3
                 syntax: #(
@@ -1595,7 +1636,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [52 30 52 38]
+                range: [57 30 57 38]
                 expr: integer!
                 depth: 3
                 syntax: #(
@@ -1606,30 +1647,30 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [52 22 52 23]
+              parent: [57 22 57 23]
               args: #(
                 types: [map! integer!]
               )
             )
           )
           #(
-            range: [52 40 52 47]
+            range: [57 40 57 47]
             expr: return:
             depth: 2
             syntax: #(
               name: func-return
               error: #(severity: 1 code: "invalid-arg" source: "Syntax" message: "return: -- invalid argument for: c")
               args: #(
-                type: [52 48 52 58]
+                type: [57 48 57 58]
               )
             )
           )
           #(
-            range: [52 48 52 58]
+            range: [57 48 57 58]
             expr:
             [
               #(
-                range: [52 49 52 57]
+                range: [57 49 57 57]
                 expr: integer!
                 depth: 3
                 syntax: #(
@@ -1640,29 +1681,29 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [52 40 52 47]
+              parent: [57 40 57 47]
               args: #(
                 types: [integer!]
               )
             )
           )
           #(
-            range: [52 59 52 60]
+            range: [57 59 57 60]
             expr: c
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                type: [52 61 52 71]
+                type: [57 61 57 71]
               )
             )
           )
           #(
-            range: [52 61 52 71]
+            range: [57 61 57 71]
             expr:
             [
               #(
-                range: [52 62 52 70]
+                range: [57 62 57 70]
                 expr: integer!
                 depth: 3
                 syntax: #(
@@ -1673,14 +1714,14 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [52 59 52 60]
+              parent: [57 59 57 60]
               args: #(
                 types: [integer!]
               )
             )
           )
           #(
-            range: [52 72 52 74]
+            range: [57 72 57 74]
             expr: /c
             depth: 2
             syntax: #(
@@ -1688,36 +1729,36 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               error: #(severity: 1 code: "double-define" source: "Syntax" message: "/c -- double define: c")
               args: #(
                 types: [
-                  [52 75 52 76]
-                  [52 77 52 87]
-                  [52 88 52 90]
-                  [52 91 52 97]
-                  [52 98 52 99]
-                  [52 100 52 101]
-                  [52 102 52 103]
+                  [57 75 57 76]
+                  [57 77 57 87]
+                  [57 88 57 90]
+                  [57 91 57 97]
+                  [57 98 57 99]
+                  [57 100 57 101]
+                  [57 102 57 103]
                 ]
               )
             )
           )
           #(
-            range: [52 75 52 76]
+            range: [57 75 57 76]
             expr: a
             depth: 2
             syntax: #(
               name: func-param
               error: #(severity: 1 code: "double-define" source: "Syntax" message: "a -- double define: a")
               args: #(
-                refs: [52 72 52 74]
-                type: [52 77 52 87]
+                refs: [57 72 57 74]
+                type: [57 77 57 87]
               )
             )
           )
           #(
-            range: [52 77 52 87]
+            range: [57 77 57 87]
             expr:
             [
               #(
-                range: [52 78 52 86]
+                range: [57 78 57 86]
                 expr: integer!
                 depth: 3
                 syntax: #(
@@ -1728,14 +1769,14 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             depth: 2
             syntax: #(
               name: func-type
-              parent: [52 75 52 76]
+              parent: [57 75 57 76]
               args: #(
                 types: [integer!]
               )
             )
           )
           #(
-            range: [52 88 52 90]
+            range: [57 88 57 90]
             expr: /d
             depth: 2
             syntax: #(
@@ -1747,53 +1788,53 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [52 91 52 97]
+            range: [57 91 57 97]
             expr: /local
             depth: 2
             syntax: #(
               name: func-refinement
               args: #(
                 types: [
-                  [52 98 52 99]
-                  [52 100 52 101]
-                  [52 102 52 103]
-                  [52 100 52 101]
-                  [52 102 52 103]
-                  [52 102 52 103]
+                  [57 98 57 99]
+                  [57 100 57 101]
+                  [57 102 57 103]
+                  [57 100 57 101]
+                  [57 102 57 103]
+                  [57 102 57 103]
                 ]
               )
             )
           )
           #(
-            range: [52 98 52 99]
+            range: [57 98 57 99]
             expr: x
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [52 91 52 97]
+                refs: [57 91 57 97]
               )
             )
           )
           #(
-            range: [52 100 52 101]
+            range: [57 100 57 101]
             expr: y
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [52 91 52 97]
+                refs: [57 91 57 97]
               )
             )
           )
           #(
-            range: [52 102 52 103]
+            range: [57 102 57 103]
             expr: z
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [52 91 52 97]
+                refs: [57 91 57 97]
               )
             )
           )
@@ -1805,11 +1846,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [52 104 55 2]
+        range: [57 104 60 2]
         expr:
         [
           #(
-            range: [53 2 53 8]
+            range: [58 2 58 8]
             expr: reduce
             depth: 2
             syntax: #(
@@ -1819,11 +1860,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [53 9 53 18]
+            range: [58 9 58 18]
             expr:
             [
               #(
-                range: [53 10 53 11]
+                range: [58 10 58 11]
                 expr: a
                 depth: 3
                 syntax: #(
@@ -1831,7 +1872,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [53 12 53 13]
+                range: [58 12 58 13]
                 expr: b
                 depth: 3
                 syntax: #(
@@ -1839,7 +1880,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [53 14 53 15]
+                range: [58 14 58 15]
                 expr: c
                 depth: 3
                 syntax: #(
@@ -1847,7 +1888,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
                 )
               )
               #(
-                range: [53 16 53 17]
+                range: [58 16 58 17]
                 expr: d
                 depth: 3
                 syntax: #(
@@ -1862,7 +1903,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [54 2 54 12]
+            range: [59 2 59 12]
             expr: find/match
             depth: 2
             syntax: #(
@@ -1872,7 +1913,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [54 13 54 18]
+            range: [59 13 59 18]
             expr: "adb"
             depth: 2
             syntax: #(
@@ -1881,7 +1922,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [54 19 54 22]
+            range: [59 19 59 22]
             expr: "a"
             depth: 2
             syntax: #(
@@ -1898,17 +1939,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [57 1 57 5]
+        range: [62 1 62 5]
         expr: fh1:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [57 6 57 9]
+          cast: [62 6 62 9]
         )
       )
       #(
-        range: [57 6 57 9]
+        range: [62 6 62 9]
         expr: has
         depth: 1
         syntax: #(
@@ -1917,20 +1958,20 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           error: #(severity: 1 code: "miss-expr" source: "Syntax" message: "has -- need a type: block!")
           word: has
           casts: #(
-            spec: [57 10 57 20]
-            body: [58 1 58 5]
+            spec: [62 10 62 20]
+            body: [63 1 63 5]
           )
           resolved: #(
-            spec: [57 10 57 20]
+            spec: [62 10 62 20]
           )
         )
       )
       #(
-        range: [57 10 57 20]
+        range: [62 10 62 20]
         expr:
         [
           #(
-            range: [57 11 57 15]
+            range: [62 11 62 15]
             expr: /ref
             depth: 2
             syntax: #(
@@ -1938,32 +1979,32 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
               error: #(severity: 1 code: "forbidden-refine" source: "Syntax" message: "/ref -- forbidden refinement: /ref")
               args: #(
                 types: [
-                  [57 16 57 17]
-                  [57 18 57 19]
-                  [57 18 57 19]
+                  [62 16 62 17]
+                  [62 18 62 19]
+                  [62 18 62 19]
                 ]
               )
             )
           )
           #(
-            range: [57 16 57 17]
+            range: [62 16 62 17]
             expr: a
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [57 11 57 15]
+                refs: [62 11 62 15]
               )
             )
           )
           #(
-            range: [57 18 57 19]
+            range: [62 18 62 19]
             expr: b
             depth: 2
             syntax: #(
               name: func-param
               args: #(
-                refs: [57 11 57 15]
+                refs: [62 11 62 15]
               )
             )
           )
@@ -1975,17 +2016,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [58 1 58 5]
+        range: [63 1 63 5]
         expr: fh2:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [58 6 58 9]
+          cast: [63 6 63 9]
         )
       )
       #(
-        range: [58 6 58 9]
+        range: [63 6 63 9]
         expr: has
         depth: 1
         syntax: #(
@@ -1995,11 +2036,11 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [58 10 58 15]
+        range: [63 10 63 15]
         expr:
         [
           #(
-            range: [58 11 58 12]
+            range: [63 11 63 12]
             expr: a
             depth: 2
             syntax: #(
@@ -2007,7 +2048,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [58 13 58 14]
+            range: [63 13 63 14]
             expr: b
             depth: 2
             syntax: #(
@@ -2022,7 +2063,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [58 15 58 17]
+        range: [63 15 63 17]
         expr: []
         depth: 1
         syntax: #(
@@ -2031,18 +2072,18 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [60 1 60 3]
+        range: [65 1 65 3]
         expr: z:
         depth: 1
         syntax: #(
           name: set
           step: 2
           error: #(severity: 1 code: "recursive-define" source: "Syntax" message: "z: -- recursive define")
-          cast: [60 4 60 5]
+          cast: [65 4 65 5]
         )
       )
       #(
-        range: [60 4 60 5]
+        range: [65 4 65 5]
         expr: z
         depth: 1
         syntax: #(
@@ -2052,21 +2093,21 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [62 1 62 5]
+        range: [67 1 67 5]
         expr: blk:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [62 6 62 12]
+          cast: [67 6 67 12]
         )
       )
       #(
-        range: [62 6 62 12]
+        range: [67 6 67 12]
         expr:
         [
           #(
-            range: [62 7 62 9]
+            range: [67 7 67 9]
             expr: a:
             depth: 2
             syntax: #(
@@ -2074,7 +2115,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
             )
           )
           #(
-            range: [62 10 62 11]
+            range: [67 10 67 11]
             expr: 1
             depth: 2
             syntax: #(
@@ -2089,17 +2130,17 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [63 1 63 5]
+        range: [68 1 68 5]
         expr: ctx:
         depth: 1
         syntax: #(
           name: set
           step: 2
-          cast: [63 6 63 13]
+          cast: [68 6 68 13]
         )
       )
       #(
-        range: [63 6 63 13]
+        range: [68 6 68 13]
         expr: context
         depth: 1
         syntax: #(
@@ -2107,31 +2148,31 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
           step: 2
           word: context
           casts: #(
-            spec: [63 14 65 2]
+            spec: [68 14 70 2]
           )
           resolved: #(
-            spec: [63 14 65 2]
+            spec: [68 14 70 2]
           )
         )
       )
       #(
-        range: [63 14 65 2]
+        range: [68 14 70 2]
         expr:
         [
           #(
-            range: [64 2 64 4]
+            range: [69 2 69 4]
             expr: a:
             depth: 2
             syntax: #(
               name: set
               step: 2
-              cast: [64 5 64 9]
+              cast: [69 5 69 9]
               refer: [3 1 3 3]
               value: [3 4 3 9]
             )
           )
           #(
-            range: [64 5 64 9]
+            range: [69 5 69 9]
             expr: none
             depth: 2
             syntax: #(
@@ -2149,7 +2190,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [67 1 67 3]
+        range: [72 1 72 3]
         expr: do
         depth: 1
         syntax: #(
@@ -2159,7 +2200,7 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [67 4 67 8]
+        range: [72 4 72 8]
         expr: bind
         depth: 1
         syntax: #(
@@ -2169,26 +2210,26 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli .\tests\red-test.red
         )
       )
       #(
-        range: [67 9 67 12]
+        range: [72 9 72 12]
         expr: blk
         depth: 1
         syntax: #(
           name: refer
           step: 1
-          refer: [62 1 62 5]
-          value: [62 6 62 12]
+          refer: [67 1 67 5]
+          value: [67 6 67 12]
           word: blk
         )
       )
       #(
-        range: [67 13 67 16]
+        range: [72 13 72 16]
         expr: ctx
         depth: 1
         syntax: #(
           name: refer
           step: 1
-          refer: [63 1 63 5]
-          value: [63 6 63 13]
+          refer: [68 1 68 5]
+          value: [68 6 68 13]
           word: ctx
         )
       )
@@ -2231,12 +2272,12 @@ Error/Warning: ---------------------------------------
     message: "test -- invalid datatype: test"
     range: #(
         start: #(
-            line: 36
-            character: 12
+            line: 37
+            character: 4
         )
         end: #(
-            line: 36
-            character: 16
+            line: 37
+            character: 8
         )
     )
 ) #(
@@ -2246,12 +2287,12 @@ Error/Warning: ---------------------------------------
     message: "test! -- invalid datatype: test!"
     range: #(
         start: #(
-            line: 36
-            character: 21
+            line: 38
+            character: 4
         )
         end: #(
-            line: 36
-            character: 26
+            line: 38
+            character: 9
         )
     )
 ) #(
@@ -2261,11 +2302,11 @@ Error/Warning: ---------------------------------------
     message: "return: -- invalid argument for: c"
     range: #(
         start: #(
-            line: 51
+            line: 56
             character: 39
         )
         end: #(
-            line: 51
+            line: 56
             character: 46
         )
     )
@@ -2276,11 +2317,11 @@ Error/Warning: ---------------------------------------
     message: "/c -- double define: c"
     range: #(
         start: #(
-            line: 51
+            line: 56
             character: 71
         )
         end: #(
-            line: 51
+            line: 56
             character: 73
         )
     )
@@ -2291,11 +2332,11 @@ Error/Warning: ---------------------------------------
     message: "a -- double define: a"
     range: #(
         start: #(
-            line: 51
+            line: 56
             character: 74
         )
         end: #(
-            line: 51
+            line: 56
             character: 75
         )
     )
@@ -2306,11 +2347,11 @@ Error/Warning: ---------------------------------------
     message: "has -- need a type: block!"
     range: #(
         start: #(
-            line: 56
+            line: 61
             character: 5
         )
         end: #(
-            line: 56
+            line: 61
             character: 8
         )
     )
@@ -2321,11 +2362,11 @@ Error/Warning: ---------------------------------------
     message: "/ref -- forbidden refinement: /ref"
     range: #(
         start: #(
-            line: 56
+            line: 61
             character: 10
         )
         end: #(
-            line: 56
+            line: 61
             character: 14
         )
     )
@@ -2336,11 +2377,11 @@ Error/Warning: ---------------------------------------
     message: "z: -- recursive define"
     range: #(
         start: #(
-            line: 59
+            line: 64
             character: 0
         )
         end: #(
-            line: 59
+            line: 64
             character: 2
         )
     )
@@ -2428,43 +2469,43 @@ Error/Warning: ---------------------------------------
     )
   )
   #(
-    range: [50 1 50 5]
+    range: [55 1 55 5]
     expr: fff:
     depth: 1
     syntax: #(
       name: set
       step: 2
-      cast: [50 6 50 7]
+      cast: [55 6 55 7]
     )
   )
   #(
-    range: [52 1 52 4]
+    range: [57 1 57 4]
     expr: ft:
     depth: 1
     syntax: #(
       name: set
       step: 2
-      cast: [52 5 52 9]
+      cast: [57 5 57 9]
     )
   )
   #(
-    range: [57 1 57 5]
+    range: [62 1 62 5]
     expr: fh1:
     depth: 1
     syntax: #(
       name: set
       step: 2
-      cast: [57 6 57 9]
+      cast: [62 6 62 9]
     )
   )
   #(
-    range: [58 1 58 5]
+    range: [63 1 63 5]
     expr: fh2:
     depth: 1
     syntax: #(
       name: set
       step: 2
-      cast: [58 6 58 9]
+      cast: [63 6 63 9]
     )
   )
 ]
