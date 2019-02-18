@@ -388,6 +388,12 @@ red-syntax: context [
 		]
 		par: pc
 		pc: par/1/expr
+		if all [
+			block? pc
+			empty? pc
+		][
+			exit
+		]
 		if string? pc/1/expr [
 			par/1/syntax/desc: pc
 			pc/1/syntax/name: "func-desc"
