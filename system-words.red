@@ -136,11 +136,8 @@ system-words: context [
 		][completions]
 	]
 
-	get-completions: function [str [string! none!]][
-		if any [
-			none? str
-			empty? str
-		][return none]
+	get-completions: function [str [string!]][
+		if empty? str [return none]
 		result: make block! 4
 		completions: none
 		item: none

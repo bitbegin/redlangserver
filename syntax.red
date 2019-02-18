@@ -1377,17 +1377,17 @@ red-syntax: context [
 		ret
 	]
 
-	collect-completions: function [top [block!] line [integer!] column [integer!]][
+	collect-completions: function [top [block!] pc [block! paren!] /extra][
+		ret: clear []
 		str: clear ""
-		top/1/syntax/completions: clear []
-		collect*: function [npc [block! paren!]][
-			unique?: function [word [string!]][
-				pc: top/1/syntax/completions
-				forall pc [
-					if word = to string! pc/1/expr [return false]
-				]
-				true
+		unique?: function [word [string!]][
+			npc: ret
+			forall npc [
+				if word = to string! npc/1/expr [return false]
 			]
+			true
+		]
+		collect*: function [npc [block! paren!]][
 			word: to string! npc/1/expr
 			if any [
 				empty? str
@@ -1400,7 +1400,7 @@ red-syntax: context [
 					unique? word
 					npc <> pc
 				][
-					append top/1/syntax/completions npc/1
+					append ret npc/1
 				]
 			]
 		]
@@ -1432,38 +1432,37 @@ red-syntax: context [
 			]
 		]
 
-		unless pc: position? top line column [
-			return top/1/syntax/completions
-		]
-		either all [
-			any [
-				block? pc/1/expr
-				paren? pc/1/expr
-			]
-			not empty? pc/1/expr
-			any [
-				pc/1/range/3 > line
-				all [
-					pc/1/range/3 = line
-					pc/1/range/4 > column
+		unless extra [
+			either all [
+				any [
+					block? pc/1/expr
+					paren? pc/1/expr
 				]
+				not empty? pc/1/expr
+				any [
+					pc/1/range/3 > line
+					all [
+						pc/1/range/3 = line
+						pc/1/range/4 > column
+					]
+				]
+			][
+				collect-func-spec pc
+				collect-set-word pc/1/expr
+			][
+				unless word? pc/1/expr [
+					return ret
+				]
+				str: to string! pc/1/expr
 			]
-		][
-			collect-func-spec pc
-			collect-set-word pc/1/expr
-		][
-			unless word? pc/1/expr [
-				return none
-			]
-			str: to string! pc/1/expr
-		]
 
-		npc: pc
-		until [
-			par: get-parent top npc/1
-			collect-func-spec par
-			collect-set-word head npc
-			not npc: par
+			npc: pc
+			until [
+				par: get-parent top npc/1
+				collect-func-spec par
+				collect-set-word head npc
+				not npc: par
+			]
 		]
 		if npc: top/1/syntax/extra [
 			forall npc [
@@ -1472,55 +1471,7 @@ red-syntax: context [
 				]
 			]
 		]
-		top/1/syntax/completions
-	]
-
-	get-completions: function [top [block!] str [string! none!] line [integer!] column [integer!]][
-		if any [
-			none? str
-			empty? str
-			#"%" = str/1
-			find str #"/"
-		][return none]
-		if empty? resolve-block: collect-completions top str line column [return none]
-		words: reduce ['word]
-		forall resolve-block [
-			kind: CompletionItemKind/Variable
-			cast: resolve-block/1/2/syntax/cast
-			if all [
-				cast/expr
-				find [does has func function] cast/expr
-			][
-				kind: cast/CompletionItemKind
-			]
-			append/only words reduce [resolve-block/1/1 kind]
-		]
-		words
-	]
-
-	resolve-completion: function [top [block!] str [string! none!] line [integer!] column [integer!]][
-		if any [
-			none? str
-			empty? str
-			#"%" = str/1
-			find str #"/"
-		][return ""]
-		if empty? resolve-block: collect-completions top str line column [return ""]
-		forall resolve-block [
-			if resolve-block/1/1 = str [
-				item: resolve-block/1/2
-				cast: item/syntax/cast
-				either all [
-					cast/expr
-					find [does has func function] cast/expr
-				][
-					return rejoin [str " is a " to string! cast/expr]
-				][
-					return rejoin [str " is a variable"]
-				]
-			]
-		]
-		""
+		ret
 	]
 
 	hover: function [top [block!] line [integer!] column [integer!]][
@@ -1562,6 +1513,7 @@ red-syntax: context [
 
 source-syntax: context [
 	sources: make block! 4
+	last-comps: []
 
 	find-source: function [uri [string!]][
 		forall sources [
@@ -1615,5 +1567,100 @@ source-syntax: context [
 		red-syntax/collect-errors res
 	]
 
-	
+	get-completions: function [uri [string!] line [integer!] column [integer!]][
+		unless item: find-source uri [
+			return none
+		]
+		top: item/1/2
+		unless pc: red-syntax/position? top line column [
+			return none
+		]
+		unless any [
+			file? pc/1/expr
+			path? pc/1/expr
+			word? pc/1/expr
+		][
+			return none
+		]
+		str: mold pc/1/expr
+		comps: clear last-comps
+
+		if word? pc/1/expr [
+			forall sources [
+				top2: sources/1/2
+				collects: either sources/1/1 = uri [
+					red-syntax/collect-completions top2 pc
+				][
+					red-syntax/collect-completions/extra top2 pc
+				]
+				forall collects [
+					append comps make map! reduce [
+						'label to string! collects/1/expr
+						'kind SymbolKind/Key
+						if sources/1/1 = uri ['preselect true]
+					]
+				]
+			]
+			words: system-words/system-words
+			forall words [
+				sys-word: mold words/1
+				if find/match sys-word str [
+					append comps make map! reduce [
+						'label sys-word
+						'kind SymbolKind/Key
+					]
+				]
+			]
+			return comps
+		]
+		if path? pc/1/expr [
+			completions: red-complete-ctx/red-complete-path str no
+			forall completions [
+				append comps make map! reduce [
+					'label completions/1
+					'kind SymbolKind/Field
+				]
+			]
+			return comps
+		]
+
+		if file? pc/1/expr [
+			completions: red-complete-ctx/red-complete-file str no
+			forall completions [
+				append comps make map! reduce [
+					'label completions/1
+					'kind SymbolKind/File
+				]
+			]
+			return comps
+		]
+	]
+
+	resolve-completion: function [uri [string!] line [integer!] column [integer!]][
+		return ""
+	]
+
+	system-completion-kind: function [word [word!]][
+		type: type? get word
+		kind: case [
+			datatype? get word [
+				CompletionItemKind/Keyword
+			]
+			typeset? get word [
+				CompletionItemKind/Keyword
+			]
+			op! = type [
+				CompletionItemKind/Operator
+			]
+			find reduce [action! native! function! routine!] type [
+				CompletionItemKind/Function
+			]
+			object! = type [
+				CompletionItemKind/Class
+			]
+			true [
+				CompletionItemKind/Variable
+			]
+		]
+	]
 ]

@@ -20,7 +20,6 @@ open-logger?: false
 debug-on?: false
 
 last-uri: none
-last-completion: none
 last-line: none
 last-column: none
 client-caps: none
@@ -239,202 +238,6 @@ on-textDocument-didChange: function [params [map!]][
 	response
 ]
 
-parse-completion-string: function [source line column][
-	start: 1
-	end: column
-	n: -1
-	until [
-		str: source
-		if source: find/tail source #"^/" [n: n + 1]
-		any [none? source n = line]
-	]
-	delimiters: charset " ^-[](){}':;"
-	line-str: copy/part str column
-	unless ptr: find/last/tail line-str delimiters [
-		ptr: line-str
-	]
-	start: index? ptr
-	end: start + column
-	reduce [ptr start end]
-]
-
-system-completion-kind: function [word [word!]][
-	type: type? get word
-	kind: case [
-		datatype? get word [
-			CompletionItemKind/Keyword
-		]
-		typeset? get word [
-			CompletionItemKind/Keyword
-		]
-		op! = type [
-			CompletionItemKind/Operator
-		]
-		find reduce [action! native! function! routine!] type [
-			CompletionItemKind/Function
-		]
-		object! = type [
-			CompletionItemKind/Class
-		]
-		true [
-			CompletionItemKind/Variable
-		]
-	]
-]
-
-complete-system: [
-	completions: system-words/get-completions completion-string
-	unless any [
-		none? completions
-		1 >= length? completions
-		all [
-			2 = length? completions
-			"%" = completions/2
-		]
-	][
-		completions-type: completions/1
-		completions: next completions
-		case [
-			completions-type = 'file [
-				forall completions [
-					append comps make map! reduce [
-						'label to string! completions/1
-						'kind CompletionItemKind/File
-					]
-				]
-			]
-			completions-type = 'path [
-				forall completions [
-					append comps make map! reduce [
-						'label completions/1
-						'kind CompletionItemKind/Field
-					]
-				]
-			]
-			true [
-				forall completions [
-					kind: system-completion-kind to word! completions/1
-					append comps make map! reduce [
-						'label completions/1
-						'kind kind
-					]
-				]
-			]
-		]
-	]
-]
-
-complete-context: [
-	completions: red-syntax/get-completions syntax completion-string line column
-	unless any [
-		none? completions
-		1 >= length? completions
-	][
-		completions-type: completions/1
-		completions: next completions
-		if completions-type = 'word [
-			forall completions [
-				insert comps make map! reduce [
-					'label completions/1/1
-					'kind completions/1/2
-					'preselect true
-				]
-			]
-		]
-	]
-]
-
-complete-snippet: [
-	if find/match "red.title.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "red.title.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "Red [^/^-Title: ^"${2:title}^"^/]^/"
-			]
-		]
-	]
-	if find/match "red.view.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "red.view.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "Red [^/^-Title: ^"${2:title}^"^/^-Needs: 'View^/]^/"
-			]
-		]
-	]
-	if find/match "either.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "either.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "either ${1:condition} [^/^-${2:exp}^/][^/^-${3:exp}^/]^/"
-			]
-		]
-	]
-	if find/match "func.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "func.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "func [${1:arg}][^/^-${2:exp}^/]^/"
-			]
-		]
-	]
-	if find/match "function.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "function.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "function [${1:arg}][^/^-${2:exp}^/]^/"
-			]
-		]
-	]
-	if find/match "while.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "while.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "while [${1:condition}][^/^-${2:exp}^/]^/"
-			]
-		]
-	]
-	if find/match "forall.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "forall.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "forall ${1:series} [^/^-${2:exp}^/]^/"
-			]
-		]
-	]
-	if find/match "foreach.snippet" completion-string [
-		insert comps make map! reduce [
-			'label "foreach.snippet"
-			'kind CompletionItemKind/Keyword
-			'insertTextFormat 2
-			'textEdit make map! reduce [
-				'range range
-				'newText "foreach ${1:iteration} ${2:series} [^/^-${3:exp}^/]^/"
-			]
-		]
-	]
-]
-
 on-textDocument-completion: function [params [map!]][
 	unless auto-complete? [
 		json-body/result: ""
@@ -442,37 +245,12 @@ on-textDocument-completion: function [params [map!]][
 		exit
 	]
 	uri: params/textDocument/uri
-	set 'last-uri uri
 	line: params/position/line
 	column: params/position/character
-	source: none
-	syntax: none
-	completion-string: none
-	if item: find-source uri [
-		source: item/1/2
-		syntax: item/1/3
-		blk: parse-completion-string source line column
-		completion-string: blk/1
-		range: red-lexer/to-range reduce [line + 1 blk/2] reduce [line + 1 blk/3]
-	]
-	set 'last-completion completion-string
+	set 'last-uri uri
 	set 'last-line line
 	set 'last-column column
-
-	comps: make block! 4
-	completions: none
-	completions-type: none
-	kind: none
-
-	unless any [
-		none? completion-string
-		empty? completion-string
-	][
-		do bind complete-snippet 'completion-string
-		do bind complete-system 'completion-string
-		do bind complete-context 'completion-string
-	]
-
+	comps: source-syntax/get-completions uri line column
 	either empty? comps [
 		json-body/result: make map! reduce [
 			'isIncomplete true
@@ -484,79 +262,15 @@ on-textDocument-completion: function [params [map!]][
 			'items comps
 		]
 	]
-
 	response
-]
-
-resolve-snippet: function [text [string!]][
-	switch text [
-		"red.title.snippet" [return "Red [ Title ]"]
-		"red.view.snippet" [return "Red [ Title NeedsView ]"]
-		"either.snippet" [return "either condition [ ][ ]"]
-		"func.snippet" [return "func [args][ ]"]
-		"function.snippet" [return "function [args][ ]"]
-		"while.snippet" [return "while [ condition ] [ ]"]
-		"forall.snippet" [return "forall series [ ]"]
-		"foreach.snippet" [return "foreach iteration series [ ]"]
-	]
-	none
 ]
 
 on-completionItem-resolve: function [params [map!]][
 	text: params/label
-	hstr: either empty? text [""][
-		either last-completion/1 = #"%" [""][
-			either snip: resolve-snippet text [snip][
-				word: to word! text
-				either find system-words/system-words word [
-					either datatype? get word [
-						rejoin [text " is a base datatype!"]
-					][
-						system-words/get-word-info word
-					]
-				][
-					either item: find-source last-uri [
-						red-syntax/resolve-completion item/1/3 text last-line last-column
-					][none]
-				]
-			]
-		]
-	]
-
+	hstr: source-syntax/resolve-completion last-uri last-line last-column
 	put params 'documentation either hstr [hstr][""]
-
 	json-body/result: params
 	response
-]
-
-get-selected-text: function [source line column][
-	start: 1
-	end: column
-	n: -1
-	until [
-		str: source
-		if source: find/tail source #"^/" [n: n + 1]
-		any [none? source n = line]
-	]
-	delimiters: charset " ^M^/^-[](){}':;"
-	while [
-		all [
-			column < length? str
-			not find delimiters str/(column + 1)
-		]
-	][column: column + 1]
-	line-str: copy/part str column
-	unless ptr: find/last/tail line-str delimiters [
-		ptr: line-str
-	]
-	start: index? ptr
-	if ptr/1 <> #"%" [
-		if slash: find ptr #"/" [
-			ptr: copy/part ptr slash
-		]
-	]
-	end: start + length? ptr
-	reduce [ptr start end]
 ]
 
 on-textDocument-symbol: function [params [map!]][
