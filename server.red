@@ -266,8 +266,7 @@ on-textDocument-completion: function [params [map!]][
 ]
 
 on-completionItem-resolve: function [params [map!]][
-	text: params/label
-	hstr: source-syntax/resolve-completion last-uri last-line last-column
+	hstr: source-syntax/resolve-completion params
 	put params 'documentation either hstr [hstr][""]
 	json-body/result: params
 	response

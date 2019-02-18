@@ -1563,7 +1563,11 @@ source-syntax: context [
 				forall collects [
 					comp: make map! reduce [
 						'label to string! collects/1/expr
-						'kind SymbolKind/Key
+						'kind CompletionItemKind/Variable
+						'data make map! reduce [
+							'uri uri
+							'range mold collects/1/range
+						]
 					]
 					if sources/1/1 = uri [
 						put comp 'preselect true
@@ -1577,7 +1581,7 @@ source-syntax: context [
 				if find/match sys-word str [
 					append comps make map! reduce [
 						'label sys-word
-						'kind SymbolKind/Key
+						'kind CompletionItemKind/Keyword
 					]
 				]
 			]
@@ -1588,7 +1592,7 @@ source-syntax: context [
 			forall completions [
 				append comps make map! reduce [
 					'label completions/1
-					'kind SymbolKind/Field
+					'kind CompletionItemKind/Property
 				]
 			]
 			return comps
@@ -1599,15 +1603,63 @@ source-syntax: context [
 			forall completions [
 				append comps make map! reduce [
 					'label completions/1
-					'kind SymbolKind/File
+					'kind CompletionItemKind/File
 				]
 			]
 			return comps
 		]
 	]
 
-	resolve-completion: function [uri [string!] line [integer!] column [integer!]][
-		return ""
+	resolve-completion: function [params [map!]][
+		if params/kind = CompletionItemKind/Keyword [
+			word: to word! params/label
+			if datatype? get word [
+				return rejoin [params/label " is a base datatype!"]
+			]
+			return system-words/get-word-info word
+		]
+		if all [
+			params/kind = CompletionItemKind/Variable
+			params/data
+		][
+			uri: params/data/uri
+			range: load params/data/range
+			unless item: find-source uri [
+				return none
+			]
+			top: item/1/2
+			unless pc: red-syntax/find-expr top range [
+				return none
+			]
+			unless cast: pc/1/syntax/cast [
+				return none
+			]
+			either any [
+				word? cast/1/expr
+				path? cast/1/expr
+			][
+				if val: cast/1/syntax/value [
+					return rejoin [params/label " is a " mold type? val/1/expr " datatype!"]
+				]
+				if refer: cast/1/syntax/refer [
+					if refer/1/syntax/name = "func-param" [
+						return rejoin [params/label " is function parameter!"]
+					]
+					if refer/1/syntax/name = "func-refinement" [
+						return rejoin [params/label " is function refinement!"]
+					]
+				]
+				if find [func function does has] cast/1/syntax/word [
+					return rejoin [params/label " is a function!"]
+				]
+				if cast/1/syntax/word = 'context [
+					return rejoin [params/label " is a context!"]
+				]
+			][
+				return rejoin [params/label " is a " mold type? cast/1/expr " datatype!"]
+			]
+		]
+		none
 	]
 
 	system-completion-kind: function [word [word!]][

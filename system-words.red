@@ -135,40 +135,4 @@ system-words: context [
 			res
 		][completions]
 	]
-
-	get-completions: function [str [string!]][
-		if empty? str [return none]
-		result: make block! 4
-		completions: none
-		item: none
-		case [
-			all [
-				#"%" = str/1
-				1 < length? str
-			][
-				append result 'file
-				completions: red-complete-ctx/red-complete-file str no
-				append result form-completion completions
-			]
-			all [
-				#"/" <> str/1
-				ptr: find str #"/"
-				find system-words to word! copy/part str ptr
-			][
-				append result 'path
-				completions: red-complete-ctx/red-complete-path str no
-				append result form-completion completions
-			]
-			true [
-				append result 'word
-				forall system-words [
-					sys-word: mold system-words/1
-					if find/match sys-word str [
-						append result sys-word
-					]
-				]
-			]
-		]
-		result
-	]
 ]
