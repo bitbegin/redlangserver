@@ -1561,11 +1561,14 @@ source-syntax: context [
 					red-syntax/collect-completions/extra top2 pc
 				]
 				forall collects [
-					append comps make map! reduce [
+					comp: make map! reduce [
 						'label to string! collects/1/expr
 						'kind SymbolKind/Key
-						if sources/1/1 = uri ['preselect true]
 					]
+					if sources/1/1 = uri [
+						put comp 'preselect true
+					]
+					append comps comp
 				]
 			]
 			words: system-words/system-words

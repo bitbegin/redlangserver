@@ -250,7 +250,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-uri uri
 	set 'last-line line
 	set 'last-column column
-	comps: source-syntax/get-completions uri line column
+	comps: source-syntax/get-completions uri line + 1 column + 1
 	either empty? comps [
 		json-body/result: make map! reduce [
 			'isIncomplete true
