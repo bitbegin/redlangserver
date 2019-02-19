@@ -37,6 +37,7 @@ o: l
 r: func [
 	a [test]
 	b [test!]
+	/part length [integer! string!]
 	return: [block!] ;--tests
 	/local x y
 ][

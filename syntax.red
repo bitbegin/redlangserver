@@ -346,7 +346,10 @@ red-syntax: context [
 						append par/1/syntax/args/params npc
 						if tail? npc: check-args npc par [return npc]
 					][
-						either refinement? npc/1/expr [
+						either any [
+							refinement? npc/1/expr
+							npc/1/expr = to set-word! 'return
+						][
 							return npc
 						][
 							syntax-error npc 'invalid-arg mold par/1/expr
@@ -1264,7 +1267,7 @@ red-syntax: context [
 					]
 					if params: pc/1/syntax/args/params [
 						newline pad + 8
-						append buffer "types: ["
+						append buffer "params: ["
 						forall params [
 							newline pad + 10
 							append buffer mold/flat params/1/range
