@@ -10,313 +10,45 @@ Red [
 	}
 ]
 
-system/lexer: context [
-
-	pre-load: none
-
-	throw-error: function [spec [block!] /missing][
-		type: spec/1									;-- preserve lit-words from double reduction
-		spec: reduce spec
-		src: back tail spec
-		src/1: trim/tail either string? src/1 [
-			form trim/with copy/part src/1 40 #"^/"
-		][
-			mold/flat/part src/1 40
-		]
-		if "^^/" = copy/part pos: skip tail src/1 -3 2 [remove/part pos 2]
-		spec/1: type
-		cause-error 'syntax any [all [missing 'missing] 'invalid] spec
-	]
+lexer: context [
+	throw-error: :system/lexer/throw-error
 	
-	make-hm: routine [h [integer!] m [integer!]][
-		time/box (as-float h) * 3600.0 + ((as-float m) * 60.0)
-	]
+	make-hm: :system/lexer/make-hm
 	
-	make-msf: routine [m [integer!] s [float!]][
-		time/box ((as-float m) * 60.0) + s
-	]
+	make-msf: :system/lexer/make-msf
 	
-	make-hms: routine [h [integer!] m [integer!] s [integer!]][
-		time/box (as-float h) * 3600.0 + ((as-float m) * 60.0) + (as-float s)
-	]
+	make-hms: :system/lexer/make-hms
 	
-	make-hmsf: routine [h [integer!] m [integer!] s [float!]][
-		time/box (as-float h) * 3600.0 + ((as-float m) * 60.0) + s
-	]
+	make-hmsf: :system/lexer/make-hmsf
 	
-	make-time: function [
-		pos		[string!]
-		hours	[integer! none!]
-		mins	[integer!]
-		secs	[integer! float! none!]
-		neg?	[logic!]
-		return: [time!]
-	][
-		if any [all [hours hours <> 0 mins < 0] all [secs secs < 0]][throw-error [time! pos]]
-		if hours [hours: absolute hours]
-		mins: absolute mins
+	make-time: :system/lexer/make-time
 
-		time: case [
-			all [hours secs][
-				either float? secs [
-					make-hmsf hours mins secs
-				][
-					make-hms hours mins secs
-				]
-			]
-			hours [make-hm hours mins]
-			'else [
-				unless float? secs []					;@@ TBD: error
-				make-msf mins secs
-			]
-		]
-		either neg? [negate time][time]
-	]
+	make-binary: :system/lexer/make-binary
 
-	make-binary: routine [
-		start  [string!]
-		end    [string!]
-		base   [integer!]
-		/local
-			s	 [series!]
-			p	 [byte-ptr!]
-			len  [integer!]
-			unit [integer!]
-			ret  [red-binary!]
-	][
-		s:  GET_BUFFER(start)
-		unit: GET_UNIT(s)
-		p:	  string/rs-head start
-		len:  end/head - start/head
-		
-		ret: as red-binary! stack/arguments
-		ret/head: 0
-		ret/header: TYPE_NONE
-		ret/node: switch base [
-			16 [binary/decode-16 p len unit]
-			2  [binary/decode-2  p len unit]
-			64 [binary/decode-64 p len unit]
-		]
-		if ret/node <> null [ret/header: TYPE_BINARY]		;-- if null, return NONE!
-	]
+	make-tuple: :system/lexer/make-tuple
 
-	make-tuple: routine [
-		start  [string!]
-		end	   [string!]
-		/local
-			s    [series!]
-			err	 [integer!]
-			len  [integer!]
-			unit [integer!]
-			p	 [byte-ptr!]
-			tp	 [byte-ptr!]
-			ret  [red-value!]
-	][
-		s:	  GET_BUFFER(start)
-		unit: GET_UNIT(s)
-		p:	  string/rs-head start
-		len:  end/head - start/head
-		ret:  stack/arguments
-		err:  0
-		
-		tokenizer/scan-tuple p len unit	:err ret
-		assert err = 0									;-- pre-checked validity
-		ret
-	]
+	make-number: :system/lexer/make-number
 
-	make-number: routine [
-		start  [string!]
-		end	   [string!]
-		type   [datatype!]
-		/local
-			s	 [series!]
-			len  [integer!]
-			unit [integer!]
-			p	 [byte-ptr!]
-			err	 [integer!]
-			i	 [integer!]
-	][
-		if type/value <> TYPE_INTEGER [
-			make-float start end type					;-- float! escape path
-			exit
-		]
-		s:	  GET_BUFFER(start)
-		unit: GET_UNIT(s)
-		p:	  string/rs-head start
-		len:  end/head - start/head
-		err:  0
+	make-float: :system/lexer/make-float
 
-		i: tokenizer/scan-integer p len unit :err
-		
-		if err <> 0 [
-			type/value: TYPE_FLOAT
-			make-float start end type			;-- fallback to float! loading
-			exit
-		]			
-		integer/box i
-	]
+	make-hexa: :system/lexer/make-hexa
 
-	make-float: routine [
-		start [string!]
-		end	  [string!]
-		type  [datatype!]
-		/local
-			s	 [series!]
-			unit [integer!]
-			len  [integer!]
-			p	 [byte-ptr!]
-			err	 [integer!]
-			f	 [float!]
-	][
-		s:	  GET_BUFFER(start)
-		unit: GET_UNIT(s)
-		p:	  string/rs-head start
-		len:  end/head - start/head
-		err:  0
-		
-		f: tokenizer/scan-float p len unit :err
-		
-		either type/value = TYPE_FLOAT [float/box f][percent/box f / 100.0]
-	]
+	make-char: :system/lexer/make-char
 
-	make-hexa: routine [
-		start	[string!]
-		end		[string!]
-		return: [integer!]
-		/local
-			s	  [series!]
-			unit  [integer!]
-			p	  [byte-ptr!]
-			head  [byte-ptr!]
-			p4	  [int-ptr!]
-			n	  [integer!]
-			power [integer!]
-			cp	  [byte!]
-	][
-		s: GET_BUFFER(start)
-		unit: GET_UNIT(s)
+	push-path: :system/lexer/push-path
 
-		p: (string/rs-head end) - unit
-		head: string/rs-head start
+	set-path: :system/lexer/set-path
 
-		n: 0
-		power: 0
-		while [p >= head][
-			cp: switch unit [
-				Latin1 [p/value]
-				UCS-2  [as-byte ((as-integer p/2) << 8 + p/1)]
-				UCS-4  [p4: as int-ptr! p as-byte p4/value]
-			]
-			if cp <> #"0" [
-				case [
-					all [#"0" <= cp cp <= #"9"][cp: cp - #"0"]
-					all [#"A" <= cp cp <= #"F"][cp: cp - #"A" + 10]
-					all [#"a" <= cp cp <= #"f"][cp: cp - #"a" + 10]
-				]
-				n: n + ((as-integer cp) << power)
-			]
-			power: power + 4
-			p: p - unit
-		]
-		n
-	]
+	make-word: :system/lexer/make-word
 
-	make-char: routine [
-		start	[string!]
-		end		[string!]
-		/local
-			n	  [integer!]
-			value [red-value!]
-	][
-		n: make-hexa start end
-		value: as red-value! integer/box n
-		set-type value TYPE_CHAR
-	]
+	to-word: :system/lexer/to-word
 
-	push-path: routine [
-		stack [block!]
-		type  [datatype!]
-		/local
-			path [red-path!]
-	][
-		path: as red-path! block/make-at as red-block! ALLOC_TAIL(stack) 4
-		path/header: switch type/value [
-			TYPE_GET_WORD [TYPE_GET_PATH]
-			TYPE_LIT_WORD [TYPE_LIT_PATH]
-			default [TYPE_PATH]
-		]
-		path/args: null
-	]
+	pop: :system/lexer/pop
 
-	set-path: routine [
-		stack [block!]
-		/local
-			path [red-path!]
-	][
-		path: as red-path! _series/pick as red-series! stack 1 null
-		path/args: null
-		set-type as red-value! path TYPE_SET_PATH
-	]
+	store: :system/lexer/store
 
-	make-word: routine [
-		src   [string!]
-		type  [datatype!]
-	][
-		set-type
-			as red-value! word/box (symbol/make-alt src) ;-- word/box puts it in stack/arguments
-			type/value
-	]
+	new-line: :system/lexer/new-line
 
-	to-word: func [
-		stack [block!]
-		src   [string!]
-		type  [datatype!]
-	][
-		store stack make-word src type
-	]
-
-	pop: function [stack [block!]][
-		value: last stack
-		remove back tail stack
-
-		either any [1 < length? stack head? stack/1][
-			append/only last stack :value
-		][
-			pos: back tail stack						;-- root storage and offset-ed series (/into option)
-			pos/1: insert/only last stack :value
-		]
-	]
-
-	store: function [stack [block!] value][
-		either any [1 < length? stack head? stack/1][
-			append last stack value
-		][
-			pos: back tail stack						;-- root storage and offset-ed series (/into option)
-			pos/1: insert last stack value
-		]
-	]
-
-	new-line: routine [
-		series [any-type!]
-		/local
-			blk  [red-block!]
-			s	 [series!]
-			cell [red-value!]
-	][
-		assert any [
-			TYPE_OF(series) = TYPE_BLOCK
-			TYPE_OF(series) = TYPE_PAREN
-		]
-		blk: as red-block! series
-		s: GET_BUFFER(blk)
-		cell: s/offset + blk/head
-		
-		while [cell < s/tail][
-			cell/header: cell/header or flag-new-line
-			cell: cell + 1
-		]
-	]
-	
 	transcode: function [
 		src	 [string!]
 		dst	 [block! none!]
@@ -942,7 +674,7 @@ system/lexer: context [
 			)
 		]
 
-		one-value: [any ws pos: opt literal-value pos: to end opt wrong-end]
+		one-value: [any ws pos: literal-value pos: to end opt wrong-end]
 		any-value: [pos: any [some ws | literal-value]]
 		red-rules: [any-value any ws opt wrong-end]
 
@@ -954,7 +686,18 @@ system/lexer: context [
 			][
 				parse/case src either one [one-value][red-rules]
 			][
-				throw-error ['value pos]
+				unless tail? pos [
+					if find ")]}" pos/1 [
+						value: switch pos/1 [
+							#")"	[#"("]
+							#"]"	[#"["]
+							#"}"	[#"{"]
+						]
+						pos: next pos
+						throw-error/missing [value back pos]
+					]
+					throw-error ['value pos]
+				]
 			]
 		]	
 		either trap [
