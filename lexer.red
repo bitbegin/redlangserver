@@ -55,11 +55,13 @@ lexer: context [
 		trap [logic!]
 		/one
 		/only											;-- force returning the loaded value (with /one)
-		/part	
+		/part
 			length [integer! string!]
+		/ast
+			out [block!]
 		return: [block!]
 		/local
-			new s e c pos value cnt type process path
+			new s e rs re c pos value cnt type process path
 			digit hexa-upper hexa-lower hexa hexa-char not-word-char not-word-1st
 			not-file-char not-str-char not-mstr-char caret-char
 			non-printable-char integer-end ws-ASCII ws-U+2k control-char
@@ -72,6 +74,28 @@ lexer: context [
 		old-line: line: 1
 
 		append/only stack any [dst make block! 200]
+
+		if ast [
+			ast-stack: clear []
+			append/only ast-stack out
+		]
+		store-ast: [
+			if ast [
+				ast-block: reduce ['expr value 's index? rs 'e index? re]
+				if ast-nested [append ast-block reduce ['nested ast-nested]]
+				append/only last ast-stack ast-block
+				ast-nested: none
+			]
+		]
+		pop-ast: [
+			if ast [
+				ast-nested: last ast-stack remove back tail ast-stack
+				do store-ast
+			]
+		]
+		ast-nested: none
+		ast-block: none
+		rs-stack: make block! 200
 
 		make-string: [
 			new: make type len: (index? e) - index? s
@@ -561,11 +585,22 @@ lexer: context [
 		]
 		
 		map-rule: [
-			"#(" (append/only stack make block! 100)
+			"#(" (
+				append/only stack make block! 100
+				if ast [
+					append/only ast-stack make block! 100
+					append rs-stack rs
+				]
+			)
 			any-value
 			#")" (
 				value: back tail stack
 				value/1: make map! value/1
+				if ast [
+					value: value/1
+					do pop-ast
+					rs: last rs-stack remove back tail rs-stack
+				]
 				pop stack
 				old-line: line
 			)
@@ -575,9 +610,18 @@ lexer: context [
 			#"[" (
 				append/only stack make block! 100
 				if line > old-line [old-line: line new-line back tail stack]
+				if ast [
+					append/only ast-stack make block! 100
+					append rs-stack rs
+				]
 			)
 			any-value
 			#"]" (
+				if ast [
+					value: last stack
+					do pop-ast
+					rs: last rs-stack remove back tail rs-stack
+				]
 				pop stack
 				old-line: line
 			)
@@ -587,9 +631,18 @@ lexer: context [
 			#"(" (
 				append/only stack make paren! 4
 				if line > old-line [old-line: line new-line back tail stack]
+				if ast [
+					append/only ast-stack make block! 8
+					append rs-stack rs
+				]
 			)
 			any-value 
 			#")" (
+				if ast [
+					value: last stack
+					do pop-ast
+					rs: last rs-stack remove back tail rs-stack
+				]
 				pop stack
 				old-line: line
 			)
@@ -644,29 +697,30 @@ lexer: context [
 		]
 
 		literal-value: [
-			pos: (e: none) s: [
-				 string-rule		(store stack do make-string)
-				| block-rule
-				| comment-rule
-				| tuple-rule		(store stack make-tuple s e)
-				| hexa-rule			(store stack make-hexa s e)
-				| binary-rule		if (value: make-binary s e base) (store stack value)
-				| email-rule		(store stack do make-file)
-				| date-rule			if (value) (store stack value)
-				| integer-rule		if (value) (store stack value)
-				| float-rule		if (value: make-float s e type) (store stack value)
-				| tag-rule			(store stack do make-string)
-				| word-rule
-				| lit-word-rule
-				| get-word-rule
-				| refinement-rule
-				| file-rule			(store stack value: do process)
-				| char-rule			(if value > 10FFFFh [throw-error [char! skip pos -6]] store stack value)
-				| map-rule
-				| paren-rule
-				| escaped-rule		(store stack value)
-				| issue-rule
+			pos: (e: none) rs: s: [
+				 string-rule re:	(store stack value: do make-string)
+				| block-rule re:	(value: none)
+				| comment-rule re:	(value: none)
+				| tuple-rule re:	(store stack value: make-tuple s e)
+				| hexa-rule re:		(store stack value: make-hexa s e)
+				| binary-rule re:	if (value: make-binary s e base) (store stack value)
+				| email-rule re:	(store stack value: do make-file)
+				| date-rule re:		if (value) (store stack value)
+				| integer-rule re:	if (value) (store stack value)
+				| float-rule re:	if (value: make-float s e type) (store stack value)
+				| tag-rule re:		(store stack value: do make-string)
+				| word-rule re:		(value: last last stack)
+				| lit-word-rule re:	(value: last last stack)
+				| get-word-rule re:	(value: last last stack)
+				| refinement-rule re:	(value: last last stack)
+				| file-rule re:		(store stack value: do process)
+				| char-rule re:		(if value > 10FFFFh [throw-error [char! skip pos -6]] store stack value)
+				| map-rule re:		(value: none)
+				| paren-rule re:	(value: none)
+				| escaped-rule re:	(store stack value)
+				| issue-rule re:	(value: last last stack)
 			](
+				if value [do store-ast]
 				if line > old-line [
 					old-line: line 
 					new-line back tail last stack
@@ -678,8 +732,6 @@ lexer: context [
 		any-value: [pos: any [some ws | literal-value]]
 		red-rules: [any-value any ws opt wrong-end]
 
-		if pre-load [do [pre-load src length]]
-		
 		set/any 'err try [
 			unless either part [
 				parse/case/part src red-rules length
