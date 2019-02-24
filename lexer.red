@@ -81,21 +81,40 @@ lexer: context [
 		]
 		store-ast: [
 			if ast [
-				ast-block: reduce ['expr value 's index? rs 'e index? re]
+				depth: 1 + length? rs-stack
+				ast-block: reduce ['expr value 's index? rs 'e index? re 'depth depth]
 				if ast-nested [append ast-block reduce ['nested ast-nested]]
 				append/only last ast-stack ast-block
 				ast-nested: none
+				if depth > max-depth [max-depth: depth]
 			]
 		]
 		pop-ast: [
 			if ast [
 				ast-nested: last ast-stack remove back tail ast-stack
+				if any [
+					all [
+						block? value
+						empty? value
+					]
+					all [
+						paren? value
+						empty? value
+					]
+					all [
+						map? value
+						value = #()
+					]
+				][
+					ast-nested: none
+				]
 				do store-ast
 			]
 		]
 		ast-nested: none
 		ast-block: none
 		rs-stack: make block! 200
+		max-depth: 1
 
 		make-string: [
 			new: make type len: (index? e) - index? s
@@ -593,13 +612,13 @@ lexer: context [
 				]
 			)
 			any-value
-			#")" (
+			#")" re: (
 				value: back tail stack
 				value/1: make map! value/1
 				if ast [
 					value: value/1
-					do pop-ast
 					rs: last rs-stack remove back tail rs-stack
+					do pop-ast
 				]
 				pop stack
 				old-line: line
@@ -616,11 +635,11 @@ lexer: context [
 				]
 			)
 			any-value
-			#"]" (
+			#"]" re: (
 				if ast [
 					value: last stack
-					do pop-ast
 					rs: last rs-stack remove back tail rs-stack
+					do pop-ast
 				]
 				pop stack
 				old-line: line
@@ -637,11 +656,11 @@ lexer: context [
 				]
 			)
 			any-value 
-			#")" (
+			#")" re: (
 				if ast [
 					value: last stack
-					do pop-ast
 					rs: last rs-stack remove back tail rs-stack
+					do pop-ast
 				]
 				pop stack
 				old-line: line
@@ -753,7 +772,7 @@ lexer: context [
 			]
 		]	
 		either trap [
-			reduce [stack/1 pos :err]
+			reduce [stack/1 pos :err max-depth]
 		][
 			if error? :err [do :err]
 			either all [one not only][pos][stack/1]

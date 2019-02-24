@@ -11,7 +11,7 @@ Red [
 #include %lsp-const.red
 #include %json.red
 #include %system-words.red
-#include %lexer.red
+#include %ast-lexer.red
 #include %syntax.red
 
 logger: none
