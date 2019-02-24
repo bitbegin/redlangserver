@@ -10,7 +10,6 @@ Red [
 #include %lexer.red
 
 ast: context [
-
 	form-pos: function [pos [string!]][
 		start: end: head pos
 		line: 0
@@ -44,12 +43,6 @@ ast: context [
 		]
 	]
 
-	form-range: function [range [block!]][
-		start: reduce [range/1 range/2]
-		end: reduce [range/3 range/4]
-		to-range start end
-	]
-
 	analysis: function [start [string!]][
 		ast: make block! 1
 		res: lexer/transcode/ast start none true ast
@@ -57,55 +50,5 @@ ast: context [
 			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
 		ast
-	]
-
-	format: function [top [block!]][
-		buffer: make string! 1000
-		newline: function [cnt [integer!]] [
-			append buffer lf
-			append/dup buffer " " cnt
-		]
-		format*: function [pc [block! paren!] depth [integer!]][
-			pad: depth * 4
-			newline pad
-			append buffer "["
-			forall pc [
-				newline pad + 2
-				append buffer "["
-				newline pad + 4
-				append buffer "expr: "
-				append buffer mold/flat/part pc/1/expr 20
-				newline pad + 4
-				append buffer "s: "
-				append buffer mold pc/1/s
-				newline pad + 4
-				append buffer "e: "
-				append buffer mold pc/1/e
-				newline pad + 4
-				append buffer "depth: "
-				append buffer mold pc/1/depth
-				if pc/1/nested [
-					newline pad + 4
-					append buffer "nested: "
-					format* pc/1/nested depth + 1
-				]
-				if pc/1/source [
-					newline pad + 4
-					append buffer "source: "
-					append buffer mold/flat/part pc/1/source 20
-				]
-				if pc/1/max-depth [
-					newline pad + 4
-					append buffer "max-depth: "
-					append buffer pc/1/max-depth
-				]
-				newline pad + 2
-				append buffer "]"
-			]
-			newline pad
-			append buffer "]"
-		]
-		format* top 0
-		buffer
 	]
 ]

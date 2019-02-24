@@ -8,66 +8,36 @@ Red [
 ]
 
 semantic: context [
-	throw-error: register-error 'red-syntax
+	throw-error: register-error 'semantic
 
-	create-error: function [syntax [map!] type [word!] word [word!] message [string! none!]][
-		error: make map! reduce [
+	create-error: function [pc [block!] type [word!] word [word!] message [string!]][
+		error: reduce [
 			'severity DiagnosticSeverity/(type)
 			'code to string! word
 			'source "Syntax"
 			'message message
 		]
-		either none? syntax/error [
-			syntax/error: error
-		][
-			either block? errors: syntax/error [
-				forall errors [
-					if errors/1/code = error/code [exit]
-				]
-				append syntax/error error
-			][
-				if errors/code = error/code [exit]
-				syntax/error: reduce [errors error]
+		unless pc/error [
+			repend pc ['error error]
+			exit
+		]
+		either block? errors: pc/error [
+			forall errors [
+				if errors/1/code = error/code [exit]
 			]
+			repend/only pc/error error
+		][
+			if errors/code = error/code [exit]
+			pc/error: reduce [errors error]
 		]
 	]
 
-	literal-type: reduce [
+	literal-type: [
 		binary! char! date! email! file! float!
 		lit-path! lit-word!
 		integer! issue! logic! map! pair!
 		percent! refinement! string! tag! time!
 		tuple! url!
-	]
-
-	symbol-type?: function [type][
-		case [
-			find reduce [date! float! integer! percent! time! tuple! pair!] type [
-				SymbolKind/Number
-			]
-			type = logic! [
-				SymbolKind/Boolean
-			]
-			find reduce [string! char! email! file! issue! tag! url!] type [
-				SymbolKind/String
-			]
-			type = binary! [
-				SymbolKind/Array
-			]
-			find reduce [lit-word!] type [
-				SymbolKind/Constant
-			]
-			find reduce [lit-path! refinement!] type [
-				SymbolKind/Object
-			]
-			type = map! [
-				SymbolKind/Key
-			]
-		]
-	]
-
-	simple-literal?: function [value][
-		either find literal-type value [true][false]
 	]
 
 	next-type: function [pc [block! paren!]][
@@ -198,27 +168,27 @@ semantic: context [
 	syntax-error: function [pc [block! paren!] word [word!] args][
 		switch word [
 			miss-expr [
-				create-error pc/1/syntax 'Error 'miss-expr
+				create-error pc/1 'Error 'miss-expr
 					rejoin [mold pc/1/expr " -- need a type: " args]
 			]
 			recursive-define [
-				create-error pc/1/syntax 'Error 'recursive-define
+				create-error pc/1 'Error 'recursive-define
 					rejoin [mold pc/1/expr " -- recursive define"]
 			]
 			double-define [
-				create-error pc/1/syntax 'Error 'double-define
+				create-error pc/1 'Error 'double-define
 					rejoin [mold pc/1/expr " -- double define: " args]
 			]
 			invalid-arg [
-				create-error pc/1/syntax 'Error 'invalid-arg
+				create-error pc/1 'Error 'invalid-arg
 					rejoin [mold pc/1/expr " -- invalid argument for: " args]
 			]
 			invalid-datatype [
-				create-error pc/1/syntax 'Error 'invalid-datatype
+				create-error pc/1 'Error 'invalid-datatype
 					rejoin [mold pc/1/expr " -- invalid datatype: " args]
 			]
 			forbidden-refine [
-				create-error pc/1/syntax 'Error 'forbidden-refine
+				create-error pc/1 'Error 'forbidden-refine
 					rejoin [mold pc/1/expr " -- forbidden refinement: " args]
 			]
 		]
@@ -773,16 +743,9 @@ semantic: context [
 			step: none
 			cast: none
 
-			semicolon-type?: [
-				if any [
-					all [
-						string? expr
-						not empty? expr
-						expr/1 = #";"
-					]
-					expr = none
-				][
-					syntax/name: "semicolon"
+			comment-type?: [
+				if expr = 'comment [
+					syntax/name: "comment"
 					ret: exp-type? next pc
 					ret/2: ret/2 + 1
 					syntax/step: 1
@@ -812,7 +775,7 @@ semantic: context [
 			]
 
 			literal-type?: [
-				if simple-literal? type? expr [
+				if find literal-type type?/word expr [
 					syntax/name: "literal"
 					syntax/step: 1
 					return reduce [pc 1]
@@ -923,7 +886,7 @@ semantic: context [
 				]
 			]
 
-			do semicolon-type?
+			do comment-type?
 			do include-type?
 			do literal-type?
 			do set-type?
@@ -975,6 +938,12 @@ semantic: context [
 						]
 					]
 				]
+			]
+		]
+
+		resolve-refer: function [pc [block!]][
+			forall pc [
+
 			]
 		]
 
@@ -1127,9 +1096,12 @@ semantic: context [
 			top/1/expr
 			block? top/1/expr
 		][throw-error 'analysis "expr isn't a block!" top/1]
-		top/1/syntax/name: "top"
-		top/1/syntax/step: 1
-		top/1/syntax/extra: make block! 20
+		repend top/1 ['syntax syntax: make block! 3]
+		repend syntax [
+			'name "top"
+			'step 1
+			'extra make block! 20
+		]
 		pc: top/1/expr
 		unless pc/1/expr = 'Red [
 			syntax-error pc 'miss-expr "'Red' for Red File header"
@@ -1137,13 +1109,11 @@ semantic: context [
 		unless block? pc/2/expr [
 			syntax-error next pc 'miss-expr "block! for Red File header"
 		]
-		pc/1/syntax/meta: 1
-		pc/2/syntax/meta: 2
 		exp-all top
 		;resolve-keyword top
 	]
 
-	format: function [top [block!]][
+	formatxx: function [top [block!]][
 		buffer: make string! 1000
 		newline: function [cnt [integer!]] [
 			append buffer lf
@@ -1353,33 +1323,99 @@ semantic: context [
 		buffer
 	]
 
-	collect-errors: function [top [block! paren!]][
+	format: function [top [block!] /semantic][
+		buffer: make string! 1000
+		newline: function [cnt [integer!]] [
+			append buffer lf
+			append/dup buffer " " cnt
+		]
+		format*: function [pc [block! paren!] depth [integer!]][
+			pad: depth * 4
+			newline pad
+			append buffer "["
+			forall pc [
+				newline pad + 2
+				append buffer "["
+				newline pad + 4
+				append buffer "expr: "
+				append buffer mold/flat/part pc/1/expr 20
+				newline pad + 4
+				append buffer "s: "
+				append buffer mold pc/1/s
+				newline pad + 4
+				append buffer "e: "
+				append buffer mold pc/1/e
+				newline pad + 4
+				append buffer "depth: "
+				append buffer mold pc/1/depth
+				if pc/1/nested [
+					newline pad + 4
+					append buffer "nested: "
+					format* pc/1/nested depth + 1
+				]
+				if pc/1/source [
+					newline pad + 4
+					append buffer "source: "
+					append buffer mold/flat/part pc/1/source 20
+				]
+				if pc/1/max-depth [
+					newline pad + 4
+					append buffer "max-depth: "
+					append buffer pc/1/max-depth
+				]
+				if all [
+					semantic
+					pc/1/syntax
+				][
+					newline pad + 4
+					append buffer "syntax: ["
+					
+					if pc/1/syntax/word [
+						newline pad + 6
+						append buffer "word: "
+						append buffer pc/1/syntax/word
+					]
+
+					newline pad + 4
+					append buffer "]"
+				]
+				newline pad + 2
+				append buffer "]"
+			]
+			newline pad
+			append buffer "]"
+		]
+		format* top 0
+		buffer
+	]
+
+	to-range: function [pc [block!]][
+		ast/to-range ast/form-pos pc/1/s ast/form-pos pc/1/e
+	]
+
+	collect-errors: function [top [block!]][
 		ret: make block! 4
-		collect-errors*: function [pc [block! paren!]][
+		collect-errors*: function [pc [block!]][
 			blk: [
-				if pc/1/syntax/error [
-					error: copy pc/1/syntax/error
+				if pc/1/error [
+					error: pc/1/error
 					either block? error [
 						forall error [
-							error/1/range: red-lexer/form-range pc/1/range
-							append ret error/1
+							err: make map! error/1
+							err/range: to-range pc
+							append ret err
 						]
 					][
-						error/range: red-lexer/form-range pc/1/range
-						append ret error
+						err: make map! error
+						err/range: to-range pc
+						append ret err
 					]
 				]
 			]
 			forall pc [
-				either all [
-					any [
-						block? pc/1/expr
-						paren? pc/1/expr
-					]
-					not empty? pc/1/expr
-				][
+				either pc/1/nested [
 					do blk
-					collect-errors* pc/1/expr
+					collect-errors* pc/1/nested
 				][
 					do blk
 				]
