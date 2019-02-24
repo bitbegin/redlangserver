@@ -51,15 +51,12 @@ ast: context [
 	]
 
 	analysis: function [start [string!]][
-		code: make block! 1000
-		ast: make block! 1000
-		top: reduce ['expr code 's index? start 'e index? back tail start 'nested ast 'source start]
-		res: lexer/transcode/ast start code true ast
+		ast: make block! 1
+		res: lexer/transcode/ast start none true ast
 		if error? res/3 [
-			return make map! reduce ['pos form-pos res/2 'error res/3 'stack top]
+			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
-		append top reduce ['max-depth res/4]
-		reduce [top]
+		ast
 	]
 
 	format: function [top [block!]][

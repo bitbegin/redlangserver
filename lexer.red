@@ -77,13 +77,25 @@ lexer: context [
 
 		if ast [
 			ast-stack: clear []
+			ast-nested: none
+			ast-block: none
+			rs-stack: make block! 200
+			max-depth: 1
 			append/only ast-stack out
+			append/only ast-stack make block! 100
+			append rs-stack src
 		]
 		store-ast: [
 			if ast [
-				depth: 1 + length? rs-stack
+				depth: length? rs-stack
 				ast-block: reduce ['expr value 's index? rs 'e index? re 'depth depth]
-				if ast-nested [append ast-block reduce ['nested ast-nested]]
+				if ast-nested [repend ast-block ['nested ast-nested]]
+				if depth = 0 [
+					repend ast-block [
+						'max-depth max-depth
+						'source src
+					]
+				]
 				append/only last ast-stack ast-block
 				ast-nested: none
 				if depth > max-depth [max-depth: depth]
@@ -111,10 +123,6 @@ lexer: context [
 				do store-ast
 			]
 		]
-		ast-nested: none
-		ast-block: none
-		rs-stack: make block! 200
-		max-depth: 1
 
 		make-string: [
 			new: make type len: (index? e) - index? s
@@ -752,10 +760,17 @@ lexer: context [
 		red-rules: [any-value any ws opt wrong-end]
 
 		set/any 'err try [
-			unless either part [
+			either either part [
 				parse/case/part src red-rules length
 			][
 				parse/case src either one [one-value][red-rules]
+			][
+				if ast [
+					value: stack/1
+					rs: last rs-stack remove back tail rs-stack
+					re: tail src
+					do pop-ast
+				]
 			][
 				unless tail? pos [
 					if find ")]}" pos/1 [
@@ -772,7 +787,7 @@ lexer: context [
 			]
 		]	
 		either trap [
-			reduce [stack/1 pos :err max-depth]
+			reduce [stack/1 pos :err]
 		][
 			if error? :err [do :err]
 			either all [one not only][pos][stack/1]
