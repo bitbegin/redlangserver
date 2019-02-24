@@ -1,7 +1,7 @@
 Red [
 	Title:   "Red lexer for Red language server"
 	Author:  "bitbegin"
-	File: 	 %lexer.red
+	File: 	 %ast.red
 	Tabs:	 4
 	Rights:  "Copyright (C) 2011-2019 Red Foundation. All rights reserved."
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
@@ -9,7 +9,7 @@ Red [
 
 #include %lexer.red
 
-ast-lexer: context [
+ast: context [
 
 	form-pos: function [pos [string!]][
 		start: end: head pos

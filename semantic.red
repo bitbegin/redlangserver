@@ -7,7 +7,7 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-red-syntax: context [
+semantic: context [
 	throw-error: register-error 'red-syntax
 
 	create-error: function [syntax [map!] type [word!] word [word!] message [string! none!]][
