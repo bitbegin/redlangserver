@@ -30,6 +30,23 @@ ast: context [
 		reduce [line column + 1]
 	]
 
+	to-pos: function [src [string!] line [integer!] column [integer!]][
+		start: end: src
+		cnt: 0
+		until [
+			cnt: cnt + 1
+			start: end
+			unless end: find/tail start #"^/" [
+				end: tail start break
+			]
+			if line <= cnt [break]
+		]
+		if line <> cnt [return end]
+		len: (index? end) - (index? start)
+		if column > len [return end]
+		skip start column - 1
+	]
+
 	to-range: function [start [block!] end [block!] /keep][
 		make map! reduce [
 			'start make map! reduce [
@@ -43,9 +60,9 @@ ast: context [
 		]
 	]
 
-	analysis: function [start [string!]][
+	analysis: function [src [string!]][
 		ast: make block! 1
-		res: lexer/transcode/ast start none true ast
+		res: lexer/transcode/ast src none true ast
 		if error? res/3 [
 			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
