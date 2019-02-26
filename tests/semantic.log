@@ -1409,4 +1409,111 @@ PS D:\vscode-ext\VScode-extension\server> ./red.exe --cli tests/red-test.red
     max-depth: 6
   ]
 ]
+Error/Warning: ---------------------------------------
+[#(
+    severity: 1
+    code: "miss-expr"
+    source: "Syntax"
+    message: "he: -- need a type: block! for Red File header"
+    range: #(
+        start: #(
+            line: 0
+            character: 4
+        )
+        end: #(
+            line: 0
+            character: 7
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "test -- invalid datatype: test"
+    range: #(
+        start: #(
+            line: 37
+            character: 4
+        )
+        end: #(
+            line: 37
+            character: 8
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "test! -- invalid datatype: test!"
+    range: #(
+        start: #(
+            line: 38
+            character: 4
+        )
+        end: #(
+            line: 38
+            character: 9
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-arg"
+    source: "Syntax"
+    message: "return: -- invalid argument for: c"
+    range: #(
+        start: #(
+            line: 57
+            character: 39
+        )
+        end: #(
+            line: 57
+            character: 46
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "/c -- double define: c"
+    range: #(
+        start: #(
+            line: 57
+            character: 71
+        )
+        end: #(
+            line: 57
+            character: 73
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "a -- double define: a"
+    range: #(
+        start: #(
+            line: 57
+            character: 74
+        )
+        end: #(
+            line: 57
+            character: 75
+        )
+    )
+) #(
+    severity: 1
+    code: "forbidden-refine"
+    source: "Syntax"
+    message: "/ref -- forbidden refinement: /ref"
+    range: #(
+        start: #(
+            line: 62
+            character: 10
+        )
+        end: #(
+            line: 62
+            character: 14
+        )
+    )
+)]
 PS D:\vscode-ext\VScode-extension\server>

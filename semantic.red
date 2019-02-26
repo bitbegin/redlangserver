@@ -795,8 +795,8 @@ semantic: context [
 		buffer
 	]
 
-	to-range: function [pc [block!]][
-		ast/to-range ast/form-pos pc/1/s ast/form-pos pc/1/e
+	to-range: function [src [string!] pc [block!]][
+		ast/to-range ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
 	]
 
 	collect-errors: function [top [block!]][
@@ -805,7 +805,7 @@ semantic: context [
 			blk: [
 				if pc/1/error [
 					error: pc/1/error
-					either block? error [
+					either block? error/1 [
 						forall error [
 							err: make map! error/1
 							err/range: to-range pc
@@ -813,7 +813,7 @@ semantic: context [
 						]
 					][
 						err: make map! error
-						err/range: to-range pc
+						err/range: to-range top/1/source pc
 						append ret err
 					]
 				]
