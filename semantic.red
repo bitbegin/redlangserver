@@ -351,12 +351,13 @@ semantic: context [
 
 	func-arg?: function [spec [block!] word [word!]][
 		if block? expr: spec/1/expr [
-			forall expr [
+			npc: spec/1/nested
+			forall npc [
 				if all [
-					find [word! lit-word! get-word! refinement!] type?/word expr/1/expr
-					word = to word! expr/1/expr
+					find [word! lit-word! get-word! refinement!] type?/word npc/1/expr
+					word = to word! npc/1/expr
 				][
-					return expr
+					return npc
 				]
 			]
 		]
@@ -367,6 +368,7 @@ semantic: context [
 		npc: head pc
 		forall npc [
 			if all [
+				npc/1/syntax
 				find [func function has] npc/1/syntax/word
 				npc/1/syntax/resolved
 				npc/1/syntax/resolved/body = pc
@@ -375,48 +377,6 @@ semantic: context [
 			]
 		]
 		none
-	]
-
-	context-spec?: function [top [block!] pc [block!]][
-		if top = pc [return true]
-		npc: head pc
-		forall npc [
-			if all [
-				npc/1/syntax/word = 'context
-				npc/1/syntax/resolved
-				npc/1/syntax/resolved/spec = pc
-			][
-				return true
-			]
-		]
-		false
-	]
-
-	function-body?: function [top [block!] pc [block! paren!]][
-		npc: head pc
-		forall npc [
-			if all [
-				npc/1/syntax/word = 'function
-				npc/1/syntax/resolved
-				npc/1/syntax/resolved/body = pc
-			][
-				return true
-			]
-		]
-		false
-	]
-
-	belong-to-function?: function [top [block!] pc [block! paren!]][
-		until [
-			if all [
-				pc/1/syntax/name = "block"
-				function-body? top pc
-			][
-				return true
-			]
-			pc: get-parent top pc/1
-		]
-		false
 	]
 
 	func-spec-declare?: function [top [block!] pc [block!]][
@@ -475,7 +435,7 @@ semantic: context [
 		none
 	]
 
-	exp-all: function [top [block! paren!]][
+	resolve: function [top [block! paren!]][
 		resolve-set: function [pc [block!]][
 			resolve-set*: function [npc [block!]][
 				unless cast: next npc [
@@ -639,25 +599,22 @@ semantic: context [
 					get-word? pc/1/expr
 					get-path? pc/1/expr
 				][
-					if any [
+					either any [
 						word? pc/1/expr
 						get-word? pc/1/expr
 					][
 						resolve-word pc
+						word: to word! pc/1/expr
+						repend pc/1/syntax ['word word]
+					][
+						word: to word! pc/1/expr/1
+						repend pc/1 ['syntax reduce ['word word]]
 					]
 					step: 1
 					if all [
 						none? pc/1/syntax/declare
 						none? pc/1/syntax/recent
 					][
-						word: either any [
-							word? pc/1/expr
-							get-word? pc/1/expr
-						][
-							to word! pc/1/expr
-						][
-							to word! pc/1/expr/1
-						]
 						repend pc/1 ['syntax reduce ['word word]]
 						if find [func function does has context all any] word [
 							step: resolve-func pc
@@ -668,7 +625,7 @@ semantic: context [
 			]
 		]
 
-		exp-depth: function [pc [block!] depth [integer!]][
+		resolve-depth: function [pc [block!] depth [integer!]][
 			if pc/1/depth > depth [exit]
 			if pc/1/depth = depth [
 				resolve-refer pc
@@ -679,14 +636,14 @@ semantic: context [
 					pc/1/nested
 					pc/1/syntax/into
 				]
-					exp-depth pc/1/nested depth
+					resolve-depth pc/1/nested depth
 				]
 			]
 		]
 
 		max-depth: top/1/max-depth
 		repeat depth max-depth [
-			exp-depth top/1/nested depth
+			resolve-depth top/1/nested depth
 		]
 	]
 
@@ -709,8 +666,7 @@ semantic: context [
 		unless block? pc/2/expr [
 			syntax-error next pc 'miss-expr "block! for Red File header"
 		]
-		exp-all top
-		;resolve-keyword top
+		resolve top
 	]
 
 	formatxx: function [top [block!]][
