@@ -274,7 +274,7 @@ semantic: context [
 			]
 		]
 		par: pc
-		pc: par/1/expr
+		pc: par/1/nested
 		if all [
 			block? pc
 			empty? pc
@@ -415,12 +415,12 @@ semantic: context [
 				]
 				if find literal-type type?/word cast/1/expr [
 					repend pc/1/syntax ['value cast]
-					repeat pc/1/syntax ['step 1 + (index? cast) - (index pc)]
+					repend pc/1/syntax ['step 1 + (index? cast) - (index? pc)]
 					exit
 				]
 				if word? cast/1/expr [
 					repend pc/1/syntax ['cast cast]
-					repeat pc/1/syntax ['step 1 + (index? cast) - (index pc)]
+					repend pc/1/syntax ['step 1 + (index? cast) - (index? pc)]
 					exit
 				]
 				if set-word? cast/1/expr [
@@ -449,7 +449,7 @@ semantic: context [
 			][
 				repend pc/1/syntax ['declare declare]
 			]
-			if recent: recent-set? pc [
+			if recent: recent-set? top pc [
 				repend pc/1/syntax ['recent recent]
 			]
 		]
@@ -593,6 +593,7 @@ semantic: context [
 					]
 					pc: skip pc step continue
 				]
+				pc: next pc
 			]
 		]
 
@@ -606,10 +607,13 @@ semantic: context [
 				if all [
 					pc/1/nested
 					any [
-						pc/1/syntax/into
+						all [
+							pc/1/syntax
+							pc/1/syntax/into
+						]
 						paren? pc/1/expr
 					]
-				]
+				][
 					resolve-depth pc/1/nested depth
 				]
 			]
@@ -769,7 +773,6 @@ semantic: context [
 								value: args/(i * 2 + 2)
 								append buffer mold/flat reduce [value/1/s value/1/e]
 							]
-
 							i: i + 1
 						]
 					]
