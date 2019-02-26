@@ -145,24 +145,18 @@ semantic: context [
 				append words word
 			]
 		]
-		check-args: function [npc [block!] par [block! paren! none!]][
-			syntax: npc/1/syntax
-			syntax/name: "func-param"
-			syntax/args: make map! 3
-			syntax/args/refs: par
+		check-args: function [npc [block!] par [block! none!]][
+			repend npc/1 ['syntax syntax: make block! 4]
+			repend syntax ['type 'func-param 'args args: make block! 4]
+			repend syntax/args ['refs par]
 			double-check npc
-			ret: next-type npc
-			npc2: ret/1
-			if tail? npc2 [return npc2]
+			if tail? npc2: next npc [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/args/desc: npc2
-					npc2/1/syntax/name: "func-desc"
-					npc2/1/syntax/parent: npc
-					ret: next-type npc2
-					npc3: ret/1
-					if tail? npc3 [return npc3]
+					repend syntax/args ['desc npc2]
+					repend npc2/1 ['syntax reduce ['type 'func-desc 'parent npc]]
+					if tail? npc3: next npc2 [return npc3]
 					if block? npc3/1/expr [
 						syntax-error npc3 'invalid-arg mold npc/1/expr
 						return next npc3
@@ -170,15 +164,12 @@ semantic: context [
 					return npc3
 				]
 				type = block! [
-					syntax/args/type: npc2
-					npc2/1/syntax/name: "func-type"
-					npc2/1/syntax/parent: npc
-					npc2/1/syntax/args: make map! 1
-					npc2/1/syntax/args/types: make block! 4
-					expr2: npc2/1/expr
+					repend syntax/args ['type npc2]
+					repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
+					expr2: npc2/1/nested
 					forall expr2 [
 						expr3: expr2/1/expr
-						either any [
+						unless any [
 							all [
 								value? expr3
 								datatype? get expr3
@@ -188,19 +179,14 @@ semantic: context [
 								typeset? get expr3
 							]
 						][
-							append/only npc2/1/syntax/args/types expr3
-						][
 							syntax-error expr2 'invalid-datatype mold expr3
 						]
-						expr2/1/syntax/name: "func-type-item"
+						repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 					]
-					ret: next-type npc2
-					npc3: ret/1
-					if tail? npc3 [return npc3]
+					if tail? npc3: next npc2 [return npc3]
 					if string? npc3/1/expr [
-						syntax/args/desc: npc3
-						npc3/1/syntax/name: "func-desc"
-						npc3/1/syntax/parent: npc
+						repend syntax/args ['desc npc3]
+						repend npc2/1 ['syntax reduce ['type 'func-desc 'parent npc]]
 						return next npc3
 					]
 					return npc3
@@ -209,12 +195,10 @@ semantic: context [
 			npc2
 		]
 		check-return: function [npc [block!]][
-			syntax: npc/1/syntax
-			syntax/name: "func-return"
+			repend npc/1 ['syntax syntax: make block! 4]
+			repend syntax ['type 'func-return]
 			double-check npc
-			ret: next-type npc
-			npc2: ret/1
-			if tail? npc2 [
+			if tail? npc2: next npc [
 				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
@@ -222,16 +206,13 @@ semantic: context [
 				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
-			syntax/args: make map! 1
-			syntax/args/type: npc2
-			npc2/1/syntax/name: "func-type"
-			npc2/1/syntax/parent: npc
-			npc2/1/syntax/args: make map! 1
-			npc2/1/syntax/args/types: make block! 4
-			expr2: npc2/1/expr
+			repend syntax ['args args: make block! 4]
+			repend syntax/args ['type npc2]
+			repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
+			expr2: npc2/1/nested
 			forall expr2 [
 				expr3: expr2/1/expr
-				either any [
+				unless any [
 					all [
 						value? expr3
 						datatype? get expr3
@@ -241,14 +222,11 @@ semantic: context [
 						typeset? get expr3
 					]
 				][
-					append/only npc2/1/syntax/args/types expr3
-				][
 					syntax-error expr2 'invalid-datatype mold expr3
 				]
-				expr2/1/syntax/name: "func-type-item"
+				repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 			]
-			ret: next-type npc2
-			ret/1
+			next npc2
 		]
 		check-refines: function [npc [block!]][
 			collect-args: function [npc [block!] par [block!]][
@@ -270,22 +248,17 @@ semantic: context [
 				]
 				return npc
 			]
-			syntax: npc/1/syntax
-			syntax/name: "func-refinement"
-			syntax/args: make map! 2
-			syntax/args/params: make block! 4
+			repend npc/1 ['syntax syntax: make block! 4]
+			repend syntax ['type 'func-refinement 'args make block! 4]
+			repend syntax/args ['params make block! 4]
 			double-check npc
-			ret: next-type npc
-			npc2: ret/1
-			if tail? npc2 [return npc2]
+			if tail? npc2: next npc [return npc2]
 			type: type? npc2/1/expr
 			case [
 				type = string! [
-					syntax/args/desc: npc2
-					npc2/1/syntax/name: "func-desc"
-					npc2/1/syntax/parent: npc
-					ret: next-type npc2
-					npc3: ret/1
+					repend syntax/args ['desc npc2]
+					repend npc2/1 ['syntax reduce ['type 'func-desc 'parent npc]]
+					npc3: next npc2
 					return collect-args npc3 npc
 				]
 				type = word! [
@@ -309,10 +282,9 @@ semantic: context [
 			exit
 		]
 		if string? pc/1/expr [
-			par/1/syntax/desc: pc
-			pc/1/syntax/name: "func-desc"
-			ret: next-type pc
-			if tail? pc: ret/1 [exit]
+			repend par/1 ['syntax reduce ['desc pc]]
+			repend pc/1 ['syntax reduce ['type 'func-desc]]
+			if tail? pc: next pc [exit]
 		]
 		return-pc: none
 		local-pc: none
@@ -341,8 +313,7 @@ semantic: context [
 				]
 				true [
 					syntax-error pc 'invalid-arg mold expr
-					ret: next-type pc
-					pc: ret/1
+					pc: next pc
 				]
 			]
 			tail? pc
@@ -438,7 +409,7 @@ semantic: context [
 	resolve: function [top [block! paren!]][
 		resolve-set: function [pc [block!]][
 			resolve-set*: function [npc [block!]][
-				unless cast: next npc [
+				if tail? cast: next npc [
 					syntax-error pc 'miss-expr "any-type!"
 					exit
 				]
@@ -457,7 +428,7 @@ semantic: context [
 				]
 			]
 			unless pc/1/syntax [
-				repend pc/1 ['syntax []]
+				repend pc/1 ['syntax make block! 4]
 			]
 			if all [
 				none? pc/1/syntax/declare
@@ -470,7 +441,7 @@ semantic: context [
 
 		resolve-word: function [pc [block!]][
 			unless pc/1/syntax [
-				repend pc/1 ['syntax []]
+				repend pc/1 ['syntax make block! 4]
 			]
 			if all [
 				none? pc/1/syntax/declare
@@ -509,7 +480,7 @@ semantic: context [
 		]
 
 		fetch-block: function [pc [block! none!]][
-			unless pc [
+			if tail? pc [
 				return reduce [none 0]
 			]
 			if block? pc [
@@ -536,7 +507,7 @@ semantic: context [
 			]
 			step: step + ret/2
 			spec: ret/1
-			repend pc/1/syntax ['resolved resolved: clear []]
+			repend pc/1/syntax ['resolved resolved: make block! 4]
 			either pc/1/syntax/word = 'does [
 				repend resolved ['body spec]
 				either spec/1/syntax [
@@ -577,7 +548,7 @@ semantic: context [
 				if pc/1/syntax [pc: next pc continue]
 				if pc/1/expr = 'set [
 					if any [
-						none? npc: next pc
+						tail? npc: next pc
 						not find [word! path! lit-word! lit-path!] type?/word npc/1/expr
 					][
 						syntax-error pc 'miss-expr "word!/path!/lit-word!/lit-path!"
@@ -634,7 +605,10 @@ semantic: context [
 			forall pc [
 				if all [
 					pc/1/nested
-					pc/1/syntax/into
+					any [
+						pc/1/syntax/into
+						paren? pc/1/expr
+					]
 				]
 					resolve-depth pc/1/nested depth
 				]
@@ -667,216 +641,6 @@ semantic: context [
 			syntax-error next pc 'miss-expr "block! for Red File header"
 		]
 		resolve top
-	]
-
-	formatxx: function [top [block!]][
-		buffer: make string! 1000
-		newline: function [cnt [integer!]] [
-			append buffer lf
-			append/dup buffer " " cnt
-		]
-		format*: function [pc [block! paren!] depth [integer!]][
-			pad: depth * 4
-			newline pad
-			either block? pc [
-				blk?: true
-				append buffer "["
-			][
-				append buffer "("
-			]
-			forall pc [
-				newline pad + 2
-				append buffer "#("
-				newline pad + 4
-				append buffer "range: "
-				append buffer mold pc/1/range
-				newline pad + 4
-				append buffer "expr: "
-				either any [
-					block? pc/1/expr
-					paren? pc/1/expr
-				][
-					either empty? pc/1/expr [
-						either block? pc/1/expr [
-							append buffer "[]"
-						][
-							append buffer "()"
-						]
-					][
-						format* pc/1/expr depth + 1
-					]
-				][
-					append buffer mold/flat pc/1/expr
-				]
-				newline pad + 4
-				append buffer "depth: "
-				append buffer mold pc/1/depth
-				if pc/1/max-depth [
-					newline pad + 4
-					append buffer "max-depth: "
-					append buffer mold pc/1/max-depth
-				]
-				newline pad + 4
-				append buffer "syntax: #("
-				newline pad + 6
-				append buffer "name: "
-				append buffer pc/1/syntax/name
-				if pc/1/syntax/step [
-					newline pad + 6
-					append buffer "step: "
-					append buffer pc/1/syntax/step
-				]
-				if pc/1/syntax/error [
-					newline pad + 6
-					append buffer "error: "
-					append buffer mold/flat pc/1/syntax/error
-				]
-				if pc/1/syntax/meta [
-					newline pad + 6
-					append buffer "meta: "
-					append buffer pc/1/syntax/meta
-				]
-				if pc/1/syntax/cast [
-					newline pad + 6
-					append buffer "cast: "
-					append buffer mold/flat pc/1/syntax/cast/1/range
-				]
-				if pc/1/syntax/parent [
-					newline pad + 6
-					append buffer "parent: "
-					append buffer mold/flat pc/1/syntax/parent/1/range
-				]
-				if pc/1/syntax/refer [
-					newline pad + 6
-					append buffer "refer: "
-					append buffer mold/flat pc/1/syntax/refer/1/range
-				]
-				if pc/1/syntax/value [
-					newline pad + 6
-					append buffer "value: "
-					append buffer mold/flat pc/1/syntax/value/1/range
-				]
-				if pc/1/syntax/word [
-					newline pad + 6
-					append buffer "word: "
-					append buffer pc/1/syntax/word
-				]
-
-				if pc/1/syntax/desc [
-					newline pad + 6
-					append buffer "desc: "
-					append buffer mold/flat pc/1/syntax/desc/1/range
-				]
-
-				if pc/1/syntax/args [
-					newline pad + 6
-					append buffer "args: #("
-					if pc/1/syntax/args/refs [
-						newline pad + 8
-						append buffer "refs: "
-						append buffer mold/flat pc/1/syntax/args/refs/1/range
-					]
-					if pc/1/syntax/args/desc [
-						newline pad + 8
-						append buffer "desc: "
-						append buffer mold/flat pc/1/syntax/args/desc/1/range
-					]
-					if pc/1/syntax/args/type [
-						newline pad + 8
-						append buffer "type: "
-						append buffer mold/flat pc/1/syntax/args/type/1/range
-					]
-					if pc/1/syntax/args/types [
-						newline pad + 8
-						append buffer "types: "
-						append buffer mold/flat pc/1/syntax/args/types
-					]
-					if params: pc/1/syntax/args/params [
-						newline pad + 8
-						append buffer "params: ["
-						forall params [
-							newline pad + 10
-							append buffer mold/flat params/1/range
-						]
-						newline pad + 8
-						append buffer "]"
-					]
-					newline pad + 6
-					append buffer ")"
-				]
-
-				if pc/1/syntax/casts [
-					newline pad + 6
-					append buffer "casts: #("
-					casts: words-of pc/1/syntax/casts
-					forall casts [
-						newline pad + 8
-						append buffer mold casts/1
-						append buffer ": "
-						pos: pc/1/syntax/casts/(casts/1)
-						append buffer mold/flat pos/1/range
-					]
-					newline pad + 6
-					append buffer ")"
-				]
-
-				if pc/1/syntax/resolved [
-					newline pad + 6
-					append buffer "resolved: #("
-					resolved: words-of pc/1/syntax/resolved
-					forall resolved [
-						newline pad + 8
-						append buffer mold resolved/1
-						append buffer ": "
-						pos: pc/1/syntax/resolved/(resolved/1)
-						append buffer mold/flat pos/1/range
-					]
-					newline pad + 6
-					append buffer ")"
-				]
-
-				if pc/1/syntax/into [
-					newline pad + 6
-					append buffer "into: "
-					append buffer mold pc/1/syntax/into
-				]
-
-				if extra: pc/1/syntax/extra [
-					newline pad + 6
-					append buffer "extra: ["
-					forall extra [
-						newline pad + 8
-						append buffer mold/flat extra/1/range
-					]
-					newline pad + 6
-					append buffer "]"
-				]
-
-				if completions: pc/1/syntax/completions [
-					newline pad + 6
-					append buffer "completions: ["
-					forall completions [
-						newline pad + 8
-						append buffer mold/flat completions/1/range
-					]
-					newline pad + 6
-					append buffer "]"
-				]
-
-				newline pad + 4
-				append buffer ")"
-				newline pad + 2
-				append buffer ")"
-			]
-			newline pad
-			either blk? [
-				append buffer "]"
-			][
-				append buffer ")"
-			]
-		]
-		format* top 0
-		buffer
 	]
 
 	format: function [top [block!] /semantic][
@@ -967,6 +731,45 @@ semantic: context [
 							append buffer ": "
 							value: resolved/(i * 2 + 2)
 							append buffer mold/flat reduce [value/1/s value/1/e]
+							i: i + 1
+						]
+					]
+
+					if type: pc/1/syntax/type [
+						newline pad + 6
+						append buffer "type: "
+						append buffer type
+					]
+
+					if parent: pc/1/syntax/parent [
+						newline pad + 6
+						append buffer "parent: "
+						append buffer mold/flat reduce [parent/1/s parent/1/e]
+					]
+
+					if args: pc/1/syntax/args [
+						newline pad + 6
+						append buffer "args: ["
+						i: 0
+						len: (length? args) / 2
+						loop len [
+							newline pad + 8
+							either 'params = key: args/(i * 2 + 1) [
+								append buffer "params: ["
+								value: args/(i * 2 + 2)
+								forall value [
+									newline pad + 10
+									append buffer mold/flat reduce [value/1/1/s value/1/1/e]
+								]
+								newline pad + 8
+								append buffer "]"
+							][
+								append buffer key
+								append buffer ": "
+								value: args/(i * 2 + 2)
+								append buffer mold/flat reduce [value/1/s value/1/e]
+							]
+
 							i: i + 1
 						]
 					]
