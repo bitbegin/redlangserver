@@ -88,7 +88,7 @@ lexer: context [
 		store-ast: [
 			if ast [
 				depth: length? rs-stack
-				ast-block: reduce ['expr value 's index? rs 'e index? re 'depth depth]
+				ast-block: reduce ['expr reduce [value] 's index? rs 'e index? re 'depth depth]
 				if ast-nested [repend ast-block ['nested ast-nested]]
 				if depth = 0 [
 					repend ast-block [

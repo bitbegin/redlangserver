@@ -21,7 +21,8 @@ semantic: context [
 			repend pc ['error error]
 			exit
 		]
-		either block? errors: pc/error [
+		errors: pc/error
+		either block? errors/1 [
 			forall errors [
 				if errors/1/code = error/code [exit]
 			]
@@ -110,27 +111,27 @@ semantic: context [
 		switch word [
 			miss-expr [
 				create-error pc/1 'Error 'miss-expr
-					rejoin [mold pc/1/expr " -- need a type: " args]
+					rejoin [mold pc/1/expr/1 " -- need a type: " args]
 			]
 			recursive-define [
 				create-error pc/1 'Error 'recursive-define
-					rejoin [mold pc/1/expr " -- recursive define"]
+					rejoin [mold pc/1/expr/1 " -- recursive define"]
 			]
 			double-define [
 				create-error pc/1 'Error 'double-define
-					rejoin [mold pc/1/expr " -- double define: " args]
+					rejoin [mold pc/1/expr/1 " -- double define: " args]
 			]
 			invalid-arg [
 				create-error pc/1 'Error 'invalid-arg
-					rejoin [mold pc/1/expr " -- invalid argument for: " args]
+					rejoin [mold pc/1/expr/1 " -- invalid argument for: " args]
 			]
 			invalid-datatype [
 				create-error pc/1 'Error 'invalid-datatype
-					rejoin [mold pc/1/expr " -- invalid datatype: " args]
+					rejoin [mold pc/1/expr/1 " -- invalid datatype: " args]
 			]
 			forbidden-refine [
 				create-error pc/1 'Error 'forbidden-refine
-					rejoin [mold pc/1/expr " -- forbidden refinement: " args]
+					rejoin [mold pc/1/expr/1 " -- forbidden refinement: " args]
 			]
 		]
 	]
@@ -139,7 +140,7 @@ semantic: context [
 		words: make block! 4
 		word: none
 		double-check: function [pc [block!]][
-			either find words word: to word! pc/1/expr [
+			either find words word: to word! pc/1/expr/1 [
 				syntax-error pc 'double-define to string! word
 			][
 				append words word
@@ -151,14 +152,14 @@ semantic: context [
 			repend syntax/args ['refs par]
 			double-check npc
 			if tail? npc2: next npc [return npc2]
-			type: type? npc2/1/expr
+			type: type? npc2/1/expr/1
 			case [
 				type = string! [
 					repend syntax/args ['desc npc2]
 					repend npc2/1 ['syntax reduce ['type 'func-desc 'parent npc]]
 					if tail? npc3: next npc2 [return npc3]
-					if block? npc3/1/expr [
-						syntax-error npc3 'invalid-arg mold npc/1/expr
+					if block? npc3/1/expr/1 [
+						syntax-error npc3 'invalid-arg mold npc/1/expr/1
 						return next npc3
 					]
 					return npc3
@@ -168,7 +169,7 @@ semantic: context [
 					repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
 					expr2: npc2/1/nested
 					forall expr2 [
-						expr3: expr2/1/expr
+						expr3: expr2/1/expr/1
 						unless any [
 							all [
 								value? expr3
@@ -184,7 +185,7 @@ semantic: context [
 						repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 					]
 					if tail? npc3: next npc2 [return npc3]
-					if string? npc3/1/expr [
+					if string? npc3/1/expr/1 [
 						repend syntax/args ['desc npc3]
 						repend npc2/1 ['syntax reduce ['type 'func-desc 'parent npc]]
 						return next npc3
@@ -202,7 +203,7 @@ semantic: context [
 				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
-			unless block? npc2/1/expr [
+			unless block? npc2/1/expr/1 [
 				syntax-error npc 'miss-expr "block!"
 				return npc2
 			]
@@ -211,7 +212,7 @@ semantic: context [
 			repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
 			expr2: npc2/1/nested
 			forall expr2 [
-				expr3: expr2/1/expr
+				expr3: expr2/1/expr/1
 				unless any [
 					all [
 						value? expr3
@@ -231,17 +232,17 @@ semantic: context [
 		check-refines: function [npc [block!]][
 			collect-args: function [npc [block!] par [block!]][
 				while [not tail? npc][
-					either word? npc/1/expr [
+					either word? npc/1/expr/1 [
 						append par/1/syntax/args/params npc
 						if tail? npc: check-args npc par [return npc]
 					][
 						either any [
-							refinement? npc/1/expr
-							npc/1/expr = to set-word! 'return
+							refinement? npc/1/expr/1
+							npc/1/expr/1 = to set-word! 'return
 						][
 							return npc
 						][
-							syntax-error npc 'invalid-arg mold par/1/expr
+							syntax-error npc 'invalid-arg mold par/1/expr/1
 							npc: next npc
 						]
 					]
@@ -253,7 +254,7 @@ semantic: context [
 			repend syntax/args ['params make block! 4]
 			double-check npc
 			if tail? npc2: next npc [return npc2]
-			type: type? npc2/1/expr
+			type: type? npc2/1/expr/1
 			case [
 				type = string! [
 					repend syntax/args ['desc npc2]
@@ -268,7 +269,7 @@ semantic: context [
 					return npc2
 				]
 				true [
-					syntax-error npc2 'invalid-arg mold npc/1/expr
+					syntax-error npc2 'invalid-arg mold npc/1/expr/1
 					return next npc2
 				]
 			]
@@ -281,7 +282,7 @@ semantic: context [
 		][
 			exit
 		]
-		if string? pc/1/expr [
+		if string? pc/1/expr/1 [
 			repend par/1 ['syntax reduce ['desc pc]]
 			repend pc/1 ['syntax reduce ['type 'func-desc]]
 			if tail? pc: next pc [exit]
@@ -289,7 +290,7 @@ semantic: context [
 		return-pc: none
 		local-pc: none
 		until [
-			expr: pc/1/expr
+			expr: pc/1/expr/1
 			case [
 				expr = to set-word! 'return [
 					return-pc: pc
@@ -300,7 +301,7 @@ semantic: context [
 						local-pc
 						keyword = 'has
 					][
-						syntax-error pc 'forbidden-refine mold pc/1/expr
+						syntax-error pc 'forbidden-refine mold pc/1/expr/1
 					]
 					if expr = /local [local-pc: pc]
 					pc: check-refines pc
@@ -321,12 +322,12 @@ semantic: context [
 	]
 
 	func-arg?: function [spec [block!] word [word!]][
-		if block? expr: spec/1/expr [
+		if block? expr: spec/1/expr/1 [
 			npc: spec/1/nested
 			forall npc [
 				if all [
-					find [word! lit-word! get-word! refinement!] type?/word npc/1/expr
-					word = to word! npc/1/expr
+					find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1
+					word = to word! npc/1/expr/1
 				][
 					return npc
 				]
@@ -351,10 +352,10 @@ semantic: context [
 	]
 
 	func-spec-declare?: function [top [block!] pc [block!]][
-		word: to word! pc/1/expr
+		word: to word! pc/1/expr/1
 		find-func-spec: function [par [block!]][
 			if all [
-				block? par/1/expr
+				block? par/1/expr/1
 				par <> top
 				spec: spec-of-func-body top par
 				ret: func-arg? spec word
@@ -376,20 +377,20 @@ semantic: context [
 	]
 
 	recent-set?: function [top [block!] pc [block!]][
-		word: to word! pc/1/expr
+		word: to word! pc/1/expr/1
 		find-set-word: function [npc [block! paren!]][
 			forall npc [
 				if all [
 					pc <> npc
 					any [
-						set-word? npc/1/expr
+						set-word? npc/1/expr/1
 						all [
-							word? npc/1/expr
+							word? npc/1/expr/1
 							npc/-1
-							npc/-1/expr = 'set
+							npc/-1/expr/1 = 'set
 						]
 					]
-					word = to word! npc/1/expr
+					word = to word! npc/1/expr/1
 				][
 					return npc
 				]
@@ -413,17 +414,17 @@ semantic: context [
 					syntax-error pc 'miss-expr "any-type!"
 					exit
 				]
-				if find literal-type type?/word cast/1/expr [
+				if find literal-type type?/word cast/1/expr/1 [
 					repend pc/1/syntax ['value cast]
 					repend pc/1/syntax ['step 1 + (index? cast) - (index? pc)]
 					exit
 				]
-				if word? cast/1/expr [
+				if word? cast/1/expr/1 [
 					repend pc/1/syntax ['cast cast]
 					repend pc/1/syntax ['step 1 + (index? cast) - (index? pc)]
 					exit
 				]
-				if set-word? cast/1/expr [
+				if set-word? cast/1/expr/1 [
 					resolve-set* cast
 				]
 			]
@@ -455,7 +456,7 @@ semantic: context [
 		]
 
 		word-value?: function [pc [block!]][
-			if set-word? pc/1/expr [
+			if set-word? pc/1/expr/1 [
 				unless pc/1/syntax [resolve-set pc]
 				if value: pc/1/syntax/value [
 					return reduce [pc/1/syntax/step value]
@@ -466,8 +467,8 @@ semantic: context [
 				return none
 			]
 			if any [
-				word? pc/1/expr
-				get-word? pc/1/expr
+				word? pc/1/expr/1
+				get-word? pc/1/expr/1
 			][
 				unless pc/1/syntax [resolve-word pc]
 				if recent: pc/1/syntax/recent [
@@ -546,10 +547,10 @@ semantic: context [
 		resolve-refer: function [pc [block!]][
 			while [not tail? pc] [
 				if pc/1/syntax [pc: next pc continue]
-				if pc/1/expr = 'set [
+				if pc/1/expr/1 = 'set [
 					if any [
 						tail? npc: next pc
-						not find [word! path! lit-word! lit-path!] type?/word npc/1/expr
+						not find [word! path! lit-word! lit-path!] type?/word npc/1/expr/1
 					][
 						syntax-error pc 'miss-expr "word!/path!/lit-word!/lit-path!"
 						pc: next pc continue
@@ -558,27 +559,27 @@ semantic: context [
 					pc: next pc continue
 				]
 				if any [
-					set-word? pc/1/expr
-					set-path? pc/1/expr
+					set-word? pc/1/expr/1
+					set-path? pc/1/expr/1
 				][
 					resolve-set pc
 					pc: next pc continue
 				]
 				if any [
-					word? pc/1/expr
-					path? pc/1/expr
-					get-word? pc/1/expr
-					get-path? pc/1/expr
+					word? pc/1/expr/1
+					path? pc/1/expr/1
+					get-word? pc/1/expr/1
+					get-path? pc/1/expr/1
 				][
 					either any [
-						word? pc/1/expr
-						get-word? pc/1/expr
+						word? pc/1/expr/1
+						get-word? pc/1/expr/1
 					][
 						resolve-word pc
-						word: to word! pc/1/expr
+						word: to word! pc/1/expr/1
 						repend pc/1/syntax ['word word]
 					][
-						word: to word! pc/1/expr/1
+						word: to word! pc/1/expr/1/1
 						repend pc/1 ['syntax reduce ['word word]]
 					]
 					step: 1
@@ -611,7 +612,7 @@ semantic: context [
 							pc/1/syntax
 							pc/1/syntax/into
 						]
-						paren? pc/1/expr
+						paren? pc/1/expr/1
 					]
 				][
 					resolve-depth pc/1/nested depth
@@ -638,10 +639,10 @@ semantic: context [
 			'extra make block! 20
 		]
 		pc: top/1/nested
-		unless pc/1/expr = 'Red [
+		unless pc/1/expr/1 = 'Red [
 			syntax-error pc 'miss-expr "'Red' for Red File header"
 		]
-		unless block? pc/2/expr [
+		unless block? pc/2/expr/1 [
 			syntax-error next pc 'miss-expr "block! for Red File header"
 		]
 		resolve top
