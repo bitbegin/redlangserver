@@ -529,13 +529,11 @@ semantic: context [
 			repend pc/1/syntax ['resolved resolved: make block! 4]
 			either pc/1/syntax/word = 'does [
 				repend resolved ['body spec]
-				set-into spec
 				if spec/1/nested [resolve-refer spec/1/nested]
 				return step
 			][
 				repend resolved ['spec spec]
 				if find [context all any] pc/1/syntax/word [
-					set-into spec
 					if spec/1/nested [resolve-refer spec/1/nested]
 					return step
 				]
@@ -548,7 +546,6 @@ semantic: context [
 			]
 			step: step + ret/2
 			spec: ret/1
-			set-into spec
 			repend resolved ['body spec]
 			if spec/1/nested [resolve-refer spec/1/nested]
 			step
