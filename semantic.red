@@ -522,7 +522,7 @@ semantic: context [
 			ret: fetch-block next pc
 			unless ret/1 [
 				syntax-error pc 'miss-expr "block!"
-				return step + ret/2
+				return step
 			]
 			step: step + ret/2
 			spec: ret/1
@@ -544,7 +544,7 @@ semantic: context [
 			ret: fetch-block skip pc step
 			unless ret/1 [
 				syntax-error pc 'miss-expr "block!"
-				return step + ret/2
+				return step
 			]
 			step: step + ret/2
 			spec: ret/1
@@ -608,6 +608,13 @@ semantic: context [
 				]
 				return step
 			]
+			if all [
+				pc/1/nested
+				paren? pc/1/expr/1
+			][
+				resolve-refer pc/1/nested
+				return 1
+			]
 			1
 		]
 
@@ -623,22 +630,7 @@ semantic: context [
 
 		]
 
-		ipc: top/1/nested
-		forall ipc [
-			resolve-refer ipc
-			if all [
-				ipc/1/nested
-				any [
-					all [
-						ipc/1/syntax
-						ipc/1/syntax/into
-					]
-					paren? ipc/1/expr/1
-				]
-			][
-				resolve-refer ipc/1/nested
-			]
-		]
+		resolve-refer top/1/nested
 	]
 
 	analysis: function [top [block!]][

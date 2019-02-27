@@ -1823,7 +1823,7 @@
         depth: 1
         syntax: [
           word: has
-          step: 4
+          step: 2
           resolved: [
             spec: [812 822]
         ]
