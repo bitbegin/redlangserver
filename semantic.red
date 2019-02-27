@@ -90,6 +90,7 @@ semantic: context [
 		position* top line column
 	]
 
+	;-- use pc/1/upper to instead
 	get-parent: function [top [block!] item [block!]][
 		get-parent*: function [pc [block!] par [block!]][
 			forall pc [
@@ -391,7 +392,7 @@ semantic: context [
 		]
 		par: pc
 		forever [
-			unless par: get-parent top par/1 [
+			unless par: par/1/upper [
 				return none
 			]
 			if ret: find-func-spec par [
@@ -432,7 +433,7 @@ semantic: context [
 			if ret: find-set-word head npc [
 				return ret
 			]
-			not npc: get-parent top npc/1
+			not npc: npc/1/upper
 		]
 		none
 	]
@@ -477,7 +478,7 @@ semantic: context [
 			if all [
 				none? pc/1/syntax/declare
 				none? pc/1/syntax/recent
-				top <> par: get-parent top pc/1
+				top <> par: pc/1/upper
 				not context-spec? top par
 			][
 				unless find top/1/syntax/extra pc/1 [
@@ -721,6 +722,11 @@ semantic: context [
 				newline pad + 4
 				append buffer "range: "
 				append buffer mold/flat to-range pc
+				if pc/1/upper [
+					newline pad + 4
+					append buffer "upper: "
+					append buffer mold/flat to-range pc/1/upper
+				]
 				newline pad + 4
 				append buffer "depth: "
 				append buffer mold pc/1/depth
@@ -985,7 +991,7 @@ semantic: context [
 
 			npc: pc
 			until [
-				par: get-parent top npc/1
+				par: npc/1/upper
 				collect-func-spec par
 				collect-set-word head npc
 				not npc: par
