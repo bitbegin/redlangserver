@@ -2,16 +2,12 @@
 [
   [
     expr: [Red he: [] a: 'test
-    s: 1
-    e: 941
     range: [1 1 76 1]
     depth: 0
     nested: 
     [
       [
         expr: Red
-        s: 1
-        e: 4
         range: [1 1 1 4]
         depth: 1
         syntax: [
@@ -20,8 +16,6 @@
       ]
       [
         expr: he:
-        s: 5
-        e: 8
         range: [1 5 1 8]
         depth: 1
         syntax: [
@@ -32,15 +26,11 @@
       ]
       [
         expr: []
-        s: 9
-        e: 11
         range: [1 9 1 11]
         depth: 1
       ]
       [
         expr: a:
-        s: 13
-        e: 15
         range: [3 1 3 3]
         depth: 1
         syntax: [
@@ -50,15 +40,11 @@
       ]
       [
         expr: 'test
-        s: 16
-        e: 21
         range: [3 4 3 9]
         depth: 1
       ]
       [
         expr: b:
-        s: 22
-        e: 24
         range: [4 1 4 3]
         depth: 1
         syntax: [
@@ -68,8 +54,6 @@
       ]
       [
         expr: context
-        s: 25
-        e: 32
         range: [4 4 4 11]
         depth: 1
         syntax: [
@@ -82,16 +66,12 @@
       ]
       [
         expr: [c: 4 d: context [e:
-        s: 33
-        e: 346
         range: [4 12 32 2]
         depth: 1
         nested: 
         [
           [
             expr: c:
-            s: 36
-            e: 38
             range: [5 2 5 4]
             depth: 2
             syntax: [
@@ -101,15 +81,11 @@
           ]
           [
             expr: 4
-            s: 39
-            e: 40
             range: [5 5 5 6]
             depth: 2
           ]
           [
             expr: d:
-            s: 42
-            e: 44
             range: [6 2 6 4]
             depth: 2
             syntax: [
@@ -119,8 +95,6 @@
           ]
           [
             expr: context
-            s: 45
-            e: 52
             range: [6 5 6 12]
             depth: 2
             syntax: [
@@ -133,16 +107,12 @@
           ]
           [
             expr: [e: #{12} f: func [x
-            s: 53
-            e: 314
             range: [6 13 27 3]
             depth: 2
             nested: 
             [
               [
                 expr: e:
-                s: 57
-                e: 59
                 range: [7 3 7 5]
                 depth: 3
                 syntax: [
@@ -152,15 +122,11 @@
               ]
               [
                 expr: #{12}
-                s: 60
-                e: 65
                 range: [7 6 7 11]
                 depth: 3
               ]
               [
                 expr: f:
-                s: 68
-                e: 70
                 range: [8 3 8 5]
                 depth: 3
                 syntax: [
@@ -170,8 +136,6 @@
               ]
               [
                 expr: func
-                s: 71
-                e: 75
                 range: [8 6 8 10]
                 depth: 3
                 syntax: [
@@ -185,16 +149,12 @@
               ]
               [
                 expr: [x [block!] y [integ
-                s: 76
-                e: 101
                 range: [8 11 8 36]
                 depth: 3
                 nested: 
                 [
                   [
                     expr: x
-                    s: 77
-                    e: 78
                     range: [8 12 8 13]
                     depth: 4
                     syntax: [
@@ -206,16 +166,12 @@
                   ]
                   [
                     expr: [block!]
-                    s: 79
-                    e: 87
                     range: [8 14 8 22]
                     depth: 4
                     nested: 
                     [
                       [
                         expr: block!
-                        s: 80
-                        e: 86
                         range: [8 15 8 21]
                         depth: 5
                         syntax: [
@@ -230,8 +186,6 @@
                   ]
                   [
                     expr: y
-                    s: 88
-                    e: 89
                     range: [8 23 8 24]
                     depth: 4
                     syntax: [
@@ -243,16 +197,12 @@
                   ]
                   [
                     expr: [integer!]
-                    s: 90
-                    e: 100
                     range: [8 25 8 35]
                     depth: 4
                     nested: 
                     [
                       [
                         expr: integer!
-                        s: 91
-                        e: 99
                         range: [8 26 8 34]
                         depth: 5
                         syntax: [
@@ -269,16 +219,12 @@
               ]
               [
                 expr: [ff: function [a [in
-                s: 101
-                e: 303
                 range: [8 36 25 4]
                 depth: 3
                 nested: 
                 [
                   [
                     expr: ff:
-                    s: 106
-                    e: 109
                     range: [9 4 9 7]
                     depth: 4
                     syntax: [
@@ -288,8 +234,6 @@
                   ]
                   [
                     expr: function
-                    s: 110
-                    e: 118
                     range: [9 8 9 16]
                     depth: 4
                     syntax: [
@@ -303,16 +247,12 @@
                   ]
                   [
                     expr: [a [integer!] b [bin
-                    s: 119
-                    e: 145
                     range: [9 17 9 43]
                     depth: 4
                     nested: 
                     [
                       [
                         expr: a
-                        s: 120
-                        e: 121
                         range: [9 18 9 19]
                         depth: 5
                         syntax: [
@@ -324,16 +264,12 @@
                       ]
                       [
                         expr: [integer!]
-                        s: 122
-                        e: 132
                         range: [9 20 9 30]
                         depth: 5
                         nested: 
                         [
                           [
                             expr: integer!
-                            s: 123
-                            e: 131
                             range: [9 21 9 29]
                             depth: 6
                             syntax: [
@@ -348,8 +284,6 @@
                       ]
                       [
                         expr: b
-                        s: 133
-                        e: 134
                         range: [9 31 9 32]
                         depth: 5
                         syntax: [
@@ -361,16 +295,12 @@
                       ]
                       [
                         expr: [binary!]
-                        s: 135
-                        e: 144
                         range: [9 33 9 42]
                         depth: 5
                         nested: 
                         [
                           [
                             expr: binary!
-                            s: 136
-                            e: 143
                             range: [9 34 9 41]
                             depth: 6
                             syntax: [
@@ -387,16 +317,12 @@
                   ]
                   [
                     expr: [f1: "test" f2: x f3
-                    s: 145
-                    e: 247
                     range: [9 43 18 5]
                     depth: 4
                     nested: 
                     [
                       [
                         expr: f1:
-                        s: 151
-                        e: 154
                         range: [10 5 10 8]
                         depth: 5
                         syntax: [
@@ -407,15 +333,11 @@
                       ]
                       [
                         expr: "test"
-                        s: 155
-                        e: 161
                         range: [10 9 10 15]
                         depth: 5
                       ]
                       [
                         expr: f2:
-                        s: 166
-                        e: 169
                         range: [11 5 11 8]
                         depth: 5
                         syntax: [
@@ -426,8 +348,6 @@
                       ]
                       [
                         expr: x
-                        s: 170
-                        e: 171
                         range: [11 9 11 10]
                         depth: 5
                         syntax: [
@@ -437,8 +357,6 @@
                       ]
                       [
                         expr: f3:
-                        s: 176
-                        e: 179
                         range: [12 5 12 8]
                         depth: 5
                         syntax: [
@@ -449,8 +367,6 @@
                       ]
                       [
                         expr: f1
-                        s: 180
-                        e: 182
                         range: [12 9 12 11]
                         depth: 5
                         syntax: [
@@ -460,8 +376,6 @@
                       ]
                       [
                         expr: f4:
-                        s: 187
-                        e: 190
                         range: [13 5 13 8]
                         depth: 5
                         syntax: [
@@ -472,8 +386,6 @@
                       ]
                       [
                         expr: l
-                        s: 191
-                        e: 192
                         range: [13 9 13 10]
                         depth: 5
                         syntax: [
@@ -483,8 +395,6 @@
                       ]
                       [
                         expr: f5:
-                        s: 197
-                        e: 200
                         range: [14 5 14 8]
                         depth: 5
                         syntax: [
@@ -493,8 +403,6 @@
                       ]
                       [
                         expr: :f
-                        s: 201
-                        e: 203
                         range: [14 9 14 11]
                         depth: 5
                         syntax: [
@@ -504,8 +412,6 @@
                       ]
                       [
                         expr: f6:
-                        s: 208
-                        e: 211
                         range: [15 5 15 8]
                         depth: 5
                         syntax: [
@@ -516,8 +422,6 @@
                       ]
                       [
                         expr: f5
-                        s: 212
-                        e: 214
                         range: [15 9 15 11]
                         depth: 5
                         syntax: [
@@ -527,8 +431,6 @@
                       ]
                       [
                         expr: f7:
-                        s: 219
-                        e: 222
                         range: [16 5 16 8]
                         depth: 5
                         syntax: [
@@ -539,8 +441,6 @@
                       ]
                       [
                         expr: a
-                        s: 223
-                        e: 224
                         range: [16 9 16 10]
                         depth: 5
                         syntax: [
@@ -550,8 +450,6 @@
                       ]
                       [
                         expr: +
-                        s: 225
-                        e: 226
                         range: [16 11 16 12]
                         depth: 5
                         syntax: [
@@ -561,8 +459,6 @@
                       ]
                       [
                         expr: length?
-                        s: 227
-                        e: 234
                         range: [16 13 16 20]
                         depth: 5
                         syntax: [
@@ -572,8 +468,6 @@
                       ]
                       [
                         expr: b
-                        s: 235
-                        e: 236
                         range: [16 21 16 22]
                         depth: 5
                         syntax: [
@@ -583,8 +477,6 @@
                       ]
                       [
                         expr: f
-                        s: 241
-                        e: 242
                         range: [17 5 17 6]
                         depth: 5
                         syntax: [
@@ -596,8 +488,6 @@
                   ]
                   [
                     expr: x:
-                    s: 251
-                    e: 253
                     range: [19 4 19 6]
                     depth: 4
                     syntax: [
@@ -608,15 +498,11 @@
                   ]
                   [
                     expr: 1
-                    s: 254
-                    e: 255
                     range: [19 7 19 8]
                     depth: 4
                   ]
                   [
                     expr: y:
-                    s: 259
-                    e: 261
                     range: [20 4 20 6]
                     depth: 4
                     syntax: [
@@ -627,15 +513,11 @@
                   ]
                   [
                     expr: 1
-                    s: 262
-                    e: 263
                     range: [20 7 20 8]
                     depth: 4
                   ]
                   [
                     expr: e:
-                    s: 267
-                    e: 269
                     range: [21 4 21 6]
                     depth: 4
                     syntax: [
@@ -645,8 +527,6 @@
                   ]
                   [
                     expr: x
-                    s: 270
-                    e: 271
                     range: [21 7 21 8]
                     depth: 4
                     syntax: [
@@ -656,8 +536,6 @@
                   ]
                   [
                     expr: +
-                    s: 272
-                    e: 273
                     range: [21 9 21 10]
                     depth: 4
                     syntax: [
@@ -666,8 +544,6 @@
                   ]
                   [
                     expr: y
-                    s: 274
-                    e: 275
                     range: [21 11 21 12]
                     depth: 4
                     syntax: [
@@ -677,8 +553,6 @@
                   ]
                   [
                     expr: o:
-                    s: 279
-                    e: 281
                     range: [22 4 22 6]
                     depth: 4
                     syntax: [
@@ -688,8 +562,6 @@
                   ]
                   [
                     expr: g
-                    s: 282
-                    e: 283
                     range: [22 7 22 8]
                     depth: 4
                     syntax: [
@@ -698,8 +570,6 @@
                   ]
                   [
                     expr: t:
-                    s: 287
-                    e: 289
                     range: [23 4 23 6]
                     depth: 4
                     syntax: [
@@ -709,8 +579,6 @@
                   ]
                   [
                     expr: h
-                    s: 290
-                    e: 291
                     range: [23 7 23 8]
                     depth: 4
                     syntax: [
@@ -719,8 +587,6 @@
                   ]
                   [
                     expr: u:
-                    s: 295
-                    e: 297
                     range: [24 4 24 6]
                     depth: 4
                     syntax: [
@@ -730,8 +596,6 @@
                   ]
                   [
                     expr: x
-                    s: 298
-                    e: 299
                     range: [24 7 24 8]
                     depth: 4
                     syntax: [
@@ -743,8 +607,6 @@
               ]
               [
                 expr: g:
-                s: 306
-                e: 308
                 range: [26 3 26 5]
                 depth: 3
                 syntax: [
@@ -754,8 +616,6 @@
               ]
               [
                 expr: []
-                s: 309
-                e: 311
                 range: [26 6 26 8]
                 depth: 3
               ]
@@ -763,8 +623,6 @@
           ]
           [
             expr: h:
-            s: 316
-            e: 318
             range: [28 2 28 4]
             depth: 2
             syntax: [
@@ -774,23 +632,17 @@
           ]
           [
             expr: #(a: 3)
-            s: 319
-            e: 326
             range: [28 5 28 12]
             depth: 2
             nested: 
             [
               [
                 expr: a:
-                s: 321
-                e: 323
                 range: [28 7 28 9]
                 depth: 3
               ]
               [
                 expr: 3
-                s: 324
-                e: 325
                 range: [28 10 28 11]
                 depth: 3
               ]
@@ -798,8 +650,6 @@
           ]
           [
             expr: i:
-            s: 328
-            e: 330
             range: [29 2 29 4]
             depth: 2
             syntax: [
@@ -809,8 +659,6 @@
           ]
           [
             expr: x
-            s: 331
-            e: 332
             range: [29 5 29 6]
             depth: 2
             syntax: [
@@ -819,8 +667,6 @@
           ]
           [
             expr: j:
-            s: 334
-            e: 336
             range: [30 2 30 4]
             depth: 2
             syntax: [
@@ -830,8 +676,6 @@
           ]
           [
             expr: e
-            s: 337
-            e: 338
             range: [30 5 30 6]
             depth: 2
             syntax: [
@@ -840,8 +684,6 @@
           ]
           [
             expr: k:
-            s: 340
-            e: 342
             range: [31 2 31 4]
             depth: 2
             syntax: [
@@ -851,8 +693,6 @@
           ]
           [
             expr: t
-            s: 343
-            e: 344
             range: [31 5 31 6]
             depth: 2
             syntax: [
@@ -863,8 +703,6 @@
       ]
       [
         expr: l:
-        s: 348
-        e: 350
         range: [34 1 34 3]
         depth: 1
         syntax: [
@@ -874,16 +712,12 @@
       ]
       [
         expr: (m: 3 n: a)
-        s: 351
-        e: 362
         range: [34 4 34 15]
         depth: 1
         nested: 
         [
           [
             expr: m:
-            s: 352
-            e: 354
             range: [34 5 34 7]
             depth: 2
             syntax: [
@@ -893,15 +727,11 @@
           ]
           [
             expr: 3
-            s: 355
-            e: 356
             range: [34 8 34 9]
             depth: 2
           ]
           [
             expr: n:
-            s: 357
-            e: 359
             range: [34 10 34 12]
             depth: 2
             syntax: [
@@ -911,8 +741,6 @@
           ]
           [
             expr: a
-            s: 360
-            e: 361
             range: [34 13 34 14]
             depth: 2
             syntax: [
@@ -923,8 +751,6 @@
       ]
       [
         expr: o:
-        s: 363
-        e: 365
         range: [35 1 35 3]
         depth: 1
         syntax: [
@@ -934,8 +760,6 @@
       ]
       [
         expr: l
-        s: 366
-        e: 367
         range: [35 4 35 5]
         depth: 1
         syntax: [
@@ -944,8 +768,6 @@
       ]
       [
         expr: r:
-        s: 369
-        e: 371
         range: [37 1 37 3]
         depth: 1
         syntax: [
@@ -955,8 +777,6 @@
       ]
       [
         expr: func
-        s: 372
-        e: 376
         range: [37 4 37 8]
         depth: 1
         syntax: [
@@ -970,16 +790,12 @@
       ]
       [
         expr: [a [test] b [test!] 
-        s: 377
-        e: 473
         range: [37 9 43 2]
         depth: 1
         nested: 
         [
           [
             expr: a
-            s: 380
-            e: 381
             range: [38 2 38 3]
             depth: 2
             syntax: [
@@ -991,16 +807,12 @@
           ]
           [
             expr: [test]
-            s: 382
-            e: 388
             range: [38 4 38 10]
             depth: 2
             nested: 
             [
               [
                 expr: test
-                s: 383
-                e: 387
                 range: [38 5 38 9]
                 depth: 3
                 syntax: [
@@ -1016,8 +828,6 @@
           ]
           [
             expr: b
-            s: 390
-            e: 391
             range: [39 2 39 3]
             depth: 2
             syntax: [
@@ -1029,16 +839,12 @@
           ]
           [
             expr: [test!]
-            s: 392
-            e: 399
             range: [39 4 39 11]
             depth: 2
             nested: 
             [
               [
                 expr: test!
-                s: 393
-                e: 398
                 range: [39 5 39 10]
                 depth: 3
                 syntax: [
@@ -1054,8 +860,6 @@
           ]
           [
             expr: /part
-            s: 401
-            e: 406
             range: [40 2 40 7]
             depth: 2
             syntax: [
@@ -1069,8 +873,6 @@
           ]
           [
             expr: length
-            s: 407
-            e: 413
             range: [40 8 40 14]
             depth: 2
             syntax: [
@@ -1083,16 +885,12 @@
           ]
           [
             expr: [integer! string!]
-            s: 414
-            e: 432
             range: [40 15 40 33]
             depth: 2
             nested: 
             [
               [
                 expr: integer!
-                s: 415
-                e: 423
                 range: [40 16 40 24]
                 depth: 3
                 syntax: [
@@ -1101,8 +899,6 @@
               ]
               [
                 expr: string!
-                s: 424
-                e: 431
                 range: [40 25 40 32]
                 depth: 3
                 syntax: [
@@ -1117,8 +913,6 @@
           ]
           [
             expr: return:
-            s: 434
-            e: 441
             range: [41 2 41 9]
             depth: 2
             syntax: [
@@ -1130,16 +924,12 @@
           ]
           [
             expr: [block!]
-            s: 442
-            e: 450
             range: [41 10 41 18]
             depth: 2
             nested: 
             [
               [
                 expr: block!
-                s: 443
-                e: 449
                 range: [41 11 41 17]
                 depth: 3
                 syntax: [
@@ -1154,8 +944,6 @@
           ]
           [
             expr: /local
-            s: 461
-            e: 467
             range: [42 2 42 8]
             depth: 2
             syntax: [
@@ -1170,8 +958,6 @@
           ]
           [
             expr: x
-            s: 468
-            e: 469
             range: [42 9 42 10]
             depth: 2
             syntax: [
@@ -1183,8 +969,6 @@
           ]
           [
             expr: y
-            s: 470
-            e: 471
             range: [42 11 42 12]
             depth: 2
             syntax: [
@@ -1198,16 +982,12 @@
       ]
       [
         expr: [x: 1 y: 1 a + b + 1
-        s: 473
-        e: 502
         range: [43 2 46 2]
         depth: 1
         nested: 
         [
           [
             expr: x:
-            s: 476
-            e: 478
             range: [44 2 44 4]
             depth: 2
             syntax: [
@@ -1218,15 +998,11 @@
           ]
           [
             expr: 1
-            s: 479
-            e: 480
             range: [44 5 44 6]
             depth: 2
           ]
           [
             expr: y:
-            s: 481
-            e: 483
             range: [44 7 44 9]
             depth: 2
             syntax: [
@@ -1237,15 +1013,11 @@
           ]
           [
             expr: 1
-            s: 484
-            e: 485
             range: [44 10 44 11]
             depth: 2
           ]
           [
             expr: a
-            s: 487
-            e: 488
             range: [45 2 45 3]
             depth: 2
             syntax: [
@@ -1255,8 +1027,6 @@
           ]
           [
             expr: +
-            s: 489
-            e: 490
             range: [45 4 45 5]
             depth: 2
             syntax: [
@@ -1265,8 +1035,6 @@
           ]
           [
             expr: b
-            s: 491
-            e: 492
             range: [45 6 45 7]
             depth: 2
             syntax: [
@@ -1276,8 +1044,6 @@
           ]
           [
             expr: +
-            s: 493
-            e: 494
             range: [45 8 45 9]
             depth: 2
             syntax: [
@@ -1286,15 +1052,11 @@
           ]
           [
             expr: 1
-            s: 495
-            e: 496
             range: [45 10 45 11]
             depth: 2
           ]
           [
             expr: +
-            s: 497
-            e: 498
             range: [45 12 45 13]
             depth: 2
             syntax: [
@@ -1303,8 +1065,6 @@
           ]
           [
             expr: 1
-            s: 499
-            e: 500
             range: [45 14 45 15]
             depth: 2
           ]
@@ -1312,8 +1072,6 @@
       ]
       [
         expr: s:
-        s: 504
-        e: 506
         range: [48 1 48 3]
         depth: 1
         syntax: [
@@ -1323,8 +1081,6 @@
       ]
       [
         expr: function
-        s: 507
-        e: 515
         range: [48 4 48 12]
         depth: 1
         syntax: [
@@ -1338,16 +1094,12 @@
       ]
       [
         expr: [uri [string!] code 
-        s: 516
-        e: 559
         range: [48 13 48 56]
         depth: 1
         nested: 
         [
           [
             expr: uri
-            s: 517
-            e: 520
             range: [48 14 48 17]
             depth: 2
             syntax: [
@@ -1359,16 +1111,12 @@
           ]
           [
             expr: [string!]
-            s: 521
-            e: 530
             range: [48 18 48 27]
             depth: 2
             nested: 
             [
               [
                 expr: string!
-                s: 522
-                e: 529
                 range: [48 19 48 26]
                 depth: 3
                 syntax: [
@@ -1383,8 +1131,6 @@
           ]
           [
             expr: code
-            s: 531
-            e: 535
             range: [48 28 48 32]
             depth: 2
             syntax: [
@@ -1396,16 +1142,12 @@
           ]
           [
             expr: [string!]
-            s: 536
-            e: 545
             range: [48 33 48 42]
             depth: 2
             nested: 
             [
               [
                 expr: string!
-                s: 537
-                e: 544
                 range: [48 34 48 41]
                 depth: 3
                 syntax: [
@@ -1420,8 +1162,6 @@
           ]
           [
             expr: blk
-            s: 546
-            e: 549
             range: [48 43 48 46]
             depth: 2
             syntax: [
@@ -1433,16 +1173,12 @@
           ]
           [
             expr: [block!]
-            s: 550
-            e: 558
             range: [48 47 48 55]
             depth: 2
             nested: 
             [
               [
                 expr: block!
-                s: 551
-                e: 557
                 range: [48 48 48 54]
                 depth: 3
                 syntax: [
@@ -1459,16 +1195,12 @@
       ]
       [
         expr: [either uri [return 
-        s: 559
-        e: 645
         range: [48 56 54 2]
         depth: 1
         nested: 
         [
           [
             expr: either
-            s: 562
-            e: 568
             range: [49 2 49 8]
             depth: 2
             syntax: [
@@ -1478,8 +1210,6 @@
           ]
           [
             expr: uri
-            s: 569
-            e: 572
             range: [49 9 49 12]
             depth: 2
             syntax: [
@@ -1489,52 +1219,38 @@
           ]
           [
             expr: [return reduce [uri 
-            s: 573
-            e: 608
             range: [49 13 51 3]
             depth: 2
             nested: 
             [
               [
                 expr: return
-                s: 577
-                e: 583
                 range: [50 3 50 9]
                 depth: 3
               ]
               [
                 expr: reduce
-                s: 584
-                e: 590
                 range: [50 10 50 16]
                 depth: 3
               ]
               [
                 expr: [uri code blk]
-                s: 591
-                e: 605
                 range: [50 17 50 31]
                 depth: 3
                 nested: 
                 [
                   [
                     expr: uri
-                    s: 592
-                    e: 595
                     range: [50 18 50 21]
                     depth: 4
                   ]
                   [
                     expr: code
-                    s: 596
-                    e: 600
                     range: [50 22 50 26]
                     depth: 4
                   ]
                   [
                     expr: blk
-                    s: 601
-                    e: 604
                     range: [50 27 50 30]
                     depth: 4
                   ]
@@ -1544,52 +1260,38 @@
           ]
           [
             expr: [return reduce [uri 
-            s: 608
-            e: 643
             range: [51 3 53 3]
             depth: 2
             nested: 
             [
               [
                 expr: return
-                s: 612
-                e: 618
                 range: [52 3 52 9]
                 depth: 3
               ]
               [
                 expr: reduce
-                s: 619
-                e: 625
                 range: [52 10 52 16]
                 depth: 3
               ]
               [
                 expr: [uri code blk]
-                s: 626
-                e: 640
                 range: [52 17 52 31]
                 depth: 3
                 nested: 
                 [
                   [
                     expr: uri
-                    s: 627
-                    e: 630
                     range: [52 18 52 21]
                     depth: 4
                   ]
                   [
                     expr: code
-                    s: 631
-                    e: 635
                     range: [52 22 52 26]
                     depth: 4
                   ]
                   [
                     expr: blk
-                    s: 636
-                    e: 639
                     range: [52 27 52 30]
                     depth: 4
                   ]
@@ -1601,8 +1303,6 @@
       ]
       [
         expr: fff:
-        s: 647
-        e: 651
         range: [56 1 56 5]
         depth: 1
         syntax: [
@@ -1612,15 +1312,11 @@
       ]
       [
         expr: 3
-        s: 652
-        e: 653
         range: [56 6 56 7]
         depth: 1
       ]
       [
         expr: ft:
-        s: 655
-        e: 658
         range: [58 1 58 4]
         depth: 1
         syntax: [
@@ -1630,8 +1326,6 @@
       ]
       [
         expr: func
-        s: 659
-        e: 663
         range: [58 5 58 9]
         depth: 1
         syntax: [
@@ -1645,16 +1339,12 @@
       ]
       [
         expr: [a [block!] b [map! 
-        s: 664
-        e: 758
         range: [58 10 58 104]
         depth: 1
         nested: 
         [
           [
             expr: a
-            s: 665
-            e: 666
             range: [58 11 58 12]
             depth: 2
             syntax: [
@@ -1666,16 +1356,12 @@
           ]
           [
             expr: [block!]
-            s: 667
-            e: 675
             range: [58 13 58 21]
             depth: 2
             nested: 
             [
               [
                 expr: block!
-                s: 668
-                e: 674
                 range: [58 14 58 20]
                 depth: 3
                 syntax: [
@@ -1690,8 +1376,6 @@
           ]
           [
             expr: b
-            s: 676
-            e: 677
             range: [58 22 58 23]
             depth: 2
             syntax: [
@@ -1703,16 +1387,12 @@
           ]
           [
             expr: [map! integer!]
-            s: 678
-            e: 693
             range: [58 24 58 39]
             depth: 2
             nested: 
             [
               [
                 expr: map!
-                s: 679
-                e: 683
                 range: [58 25 58 29]
                 depth: 3
                 syntax: [
@@ -1721,8 +1401,6 @@
               ]
               [
                 expr: integer!
-                s: 684
-                e: 692
                 range: [58 30 58 38]
                 depth: 3
                 syntax: [
@@ -1737,8 +1415,6 @@
           ]
           [
             expr: return:
-            s: 694
-            e: 701
             range: [58 40 58 47]
             depth: 2
             syntax: [
@@ -1751,16 +1427,12 @@
           ]
           [
             expr: [integer!]
-            s: 702
-            e: 712
             range: [58 48 58 58]
             depth: 2
             nested: 
             [
               [
                 expr: integer!
-                s: 703
-                e: 711
                 range: [58 49 58 57]
                 depth: 3
                 syntax: [
@@ -1775,8 +1447,6 @@
           ]
           [
             expr: c
-            s: 713
-            e: 714
             range: [58 59 58 60]
             depth: 2
             syntax: [
@@ -1788,16 +1458,12 @@
           ]
           [
             expr: [integer!]
-            s: 715
-            e: 725
             range: [58 61 58 71]
             depth: 2
             nested: 
             [
               [
                 expr: integer!
-                s: 716
-                e: 724
                 range: [58 62 58 70]
                 depth: 3
                 syntax: [
@@ -1812,8 +1478,6 @@
           ]
           [
             expr: /c
-            s: 726
-            e: 728
             range: [58 72 58 74]
             depth: 2
             syntax: [
@@ -1828,8 +1492,6 @@
           ]
           [
             expr: a
-            s: 729
-            e: 730
             range: [58 75 58 76]
             depth: 2
             syntax: [
@@ -1843,16 +1505,12 @@
           ]
           [
             expr: [integer!]
-            s: 731
-            e: 741
             range: [58 77 58 87]
             depth: 2
             nested: 
             [
               [
                 expr: integer!
-                s: 732
-                e: 740
                 range: [58 78 58 86]
                 depth: 3
                 syntax: [
@@ -1867,8 +1525,6 @@
           ]
           [
             expr: /d
-            s: 742
-            e: 744
             range: [58 88 58 90]
             depth: 2
             syntax: [
@@ -1881,8 +1537,6 @@
           ]
           [
             expr: /local
-            s: 745
-            e: 751
             range: [58 91 58 97]
             depth: 2
             syntax: [
@@ -1898,8 +1552,6 @@
           ]
           [
             expr: x
-            s: 752
-            e: 753
             range: [58 98 58 99]
             depth: 2
             syntax: [
@@ -1911,8 +1563,6 @@
           ]
           [
             expr: y
-            s: 754
-            e: 755
             range: [58 100 58 101]
             depth: 2
             syntax: [
@@ -1924,8 +1574,6 @@
           ]
           [
             expr: z
-            s: 756
-            e: 757
             range: [58 102 58 103]
             depth: 2
             syntax: [
@@ -1939,16 +1587,12 @@
       ]
       [
         expr: [reduce [a b c d] fi
-        s: 758
-        e: 801
         range: [58 104 61 2]
         depth: 1
         nested: 
         [
           [
             expr: reduce
-            s: 761
-            e: 767
             range: [59 2 59 8]
             depth: 2
             syntax: [
@@ -1957,37 +1601,27 @@
           ]
           [
             expr: [a b c d]
-            s: 768
-            e: 777
             range: [59 9 59 18]
             depth: 2
             nested: 
             [
               [
                 expr: a
-                s: 769
-                e: 770
                 range: [59 10 59 11]
                 depth: 3
               ]
               [
                 expr: b
-                s: 771
-                e: 772
                 range: [59 12 59 13]
                 depth: 3
               ]
               [
                 expr: c
-                s: 773
-                e: 774
                 range: [59 14 59 15]
                 depth: 3
               ]
               [
                 expr: d
-                s: 775
-                e: 776
                 range: [59 16 59 17]
                 depth: 3
               ]
@@ -1995,8 +1629,6 @@
           ]
           [
             expr: find/match
-            s: 779
-            e: 789
             range: [60 2 60 12]
             depth: 2
             syntax: [
@@ -2005,15 +1637,11 @@
           ]
           [
             expr: "adb"
-            s: 790
-            e: 795
             range: [60 13 60 18]
             depth: 2
           ]
           [
             expr: "a"
-            s: 796
-            e: 799
             range: [60 19 60 22]
             depth: 2
           ]
@@ -2021,8 +1649,6 @@
       ]
       [
         expr: fh1:
-        s: 803
-        e: 807
         range: [63 1 63 5]
         depth: 1
         syntax: [
@@ -2032,8 +1658,6 @@
       ]
       [
         expr: has
-        s: 808
-        e: 811
         range: [63 6 63 9]
         depth: 1
         syntax: [
@@ -2047,16 +1671,12 @@
       ]
       [
         expr: [/ref a b]
-        s: 812
-        e: 822
         range: [63 10 63 20]
         depth: 1
         nested: 
         [
           [
             expr: /ref
-            s: 813
-            e: 817
             range: [63 11 63 15]
             depth: 2
             syntax: [
@@ -2072,8 +1692,6 @@
           ]
           [
             expr: a
-            s: 818
-            e: 819
             range: [63 16 63 17]
             depth: 2
             syntax: [
@@ -2085,8 +1703,6 @@
           ]
           [
             expr: b
-            s: 820
-            e: 821
             range: [63 18 63 19]
             depth: 2
             syntax: [
@@ -2100,8 +1716,6 @@
       ]
       [
         expr: fh2:
-        s: 823
-        e: 827
         range: [64 1 64 5]
         depth: 1
         syntax: [
@@ -2111,8 +1725,6 @@
       ]
       [
         expr: has
-        s: 828
-        e: 831
         range: [64 6 64 9]
         depth: 1
         syntax: [
@@ -2126,16 +1738,12 @@
       ]
       [
         expr: [a b]
-        s: 832
-        e: 837
         range: [64 10 64 15]
         depth: 1
         nested: 
         [
           [
             expr: a
-            s: 833
-            e: 834
             range: [64 11 64 12]
             depth: 2
             syntax: [
@@ -2146,8 +1754,6 @@
           ]
           [
             expr: b
-            s: 835
-            e: 836
             range: [64 13 64 14]
             depth: 2
             syntax: [
@@ -2160,15 +1766,11 @@
       ]
       [
         expr: []
-        s: 837
-        e: 839
         range: [64 15 64 17]
         depth: 1
       ]
       [
         expr: z:
-        s: 841
-        e: 843
         range: [66 1 66 3]
         depth: 1
         syntax: [
@@ -2178,8 +1780,6 @@
       ]
       [
         expr: z
-        s: 844
-        e: 845
         range: [66 4 66 5]
         depth: 1
         syntax: [
@@ -2188,8 +1788,6 @@
       ]
       [
         expr: blk:
-        s: 847
-        e: 851
         range: [68 1 68 5]
         depth: 1
         syntax: [
@@ -2199,23 +1797,17 @@
       ]
       [
         expr: [a: 1]
-        s: 852
-        e: 858
         range: [68 6 68 12]
         depth: 1
         nested: 
         [
           [
             expr: a:
-            s: 853
-            e: 855
             range: [68 7 68 9]
             depth: 2
           ]
           [
             expr: 1
-            s: 856
-            e: 857
             range: [68 10 68 11]
             depth: 2
           ]
@@ -2223,8 +1815,6 @@
       ]
       [
         expr: ctx:
-        s: 859
-        e: 863
         range: [69 1 69 5]
         depth: 1
         syntax: [
@@ -2234,8 +1824,6 @@
       ]
       [
         expr: context
-        s: 864
-        e: 871
         range: [69 6 69 13]
         depth: 1
         syntax: [
@@ -2248,16 +1836,12 @@
       ]
       [
         expr: [a: none]
-        s: 872
-        e: 884
         range: [69 14 71 2]
         depth: 1
         nested: 
         [
           [
             expr: a:
-            s: 875
-            e: 877
             range: [70 2 70 4]
             depth: 2
             syntax: [
@@ -2267,8 +1851,6 @@
           ]
           [
             expr: none
-            s: 878
-            e: 882
             range: [70 5 70 9]
             depth: 2
             syntax: [
@@ -2279,8 +1861,6 @@
       ]
       [
         expr: do
-        s: 886
-        e: 888
         range: [73 1 73 3]
         depth: 1
         syntax: [
@@ -2289,8 +1869,6 @@
       ]
       [
         expr: bind
-        s: 889
-        e: 893
         range: [73 4 73 8]
         depth: 1
         syntax: [
@@ -2299,8 +1877,6 @@
       ]
       [
         expr: blk
-        s: 894
-        e: 897
         range: [73 9 73 12]
         depth: 1
         syntax: [
@@ -2309,8 +1885,6 @@
       ]
       [
         expr: ctx
-        s: 898
-        e: 901
         range: [73 13 73 16]
         depth: 1
         syntax: [
@@ -2319,8 +1893,6 @@
       ]
       [
         expr: if
-        s: 903
-        e: 905
         range: [75 1 75 3]
         depth: 1
         syntax: [
@@ -2329,42 +1901,34 @@
       ]
       [
         expr: all
-        s: 906
-        e: 909
         range: [75 4 75 7]
         depth: 1
         syntax: [
           word: all
           step: 3
           resolved: [
-            spec: [75 11 75 29]
+            spec: [75 12 75 30]
           ]
         ]
       ]
       [
-        expr: t:
-        s: 910
-        e: 912
-        range: [75 8 75 10]
+        expr: tt:
+        range: [75 8 75 11]
         depth: 1
         syntax: [
           step: 2
-          value: [75 11 75 29]
+          value: [75 12 75 30]
         ]
       ]
       [
         expr: [a = 1 integer? a]
-        s: 913
-        e: 931
-        range: [75 11 75 29]
+        range: [75 12 75 30]
         depth: 1
         nested: 
         [
           [
             expr: a
-            s: 914
-            e: 915
-            range: [75 12 75 13]
+            range: [75 13 75 14]
             depth: 2
             syntax: [
               word: a
@@ -2372,9 +1936,7 @@
           ]
           [
             expr: =
-            s: 916
-            e: 917
-            range: [75 14 75 15]
+            range: [75 15 75 16]
             depth: 2
             syntax: [
               word: =
@@ -2382,16 +1944,12 @@
           ]
           [
             expr: 1
-            s: 918
-            e: 919
-            range: [75 16 75 17]
+            range: [75 17 75 18]
             depth: 2
           ]
           [
             expr: integer?
-            s: 920
-            e: 928
-            range: [75 18 75 26]
+            range: [75 19 75 27]
             depth: 2
             syntax: [
               word: integer?
@@ -2399,9 +1957,7 @@
           ]
           [
             expr: a
-            s: 929
-            e: 930
-            range: [75 27 75 28]
+            range: [75 28 75 29]
             depth: 2
             syntax: [
               word: a
@@ -2411,24 +1967,18 @@
       ]
       [
         expr: [print 3]
-        s: 931
-        e: 940
-        range: [75 29 75 38]
+        range: [75 30 75 39]
         depth: 1
         nested: 
         [
           [
             expr: print
-            s: 932
-            e: 937
-            range: [75 30 75 35]
+            range: [75 31 75 36]
             depth: 2
           ]
           [
             expr: 3
-            s: 938
-            e: 939
-            range: [75 36 75 37]
+            range: [75 37 75 38]
             depth: 2
           ]
         ]
@@ -2438,6 +1988,11 @@
     max-depth: 6
     syntax: [
       extra: [
+        [9 4 9 7]
+        [23 4 23 6]
+        [24 4 24 6]
+        [34 5 34 7]
+        [34 10 34 12]
       ]
       type: top
     ]

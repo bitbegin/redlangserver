@@ -477,14 +477,11 @@ semantic: context [
 			if all [
 				none? pc/1/syntax/declare
 				none? pc/1/syntax/recent
-				par: get-parent top pc
-				any [
-					par = top
-					not context-spec? top par
-				]
+				top <> par: get-parent top pc/1
+				not context-spec? top par
 			][
 				unless find top/1/syntax/extra pc/1 [
-					append/only top/1/syntax/extra pc/1
+					append/only top/1/syntax/extra pc
 				]
 			]
 		]
@@ -693,7 +690,7 @@ semantic: context [
 		resolve top
 	]
 
-	format: function [top [block!] /semantic][
+	format: function [top [block!] /semantic /pos][
 		buffer: make string! 1000
 		newline: function [cnt [integer!]] [
 			append buffer lf
@@ -713,12 +710,14 @@ semantic: context [
 				newline pad + 4
 				append buffer "expr: "
 				append buffer mold/flat/part pc/1/expr/1 20
-				newline pad + 4
-				append buffer "s: "
-				append buffer mold pc/1/s
-				newline pad + 4
-				append buffer "e: "
-				append buffer mold pc/1/e
+				if pos [
+					newline pad + 4
+					append buffer "s: "
+					append buffer mold pc/1/s
+					newline pad + 4
+					append buffer "e: "
+					append buffer mold pc/1/e
+				]
 				newline pad + 4
 				append buffer "range: "
 				append buffer mold/flat to-range pc

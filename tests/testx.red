@@ -72,4 +72,4 @@ ctx: context [
 
 do bind blk ctx
 
-if all t: [a = 1 integer? a][print 3]
+if all tt: [a = 1 integer? a][print 3]
