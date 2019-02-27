@@ -589,6 +589,7 @@ semantic: context [
 						repend pc/1 ['syntax reduce ['word word]]
 						if find [func function does has context all any] word [
 							step: resolve-func pc
+							repend pc/1/syntax ['step step]
 						]
 					]
 					pc: skip pc step continue

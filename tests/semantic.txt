@@ -66,6 +66,7 @@
         depth: 1
         syntax: [
           word: context
+          step: 2
           resolved: [
             spec: [33 346]
         ]
@@ -110,6 +111,7 @@
             depth: 2
             syntax: [
               word: context
+              step: 2
               resolved: [
                 spec: [53 314]
             ]
@@ -154,6 +156,7 @@
                 depth: 3
                 syntax: [
                   word: func
+                  step: 3
                   resolved: [
                     spec: [76 101]
                     body: [101 303]
@@ -258,6 +261,7 @@
                     depth: 4
                     syntax: [
                       word: function
+                      step: 3
                       resolved: [
                         spec: [119 145]
                         body: [145 247]
@@ -857,6 +861,7 @@
         depth: 1
         syntax: [
           word: func
+          step: 3
           resolved: [
             spec: [377 473]
             body: [473 502]
@@ -1186,6 +1191,7 @@
         depth: 1
         syntax: [
           word: function
+          step: 3
           resolved: [
             spec: [516 559]
             body: [559 645]
@@ -1459,6 +1465,7 @@
         depth: 1
         syntax: [
           word: func
+          step: 3
           resolved: [
             spec: [664 758]
             body: [758 801]
@@ -1816,6 +1823,7 @@
         depth: 1
         syntax: [
           word: has
+          step: 4
           resolved: [
             spec: [812 822]
         ]
@@ -1977,6 +1985,7 @@
         depth: 1
         syntax: [
           word: context
+          step: 2
           resolved: [
             spec: [872 884]
         ]
@@ -2064,6 +2073,7 @@
         depth: 1
         syntax: [
           word: all
+          step: 3
           resolved: [
             spec: [913 931]
         ]
