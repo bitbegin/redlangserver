@@ -3,7 +3,7 @@
   [
     expr: [Red he: [] a: 'test
     s: 1
-    e: 902
+    e: 941
     depth: 0
     nested: 
     [
@@ -1402,6 +1402,84 @@
         s: 898
         e: 901
         depth: 1
+      ]
+      [
+        expr: if
+        s: 903
+        e: 905
+        depth: 1
+      ]
+      [
+        expr: all
+        s: 906
+        e: 909
+        depth: 1
+      ]
+      [
+        expr: t:
+        s: 910
+        e: 912
+        depth: 1
+      ]
+      [
+        expr: [a = 1 integer? a]
+        s: 913
+        e: 931
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a
+            s: 914
+            e: 915
+            depth: 2
+          ]
+          [
+            expr: =
+            s: 916
+            e: 917
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 918
+            e: 919
+            depth: 2
+          ]
+          [
+            expr: integer?
+            s: 920
+            e: 928
+            depth: 2
+          ]
+          [
+            expr: a
+            s: 929
+            e: 930
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: [print 3]
+        s: 931
+        e: 940
+        depth: 1
+        nested: 
+        [
+          [
+            expr: print
+            s: 932
+            e: 937
+            depth: 2
+          ]
+          [
+            expr: 3
+            s: 938
+            e: 939
+            depth: 2
+          ]
+        ]
       ]
     ]
     source: {Red he: []^/^/a: 'tes
