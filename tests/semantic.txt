@@ -1890,6 +1890,13 @@
         s: 828
         e: 831
         depth: 1
+        syntax: [
+          word: has
+          step: 3
+          resolved: [
+            spec: [832 837]
+            body: [837 839]
+        ]
       ]
       [
         expr: [a b]
@@ -1903,12 +1910,20 @@
             s: 833
             e: 834
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+            ]
           ]
           [
             expr: b
             s: 835
             e: 836
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+            ]
           ]
         ]
       ]
@@ -1917,6 +1932,9 @@
         s: 837
         e: 839
         depth: 1
+        syntax: [
+          into: true
+        ]
       ]
       [
         expr: z:

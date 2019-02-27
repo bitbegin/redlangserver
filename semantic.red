@@ -108,7 +108,11 @@ semantic: context [
 	]
 
 	syntax-error: function [pc [block!] word [word!] args][
-		switch word [
+		switch/default word [
+			unsupport [
+				create-error pc/1 'Warning 'unsupport
+					rejoin [mold pc/1/expr/1 " -- unsupport type: " args]
+			]
 			miss-expr [
 				create-error pc/1 'Error 'miss-expr
 					rejoin [mold pc/1/expr/1 " -- need a type: " args]
@@ -133,6 +137,9 @@ semantic: context [
 				create-error pc/1 'Error 'forbidden-refine
 					rejoin [mold pc/1/expr/1 " -- forbidden refinement: " args]
 			]
+		][
+			create-error pc/1 'Error 'unknown
+				rejoin [mold pc/1/expr/1 " -- unknown error: " mold word]
 		]
 	]
 
@@ -452,6 +459,7 @@ semantic: context [
 			]
 			if recent: recent-set? top pc [
 				repend pc/1/syntax ['recent recent]
+				resolve-set recent
 			]
 		]
 
@@ -522,11 +530,13 @@ semantic: context [
 			either pc/1/syntax/word = 'does [
 				repend resolved ['body spec]
 				set-into spec
+				if spec/1/nested [resolve-refer spec/1/nested]
 				return step
 			][
 				repend resolved ['spec spec]
 				if find [context all any] pc/1/syntax/word [
 					set-into spec
+					if spec/1/nested [resolve-refer spec/1/nested]
 					return step
 				]
 			]
@@ -540,89 +550,94 @@ semantic: context [
 			spec: ret/1
 			set-into spec
 			repend resolved ['body spec]
+			if spec/1/nested [resolve-refer spec/1/nested]
 			step
+		]
+
+		resolve-each: function [pc [block!]][
+			if pc/1/syntax [return 1]
+			if pc/1/expr/1 = 'set [
+				if any [
+					tail? npc: next pc
+					not find [word! path! lit-word! lit-path!] type: type?/word npc/1/expr/1
+				][
+					either type = 'block! [
+						syntax-error pc 'unsupport "block!"
+					][
+						syntax-error pc 'miss-expr "word!/path!/lit-word!/lit-path!"
+					]
+					return 1
+				]
+				resolve-set npc
+				return 2
+			]
+			if any [
+				set-word? pc/1/expr/1
+				set-path? pc/1/expr/1
+			][
+				resolve-set pc
+				return 1
+			]
+			if any [
+				word? pc/1/expr/1
+				path? pc/1/expr/1
+				get-word? pc/1/expr/1
+				get-path? pc/1/expr/1
+			][
+				either any [
+					word? pc/1/expr/1
+					get-word? pc/1/expr/1
+				][
+					resolve-word pc
+					word: to word! pc/1/expr/1
+					repend pc/1/syntax ['word word]
+				][
+					word: to word! pc/1/expr/1/1
+					repend pc/1 ['syntax reduce ['word word]]
+				]
+				step: 1
+				if all [
+					none? pc/1/syntax/declare
+					none? pc/1/syntax/recent
+				][
+					repend pc/1 ['syntax reduce ['word word]]
+					if find [func function does has context all any] word [
+						step: resolve-func pc
+						repend pc/1/syntax ['step step]
+					]
+				]
+				return step
+			]
+			1
 		]
 
 		resolve-refer: function [pc [block!]][
 			while [not tail? pc] [
-				if pc/1/syntax [pc: next pc continue]
-				if pc/1/expr/1 = 'set [
-					if any [
-						tail? npc: next pc
-						not find [word! path! lit-word! lit-path!] type?/word npc/1/expr/1
-					][
-						syntax-error pc 'miss-expr "word!/path!/lit-word!/lit-path!"
-						pc: next pc continue
-					]
-					resolve-set npc
-					pc: next pc continue
-				]
-				if any [
-					set-word? pc/1/expr/1
-					set-path? pc/1/expr/1
-				][
-					resolve-set pc
-					pc: next pc continue
-				]
-				if any [
-					word? pc/1/expr/1
-					path? pc/1/expr/1
-					get-word? pc/1/expr/1
-					get-path? pc/1/expr/1
-				][
-					either any [
-						word? pc/1/expr/1
-						get-word? pc/1/expr/1
-					][
-						resolve-word pc
-						word: to word! pc/1/expr/1
-						repend pc/1/syntax ['word word]
-					][
-						word: to word! pc/1/expr/1/1
-						repend pc/1 ['syntax reduce ['word word]]
-					]
-					step: 1
-					if all [
-						none? pc/1/syntax/declare
-						none? pc/1/syntax/recent
-					][
-						repend pc/1 ['syntax reduce ['word word]]
-						if find [func function does has context all any] word [
-							step: resolve-func pc
-							repend pc/1/syntax ['step step]
-						]
-					]
-					pc: skip pc step continue
-				]
-				pc: next pc
+				step: resolve-each pc
+				pc: skip pc step
 			]
 		]
 
-		resolve-depth: function [pc [block!] depth [integer!]][
-			if pc/1/depth > depth [exit]
-			if pc/1/depth = depth [
-				resolve-refer pc
-				exit
-			]
-			forall pc [
-				if all [
-					pc/1/nested
-					any [
-						all [
-							pc/1/syntax
-							pc/1/syntax/into
-						]
-						paren? pc/1/expr/1
-					]
-				][
-					resolve-depth pc/1/nested depth
-				]
-			]
+		;-- TBD: if keyword can be resolved, these single cases can be simply resolved
+		resolve-if: function [pc [block!]][
+
 		]
 
-		max-depth: top/1/max-depth
-		repeat depth max-depth [
-			resolve-depth top/1/nested depth
+		ipc: top/1/nested
+		forall ipc [
+			resolve-refer ipc
+			if all [
+				ipc/1/nested
+				any [
+					all [
+						ipc/1/syntax
+						ipc/1/syntax/into
+					]
+					paren? ipc/1/expr/1
+				]
+			][
+				resolve-refer ipc/1/nested
+			]
 		]
 	]
 
