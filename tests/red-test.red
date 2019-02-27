@@ -13,7 +13,7 @@ code: read file
 code-ast: clear []
 code-ast: ast/analysis code
 semantic/analysis code-ast
-print semantic/format code-ast
+print semantic/format/semantic code-ast
 
 
 print "Error/Warning: ---------------------------------------"

@@ -149,7 +149,7 @@ semantic: context [
 		check-args: function [npc [block!] par [block! none!]][
 			repend npc/1 ['syntax syntax: make block! 4]
 			repend syntax ['type 'func-param 'args args: make block! 4]
-			repend syntax/args ['refs par]
+			if par [repend syntax/args ['refs par]]
 			double-check npc
 			if tail? npc2: next npc [return npc2]
 			type: type? npc2/1/expr/1
@@ -233,7 +233,7 @@ semantic: context [
 			collect-args: function [npc [block!] par [block!]][
 				while [not tail? npc][
 					either word? npc/1/expr/1 [
-						append par/1/syntax/args/params npc
+						append/only par/1/syntax/args/params npc
 						if tail? npc: check-args npc par [return npc]
 					][
 						either any [
@@ -414,7 +414,7 @@ semantic: context [
 					syntax-error pc 'miss-expr "any-type!"
 					exit
 				]
-				if find literal-type type?/word cast/1/expr/1 [
+				unless find [word! path! get-word! get-path! set-word! set-path!] type?/word cast/1/expr/1 [
 					repend pc/1/syntax ['value cast]
 					repend pc/1/syntax ['step 1 + (index? cast) - (index? pc)]
 					exit
@@ -484,7 +484,7 @@ semantic: context [
 			if tail? pc [
 				return reduce [none 0]
 			]
-			if block? pc [
+			if block? pc/1/expr/1 [
 				return reduce [pc 1]
 			]
 			unless ret: word-value? pc [
@@ -493,10 +493,20 @@ semantic: context [
 			]
 			step: ret/1
 			cast: ret/2
-			if block? cast [
+			if block? cast/1/expr/1 [
 				return reduce [cast step]
 			]
 			reduce [none step]
+		]
+
+		set-into: function [pc [block!]][
+			either pc/1/syntax [
+				unless pc/1/syntax/into [
+					repend pc/1/syntax ['into true]
+				]
+			][
+				repend pc/1 ['syntax reduce ['into true]]
+			]
 		]
 
 		resolve-func: function [pc [block!]][
@@ -511,17 +521,12 @@ semantic: context [
 			repend pc/1/syntax ['resolved resolved: make block! 4]
 			either pc/1/syntax/word = 'does [
 				repend resolved ['body spec]
-				either spec/1/syntax [
-					unless spec/1/syntax/into [
-						repend spec/1/syntax ['into true]
-					]
-				][
-					repend spec/1 ['syntax reduce ['into true]]
-				]
+				set-into spec
 				return step
 			][
 				repend resolved ['spec spec]
 				if find [context all any] pc/1/syntax/word [
+					set-into spec
 					return step
 				]
 			]
@@ -533,13 +538,7 @@ semantic: context [
 			]
 			step: step + ret/2
 			spec: ret/1
-			either spec/1/syntax [
-				unless spec/1/syntax/into [
-					repend spec/1/syntax ['into true]
-				]
-			][
-				repend spec/1 ['syntax reduce ['into true]]
-			]
+			set-into spec
 			repend resolved ['body spec]
 			step
 		]
@@ -699,6 +698,12 @@ semantic: context [
 						newline pad + 6
 						append buffer "word: "
 						append buffer pc/1/syntax/word
+					]
+
+					if pc/1/syntax/into [
+						newline pad + 6
+						append buffer "into: "
+						append buffer pc/1/syntax/into
 					]
 
 					if pc/1/syntax/step [

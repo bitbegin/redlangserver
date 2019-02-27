@@ -12,12 +12,19 @@
         s: 1
         e: 4
         depth: 1
+        syntax: [
+          word: Red
+        ]
       ]
       [
         expr: he:
         s: 5
         e: 8
         depth: 1
+        syntax: [
+          step: 2
+          value: [9 11]
+        ]
         error: [severity 1 code "miss-expr" source "Syntax" message "he: -- need a type: block! for Red File header"]
       ]
       [
@@ -31,6 +38,10 @@
         s: 13
         e: 15
         depth: 1
+        syntax: [
+          step: 2
+          value: [16 21]
+        ]
       ]
       [
         expr: 'test
@@ -43,12 +54,21 @@
         s: 22
         e: 24
         depth: 1
+        syntax: [
+          step: 2
+          cast: [25 32]
+        ]
       ]
       [
         expr: context
         s: 25
         e: 32
         depth: 1
+        syntax: [
+          word: context
+          resolved: [
+            spec: [33 346]
+        ]
       ]
       [
         expr: [c: 4 d: context [e:
@@ -62,6 +82,10 @@
             s: 36
             e: 38
             depth: 2
+            syntax: [
+              step: 2
+              value: [39 40]
+            ]
           ]
           [
             expr: 4
@@ -74,12 +98,21 @@
             s: 42
             e: 44
             depth: 2
+            syntax: [
+              step: 2
+              cast: [45 52]
+            ]
           ]
           [
             expr: context
             s: 45
             e: 52
             depth: 2
+            syntax: [
+              word: context
+              resolved: [
+                spec: [53 314]
+            ]
           ]
           [
             expr: [e: #{12} f: func [x
@@ -93,6 +126,10 @@
                 s: 57
                 e: 59
                 depth: 3
+                syntax: [
+                  step: 2
+                  value: [60 65]
+                ]
               ]
               [
                 expr: #{12}
@@ -105,12 +142,22 @@
                 s: 68
                 e: 70
                 depth: 3
+                syntax: [
+                  step: 2
+                  cast: [71 75]
+                ]
               ]
               [
                 expr: func
                 s: 71
                 e: 75
                 depth: 3
+                syntax: [
+                  word: func
+                  resolved: [
+                    spec: [76 101]
+                    body: [101 303]
+                ]
               ]
               [
                 expr: [x [block!] y [integ
@@ -124,6 +171,11 @@
                     s: 77
                     e: 78
                     depth: 4
+                    syntax: [
+                      type: func-param
+                      args: [
+                        type: [79 87]
+                    ]
                   ]
                   [
                     expr: [block!]
@@ -137,7 +189,14 @@
                         s: 80
                         e: 86
                         depth: 5
+                        syntax: [
+                          type: func-type-item
+                        ]
                       ]
+                    ]
+                    syntax: [
+                      type: func-type
+                      parent: [77 78]
                     ]
                   ]
                   [
@@ -145,6 +204,11 @@
                     s: 88
                     e: 89
                     depth: 4
+                    syntax: [
+                      type: func-param
+                      args: [
+                        type: [90 100]
+                    ]
                   ]
                   [
                     expr: [integer!]
@@ -158,7 +222,14 @@
                         s: 91
                         e: 99
                         depth: 5
+                        syntax: [
+                          type: func-type-item
+                        ]
                       ]
+                    ]
+                    syntax: [
+                      type: func-type
+                      parent: [88 89]
                     ]
                   ]
                 ]
@@ -175,12 +246,22 @@
                     s: 106
                     e: 109
                     depth: 4
+                    syntax: [
+                      step: 2
+                      cast: [110 118]
+                    ]
                   ]
                   [
                     expr: function
                     s: 110
                     e: 118
                     depth: 4
+                    syntax: [
+                      word: function
+                      resolved: [
+                        spec: [119 145]
+                        body: [145 247]
+                    ]
                   ]
                   [
                     expr: [a [integer!] b [bin
@@ -194,6 +275,11 @@
                         s: 120
                         e: 121
                         depth: 5
+                        syntax: [
+                          type: func-param
+                          args: [
+                            type: [122 132]
+                        ]
                       ]
                       [
                         expr: [integer!]
@@ -207,7 +293,14 @@
                             s: 123
                             e: 131
                             depth: 6
+                            syntax: [
+                              type: func-type-item
+                            ]
                           ]
+                        ]
+                        syntax: [
+                          type: func-type
+                          parent: [120 121]
                         ]
                       ]
                       [
@@ -215,6 +308,11 @@
                         s: 133
                         e: 134
                         depth: 5
+                        syntax: [
+                          type: func-param
+                          args: [
+                            type: [135 144]
+                        ]
                       ]
                       [
                         expr: [binary!]
@@ -228,7 +326,14 @@
                             s: 136
                             e: 143
                             depth: 6
+                            syntax: [
+                              type: func-type-item
+                            ]
                           ]
+                        ]
+                        syntax: [
+                          type: func-type
+                          parent: [133 134]
                         ]
                       ]
                     ]
@@ -245,6 +350,10 @@
                         s: 151
                         e: 154
                         depth: 5
+                        syntax: [
+                          step: 2
+                          value: [155 161]
+                        ]
                       ]
                       [
                         expr: "test"
@@ -257,97 +366,155 @@
                         s: 166
                         e: 169
                         depth: 5
+                        syntax: [
+                          step: 2
+                          cast: [170 171]
+                        ]
                       ]
                       [
                         expr: x
                         s: 170
                         e: 171
                         depth: 5
+                        syntax: [
+                          word: x
+                          declare: [77 78]
+                        ]
                       ]
                       [
                         expr: f3:
                         s: 176
                         e: 179
                         depth: 5
+                        syntax: [
+                          step: 2
+                          cast: [180 182]
+                        ]
                       ]
                       [
                         expr: f1
                         s: 180
                         e: 182
                         depth: 5
+                        syntax: [
+                          word: f1
+                        ]
                       ]
                       [
                         expr: f4:
                         s: 187
                         e: 190
                         depth: 5
+                        syntax: [
+                          step: 2
+                          cast: [191 192]
+                        ]
                       ]
                       [
                         expr: l
                         s: 191
                         e: 192
                         depth: 5
+                        syntax: [
+                          word: l
+                        ]
                       ]
                       [
                         expr: f5:
                         s: 197
                         e: 200
                         depth: 5
+                        syntax: [
+                        ]
                       ]
                       [
                         expr: :f
                         s: 201
                         e: 203
                         depth: 5
+                        syntax: [
+                          word: f
+                        ]
                       ]
                       [
                         expr: f6:
                         s: 208
                         e: 211
                         depth: 5
+                        syntax: [
+                          step: 2
+                          cast: [212 214]
+                        ]
                       ]
                       [
                         expr: f5
                         s: 212
                         e: 214
                         depth: 5
+                        syntax: [
+                          word: f5
+                        ]
                       ]
                       [
                         expr: f7:
                         s: 219
                         e: 222
                         depth: 5
+                        syntax: [
+                          step: 2
+                          cast: [223 224]
+                        ]
                       ]
                       [
                         expr: a
                         s: 223
                         e: 224
                         depth: 5
+                        syntax: [
+                          word: a
+                          declare: [120 121]
+                        ]
                       ]
                       [
                         expr: +
                         s: 225
                         e: 226
                         depth: 5
+                        syntax: [
+                          word: +
+                        ]
                       ]
                       [
                         expr: length?
                         s: 227
                         e: 234
                         depth: 5
+                        syntax: [
+                          word: length?
+                        ]
                       ]
                       [
                         expr: b
                         s: 235
                         e: 236
                         depth: 5
+                        syntax: [
+                          word: b
+                          declare: [133 134]
+                        ]
                       ]
                       [
                         expr: f
                         s: 241
                         e: 242
                         depth: 5
+                        syntax: [
+                          word: f
+                        ]
                       ]
+                    ]
+                    syntax: [
+                      into: true
                     ]
                   ]
                   [
@@ -355,6 +522,11 @@
                     s: 251
                     e: 253
                     depth: 4
+                    syntax: [
+                      step: 2
+                      value: [254 255]
+                      declare: [77 78]
+                    ]
                   ]
                   [
                     expr: 1
@@ -367,6 +539,11 @@
                     s: 259
                     e: 261
                     depth: 4
+                    syntax: [
+                      step: 2
+                      value: [262 263]
+                      declare: [88 89]
+                    ]
                   ]
                   [
                     expr: 1
@@ -379,61 +556,101 @@
                     s: 267
                     e: 269
                     depth: 4
+                    syntax: [
+                      step: 2
+                      cast: [270 271]
+                    ]
                   ]
                   [
                     expr: x
                     s: 270
                     e: 271
                     depth: 4
+                    syntax: [
+                      word: x
+                      declare: [77 78]
+                    ]
                   ]
                   [
                     expr: +
                     s: 272
                     e: 273
                     depth: 4
+                    syntax: [
+                      word: +
+                    ]
                   ]
                   [
                     expr: y
                     s: 274
                     e: 275
                     depth: 4
+                    syntax: [
+                      word: y
+                      declare: [88 89]
+                    ]
                   ]
                   [
                     expr: o:
                     s: 279
                     e: 281
                     depth: 4
+                    syntax: [
+                      step: 2
+                      cast: [282 283]
+                    ]
                   ]
                   [
                     expr: g
                     s: 282
                     e: 283
                     depth: 4
+                    syntax: [
+                      word: g
+                    ]
                   ]
                   [
                     expr: t:
                     s: 287
                     e: 289
                     depth: 4
+                    syntax: [
+                      step: 2
+                      cast: [290 291]
+                    ]
                   ]
                   [
                     expr: h
                     s: 290
                     e: 291
                     depth: 4
+                    syntax: [
+                      word: h
+                    ]
                   ]
                   [
                     expr: u:
                     s: 295
                     e: 297
                     depth: 4
+                    syntax: [
+                      step: 2
+                      cast: [298 299]
+                    ]
                   ]
                   [
                     expr: x
                     s: 298
                     e: 299
                     depth: 4
+                    syntax: [
+                      word: x
+                      declare: [77 78]
+                    ]
                   ]
+                ]
+                syntax: [
+                  into: true
                 ]
               ]
               [
@@ -441,6 +658,10 @@
                 s: 306
                 e: 308
                 depth: 3
+                syntax: [
+                  step: 2
+                  value: [309 311]
+                ]
               ]
               [
                 expr: []
@@ -449,12 +670,19 @@
                 depth: 3
               ]
             ]
+            syntax: [
+              into: true
+            ]
           ]
           [
             expr: h:
             s: 316
             e: 318
             depth: 2
+            syntax: [
+              step: 2
+              value: [319 326]
+            ]
           ]
           [
             expr: #(a: 3)
@@ -482,37 +710,61 @@
             s: 328
             e: 330
             depth: 2
+            syntax: [
+              step: 2
+              cast: [331 332]
+            ]
           ]
           [
             expr: x
             s: 331
             e: 332
             depth: 2
+            syntax: [
+              word: x
+            ]
           ]
           [
             expr: j:
             s: 334
             e: 336
             depth: 2
+            syntax: [
+              step: 2
+              cast: [337 338]
+            ]
           ]
           [
             expr: e
             s: 337
             e: 338
             depth: 2
+            syntax: [
+              word: e
+            ]
           ]
           [
             expr: k:
             s: 340
             e: 342
             depth: 2
+            syntax: [
+              step: 2
+              cast: [343 344]
+            ]
           ]
           [
             expr: t
             s: 343
             e: 344
             depth: 2
+            syntax: [
+              word: t
+            ]
           ]
+        ]
+        syntax: [
+          into: true
         ]
       ]
       [
@@ -520,6 +772,10 @@
         s: 348
         e: 350
         depth: 1
+        syntax: [
+          step: 2
+          value: [351 362]
+        ]
       ]
       [
         expr: (m: 3 n: a)
@@ -533,6 +789,10 @@
             s: 352
             e: 354
             depth: 2
+            syntax: [
+              step: 2
+              value: [355 356]
+            ]
           ]
           [
             expr: 3
@@ -545,12 +805,19 @@
             s: 357
             e: 359
             depth: 2
+            syntax: [
+              step: 2
+              cast: [360 361]
+            ]
           ]
           [
             expr: a
             s: 360
             e: 361
             depth: 2
+            syntax: [
+              word: a
+            ]
           ]
         ]
       ]
@@ -559,24 +826,41 @@
         s: 363
         e: 365
         depth: 1
+        syntax: [
+          step: 2
+          cast: [366 367]
+        ]
       ]
       [
         expr: l
         s: 366
         e: 367
         depth: 1
+        syntax: [
+          word: l
+        ]
       ]
       [
         expr: r:
         s: 369
         e: 371
         depth: 1
+        syntax: [
+          step: 2
+          cast: [372 376]
+        ]
       ]
       [
         expr: func
         s: 372
         e: 376
         depth: 1
+        syntax: [
+          word: func
+          resolved: [
+            spec: [377 473]
+            body: [473 502]
+        ]
       ]
       [
         expr: [a [test] b [test!] 
@@ -590,6 +874,11 @@
             s: 380
             e: 381
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [382 388]
+            ]
           ]
           [
             expr: [test]
@@ -603,8 +892,15 @@
                 s: 383
                 e: 387
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
                 error: [severity 1 code "invalid-datatype" source "Syntax" message "test -- invalid datatype: test"]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [380 381]
             ]
           ]
           [
@@ -612,6 +908,11 @@
             s: 390
             e: 391
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [392 399]
+            ]
           ]
           [
             expr: [test!]
@@ -625,8 +926,15 @@
                 s: 393
                 e: 398
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
                 error: [severity 1 code "invalid-datatype" source "Syntax" message "test! -- invalid datatype: test!"]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [390 391]
             ]
           ]
           [
@@ -634,12 +942,25 @@
             s: 401
             e: 406
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                  [407 413]
+                ]
+            ]
           ]
           [
             expr: length
             s: 407
             e: 413
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [401 406]
+                type: [414 432]
+            ]
           ]
           [
             expr: [integer! string!]
@@ -653,13 +974,23 @@
                 s: 415
                 e: 423
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
               [
                 expr: string!
                 s: 424
                 e: 431
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [407 413]
             ]
           ]
           [
@@ -667,6 +998,11 @@
             s: 434
             e: 441
             depth: 2
+            syntax: [
+              type: func-return
+              args: [
+                type: [442 450]
+            ]
           ]
           [
             expr: [block!]
@@ -680,7 +1016,14 @@
                 s: 443
                 e: 449
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [434 441]
             ]
           ]
           [
@@ -688,18 +1031,36 @@
             s: 461
             e: 467
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                  [468 469]
+                  [470 471]
+                ]
+            ]
           ]
           [
             expr: x
             s: 468
             e: 469
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [461 467]
+            ]
           ]
           [
             expr: y
             s: 470
             e: 471
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [461 467]
+            ]
           ]
         ]
       ]
@@ -715,6 +1076,11 @@
             s: 476
             e: 478
             depth: 2
+            syntax: [
+              step: 2
+              value: [479 480]
+              declare: [468 469]
+            ]
           ]
           [
             expr: 1
@@ -727,6 +1093,11 @@
             s: 481
             e: 483
             depth: 2
+            syntax: [
+              step: 2
+              value: [484 485]
+              declare: [470 471]
+            ]
           ]
           [
             expr: 1
@@ -739,24 +1110,38 @@
             s: 487
             e: 488
             depth: 2
+            syntax: [
+              word: a
+              declare: [380 381]
+            ]
           ]
           [
             expr: +
             s: 489
             e: 490
             depth: 2
+            syntax: [
+              word: +
+            ]
           ]
           [
             expr: b
             s: 491
             e: 492
             depth: 2
+            syntax: [
+              word: b
+              declare: [390 391]
+            ]
           ]
           [
             expr: +
             s: 493
             e: 494
             depth: 2
+            syntax: [
+              word: +
+            ]
           ]
           [
             expr: 1
@@ -769,6 +1154,9 @@
             s: 497
             e: 498
             depth: 2
+            syntax: [
+              word: +
+            ]
           ]
           [
             expr: 1
@@ -777,18 +1165,31 @@
             depth: 2
           ]
         ]
+        syntax: [
+          into: true
+        ]
       ]
       [
         expr: s:
         s: 504
         e: 506
         depth: 1
+        syntax: [
+          step: 2
+          cast: [507 515]
+        ]
       ]
       [
         expr: function
         s: 507
         e: 515
         depth: 1
+        syntax: [
+          word: function
+          resolved: [
+            spec: [516 559]
+            body: [559 645]
+        ]
       ]
       [
         expr: [uri [string!] code 
@@ -802,6 +1203,11 @@
             s: 517
             e: 520
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [521 530]
+            ]
           ]
           [
             expr: [string!]
@@ -815,7 +1221,14 @@
                 s: 522
                 e: 529
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [517 520]
             ]
           ]
           [
@@ -823,6 +1236,11 @@
             s: 531
             e: 535
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [536 545]
+            ]
           ]
           [
             expr: [string!]
@@ -836,7 +1254,14 @@
                 s: 537
                 e: 544
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [531 535]
             ]
           ]
           [
@@ -844,6 +1269,11 @@
             s: 546
             e: 549
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [550 558]
+            ]
           ]
           [
             expr: [block!]
@@ -857,7 +1287,14 @@
                 s: 551
                 e: 557
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [546 549]
             ]
           ]
         ]
@@ -874,12 +1311,19 @@
             s: 562
             e: 568
             depth: 2
+            syntax: [
+              word: either
+            ]
           ]
           [
             expr: uri
             s: 569
             e: 572
             depth: 2
+            syntax: [
+              word: uri
+              declare: [517 520]
+            ]
           ]
           [
             expr: [return reduce [uri 
@@ -978,12 +1422,19 @@
             ]
           ]
         ]
+        syntax: [
+          into: true
+        ]
       ]
       [
         expr: fff:
         s: 647
         e: 651
         depth: 1
+        syntax: [
+          step: 2
+          value: [652 653]
+        ]
       ]
       [
         expr: 3
@@ -996,12 +1447,22 @@
         s: 655
         e: 658
         depth: 1
+        syntax: [
+          step: 2
+          cast: [659 663]
+        ]
       ]
       [
         expr: func
         s: 659
         e: 663
         depth: 1
+        syntax: [
+          word: func
+          resolved: [
+            spec: [664 758]
+            body: [758 801]
+        ]
       ]
       [
         expr: [a [block!] b [map! 
@@ -1015,6 +1476,11 @@
             s: 665
             e: 666
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [667 675]
+            ]
           ]
           [
             expr: [block!]
@@ -1028,7 +1494,14 @@
                 s: 668
                 e: 674
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [665 666]
             ]
           ]
           [
@@ -1036,6 +1509,11 @@
             s: 676
             e: 677
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [678 693]
+            ]
           ]
           [
             expr: [map! integer!]
@@ -1049,13 +1527,23 @@
                 s: 679
                 e: 683
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
               [
                 expr: integer!
                 s: 684
                 e: 692
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [676 677]
             ]
           ]
           [
@@ -1063,6 +1551,11 @@
             s: 694
             e: 701
             depth: 2
+            syntax: [
+              type: func-return
+              args: [
+                type: [702 712]
+            ]
             error: [severity 1 code "invalid-arg" source "Syntax" message "return: -- invalid argument for: c"]
           ]
           [
@@ -1077,7 +1570,14 @@
                 s: 703
                 e: 711
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [694 701]
             ]
           ]
           [
@@ -1085,6 +1585,11 @@
             s: 713
             e: 714
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                type: [715 725]
+            ]
           ]
           [
             expr: [integer!]
@@ -1098,7 +1603,14 @@
                 s: 716
                 e: 724
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [713 714]
             ]
           ]
           [
@@ -1106,6 +1618,13 @@
             s: 726
             e: 728
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                  [729 730]
+                ]
+            ]
             error: [severity 1 code "double-define" source "Syntax" message "/c -- double define: c"]
           ]
           [
@@ -1113,6 +1632,12 @@
             s: 729
             e: 730
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [726 728]
+                type: [731 741]
+            ]
             error: [severity 1 code "double-define" source "Syntax" message "a -- double define: a"]
           ]
           [
@@ -1127,7 +1652,14 @@
                 s: 732
                 e: 740
                 depth: 3
+                syntax: [
+                  type: func-type-item
+                ]
               ]
+            ]
+            syntax: [
+              type: func-type
+              parent: [729 730]
             ]
           ]
           [
@@ -1135,30 +1667,60 @@
             s: 742
             e: 744
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                ]
+            ]
           ]
           [
             expr: /local
             s: 745
             e: 751
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                  [752 753]
+                  [754 755]
+                  [756 757]
+                ]
+            ]
           ]
           [
             expr: x
             s: 752
             e: 753
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [745 751]
+            ]
           ]
           [
             expr: y
             s: 754
             e: 755
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [745 751]
+            ]
           ]
           [
             expr: z
             s: 756
             e: 757
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [745 751]
+            ]
           ]
         ]
       ]
@@ -1174,6 +1736,9 @@
             s: 761
             e: 767
             depth: 2
+            syntax: [
+              word: reduce
+            ]
           ]
           [
             expr: [a b c d]
@@ -1213,6 +1778,9 @@
             s: 779
             e: 789
             depth: 2
+            syntax: [
+              word: find
+            ]
           ]
           [
             expr: "adb"
@@ -1227,18 +1795,31 @@
             depth: 2
           ]
         ]
+        syntax: [
+          into: true
+        ]
       ]
       [
         expr: fh1:
         s: 803
         e: 807
         depth: 1
+        syntax: [
+          step: 2
+          cast: [808 811]
+        ]
       ]
       [
         expr: has
         s: 808
         e: 811
         depth: 1
+        syntax: [
+          word: has
+          resolved: [
+            spec: [812 822]
+        ]
+        error: [severity 1 code "miss-expr" source "Syntax" message "has -- need a type: block!"]
       ]
       [
         expr: [/ref a b]
@@ -1252,6 +1833,14 @@
             s: 813
             e: 817
             depth: 2
+            syntax: [
+              type: func-refinement
+              args: [
+                params: [
+                  [818 819]
+                  [820 821]
+                ]
+            ]
             error: [severity 1 code "forbidden-refine" source "Syntax" message "/ref -- forbidden refinement: /ref"]
           ]
           [
@@ -1259,12 +1848,22 @@
             s: 818
             e: 819
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [813 817]
+            ]
           ]
           [
             expr: b
             s: 820
             e: 821
             depth: 2
+            syntax: [
+              type: func-param
+              args: [
+                refs: [813 817]
+            ]
           ]
         ]
       ]
@@ -1273,6 +1872,10 @@
         s: 823
         e: 827
         depth: 1
+        syntax: [
+          step: 2
+          cast: [828 831]
+        ]
       ]
       [
         expr: has
@@ -1312,18 +1915,29 @@
         s: 841
         e: 843
         depth: 1
+        syntax: [
+          step: 2
+          cast: [844 845]
+        ]
       ]
       [
         expr: z
         s: 844
         e: 845
         depth: 1
+        syntax: [
+          word: z
+        ]
       ]
       [
         expr: blk:
         s: 847
         e: 851
         depth: 1
+        syntax: [
+          step: 2
+          value: [852 858]
+        ]
       ]
       [
         expr: [a: 1]
@@ -1351,12 +1965,21 @@
         s: 859
         e: 863
         depth: 1
+        syntax: [
+          step: 2
+          cast: [864 871]
+        ]
       ]
       [
         expr: context
         s: 864
         e: 871
         depth: 1
+        syntax: [
+          word: context
+          resolved: [
+            spec: [872 884]
+        ]
       ]
       [
         expr: [a: none]
@@ -1370,13 +1993,23 @@
             s: 875
             e: 877
             depth: 2
+            syntax: [
+              step: 2
+              cast: [878 882]
+            ]
           ]
           [
             expr: none
             s: 878
             e: 882
             depth: 2
+            syntax: [
+              word: none
+            ]
           ]
+        ]
+        syntax: [
+          into: true
         ]
       ]
       [
@@ -1384,42 +2017,66 @@
         s: 886
         e: 888
         depth: 1
+        syntax: [
+          word: do
+        ]
       ]
       [
         expr: bind
         s: 889
         e: 893
         depth: 1
+        syntax: [
+          word: bind
+        ]
       ]
       [
         expr: blk
         s: 894
         e: 897
         depth: 1
+        syntax: [
+          word: blk
+        ]
       ]
       [
         expr: ctx
         s: 898
         e: 901
         depth: 1
+        syntax: [
+          word: ctx
+        ]
       ]
       [
         expr: if
         s: 903
         e: 905
         depth: 1
+        syntax: [
+          word: if
+        ]
       ]
       [
         expr: all
         s: 906
         e: 909
         depth: 1
+        syntax: [
+          word: all
+          resolved: [
+            spec: [913 931]
+        ]
       ]
       [
         expr: t:
         s: 910
         e: 912
         depth: 1
+        syntax: [
+          step: 2
+          value: [913 931]
+        ]
       ]
       [
         expr: [a = 1 integer? a]
@@ -1433,12 +2090,18 @@
             s: 914
             e: 915
             depth: 2
+            syntax: [
+              word: a
+            ]
           ]
           [
             expr: =
             s: 916
             e: 917
             depth: 2
+            syntax: [
+              word: =
+            ]
           ]
           [
             expr: 1
@@ -1451,13 +2114,22 @@
             s: 920
             e: 928
             depth: 2
+            syntax: [
+              word: integer?
+            ]
           ]
           [
             expr: a
             s: 929
             e: 930
             depth: 2
+            syntax: [
+              word: a
+            ]
           ]
+        ]
+        syntax: [
+          into: true
         ]
       ]
       [
@@ -1484,6 +2156,9 @@
     ]
     source: {Red he: []^/^/a: 'tes
     max-depth: 6
+    syntax: [
+      step: 1
+    ]
   ]
 ]
 Error/Warning: ---------------------------------------
@@ -1575,6 +2250,21 @@ Error/Warning: ---------------------------------------
         end: #(
             line: 57
             character: 75
+        )
+    )
+) #(
+    severity: 1
+    code: "miss-expr"
+    source: "Syntax"
+    message: "has -- need a type: block!"
+    range: #(
+        start: #(
+            line: 62
+            character: 5
+        )
+        end: #(
+            line: 62
+            character: 8
         )
     )
 ) #(
