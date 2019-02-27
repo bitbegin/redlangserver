@@ -663,7 +663,7 @@ semantic: context [
 				append buffer "["
 				newline pad + 4
 				append buffer "expr: "
-				append buffer mold/flat/part pc/1/expr 20
+				append buffer mold/flat/part pc/1/expr/1 20
 				newline pad + 4
 				append buffer "s: "
 				append buffer mold pc/1/s

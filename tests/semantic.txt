@@ -1,0 +1,1517 @@
+
+[
+  [
+    expr: [Red he: [] a: 'test
+    s: 1
+    e: 902
+    depth: 0
+    nested: 
+    [
+      [
+        expr: Red
+        s: 1
+        e: 4
+        depth: 1
+      ]
+      [
+        expr: he:
+        s: 5
+        e: 8
+        depth: 1
+        error: [severity 1 code "miss-expr" source "Syntax" message "he: -- need a type: block! for Red File header"]
+      ]
+      [
+        expr: []
+        s: 9
+        e: 11
+        depth: 1
+      ]
+      [
+        expr: a:
+        s: 13
+        e: 15
+        depth: 1
+      ]
+      [
+        expr: 'test
+        s: 16
+        e: 21
+        depth: 1
+      ]
+      [
+        expr: b:
+        s: 22
+        e: 24
+        depth: 1
+      ]
+      [
+        expr: context
+        s: 25
+        e: 32
+        depth: 1
+      ]
+      [
+        expr: [c: 4 d: context [e:
+        s: 33
+        e: 346
+        depth: 1
+        nested: 
+        [
+          [
+            expr: c:
+            s: 36
+            e: 38
+            depth: 2
+          ]
+          [
+            expr: 4
+            s: 39
+            e: 40
+            depth: 2
+          ]
+          [
+            expr: d:
+            s: 42
+            e: 44
+            depth: 2
+          ]
+          [
+            expr: context
+            s: 45
+            e: 52
+            depth: 2
+          ]
+          [
+            expr: [e: #{12} f: func [x
+            s: 53
+            e: 314
+            depth: 2
+            nested: 
+            [
+              [
+                expr: e:
+                s: 57
+                e: 59
+                depth: 3
+              ]
+              [
+                expr: #{12}
+                s: 60
+                e: 65
+                depth: 3
+              ]
+              [
+                expr: f:
+                s: 68
+                e: 70
+                depth: 3
+              ]
+              [
+                expr: func
+                s: 71
+                e: 75
+                depth: 3
+              ]
+              [
+                expr: [x [block!] y [integ
+                s: 76
+                e: 101
+                depth: 3
+                nested: 
+                [
+                  [
+                    expr: x
+                    s: 77
+                    e: 78
+                    depth: 4
+                  ]
+                  [
+                    expr: [block!]
+                    s: 79
+                    e: 87
+                    depth: 4
+                    nested: 
+                    [
+                      [
+                        expr: block!
+                        s: 80
+                        e: 86
+                        depth: 5
+                      ]
+                    ]
+                  ]
+                  [
+                    expr: y
+                    s: 88
+                    e: 89
+                    depth: 4
+                  ]
+                  [
+                    expr: [integer!]
+                    s: 90
+                    e: 100
+                    depth: 4
+                    nested: 
+                    [
+                      [
+                        expr: integer!
+                        s: 91
+                        e: 99
+                        depth: 5
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+              [
+                expr: [ff: function [a [in
+                s: 101
+                e: 303
+                depth: 3
+                nested: 
+                [
+                  [
+                    expr: ff:
+                    s: 106
+                    e: 109
+                    depth: 4
+                  ]
+                  [
+                    expr: function
+                    s: 110
+                    e: 118
+                    depth: 4
+                  ]
+                  [
+                    expr: [a [integer!] b [bin
+                    s: 119
+                    e: 145
+                    depth: 4
+                    nested: 
+                    [
+                      [
+                        expr: a
+                        s: 120
+                        e: 121
+                        depth: 5
+                      ]
+                      [
+                        expr: [integer!]
+                        s: 122
+                        e: 132
+                        depth: 5
+                        nested: 
+                        [
+                          [
+                            expr: integer!
+                            s: 123
+                            e: 131
+                            depth: 6
+                          ]
+                        ]
+                      ]
+                      [
+                        expr: b
+                        s: 133
+                        e: 134
+                        depth: 5
+                      ]
+                      [
+                        expr: [binary!]
+                        s: 135
+                        e: 144
+                        depth: 5
+                        nested: 
+                        [
+                          [
+                            expr: binary!
+                            s: 136
+                            e: 143
+                            depth: 6
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                  [
+                    expr: [f1: "test" f2: x f3
+                    s: 145
+                    e: 247
+                    depth: 4
+                    nested: 
+                    [
+                      [
+                        expr: f1:
+                        s: 151
+                        e: 154
+                        depth: 5
+                      ]
+                      [
+                        expr: "test"
+                        s: 155
+                        e: 161
+                        depth: 5
+                      ]
+                      [
+                        expr: f2:
+                        s: 166
+                        e: 169
+                        depth: 5
+                      ]
+                      [
+                        expr: x
+                        s: 170
+                        e: 171
+                        depth: 5
+                      ]
+                      [
+                        expr: f3:
+                        s: 176
+                        e: 179
+                        depth: 5
+                      ]
+                      [
+                        expr: f1
+                        s: 180
+                        e: 182
+                        depth: 5
+                      ]
+                      [
+                        expr: f4:
+                        s: 187
+                        e: 190
+                        depth: 5
+                      ]
+                      [
+                        expr: l
+                        s: 191
+                        e: 192
+                        depth: 5
+                      ]
+                      [
+                        expr: f5:
+                        s: 197
+                        e: 200
+                        depth: 5
+                      ]
+                      [
+                        expr: :f
+                        s: 201
+                        e: 203
+                        depth: 5
+                      ]
+                      [
+                        expr: f6:
+                        s: 208
+                        e: 211
+                        depth: 5
+                      ]
+                      [
+                        expr: f5
+                        s: 212
+                        e: 214
+                        depth: 5
+                      ]
+                      [
+                        expr: f7:
+                        s: 219
+                        e: 222
+                        depth: 5
+                      ]
+                      [
+                        expr: a
+                        s: 223
+                        e: 224
+                        depth: 5
+                      ]
+                      [
+                        expr: +
+                        s: 225
+                        e: 226
+                        depth: 5
+                      ]
+                      [
+                        expr: length?
+                        s: 227
+                        e: 234
+                        depth: 5
+                      ]
+                      [
+                        expr: b
+                        s: 235
+                        e: 236
+                        depth: 5
+                      ]
+                      [
+                        expr: f
+                        s: 241
+                        e: 242
+                        depth: 5
+                      ]
+                    ]
+                  ]
+                  [
+                    expr: x:
+                    s: 251
+                    e: 253
+                    depth: 4
+                  ]
+                  [
+                    expr: 1
+                    s: 254
+                    e: 255
+                    depth: 4
+                  ]
+                  [
+                    expr: y:
+                    s: 259
+                    e: 261
+                    depth: 4
+                  ]
+                  [
+                    expr: 1
+                    s: 262
+                    e: 263
+                    depth: 4
+                  ]
+                  [
+                    expr: e:
+                    s: 267
+                    e: 269
+                    depth: 4
+                  ]
+                  [
+                    expr: x
+                    s: 270
+                    e: 271
+                    depth: 4
+                  ]
+                  [
+                    expr: +
+                    s: 272
+                    e: 273
+                    depth: 4
+                  ]
+                  [
+                    expr: y
+                    s: 274
+                    e: 275
+                    depth: 4
+                  ]
+                  [
+                    expr: o:
+                    s: 279
+                    e: 281
+                    depth: 4
+                  ]
+                  [
+                    expr: g
+                    s: 282
+                    e: 283
+                    depth: 4
+                  ]
+                  [
+                    expr: t:
+                    s: 287
+                    e: 289
+                    depth: 4
+                  ]
+                  [
+                    expr: h
+                    s: 290
+                    e: 291
+                    depth: 4
+                  ]
+                  [
+                    expr: u:
+                    s: 295
+                    e: 297
+                    depth: 4
+                  ]
+                  [
+                    expr: x
+                    s: 298
+                    e: 299
+                    depth: 4
+                  ]
+                ]
+              ]
+              [
+                expr: g:
+                s: 306
+                e: 308
+                depth: 3
+              ]
+              [
+                expr: []
+                s: 309
+                e: 311
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: h:
+            s: 316
+            e: 318
+            depth: 2
+          ]
+          [
+            expr: #(a: 3)
+            s: 319
+            e: 326
+            depth: 2
+            nested: 
+            [
+              [
+                expr: a:
+                s: 321
+                e: 323
+                depth: 3
+              ]
+              [
+                expr: 3
+                s: 324
+                e: 325
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: i:
+            s: 328
+            e: 330
+            depth: 2
+          ]
+          [
+            expr: x
+            s: 331
+            e: 332
+            depth: 2
+          ]
+          [
+            expr: j:
+            s: 334
+            e: 336
+            depth: 2
+          ]
+          [
+            expr: e
+            s: 337
+            e: 338
+            depth: 2
+          ]
+          [
+            expr: k:
+            s: 340
+            e: 342
+            depth: 2
+          ]
+          [
+            expr: t
+            s: 343
+            e: 344
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: l:
+        s: 348
+        e: 350
+        depth: 1
+      ]
+      [
+        expr: (m: 3 n: a)
+        s: 351
+        e: 362
+        depth: 1
+        nested: 
+        [
+          [
+            expr: m:
+            s: 352
+            e: 354
+            depth: 2
+          ]
+          [
+            expr: 3
+            s: 355
+            e: 356
+            depth: 2
+          ]
+          [
+            expr: n:
+            s: 357
+            e: 359
+            depth: 2
+          ]
+          [
+            expr: a
+            s: 360
+            e: 361
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: o:
+        s: 363
+        e: 365
+        depth: 1
+      ]
+      [
+        expr: l
+        s: 366
+        e: 367
+        depth: 1
+      ]
+      [
+        expr: r:
+        s: 369
+        e: 371
+        depth: 1
+      ]
+      [
+        expr: func
+        s: 372
+        e: 376
+        depth: 1
+      ]
+      [
+        expr: [a [test] b [test!] 
+        s: 377
+        e: 473
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a
+            s: 380
+            e: 381
+            depth: 2
+          ]
+          [
+            expr: [test]
+            s: 382
+            e: 388
+            depth: 2
+            nested: 
+            [
+              [
+                expr: test
+                s: 383
+                e: 387
+                depth: 3
+                error: [severity 1 code "invalid-datatype" source "Syntax" message "test -- invalid datatype: test"]
+              ]
+            ]
+          ]
+          [
+            expr: b
+            s: 390
+            e: 391
+            depth: 2
+          ]
+          [
+            expr: [test!]
+            s: 392
+            e: 399
+            depth: 2
+            nested: 
+            [
+              [
+                expr: test!
+                s: 393
+                e: 398
+                depth: 3
+                error: [severity 1 code "invalid-datatype" source "Syntax" message "test! -- invalid datatype: test!"]
+              ]
+            ]
+          ]
+          [
+            expr: /part
+            s: 401
+            e: 406
+            depth: 2
+          ]
+          [
+            expr: length
+            s: 407
+            e: 413
+            depth: 2
+          ]
+          [
+            expr: [integer! string!]
+            s: 414
+            e: 432
+            depth: 2
+            nested: 
+            [
+              [
+                expr: integer!
+                s: 415
+                e: 423
+                depth: 3
+              ]
+              [
+                expr: string!
+                s: 424
+                e: 431
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: return:
+            s: 434
+            e: 441
+            depth: 2
+          ]
+          [
+            expr: [block!]
+            s: 442
+            e: 450
+            depth: 2
+            nested: 
+            [
+              [
+                expr: block!
+                s: 443
+                e: 449
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: /local
+            s: 461
+            e: 467
+            depth: 2
+          ]
+          [
+            expr: x
+            s: 468
+            e: 469
+            depth: 2
+          ]
+          [
+            expr: y
+            s: 470
+            e: 471
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: [x: 1 y: 1 a + b + 1
+        s: 473
+        e: 502
+        depth: 1
+        nested: 
+        [
+          [
+            expr: x:
+            s: 476
+            e: 478
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 479
+            e: 480
+            depth: 2
+          ]
+          [
+            expr: y:
+            s: 481
+            e: 483
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 484
+            e: 485
+            depth: 2
+          ]
+          [
+            expr: a
+            s: 487
+            e: 488
+            depth: 2
+          ]
+          [
+            expr: +
+            s: 489
+            e: 490
+            depth: 2
+          ]
+          [
+            expr: b
+            s: 491
+            e: 492
+            depth: 2
+          ]
+          [
+            expr: +
+            s: 493
+            e: 494
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 495
+            e: 496
+            depth: 2
+          ]
+          [
+            expr: +
+            s: 497
+            e: 498
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 499
+            e: 500
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: s:
+        s: 504
+        e: 506
+        depth: 1
+      ]
+      [
+        expr: function
+        s: 507
+        e: 515
+        depth: 1
+      ]
+      [
+        expr: [uri [string!] code 
+        s: 516
+        e: 559
+        depth: 1
+        nested: 
+        [
+          [
+            expr: uri
+            s: 517
+            e: 520
+            depth: 2
+          ]
+          [
+            expr: [string!]
+            s: 521
+            e: 530
+            depth: 2
+            nested: 
+            [
+              [
+                expr: string!
+                s: 522
+                e: 529
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: code
+            s: 531
+            e: 535
+            depth: 2
+          ]
+          [
+            expr: [string!]
+            s: 536
+            e: 545
+            depth: 2
+            nested: 
+            [
+              [
+                expr: string!
+                s: 537
+                e: 544
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: blk
+            s: 546
+            e: 549
+            depth: 2
+          ]
+          [
+            expr: [block!]
+            s: 550
+            e: 558
+            depth: 2
+            nested: 
+            [
+              [
+                expr: block!
+                s: 551
+                e: 557
+                depth: 3
+              ]
+            ]
+          ]
+        ]
+      ]
+      [
+        expr: [either uri [return 
+        s: 559
+        e: 645
+        depth: 1
+        nested: 
+        [
+          [
+            expr: either
+            s: 562
+            e: 568
+            depth: 2
+          ]
+          [
+            expr: uri
+            s: 569
+            e: 572
+            depth: 2
+          ]
+          [
+            expr: [return reduce [uri 
+            s: 573
+            e: 608
+            depth: 2
+            nested: 
+            [
+              [
+                expr: return
+                s: 577
+                e: 583
+                depth: 3
+              ]
+              [
+                expr: reduce
+                s: 584
+                e: 590
+                depth: 3
+              ]
+              [
+                expr: [uri code blk]
+                s: 591
+                e: 605
+                depth: 3
+                nested: 
+                [
+                  [
+                    expr: uri
+                    s: 592
+                    e: 595
+                    depth: 4
+                  ]
+                  [
+                    expr: code
+                    s: 596
+                    e: 600
+                    depth: 4
+                  ]
+                  [
+                    expr: blk
+                    s: 601
+                    e: 604
+                    depth: 4
+                  ]
+                ]
+              ]
+            ]
+          ]
+          [
+            expr: [return reduce [uri 
+            s: 608
+            e: 643
+            depth: 2
+            nested: 
+            [
+              [
+                expr: return
+                s: 612
+                e: 618
+                depth: 3
+              ]
+              [
+                expr: reduce
+                s: 619
+                e: 625
+                depth: 3
+              ]
+              [
+                expr: [uri code blk]
+                s: 626
+                e: 640
+                depth: 3
+                nested: 
+                [
+                  [
+                    expr: uri
+                    s: 627
+                    e: 630
+                    depth: 4
+                  ]
+                  [
+                    expr: code
+                    s: 631
+                    e: 635
+                    depth: 4
+                  ]
+                  [
+                    expr: blk
+                    s: 636
+                    e: 639
+                    depth: 4
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+      [
+        expr: fff:
+        s: 647
+        e: 651
+        depth: 1
+      ]
+      [
+        expr: 3
+        s: 652
+        e: 653
+        depth: 1
+      ]
+      [
+        expr: ft:
+        s: 655
+        e: 658
+        depth: 1
+      ]
+      [
+        expr: func
+        s: 659
+        e: 663
+        depth: 1
+      ]
+      [
+        expr: [a [block!] b [map! 
+        s: 664
+        e: 758
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a
+            s: 665
+            e: 666
+            depth: 2
+          ]
+          [
+            expr: [block!]
+            s: 667
+            e: 675
+            depth: 2
+            nested: 
+            [
+              [
+                expr: block!
+                s: 668
+                e: 674
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: b
+            s: 676
+            e: 677
+            depth: 2
+          ]
+          [
+            expr: [map! integer!]
+            s: 678
+            e: 693
+            depth: 2
+            nested: 
+            [
+              [
+                expr: map!
+                s: 679
+                e: 683
+                depth: 3
+              ]
+              [
+                expr: integer!
+                s: 684
+                e: 692
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: return:
+            s: 694
+            e: 701
+            depth: 2
+            error: [severity 1 code "invalid-arg" source "Syntax" message "return: -- invalid argument for: c"]
+          ]
+          [
+            expr: [integer!]
+            s: 702
+            e: 712
+            depth: 2
+            nested: 
+            [
+              [
+                expr: integer!
+                s: 703
+                e: 711
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: c
+            s: 713
+            e: 714
+            depth: 2
+          ]
+          [
+            expr: [integer!]
+            s: 715
+            e: 725
+            depth: 2
+            nested: 
+            [
+              [
+                expr: integer!
+                s: 716
+                e: 724
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: /c
+            s: 726
+            e: 728
+            depth: 2
+            error: [severity 1 code "double-define" source "Syntax" message "/c -- double define: c"]
+          ]
+          [
+            expr: a
+            s: 729
+            e: 730
+            depth: 2
+            error: [severity 1 code "double-define" source "Syntax" message "a -- double define: a"]
+          ]
+          [
+            expr: [integer!]
+            s: 731
+            e: 741
+            depth: 2
+            nested: 
+            [
+              [
+                expr: integer!
+                s: 732
+                e: 740
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: /d
+            s: 742
+            e: 744
+            depth: 2
+          ]
+          [
+            expr: /local
+            s: 745
+            e: 751
+            depth: 2
+          ]
+          [
+            expr: x
+            s: 752
+            e: 753
+            depth: 2
+          ]
+          [
+            expr: y
+            s: 754
+            e: 755
+            depth: 2
+          ]
+          [
+            expr: z
+            s: 756
+            e: 757
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: [reduce [a b c d] fi
+        s: 758
+        e: 801
+        depth: 1
+        nested: 
+        [
+          [
+            expr: reduce
+            s: 761
+            e: 767
+            depth: 2
+          ]
+          [
+            expr: [a b c d]
+            s: 768
+            e: 777
+            depth: 2
+            nested: 
+            [
+              [
+                expr: a
+                s: 769
+                e: 770
+                depth: 3
+              ]
+              [
+                expr: b
+                s: 771
+                e: 772
+                depth: 3
+              ]
+              [
+                expr: c
+                s: 773
+                e: 774
+                depth: 3
+              ]
+              [
+                expr: d
+                s: 775
+                e: 776
+                depth: 3
+              ]
+            ]
+          ]
+          [
+            expr: find/match
+            s: 779
+            e: 789
+            depth: 2
+          ]
+          [
+            expr: "adb"
+            s: 790
+            e: 795
+            depth: 2
+          ]
+          [
+            expr: "a"
+            s: 796
+            e: 799
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: fh1:
+        s: 803
+        e: 807
+        depth: 1
+      ]
+      [
+        expr: has
+        s: 808
+        e: 811
+        depth: 1
+      ]
+      [
+        expr: [/ref a b]
+        s: 812
+        e: 822
+        depth: 1
+        nested: 
+        [
+          [
+            expr: /ref
+            s: 813
+            e: 817
+            depth: 2
+            error: [severity 1 code "forbidden-refine" source "Syntax" message "/ref -- forbidden refinement: /ref"]
+          ]
+          [
+            expr: a
+            s: 818
+            e: 819
+            depth: 2
+          ]
+          [
+            expr: b
+            s: 820
+            e: 821
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: fh2:
+        s: 823
+        e: 827
+        depth: 1
+      ]
+      [
+        expr: has
+        s: 828
+        e: 831
+        depth: 1
+      ]
+      [
+        expr: [a b]
+        s: 832
+        e: 837
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a
+            s: 833
+            e: 834
+            depth: 2
+          ]
+          [
+            expr: b
+            s: 835
+            e: 836
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: []
+        s: 837
+        e: 839
+        depth: 1
+      ]
+      [
+        expr: z:
+        s: 841
+        e: 843
+        depth: 1
+      ]
+      [
+        expr: z
+        s: 844
+        e: 845
+        depth: 1
+      ]
+      [
+        expr: blk:
+        s: 847
+        e: 851
+        depth: 1
+      ]
+      [
+        expr: [a: 1]
+        s: 852
+        e: 858
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a:
+            s: 853
+            e: 855
+            depth: 2
+          ]
+          [
+            expr: 1
+            s: 856
+            e: 857
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: ctx:
+        s: 859
+        e: 863
+        depth: 1
+      ]
+      [
+        expr: context
+        s: 864
+        e: 871
+        depth: 1
+      ]
+      [
+        expr: [a: none]
+        s: 872
+        e: 884
+        depth: 1
+        nested: 
+        [
+          [
+            expr: a:
+            s: 875
+            e: 877
+            depth: 2
+          ]
+          [
+            expr: none
+            s: 878
+            e: 882
+            depth: 2
+          ]
+        ]
+      ]
+      [
+        expr: do
+        s: 886
+        e: 888
+        depth: 1
+      ]
+      [
+        expr: bind
+        s: 889
+        e: 893
+        depth: 1
+      ]
+      [
+        expr: blk
+        s: 894
+        e: 897
+        depth: 1
+      ]
+      [
+        expr: ctx
+        s: 898
+        e: 901
+        depth: 1
+      ]
+    ]
+    source: {Red he: []^/^/a: 'tes
+    max-depth: 6
+  ]
+]
+Error/Warning: ---------------------------------------
+[#(
+    severity: 1
+    code: "miss-expr"
+    source: "Syntax"
+    message: "he: -- need a type: block! for Red File header"
+    range: #(
+        start: #(
+            line: 0
+            character: 4
+        )
+        end: #(
+            line: 0
+            character: 7
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "test -- invalid datatype: test"
+    range: #(
+        start: #(
+            line: 37
+            character: 4
+        )
+        end: #(
+            line: 37
+            character: 8
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-datatype"
+    source: "Syntax"
+    message: "test! -- invalid datatype: test!"
+    range: #(
+        start: #(
+            line: 38
+            character: 4
+        )
+        end: #(
+            line: 38
+            character: 9
+        )
+    )
+) #(
+    severity: 1
+    code: "invalid-arg"
+    source: "Syntax"
+    message: "return: -- invalid argument for: c"
+    range: #(
+        start: #(
+            line: 57
+            character: 39
+        )
+        end: #(
+            line: 57
+            character: 46
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "/c -- double define: c"
+    range: #(
+        start: #(
+            line: 57
+            character: 71
+        )
+        end: #(
+            line: 57
+            character: 73
+        )
+    )
+) #(
+    severity: 1
+    code: "double-define"
+    source: "Syntax"
+    message: "a -- double define: a"
+    range: #(
+        start: #(
+            line: 57
+            character: 74
+        )
+        end: #(
+            line: 57
+            character: 75
+        )
+    )
+) #(
+    severity: 1
+    code: "forbidden-refine"
+    source: "Syntax"
+    message: "/ref -- forbidden refinement: /ref"
+    range: #(
+        start: #(
+            line: 62
+            character: 10
+        )
+        end: #(
+            line: 62
+            character: 14
+        )
+    )
+)]
