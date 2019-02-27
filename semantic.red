@@ -343,7 +343,7 @@ semantic: context [
 		none
 	]
 
-	spec-of-func-body: function [top [block!] pc [block!]][
+	spec-of-func-body: function [top [block!] pc [block!] /type][
 		npc: head pc
 		forall npc [
 			if all [
@@ -352,10 +352,28 @@ semantic: context [
 				npc/1/syntax/resolved
 				npc/1/syntax/resolved/body = pc
 			][
+				if type [
+					return reduce [npc/1/syntax/resolved/spec npc/1/syntax/word]
+				]
 				return npc/1/syntax/resolved/spec
 			]
 		]
 		none
+	]
+
+	context-spec?: function [top [block!] pc [block!]][
+		npc: head pc
+		forall npc [
+			if all [
+				npc/1/syntax
+				npc/1/syntax/word = 'context
+				npc/1/syntax/resolved
+				npc/1/syntax/resolved/spec = pc
+			][
+				return true
+			]
+		]
+		false
 	]
 
 	func-spec-declare?: function [top [block!] pc [block!]][
@@ -364,10 +382,10 @@ semantic: context [
 			if all [
 				block? par/1/expr/1
 				par <> top
-				spec: spec-of-func-body top par
-				ret: func-arg? spec word
+				spec: spec-of-func-body/type top par
 			][
-				return ret
+				if spec/2 = 'function [return spec/1]
+				return func-arg? spec/1 word
 			]
 			none
 		]
@@ -388,7 +406,12 @@ semantic: context [
 		find-set-word: function [npc [block! paren!]][
 			forall npc [
 				if all [
-					pc <> npc
+					npc = head pc
+					(index? pc) >= (index? npc)
+				][
+					return none
+				]
+				if all [
 					any [
 						set-word? npc/1/expr/1
 						all [
@@ -445,6 +468,25 @@ semantic: context [
 				repend pc/1/syntax ['declare declare]
 			]
 			resolve-set* pc
+			if all [
+				none? pc/1/syntax/declare
+				recent: recent-set? top pc
+			][
+				repend pc/1/syntax ['recent recent]
+			]
+			if all [
+				none? pc/1/syntax/declare
+				none? pc/1/syntax/recent
+				par: get-parent top pc
+				any [
+					par = top
+					not context-spec? top par
+				]
+			][
+				unless find top/1/syntax/extra pc/1 [
+					append/only top/1/syntax/extra pc/1
+				]
+			]
 		]
 
 		resolve-word: function [pc [block!]][
@@ -459,7 +501,7 @@ semantic: context [
 			]
 			if recent: recent-set? top pc [
 				repend pc/1/syntax ['recent recent]
-				resolve-set recent
+				;resolve-set recent
 			]
 		]
 
@@ -638,8 +680,7 @@ semantic: context [
 		][throw-error 'analysis "expr isn't a block!" top/1]
 		repend top/1 ['syntax syntax: make block! 3]
 		repend syntax [
-			'name "top"
-			'step 1
+			'type 'top
 			'extra make block! 20
 		]
 		pc: top/1/nested
@@ -658,6 +699,10 @@ semantic: context [
 			append buffer lf
 			append/dup buffer " " cnt
 		]
+		src: top/1/source
+		to-range: function [pc [block!]][
+			append ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
+		]
 		format*: function [pc [block! paren!] depth [integer!]][
 			pad: depth * 4
 			newline pad
@@ -674,6 +719,9 @@ semantic: context [
 				newline pad + 4
 				append buffer "e: "
 				append buffer mold pc/1/e
+				newline pad + 4
+				append buffer "range: "
+				append buffer mold/flat to-range pc
 				newline pad + 4
 				append buffer "depth: "
 				append buffer mold pc/1/depth
@@ -720,19 +768,19 @@ semantic: context [
 					if value: pc/1/syntax/value [
 						newline pad + 6
 						append buffer "value: "
-						append buffer mold/flat reduce [value/1/s value/1/e]
+						append buffer mold/flat to-range value
 					]
 
 					if cast: pc/1/syntax/cast [
 						newline pad + 6
 						append buffer "cast: "
-						append buffer mold/flat reduce [cast/1/s cast/1/e]
+						append buffer mold/flat to-range cast
 					]
 
 					if declare: pc/1/syntax/declare [
 						newline pad + 6
 						append buffer "declare: "
-						append buffer mold/flat reduce [declare/1/s declare/1/e]
+						append buffer mold/flat to-range declare
 					]
 
 					if resolved: pc/1/syntax/resolved [
@@ -745,9 +793,22 @@ semantic: context [
 							append buffer resolved/(i * 2 + 1)
 							append buffer ": "
 							value: resolved/(i * 2 + 2)
-							append buffer mold/flat reduce [value/1/s value/1/e]
+							append buffer mold/flat to-range value
 							i: i + 1
 						]
+						newline pad + 6
+						append buffer "]"
+					]
+
+					if extra: pc/1/syntax/extra [
+						newline pad + 6
+						append buffer "extra: ["
+						forall extra [
+							newline pad + 8
+							append buffer mold/flat to-range extra/1
+						]
+						newline pad + 6
+						append buffer "]"
 					]
 
 					if type: pc/1/syntax/type [
@@ -759,7 +820,7 @@ semantic: context [
 					if parent: pc/1/syntax/parent [
 						newline pad + 6
 						append buffer "parent: "
-						append buffer mold/flat reduce [parent/1/s parent/1/e]
+						append buffer mold/flat to-range parent
 					]
 
 					if args: pc/1/syntax/args [
@@ -774,7 +835,7 @@ semantic: context [
 								value: args/(i * 2 + 2)
 								forall value [
 									newline pad + 10
-									append buffer mold/flat reduce [value/1/1/s value/1/1/e]
+									append buffer mold/flat to-range value/1
 								]
 								newline pad + 8
 								append buffer "]"
@@ -782,10 +843,12 @@ semantic: context [
 								append buffer key
 								append buffer ": "
 								value: args/(i * 2 + 2)
-								append buffer mold/flat reduce [value/1/s value/1/e]
+								append buffer mold/flat to-range value
 							]
 							i: i + 1
 						]
+						newline pad + 6
+						append buffer "]"
 					]
 
 					newline pad + 4
@@ -806,7 +869,7 @@ semantic: context [
 		buffer
 	]
 
-	to-range: function [src [string!] pc [block!]][
+	form-range: function [src [string!] pc [block!]][
 		ast/to-range ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
 	]
 
@@ -819,12 +882,12 @@ semantic: context [
 					either block? error/1 [
 						forall error [
 							err: make map! error/1
-							err/range: to-range pc
+							err/range: form-range top/1/source pc
 							append ret err
 						]
 					][
 						err: make map! error
-						err/range: to-range top/1/source pc
+						err/range: form-range top/1/source pc
 						append ret err
 					]
 				]
@@ -842,18 +905,18 @@ semantic: context [
 		ret
 	]
 
-	collect-completions: function [top [block!] pc [block! paren!] /extra][
+	collect-completions: function [top [block!] pc [block!] /extra][
 		ret: clear []
 		str: clear ""
 		unique?: function [word [string!]][
 			npc: ret
 			forall npc [
-				if word = to string! npc/1/expr [return false]
+				if word = to string! npc/1/expr/1 [return false]
 			]
 			true
 		]
-		collect*: function [npc [block! paren!]][
-			word: to string! npc/1/expr
+		collect*: function [npc [block!]][
+			word: to string! npc/1/expr/1
 			if any [
 				empty? str
 				all [
@@ -869,28 +932,28 @@ semantic: context [
 				]
 			]
 		]
-		collect-set-word: function [npc [block! paren!]][
+		collect-set-word: function [npc [block!]][
 			forall npc [
-				if set-word? npc/1/expr [
+				if set-word? npc/1/expr/1 [
 					collect* npc
 				]
 			]
 		]
 
-		collect-arg: function [spec [block! paren!]][
-			if block? npc: spec/1/expr [
+		collect-arg: function [spec [block!]][
+			if block? npc: spec/1/expr/1 [
 				forall npc [
-					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr [
+					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1 [
 						collect* npc
 					]
 				]
 			]
 		]
 
-		collect-func-spec: function [par [block! paren! none!]][
+		collect-func-spec: function [par [block! none!]][
 			unless par [exit]
 			if all [
-				par/1/syntax/name = "block"
+				block? par/1/expr/1
 				spec: spec-of-func-body top par
 			][
 				collect-arg spec
