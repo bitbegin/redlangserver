@@ -326,60 +326,38 @@ semantic: context [
 		none
 	]
 
-	;-- TBD: only support func [][], this will improve performance
-	spec-of-func-body: function [top [block!] pc [block!] /type][
-		npc: head pc
-		forall npc [
-			if all [
-				npc/1/syntax
-				find [func function has] npc/1/syntax/word
-				npc/1/syntax/resolved
-				npc/1/syntax/resolved/body = pc
-			][
-				if type [
-					return reduce [npc/1/syntax/resolved/spec npc/1/syntax/word]
-				]
-				return npc/1/syntax/resolved/spec
-			]
-		]
-		none
-	]
-
-	context-spec?: function [top [block!] pc [block!]][
-		npc: head pc
-		forall npc [
-			if all [
-				npc/1/syntax
-				npc/1/syntax/word = 'context
-				npc/1/syntax/resolved
-				npc/1/syntax/resolved/spec = pc
-			][
-				return true
-			]
+	context-spec?: function [pc [block!]][
+		par: pc/1/upper
+		if all [
+			block? par/1/expr/1
+			par/1/syntax/type = 'spec
+			parent: par/1/syntax/parent
+			parent/1/syntax/word = 'context
+			parent/1/syntax/resolved/spec
+		][
+			return true
 		]
 		false
 	]
 
 	func-spec-declare?: function [top [block!] pc [block!]][
 		word: to word! pc/1/expr/1
-		find-func-spec: function [par [block!]][
+		par: pc/1/upper
+		if all [
+			block? par/1/expr/1
+			par/1/syntax
+			par/1/syntax/type = 'body
+			parent: par/1/syntax/parent
+		][
 			if all [
-				block? par/1/expr/1
-				par <> top
-				spec: spec-of-func-body/type top par
+				parent/1/syntax/word = 'function
+				spec: parent/1/syntax/resolved/spec
+			] [return spec]
+			if all [
+				find [func has] parent/1/syntax/word
+				spec: parent/1/syntax/resolved/spec
 			][
-				if spec/2 = 'function [return spec/1]
-				return func-arg? spec/1 word
-			]
-			none
-		]
-		par: pc
-		forever [
-			unless par: par/1/upper [
-				return none
-			]
-			if ret: find-func-spec par [
-				return ret
+				return func-arg? spec word
 			]
 		]
 		none
@@ -462,7 +440,7 @@ semantic: context [
 				none? pc/1/syntax/declare
 				none? pc/1/syntax/recent
 				top <> par: pc/1/upper
-				not context-spec? top par
+				not context-spec? pc
 			][
 				unless find top/1/syntax/extra pc/1 [
 					append/only top/1/syntax/extra pc/1
@@ -530,6 +508,13 @@ semantic: context [
 			reduce [none step]
 		]
 
+		block-mark: function [pc [block!] par [block!] type [word!]][
+			unless pc/1/syntax [
+				repend pc/1 ['syntax make block! 4]
+			]
+			repend pc/1/syntax ['type type 'parent par]
+		]
+
 		resolve-func: function [pc [block!]][
 			step: 1
 			ret: fetch-block next pc
@@ -542,10 +527,12 @@ semantic: context [
 			repend pc/1/syntax ['resolved resolved: make block! 4]
 			either pc/1/syntax/word = 'does [
 				repend resolved ['body spec]
+				block-mark spec pc 'body
 				if spec/1/nested [resolve-refer spec/1/nested]
 				return step
 			][
 				repend resolved ['spec spec]
+				block-mark spec pc 'spec
 				if find [context all any] pc/1/syntax/word [
 					if spec/1/nested [resolve-refer spec/1/nested]
 					return step
@@ -558,9 +545,10 @@ semantic: context [
 				return step
 			]
 			step: step + ret/2
-			spec: ret/1
-			repend resolved ['body spec]
-			if spec/1/nested [resolve-refer spec/1/nested]
+			body: ret/1
+			repend resolved ['body body]
+			block-mark body pc 'body
+			if body/1/nested [resolve-refer body/1/nested]
 			step
 		]
 
@@ -924,11 +912,17 @@ semantic: context [
 			]
 		]
 
-		collect-func-spec: function [par [block! none!]][
-			unless par [exit]
+		collect-func-spec: function [pc [block! none!]][
+			unless pc [exit]
+			par: pc/1/upper
 			if all [
+				par
 				block? par/1/expr/1
-				spec: spec-of-func-body top par
+				par/1/syntax
+				par/1/syntax/type = 'body
+				parent: par/1/syntax/parent
+				find [func has function does] parent/1/syntax/word
+				spec: parent/1/syntax/resolved/spec
 			][
 				collect-arg spec
 			]
