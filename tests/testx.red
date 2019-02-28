@@ -2,6 +2,7 @@ Red he: []
 
 a: 'test
 b: context [
+	a: a
 	c: 4
 	d: context [
 		e: #{12}
