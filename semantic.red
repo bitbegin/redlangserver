@@ -51,12 +51,12 @@ semantic: context [
 					return pc
 				]
 				if pc/1/nested [
-					if ret: find-expr* pc/1/nested pos [return ret]
+					if ret: find-expr* pc/1/nested s e [return ret]
 				]
 			]
 			none
 		]
-		find-expr* top pos
+		find-expr* top s e
 	]
 
 	position?: function [top [block!] line [integer!] column [integer!] /outer][
@@ -970,25 +970,24 @@ source-syntax: context [
 
 	find-source: function [uri [string!]][
 		forall sources [
-			if sources/1/1 = uri [
+			if sources/1/uri = uri [
 				return sources
 			]
 		]
 		false
 	]
 
-	add-source-to-table: function [uri [string!] blk [block!]][
+	add-source-to-table: function [uri [string!] syntax [block!]][
 		either item: find-source uri [
-			item/1/2: blk
+			item/1/syntax: syntax
 		][
-			append/only sources reduce [uri blk]
+			append/only sources reduce ['uri uri 'syntax syntax]
 		]
 	]
 
 	add-source: function [uri [string!] code [string!]][
-		if map? res: red-lexer/analysis code [
-			add-source-to-table uri res/stack
-			range: red-lexer/to-range res/pos res/pos
+		if map? res: ast/analysis code [
+			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
 			info: res/error/arg2
 			if part: find info line-cs [info: copy/part info part]
@@ -1004,55 +1003,45 @@ source-syntax: context [
 			]
 		]
 		add-source-to-table uri res
-		if error? err: try [red-syntax/analysis res][
-			pc: err/arg3
-			range: red-lexer/to-range pc/2 pc/2
-			return reduce [
-				make map! reduce [
-					'range range
-					'severity 1
-					'code 1
-					'source "syntax"
-					'message err/arg2
-				]
-			]
-		]
-		red-syntax/collect-errors res
+		semantic/analysis res
+		semantic/collect-errors res
 	]
 
 	get-completions: function [uri [string!] line [integer!] column [integer!]][
 		unless item: find-source uri [
 			return none
 		]
-		top: item/1/2
-		unless pc: red-syntax/position? top line column [
+		top: item/1/syntax
+		unless pc: semantic/position?/outer top line column [
 			return none
 		]
 		unless any [
-			file? pc/1/expr
-			path? pc/1/expr
-			word? pc/1/expr
+			file? pc/1/expr/1
+			path? pc/1/expr/1
+			word? pc/1/expr/1
 		][
 			return none
 		]
-		str: mold pc/1/expr
+		str: mold pc/1/expr/1
 		comps: clear last-comps
 
-		if word? pc/1/expr [
+		if word? pc/1/expr/1 [
 			forall sources [
-				top2: sources/1/2
-				collects: either sources/1/1 = uri [
-					red-syntax/collect-completions top2 pc
+				top2: sources/1/syntax
+				ctop: either sources/1/uri = uri [
+					semantic/collect-completions top2 pc
 				][
-					red-syntax/collect-completions/extra top2 pc
+					semantic/collect-completions/extra top2 pc
 				]
+				collects: ctop/1/nested
 				forall collects [
 					comp: make map! reduce [
 						'label to string! collects/1/expr
 						'kind CompletionItemKind/Variable
 						'data make map! reduce [
 							'uri uri
-							'range mold collects/1/range
+							's collects/1/s
+							'e collects/1/e
 						]
 					]
 					if sources/1/1 = uri [
@@ -1073,7 +1062,7 @@ source-syntax: context [
 			]
 			return comps
 		]
-		if path? pc/1/expr [
+		if path? pc/1/expr/1 [
 			completions: red-complete-ctx/red-complete-path str no
 			forall completions [
 				append comps make map! reduce [
@@ -1084,7 +1073,7 @@ source-syntax: context [
 			return comps
 		]
 
-		if file? pc/1/expr [
+		if file? pc/1/expr/1 [
 			completions: red-complete-ctx/red-complete-file str no
 			forall completions [
 				append comps make map! reduce [
@@ -1109,41 +1098,16 @@ source-syntax: context [
 			params/data
 		][
 			uri: params/data/uri
-			range: load params/data/range
+			s: to integer! params/data/s
+			e: to integer! params/data/e
 			unless item: find-source uri [
 				return none
 			]
-			top: item/1/2
-			unless pc: red-syntax/find-expr top range [
+			top: item/1/syntax
+			unless pc: semantic/find-expr top s e [
 				return none
 			]
-			unless cast: pc/1/syntax/cast [
-				return none
-			]
-			either any [
-				word? cast/1/expr
-				path? cast/1/expr
-			][
-				if val: cast/1/syntax/value [
-					return rejoin [params/label " is a " mold type? val/1/expr " datatype!"]
-				]
-				if refer: cast/1/syntax/refer [
-					if refer/1/syntax/name = "func-param" [
-						return rejoin [params/label " is function parameter!"]
-					]
-					if refer/1/syntax/name = "func-refinement" [
-						return rejoin [params/label " is function refinement!"]
-					]
-				]
-				if find [func function does has] cast/1/syntax/word [
-					return rejoin [params/label " is a function!"]
-				]
-				if cast/1/syntax/word = 'context [
-					return rejoin [params/label " is a context!"]
-				]
-			][
-				return rejoin [params/label " is a " mold type? cast/1/expr " datatype!"]
-			]
+			return rejoin [params/label " is a variable!"]
 		]
 		none
 	]
@@ -1177,7 +1141,7 @@ source-syntax: context [
 			return none
 		]
 		top: item/1/2
-		unless pc: red-syntax/position? top line column [
+		unless pc: semantic/position?/outer top line column [
 			return none
 		]
 		none

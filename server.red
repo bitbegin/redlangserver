@@ -124,7 +124,8 @@ TextDocumentSyncKind: [
 ]
 
 
-trigger-string: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*"
+;trigger-string: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*"
+trigger-string: "%/"
 trigger-chars: []
 forall trigger-string [
 	append trigger-chars to string! trigger-string/1
