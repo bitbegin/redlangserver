@@ -59,7 +59,7 @@ semantic: context [
 		find-expr* top pos
 	]
 
-	position?: function [top [block!] pos [integer!] /outer][
+	position?: function [top [block!] line [integer!] column [integer!] /outer][
 		position*: function [pc [block!] pos [integer!]][
 			cascade: [
 				if pc/1/nested [
@@ -69,8 +69,8 @@ semantic: context [
 			]
 			forall pc [
 				if all [
-					pc/1/s >= pos
-					pc/1/e <= pos
+					pc/1/s <= pos
+					pc/1/e >= pos
 				][
 					if pc/1/e <> pos [do cascade]
 					if all [
@@ -87,25 +87,7 @@ semantic: context [
 			]
 			none
 		]
-		position* top line column
-	]
-
-	;-- use pc/1/upper to instead
-	get-parent: function [top [block!] item [block!]][
-		get-parent*: function [pc [block!] par [block!]][
-			forall pc [
-				if all [
-					item/s = pc/1/s
-					item/e = pc/1/e
-				][return par]
-				if pc/1/nested [
-					if ret: get-parent* pc/1/nested pc [return ret]
-				]
-			]
-			none
-		]
-		if top/1 = item [return none]
-		get-parent* top/1/nested top
+		position* top index? ast/to-pos top/1/source line column
 	]
 
 	syntax-error: function [pc [block!] word [word!] args][
@@ -241,7 +223,7 @@ semantic: context [
 			collect-args: function [npc [block!] par [block!]][
 				while [not tail? npc][
 					either word? npc/1/expr/1 [
-						append/only par/1/syntax/args/params npc
+						append/only par/1/syntax/args/params npc/1
 						if tail? npc: check-args npc par [return npc]
 					][
 						either any [
@@ -344,6 +326,7 @@ semantic: context [
 		none
 	]
 
+	;-- TBD: only support func [][], this will improve performance
 	spec-of-func-body: function [top [block!] pc [block!] /type][
 		npc: head pc
 		forall npc [
@@ -482,7 +465,7 @@ semantic: context [
 				not context-spec? top par
 			][
 				unless find top/1/syntax/extra pc/1 [
-					append/only top/1/syntax/extra pc
+					append/only top/1/syntax/extra pc/1
 				]
 			]
 		]
@@ -545,16 +528,6 @@ semantic: context [
 				return reduce [cast step]
 			]
 			reduce [none step]
-		]
-
-		set-into: function [pc [block!]][
-			either pc/1/syntax [
-				unless pc/1/syntax/into [
-					repend pc/1/syntax ['into true]
-				]
-			][
-				repend pc/1 ['syntax reduce ['into true]]
-			]
 		]
 
 		resolve-func: function [pc [block!]][
@@ -727,9 +700,11 @@ semantic: context [
 					append buffer "upper: "
 					append buffer mold/flat to-range pc/1/upper
 				]
-				newline pad + 4
-				append buffer "depth: "
-				append buffer mold pc/1/depth
+				if pc/1/depth [
+					newline pad + 4
+					append buffer "depth: "
+					append buffer mold pc/1/depth
+				]
 				if pc/1/nested [
 					newline pad + 4
 					append buffer "nested: "
@@ -756,12 +731,6 @@ semantic: context [
 						newline pad + 6
 						append buffer "word: "
 						append buffer pc/1/syntax/word
-					]
-
-					if pc/1/syntax/into [
-						newline pad + 6
-						append buffer "into: "
-						append buffer pc/1/syntax/into
 					]
 
 					if pc/1/syntax/step [
@@ -810,7 +779,7 @@ semantic: context [
 						append buffer "extra: ["
 						forall extra [
 							newline pad + 8
-							append buffer mold/flat to-range extra/1
+							append buffer mold/flat to-range extra
 						]
 						newline pad + 6
 						append buffer "]"
@@ -840,7 +809,7 @@ semantic: context [
 								value: args/(i * 2 + 2)
 								forall value [
 									newline pad + 10
-									append buffer mold/flat to-range value/1
+									append buffer mold/flat to-range value
 								]
 								newline pad + 8
 								append buffer "]"
@@ -933,7 +902,7 @@ semantic: context [
 					unique? word
 					npc <> pc
 				][
-					append ret npc/1
+					append/only ret npc/1
 				]
 			]
 		]
@@ -946,7 +915,7 @@ semantic: context [
 		]
 
 		collect-arg: function [spec [block!]][
-			if block? npc: spec/1/expr/1 [
+			if block? npc: spec/1/nested [
 				forall npc [
 					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1 [
 						collect* npc
@@ -966,27 +935,14 @@ semantic: context [
 		]
 
 		unless extra [
-			either all [
-				any [
-					block? pc/1/expr
-					paren? pc/1/expr
-				]
-				not empty? pc/1/expr
-				any [
-					pc/1/range/3 > line
-					all [
-						pc/1/range/3 = line
-						pc/1/range/4 > column
-					]
-				]
-			][
+			either pc/1/nested [
 				collect-func-spec pc
-				collect-set-word pc/1/expr
+				collect-set-word pc/1/nested
 			][
-				unless word? pc/1/expr [
+				unless find [word! get-word! file!] type?/word pc/1/expr/1 [
 					return ret
 				]
-				str: to string! pc/1/expr
+				str: to string! pc/1/expr/1
 			]
 
 			npc: pc
@@ -999,12 +955,12 @@ semantic: context [
 		]
 		if npc: top/1/syntax/extra [
 			forall npc [
-				if set-word? npc/1/expr [
+				if set-word? npc/1/expr/1 [
 					collect* npc
 				]
 			]
 		]
-		ret
+		reduce [reduce ['expr [] 'source top/1/source 's top/1/s 'e top/1/e 'nested ret]]
 	]
 ]
 

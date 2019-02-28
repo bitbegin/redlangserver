@@ -2363,3 +2363,86 @@ Error/Warning: ---------------------------------------
         )
     )
 )]
+
+[
+  [
+    expr: none
+    range: [1 1 77 1]
+    nested: 
+    [
+      [
+        expr: f1:
+        range: [11 5 11 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f2:
+        range: [12 5 12 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f3:
+        range: [13 5 13 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f4:
+        range: [14 5 14 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f5:
+        range: [15 5 15 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f6:
+        range: [16 5 16 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: f7:
+        range: [17 5 17 8]
+        upper: [10 43 19 5]
+        depth: 5
+      ]
+      [
+        expr: ff:
+        range: [10 4 10 7]
+        upper: [9 36 26 4]
+        depth: 4
+      ]
+      [
+        expr: fff:
+        range: [57 1 57 5]
+        upper: [1 1 77 1]
+        depth: 1
+      ]
+      [
+        expr: ft:
+        range: [59 1 59 4]
+        upper: [1 1 77 1]
+        depth: 1
+      ]
+      [
+        expr: fh1:
+        range: [64 1 64 5]
+        upper: [1 1 77 1]
+        depth: 1
+      ]
+      [
+        expr: fh2:
+        range: [65 1 65 5]
+        upper: [1 1 77 1]
+        depth: 1
+      ]
+    ]
+    source: {Red he: []^/^/a: 'tes
+  ]
+]
