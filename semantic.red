@@ -1144,6 +1144,43 @@ source-syntax: context [
 		unless pc: semantic/position?/outer top line column [
 			return none
 		]
+		unless pc/1/syntax [
+			case [
+				word? pc/1/expr/1 [
+					word: pc/1/expr/1
+					if datatype? get word [
+						return rejoin [mold pc/1/expr/1 " is a base datatype!"]
+					]
+				]
+				path? pc/1/expr/1 [
+					word: pc/1/expr/1/1
+				]
+				true [
+					type: type?/word pc/1/expr/1
+					if find [block! paren! map!] type [
+						return rejoin [mold mold/flat/part pc/1/expr/1 16 "...^/is a " mold type]
+					]
+					return rejoin [mold pc/1/expr/1 " is a literal^/type: " mold type]
+				]
+			]
+			return system-words/get-word-info word
+		]
+		if value: pc/1/syntax/value [
+			if any [
+				lit-word? pc/1/expr/1
+				set-word? pc/1/expr/1
+			][
+				return rejoin [mold pc/1/expr/1 
+					either pc/1/syntax/declare [
+						" is a function argument^/"
+					][
+						" is a variable^/"
+					]
+					"value type: "
+					mold type?/word value/1/expr/1
+				]
+			]
+		]
 		none
 	]
 ]
