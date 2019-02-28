@@ -1140,7 +1140,7 @@ source-syntax: context [
 		unless item: find-source uri [
 			return none
 		]
-		top: item/1/2
+		top: item/1/syntax
 		unless pc: semantic/position?/outer top line column [
 			return none
 		]

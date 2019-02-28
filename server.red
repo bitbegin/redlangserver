@@ -307,7 +307,7 @@ on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	result: source-syntax/hover uri line column
+	result: source-syntax/hover uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range none
