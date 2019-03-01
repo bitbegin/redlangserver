@@ -1070,6 +1070,9 @@ source-syntax: context [
 		][
 			return none
 		]
+		if pc/1/expr = [%][
+			return 'continue
+		]
 		unless any [
 			file? pc/1/expr/1
 			path? pc/1/expr/1

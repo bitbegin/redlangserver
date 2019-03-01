@@ -235,7 +235,7 @@ on-textDocument-didChange: function [params [map!]][
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
-		'diagnostics [];diagnostics
+		'diagnostics []
 	]
 	response
 ]
@@ -266,7 +266,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-line line
 	set 'last-column column
 	comps: source-syntax/get-completions uri line + 1 column + 1
-	either empty? comps [
+	either comps = 'continue [
 		json-body/result: make map! reduce [
 			'isIncomplete true
 			'items []
