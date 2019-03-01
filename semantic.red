@@ -597,10 +597,7 @@ semantic: context [
 				resolve-set npc
 				return 2
 			]
-			if any [
-				set-word? pc/1/expr/1
-				set-path? pc/1/expr/1
-			][
+			if set-word? pc/1/expr/1 [
 				resolve-set pc
 				return 1
 			]
