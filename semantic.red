@@ -1013,6 +1013,13 @@ source-syntax: context [
 		false
 	]
 
+	find-top: function [uri [string!]][
+		unless item: find-source uri [
+			return none
+		]
+		item/1/syntax
+	]
+
 	add-source-to-table: function [uri [string!] syntax [block!]][
 		either item: find-source uri [
 			item/1/syntax: syntax
@@ -1052,10 +1059,7 @@ source-syntax: context [
 	]
 
 	get-completions: function [uri [string!] line [integer!] column [integer!]][
-		unless item: find-source uri [
-			return none
-		]
-		top: item/1/syntax
+		unless top: find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
 		unless pc: semantic/position?/outer top index? pos [
 			return none
@@ -1151,10 +1155,7 @@ source-syntax: context [
 			uri: params/data/uri
 			s: to integer! params/data/s
 			e: to integer! params/data/e
-			unless item: find-source uri [
-				return none
-			]
-			top: item/1/syntax
+			unless top: find-top uri [return none]
 			unless pc: semantic/find-expr top s e [
 				return none
 			]
@@ -1209,10 +1210,7 @@ source-syntax: context [
 			]
 			return none
 		]
-		unless item: find-source uri [
-			return none
-		]
-		top: item/1/syntax
+		unless top: find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
 		unless pc: semantic/position?/outer top index? pos [
 			return none

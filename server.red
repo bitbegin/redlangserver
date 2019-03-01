@@ -20,6 +20,7 @@ open-logger?: false
 debug-on?: false
 
 last-uri: none
+last-diagnostics: none
 last-line: none
 last-column: none
 client-caps: none
@@ -110,6 +111,7 @@ dispatch-method: function [method [string!] params][
 		"textDocument/didOpen"				[on-textDocument-didOpen params]
 		"textDocument/didClose"				[on-textDocument-didClose params]
 		"textDocument/didChange"			[on-textDocument-didChange params]
+		"textDocument/didSave"				[on-textDocument-didSave params]
 		"textDocument/completion"			[on-textDocument-completion params]
 		"completionItem/resolve"			[on-completionItem-resolve params]
 		"textDocument/documentSymbol"		[on-textDocument-symbol params]
@@ -125,11 +127,10 @@ TextDocumentSyncKind: [
 
 
 ;trigger-string: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*"
-trigger-string: "%/"
-trigger-chars: []
-forall trigger-string [
-	append trigger-chars to string! trigger-string/1
-]
+;trigger-chars: []
+;forall trigger-string [
+;	append trigger-chars to string! trigger-string/1
+;]
 on-initialize: function [params [map!]][
 	set 'client-caps params
 	set 'auto-complete? params/initializationOptions/autoComplete
@@ -139,7 +140,7 @@ on-initialize: function [params [map!]][
 	put caps 'completionProvider
 		make map! reduce [
 			'resolveProvider true
-			'triggerCharacters trigger-chars
+			'triggerCharacters ["/"]
 		]
 
 	json-body/result: make map! reduce [
@@ -230,13 +231,26 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	diagnostics: source-syntax/add-source uri source
+	set 'last-diagnostics source-syntax/add-source uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
-		'diagnostics diagnostics
+		'diagnostics [];diagnostics
 	]
 	response
+]
+
+on-textDocument-didSave: function [params [map!]][
+	uri: params/textDocument/uri
+	if uri = last-uri [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: make map! reduce [
+			'uri uri
+			'diagnostics last-diagnostics
+		]
+		set 'last-diagnostics none
+		response
+	]
 ]
 
 on-textDocument-completion: function [params [map!]][
