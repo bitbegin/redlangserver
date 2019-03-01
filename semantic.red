@@ -1287,6 +1287,13 @@ source-syntax: context [
 			][
 				return system-words/get-word-info pc/1/syntax/word
 			]
+			if all [
+				word? word: pc/1/expr/1
+				pc/1/syntax/type = 'func-type-item
+				datatype? get word
+			][
+				return rejoin [mold word " is a base datatype!"]
+			]
 		]
 		none
 	]
