@@ -120,6 +120,10 @@ semantic: context [
 				create-error pc/1 'Error 'forbidden-refine
 					rejoin [mold pc/1/expr/1 " -- forbidden refinement: " args]
 			]
+			define-lag [
+				create-error pc/1 'Warning 'define-lag
+					rejoin [mold pc/1/expr/1 " -- definition is lagging"]
+			]
 		][
 			create-error pc/1 'Error 'unknown
 				rejoin [mold pc/1/expr/1 " -- unknown error: " mold word]
@@ -383,12 +387,6 @@ semantic: context [
 		find-set-word: function [npc [block! paren!]][
 			forall npc [
 				if all [
-					(head npc) = (head pc)
-					(index? pc) <= (index? npc)
-				][
-					return none
-				]
-				if all [
 					any [
 						set-word? npc/1/expr/1
 						all [
@@ -399,6 +397,15 @@ semantic: context [
 					]
 					word = to word! npc/1/expr/1
 				][
+					if all [
+						(head npc) = (head pc)
+						(index? pc) <= (index? npc)
+					][
+						if (index? pc) < (index? npc) [
+							syntax-error pc 'define-lag none
+						]
+						return none
+					]
 					return npc
 				]
 			]
