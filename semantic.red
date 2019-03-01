@@ -340,24 +340,39 @@ semantic: context [
 		false
 	]
 
-	func-spec-declare?: function [top [block!] pc [block!]][
+	func-spec-declare?: function [top [block!] pc [block!] /set?][
 		word: to word! pc/1/expr/1
-		par: pc/1/upper
-		if all [
-			block? par/1/expr/1
-			par/1/syntax
-			par/1/syntax/type = 'body
-			parent: par/1/syntax/parent
-		][
+		func-spec-declare?*: function [par [block!]][
 			if all [
-				parent/1/syntax/word = 'function
-				spec: parent/1/syntax/resolved/spec
-			] [return spec]
-			if all [
-				find [func has] parent/1/syntax/word
-				spec: parent/1/syntax/resolved/spec
+				block? par/1/expr/1
+				par/1/syntax
+				par/1/syntax/type = 'body
+				parent: par/1/syntax/parent
 			][
-				return func-arg? spec word
+				either set? [
+					if all [
+						parent/1/syntax/word = 'function
+						spec: parent/1/syntax/resolved/spec
+					] [return spec]
+					if all [
+						find [func has] parent/1/syntax/word
+						spec: parent/1/syntax/resolved/spec
+					][
+						return func-arg? spec word
+					]
+				][
+					if all [
+						find [func has function] parent/1/syntax/word
+						spec: parent/1/syntax/resolved/spec
+					][
+						return func-arg? spec word
+					]
+				]
+			]
+		]
+		while [pc: pc/1/upper][
+			if ret: func-spec-declare?* pc [
+				return ret
 			]
 		]
 		none
@@ -368,8 +383,8 @@ semantic: context [
 		find-set-word: function [npc [block! paren!]][
 			forall npc [
 				if all [
-					npc = head pc
-					(index? pc) >= (index? npc)
+					(head npc) = (head pc)
+					(index? pc) <= (index? npc)
 				][
 					return none
 				]
@@ -425,7 +440,7 @@ semantic: context [
 			]
 			if all [
 				none? pc/1/syntax/declare
-				declare: func-spec-declare? top pc
+				declare: func-spec-declare?/set? top pc
 			][
 				repend pc/1/syntax ['declare declare]
 			]
@@ -739,6 +754,12 @@ semantic: context [
 						append buffer mold/flat to-range cast
 					]
 
+					if recent: pc/1/syntax/recent [
+						newline pad + 6
+						append buffer "recent: "
+						append buffer mold/flat to-range recent
+					]
+
 					if declare: pc/1/syntax/declare [
 						newline pad + 6
 						append buffer "declare: "
@@ -838,7 +859,7 @@ semantic: context [
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
-			blk: [
+			forall pc [
 				if pc/1/error [
 					error: pc/1/error
 					either block? error/1 [
@@ -853,18 +874,26 @@ semantic: context [
 						append ret err
 					]
 				]
-			]
-			forall pc [
-				either pc/1/nested [
-					do blk
+				if pc/1/nested [
 					collect-errors* pc/1/nested
-				][
-					do blk
 				]
 			]
 		]
 		collect-errors* top
 		ret
+	]
+
+	contain-error?: function [top [block!]][
+		contain-error*: function [pc [block!]][
+			forall pc [
+				if pc/1/error [return true]
+				if pc/1/nested [
+					if contain-error* pc/1/nested [return true]
+				]
+			]
+			false
+		]
+		contain-error* top
 	]
 
 	collect-completions: function [top [block!] pc [block!] /extra][
@@ -1131,6 +1160,27 @@ source-syntax: context [
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
+		has-spec?: function [npc [block!]][
+			if all [
+				cast: npc/1/syntax/cast
+				cast/1/syntax/resolved
+				spec: cast/1/syntax/resolved/spec
+			][
+				if find [func function has] word: cast/1/syntax/word [
+					if semantic/contain-error? spec/1/nested [
+						return rejoin [mold npc/1/expr/1 " is a function^/but with wrong syntax in spec"]
+					]
+					*-*spec*-*: do reduce [word spec/1/expr/1 []]
+					str: help-string *-*spec*-*
+					replace/all str "*-*spec*-*" to string! npc/1/expr/1
+					return str
+				]
+				if word = 'context [
+					return rejoin [mold npc/1/expr/1 " is a context"]
+				]
+			]
+			return none
+		]
 		unless item: find-source uri [
 			return none
 		]
@@ -1154,16 +1204,19 @@ source-syntax: context [
 					if find [block! paren! map!] type [
 						return rejoin [mold mold/flat/part pc/1/expr/1 16 "...^/is a " mold type]
 					]
-					return rejoin [mold pc/1/expr/1 " is a literal^/type: " mold type]
+					unless find [set-word! set-path!] type [
+						return rejoin [mold pc/1/expr/1 " is a literal^/type: " mold type]
+					]
+					return none
 				]
 			]
 			return system-words/get-word-info word
 		]
-		if value: pc/1/syntax/value [
-			if any [
-				lit-word? pc/1/expr/1
-				set-word? pc/1/expr/1
-			][
+		if any [
+			lit-word? pc/1/expr/1
+			set-word? pc/1/expr/1
+		][
+			if value: pc/1/syntax/value [
 				return rejoin [mold pc/1/expr/1 
 					either pc/1/syntax/declare [
 						" is a function argument^/"
@@ -1173,6 +1226,29 @@ source-syntax: context [
 					"value type: "
 					mold type?/word value/1/expr/1
 				]
+			]
+			return has-spec? pc
+		]
+
+		if any [
+			word? pc/1/expr/1
+			get-word? pc/1/expr/1
+			path? pc/1/expr/1
+			get-path? pc/1/expr/1
+		][
+			if pc/1/syntax/declare [
+				return rejoin [mold pc/1/expr/1 " is a function argument"]
+			]
+			if recent: pc/1/syntax/recent [
+				if value: recent/1/syntax/value [
+					return rejoin [mold pc/1/expr/1 " is a variable^/"
+						"value type: " mold type?/word value/1/expr/1
+					]
+				]
+				return has-spec? recent
+			]
+			if system-words/system? pc/1/syntax/word [
+				return system-words/get-word-info pc/1/syntax/word
 			]
 		]
 		none
