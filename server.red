@@ -77,6 +77,7 @@ process: function [data [string!]][
 response: function [][
 	resp: json/encode json-body
 	write-response resp
+	write-log rejoin ["[NOW] " mold now/precise]
 	write-log rejoin ["[OUTPUT] Content-Length: " length? resp]
 	write-log resp write-log ""
 ]
