@@ -18,7 +18,7 @@ print semantic/format/semantic code-ast
 
 print "Error/Warning: ---------------------------------------"
 probe semantic/collect-errors code-ast
-
-ret: semantic/collect-completions code-ast semantic/position?/outer code-ast 18 6
+pos: ast/to-pos code-ast/1/source 18 6
+ret: semantic/collect-completions code-ast semantic/position?/outer code-ast index? pos
 
 print semantic/format ret

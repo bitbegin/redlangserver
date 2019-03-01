@@ -161,22 +161,23 @@ semantic: context [
 				type = block! [
 					repend syntax/args ['type npc2]
 					repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
-					expr2: npc2/1/nested
-					forall expr2 [
-						expr3: expr2/1/expr/1
-						unless any [
-							all [
-								value? expr3
-								datatype? get expr3
+					if expr2: npc2/1/nested [
+						forall expr2 [
+							expr3: expr2/1/expr/1
+							unless any [
+								all [
+									value? expr3
+									datatype? get expr3
+								]
+								all [
+									value? expr3
+									typeset? get expr3
+								]
+							][
+								syntax-error expr2 'invalid-datatype mold expr3
 							]
-							all [
-								value? expr3
-								typeset? get expr3
-							]
-						][
-							syntax-error expr2 'invalid-datatype mold expr3
+							repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 						]
-						repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 					]
 					if tail? npc3: next npc2 [return npc3]
 					if string? npc3/1/expr/1 [
@@ -204,22 +205,23 @@ semantic: context [
 			repend syntax ['args args: make block! 4]
 			repend syntax/args ['type npc2]
 			repend npc2/1 ['syntax reduce ['type 'func-type 'parent npc]]
-			expr2: npc2/1/nested
-			forall expr2 [
-				expr3: expr2/1/expr/1
-				unless any [
-					all [
-						value? expr3
-						datatype? get expr3
+			if expr2: npc2/1/nested [
+				forall expr2 [
+					expr3: expr2/1/expr/1
+					unless any [
+						all [
+							value? expr3
+							datatype? get expr3
+						]
+						all [
+							value? expr3
+							typeset? get expr3
+						]
+					][
+						syntax-error expr2 'invalid-datatype mold expr3
 					]
-					all [
-						value? expr3
-						typeset? get expr3
-					]
-				][
-					syntax-error expr2 'invalid-datatype mold expr3
+					repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 				]
-				repend expr2/1 ['syntax reduce ['type 'func-type-item]]
 			]
 			next npc2
 		]
@@ -269,13 +271,7 @@ semantic: context [
 			]
 		]
 		par: pc
-		pc: par/1/nested
-		if all [
-			block? pc
-			empty? pc
-		][
-			exit
-		]
+		unless pc: par/1/nested [exit]
 		if string? pc/1/expr/1 [
 			repend par/1 ['syntax reduce ['desc pc]]
 			repend pc/1 ['syntax reduce ['type 'func-desc]]
@@ -317,13 +313,14 @@ semantic: context [
 
 	func-arg?: function [spec [block!] word [word!]][
 		if block? expr: spec/1/expr/1 [
-			npc: spec/1/nested
-			forall npc [
-				if all [
-					find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1
-					word = to word! npc/1/expr/1
-				][
-					return npc
+			if npc: spec/1/nested [
+				forall npc [
+					if all [
+						find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1
+						word = to word! npc/1/expr/1
+					][
+						return npc
+					]
 				]
 			]
 		]
@@ -384,7 +381,7 @@ semantic: context [
 
 	recent-set?: function [top [block!] pc [block!]][
 		word: to word! pc/1/expr/1
-		find-set-word: function [npc [block! paren!]][
+		find-set-word: function [npc [block!]][
 			forall npc [
 				if all [
 					any [
@@ -424,7 +421,7 @@ semantic: context [
 		none
 	]
 
-	resolve: function [top [block! paren!]][
+	resolve: function [top [block!]][
 		resolve-set: function [pc [block!]][
 			resolve-set*: function [npc [block!]][
 				if tail? cast: next npc [
@@ -687,7 +684,7 @@ semantic: context [
 		to-range: function [pc [block!]][
 			append ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
 		]
-		format*: function [pc [block! paren!] depth [integer!]][
+		format*: function [pc [block!] depth [integer!]][
 			pad: depth * 4
 			newline pad
 			append buffer "["
@@ -942,7 +939,7 @@ semantic: context [
 		]
 
 		collect-arg: function [spec [block!]][
-			if block? npc: spec/1/nested [
+			if npc: spec/1/nested [
 				forall npc [
 					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1 [
 						collect* npc
@@ -973,7 +970,7 @@ semantic: context [
 				collect-set-word pc/1/nested
 			][
 				unless find [word! get-word! file!] type?/word pc/1/expr/1 [
-					return ret
+					return reduce [reduce ['expr [] 'source top/1/source 's top/1/s 'e top/1/e 'nested ret]]
 				]
 				str: to string! pc/1/expr/1
 			]
@@ -1088,21 +1085,22 @@ source-syntax: context [
 				][
 					semantic/collect-completions/extra top2 pc
 				]
-				collects: ctop/1/nested
-				forall collects [
-					comp: make map! reduce [
-						'label to string! collects/1/expr
-						'kind CompletionItemKind/Variable
-						'data make map! reduce [
-							'uri uri
-							's collects/1/s
-							'e collects/1/e
+				if collects: ctop/1/nested [
+					forall collects [
+						comp: make map! reduce [
+							'label to string! collects/1/expr
+							'kind CompletionItemKind/Variable
+							'data make map! reduce [
+								'uri uri
+								's collects/1/s
+								'e collects/1/e
+							]
 						]
+						if sources/1/1 = uri [
+							put comp 'preselect true
+						]
+						append comps comp
 					]
-					if sources/1/1 = uri [
-						put comp 'preselect true
-					]
-					append comps comp
 				]
 			]
 			words: system-words/system-words
@@ -1196,7 +1194,10 @@ source-syntax: context [
 				spec: cast/1/syntax/resolved/spec
 			][
 				if find [func function has] word: cast/1/syntax/word [
-					if semantic/contain-error? spec/1/nested [
+					if all [
+						spec/1/nested
+						semantic/contain-error? spec/1/nested
+					][
 						return rejoin [mold npc/1/expr/1 " is a function^/but with wrong syntax in spec"]
 					]
 					*-*spec*-*: do reduce [word spec/1/expr/1 []]
