@@ -59,7 +59,7 @@ semantic: context [
 		find-expr* top s e
 	]
 
-	position?: function [top [block!] line [integer!] column [integer!] /outer][
+	position?: function [top [block!] pos [integer!] /outer][
 		position*: function [pc [block!] pos [integer!]][
 			cascade: [
 				if pc/1/nested [
@@ -87,7 +87,7 @@ semantic: context [
 			]
 			none
 		]
-		position* top index? ast/to-pos top/1/source line column
+		position* top pos
 	]
 
 	syntax-error: function [pc [block!] word [word!] args][
@@ -401,7 +401,10 @@ semantic: context [
 						(head npc) = (head pc)
 						(index? pc) <= (index? npc)
 					][
-						if (index? pc) < (index? npc) [
+						if all [
+							(index? pc) < (index? npc)
+							none? pc/1/syntax/declare
+						][
 							syntax-error pc 'define-lag none
 						]
 						return none
@@ -576,7 +579,10 @@ semantic: context [
 
 		resolve-each: function [pc [block!]][
 			if pc/1/syntax [return 1]
-			if pc/1/expr/1 = 'set [
+			if all [
+				word? pc/1/expr/1
+				pc/1/expr/1 = 'set
+			][
 				if any [
 					tail? npc: next pc
 					not find [word! path! lit-word! lit-path!] type: type?/word npc/1/expr/1
@@ -1037,12 +1043,27 @@ source-syntax: context [
 		semantic/collect-errors res
 	]
 
+	semicolon?: function [pc [block!] pos [string!] column [integer!]][
+		if pos/1 = #";" [return true]
+		repeat count column [
+			if pos/(0 - count) = #";" [return true]
+		]
+		false
+	]
+
 	get-completions: function [uri [string!] line [integer!] column [integer!]][
 		unless item: find-source uri [
 			return none
 		]
 		top: item/1/syntax
-		unless pc: semantic/position?/outer top line column [
+		pos: ast/to-pos top/1/source line column
+		unless pc: semantic/position?/outer top index? pos [
+			return none
+		]
+		if all [
+			block? pc/1/expr/1
+			semicolon? pc pos column
+		][
 			return none
 		]
 		unless any [
@@ -1192,7 +1213,14 @@ source-syntax: context [
 			return none
 		]
 		top: item/1/syntax
-		unless pc: semantic/position?/outer top line column [
+		pos: ast/to-pos top/1/source line column
+		unless pc: semantic/position?/outer top index? pos [
+			return none
+		]
+		if all [
+			block? pc/1/expr/1
+			semicolon? pc pos column
+		][
 			return none
 		]
 		unless pc/1/syntax [
@@ -1254,7 +1282,10 @@ source-syntax: context [
 				]
 				return has-spec? recent
 			]
-			if system-words/system? pc/1/syntax/word [
+			if all [
+				pc/1/syntax/word
+				system-words/system? pc/1/syntax/word
+			][
 				return system-words/get-word-info pc/1/syntax/word
 			]
 		]
