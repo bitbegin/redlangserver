@@ -141,7 +141,7 @@ on-initialize: function [params [map!]][
 	put caps 'completionProvider
 		make map! reduce [
 			'resolveProvider true
-			'triggerCharacters ["/"]
+			'triggerCharacters ["/" "%"]
 		]
 
 	json-body/result: make map! reduce [
@@ -267,16 +267,9 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-line line
 	set 'last-column column
 	comps: source-syntax/get-completions uri line + 1 column + 1
-	either comps = 'continue [
-		json-body/result: make map! reduce [
-			'isIncomplete true
-			'items []
-		]
-	][
-		json-body/result: make map! reduce [
-			'isIncomplete false
-			'items comps
-		]
+	json-body/result: make map! reduce [
+		'isIncomplete false
+		'items comps
 	]
 	response
 ]

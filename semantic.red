@@ -72,7 +72,10 @@ semantic: context [
 					pc/1/s <= pos
 					pc/1/e >= pos
 				][
-					if pc/1/e <> pos [do cascade]
+					if any [
+						outer
+						pc/1/e <> pos
+					][do cascade]
 					if all [
 						outer
 						any [
