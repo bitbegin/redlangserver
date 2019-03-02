@@ -714,11 +714,6 @@ semantic: context [
 					append buffer "upper: "
 					append buffer mold/flat to-range src pc/1/upper
 				]
-				if pc/1/depth [
-					newline pad + 4
-					append buffer "depth: "
-					append buffer mold pc/1/depth
-				]
 				if pc/1/nested [
 					newline pad + 4
 					append buffer "nested: "
@@ -728,11 +723,6 @@ semantic: context [
 					newline pad + 4
 					append buffer "source: "
 					append buffer mold/flat/part pc/1/source 20
-				]
-				if pc/1/max-depth [
-					newline pad + 4
-					append buffer "max-depth: "
-					append buffer pc/1/max-depth
 				]
 				if all [
 					semantic

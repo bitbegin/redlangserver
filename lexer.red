@@ -81,7 +81,6 @@ lexer: context [
 			ast-block: none
 			ast-upper: none
 			rs-stack: make block! 200
-			max-depth: 1
 			append/only ast-stack out
 			append/only ast-stack make block! 100
 			append rs-stack src
@@ -93,19 +92,11 @@ lexer: context [
 				][
 					ast-upper: tail pick tail ast-stack -2
 				]
-				depth: length? rs-stack
-				ast-block: reduce ['expr reduce [value] 's index? rs 'e index? re 'depth depth]
+				ast-block: reduce ['expr reduce [value] 's index? rs 'e index? re]
 				if ast-upper [repend ast-block ['upper ast-upper]]
 				if ast-nested [repend ast-block ['nested ast-nested]]
-				if depth = 0 [
-					repend ast-block [
-						'max-depth max-depth
-						'source src
-					]
-				]
 				append/only last ast-stack ast-block
 				ast-nested: none
-				if depth > max-depth [max-depth: depth]
 			]
 		]
 		pop-ast: [

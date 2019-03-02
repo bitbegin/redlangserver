@@ -66,6 +66,7 @@ ast: context [
 		if error? res/3 [
 			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
+		repend ast/1 ['source src]
 		ast
 	]
 ]

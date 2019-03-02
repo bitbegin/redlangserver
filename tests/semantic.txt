@@ -3,14 +3,12 @@
   [
     expr: [Red he: [] a: 'test
     range: [1 1 77 1]
-    depth: 0
     nested: 
     [
       [
         expr: Red
         range: [1 1 1 4]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: Red
         ]
@@ -19,7 +17,6 @@
         expr: he:
         range: [1 5 1 8]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [1 9 1 11]
@@ -30,13 +27,11 @@
         expr: []
         range: [1 9 1 11]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: a:
         range: [3 1 3 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [3 4 3 9]
@@ -46,13 +41,11 @@
         expr: 'test
         range: [3 4 3 9]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: b:
         range: [4 1 4 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [4 4 4 11]
@@ -62,7 +55,6 @@
         expr: context
         range: [4 4 4 11]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: context
           step: 2
@@ -75,14 +67,12 @@
         expr: [a: a c: 4 d: contex
         range: [4 12 33 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a:
             range: [5 2 5 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [5 5 5 6]
@@ -93,7 +83,6 @@
             expr: a
             range: [5 5 5 6]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               word: a
               recent: [5 2 5 4]
@@ -103,7 +92,6 @@
             expr: c:
             range: [6 2 6 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               value: [6 5 6 6]
@@ -113,13 +101,11 @@
             expr: 4
             range: [6 5 6 6]
             upper: [4 12 33 2]
-            depth: 2
           ]
           [
             expr: d:
             range: [7 2 7 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [7 5 7 12]
@@ -129,7 +115,6 @@
             expr: context
             range: [7 5 7 12]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               word: context
               step: 2
@@ -142,14 +127,12 @@
             expr: [e: #{12} f: func [x
             range: [7 13 28 3]
             upper: [4 12 33 2]
-            depth: 2
             nested: 
             [
               [
                 expr: e:
                 range: [8 3 8 5]
                 upper: [7 13 28 3]
-                depth: 3
                 syntax: [
                   step: 2
                   value: [8 6 8 11]
@@ -159,13 +142,11 @@
                 expr: #{12}
                 range: [8 6 8 11]
                 upper: [7 13 28 3]
-                depth: 3
               ]
               [
                 expr: f:
                 range: [9 3 9 5]
                 upper: [7 13 28 3]
-                depth: 3
                 syntax: [
                   step: 2
                   cast: [9 6 9 10]
@@ -175,7 +156,6 @@
                 expr: func
                 range: [9 6 9 10]
                 upper: [7 13 28 3]
-                depth: 3
                 syntax: [
                   word: func
                   step: 3
@@ -189,14 +169,12 @@
                 expr: [x [block!] y [integ
                 range: [9 11 9 36]
                 upper: [7 13 28 3]
-                depth: 3
                 nested: 
                 [
                   [
                     expr: x
                     range: [9 12 9 13]
                     upper: [9 11 9 36]
-                    depth: 4
                     syntax: [
                       type: func-param
                       args: [
@@ -208,14 +186,12 @@
                     expr: [block!]
                     range: [9 14 9 22]
                     upper: [9 11 9 36]
-                    depth: 4
                     nested: 
                     [
                       [
                         expr: block!
                         range: [9 15 9 21]
                         upper: [9 14 9 22]
-                        depth: 5
                         syntax: [
                           type: func-type-item
                         ]
@@ -230,7 +206,6 @@
                     expr: y
                     range: [9 23 9 24]
                     upper: [9 11 9 36]
-                    depth: 4
                     syntax: [
                       type: func-param
                       args: [
@@ -242,14 +217,12 @@
                     expr: [integer!]
                     range: [9 25 9 35]
                     upper: [9 11 9 36]
-                    depth: 4
                     nested: 
                     [
                       [
                         expr: integer!
                         range: [9 26 9 34]
                         upper: [9 25 9 35]
-                        depth: 5
                         syntax: [
                           type: func-type-item
                         ]
@@ -270,14 +243,12 @@
                 expr: [ff: function [a [in
                 range: [9 36 26 4]
                 upper: [7 13 28 3]
-                depth: 3
                 nested: 
                 [
                   [
                     expr: ff:
                     range: [10 4 10 7]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       cast: [10 8 10 16]
@@ -287,7 +258,6 @@
                     expr: function
                     range: [10 8 10 16]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: function
                       step: 3
@@ -301,14 +271,12 @@
                     expr: [a [integer!] b [bin
                     range: [10 17 10 43]
                     upper: [9 36 26 4]
-                    depth: 4
                     nested: 
                     [
                       [
                         expr: a
                         range: [10 18 10 19]
                         upper: [10 17 10 43]
-                        depth: 5
                         syntax: [
                           type: func-param
                           args: [
@@ -320,14 +288,12 @@
                         expr: [integer!]
                         range: [10 20 10 30]
                         upper: [10 17 10 43]
-                        depth: 5
                         nested: 
                         [
                           [
                             expr: integer!
                             range: [10 21 10 29]
                             upper: [10 20 10 30]
-                            depth: 6
                             syntax: [
                               type: func-type-item
                             ]
@@ -342,7 +308,6 @@
                         expr: b
                         range: [10 31 10 32]
                         upper: [10 17 10 43]
-                        depth: 5
                         syntax: [
                           type: func-param
                           args: [
@@ -354,14 +319,12 @@
                         expr: [binary!]
                         range: [10 33 10 42]
                         upper: [10 17 10 43]
-                        depth: 5
                         nested: 
                         [
                           [
                             expr: binary!
                             range: [10 34 10 41]
                             upper: [10 33 10 42]
-                            depth: 6
                             syntax: [
                               type: func-type-item
                             ]
@@ -382,14 +345,12 @@
                     expr: [f1: "test" f2: x f3
                     range: [10 43 19 5]
                     upper: [9 36 26 4]
-                    depth: 4
                     nested: 
                     [
                       [
                         expr: f1:
                         range: [11 5 11 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           value: [11 9 11 15]
@@ -400,13 +361,11 @@
                         expr: "test"
                         range: [11 9 11 15]
                         upper: [10 43 19 5]
-                        depth: 5
                       ]
                       [
                         expr: f2:
                         range: [12 5 12 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           cast: [12 9 12 10]
@@ -417,7 +376,6 @@
                         expr: x
                         range: [12 9 12 10]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: x
                           recent: [20 4 20 6]
@@ -428,7 +386,6 @@
                         expr: f3:
                         range: [13 5 13 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           cast: [13 9 13 11]
@@ -439,7 +396,6 @@
                         expr: f1
                         range: [13 9 13 11]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: f1
                           recent: [11 5 11 8]
@@ -449,7 +405,6 @@
                         expr: f4:
                         range: [14 5 14 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           cast: [14 9 14 10]
@@ -460,7 +415,6 @@
                         expr: l
                         range: [14 9 14 10]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: l
                           recent: [35 1 35 3]
@@ -470,7 +424,6 @@
                         expr: f5:
                         range: [15 5 15 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           declare: [10 17 10 43]
                         ]
@@ -479,7 +432,6 @@
                         expr: :f
                         range: [15 9 15 11]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: f
                           recent: [9 3 9 5]
@@ -489,7 +441,6 @@
                         expr: f6:
                         range: [16 5 16 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           cast: [16 9 16 11]
@@ -500,7 +451,6 @@
                         expr: f5
                         range: [16 9 16 11]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: f5
                           recent: [15 5 15 8]
@@ -510,7 +460,6 @@
                         expr: f7:
                         range: [17 5 17 8]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           step: 2
                           cast: [17 9 17 10]
@@ -521,7 +470,6 @@
                         expr: a
                         range: [17 9 17 10]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: a
                           recent: [5 2 5 4]
@@ -532,7 +480,6 @@
                         expr: +
                         range: [17 11 17 12]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: +
                         ]
@@ -541,7 +488,6 @@
                         expr: length?
                         range: [17 13 17 20]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: length?
                         ]
@@ -550,7 +496,6 @@
                         expr: b
                         range: [17 21 17 22]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: b
                           recent: [4 1 4 3]
@@ -561,7 +506,6 @@
                         expr: f
                         range: [18 5 18 6]
                         upper: [10 43 19 5]
-                        depth: 5
                         syntax: [
                           word: f
                           recent: [9 3 9 5]
@@ -577,7 +521,6 @@
                     expr: x:
                     range: [20 4 20 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       value: [20 7 20 8]
@@ -588,13 +531,11 @@
                     expr: 1
                     range: [20 7 20 8]
                     upper: [9 36 26 4]
-                    depth: 4
                   ]
                   [
                     expr: y:
                     range: [21 4 21 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       value: [21 7 21 8]
@@ -605,13 +546,11 @@
                     expr: 1
                     range: [21 7 21 8]
                     upper: [9 36 26 4]
-                    depth: 4
                   ]
                   [
                     expr: e:
                     range: [22 4 22 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       cast: [22 7 22 8]
@@ -622,7 +561,6 @@
                     expr: x
                     range: [22 7 22 8]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: x
                       recent: [20 4 20 6]
@@ -633,7 +571,6 @@
                     expr: +
                     range: [22 9 22 10]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: +
                     ]
@@ -642,7 +579,6 @@
                     expr: y
                     range: [22 11 22 12]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: y
                       recent: [21 4 21 6]
@@ -653,7 +589,6 @@
                     expr: o:
                     range: [23 4 23 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       cast: [23 7 23 8]
@@ -664,7 +599,6 @@
                     expr: g
                     range: [23 7 23 8]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: g
                       recent: [27 3 27 5]
@@ -674,7 +608,6 @@
                     expr: t:
                     range: [24 4 24 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       cast: [24 7 24 8]
@@ -684,7 +617,6 @@
                     expr: h
                     range: [24 7 24 8]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: h
                       recent: [29 2 29 4]
@@ -694,7 +626,6 @@
                     expr: u:
                     range: [25 4 25 6]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       step: 2
                       cast: [25 7 25 8]
@@ -704,7 +635,6 @@
                     expr: x
                     range: [25 7 25 8]
                     upper: [9 36 26 4]
-                    depth: 4
                     syntax: [
                       word: x
                       recent: [20 4 20 6]
@@ -721,7 +651,6 @@
                 expr: g:
                 range: [27 3 27 5]
                 upper: [7 13 28 3]
-                depth: 3
                 syntax: [
                   step: 2
                   value: [27 6 27 8]
@@ -731,7 +660,6 @@
                 expr: []
                 range: [27 6 27 8]
                 upper: [7 13 28 3]
-                depth: 3
               ]
             ]
             syntax: [
@@ -743,7 +671,6 @@
             expr: h:
             range: [29 2 29 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               value: [29 5 29 12]
@@ -753,20 +680,17 @@
             expr: #(a: 3)
             range: [29 5 29 12]
             upper: [4 12 33 2]
-            depth: 2
             nested: 
             [
               [
                 expr: a:
                 range: [29 7 29 9]
                 upper: [29 5 29 12]
-                depth: 3
               ]
               [
                 expr: 3
                 range: [29 10 29 11]
                 upper: [29 5 29 12]
-                depth: 3
               ]
             ]
           ]
@@ -774,7 +698,6 @@
             expr: i:
             range: [30 2 30 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [30 5 30 6]
@@ -784,7 +707,6 @@
             expr: x
             range: [30 5 30 6]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               word: x
             ]
@@ -793,7 +715,6 @@
             expr: j:
             range: [31 2 31 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [31 5 31 6]
@@ -803,7 +724,6 @@
             expr: e
             range: [31 5 31 6]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               word: e
             ]
@@ -812,7 +732,6 @@
             expr: k:
             range: [32 2 32 4]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [32 5 32 6]
@@ -822,7 +741,6 @@
             expr: t
             range: [32 5 32 6]
             upper: [4 12 33 2]
-            depth: 2
             syntax: [
               word: t
             ]
@@ -837,7 +755,6 @@
         expr: l:
         range: [35 1 35 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [35 4 35 15]
@@ -847,14 +764,12 @@
         expr: (m: 3 n: a)
         range: [35 4 35 15]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: m:
             range: [35 5 35 7]
             upper: [35 4 35 15]
-            depth: 2
             syntax: [
               step: 2
               value: [35 8 35 9]
@@ -864,13 +779,11 @@
             expr: 3
             range: [35 8 35 9]
             upper: [35 4 35 15]
-            depth: 2
           ]
           [
             expr: n:
             range: [35 10 35 12]
             upper: [35 4 35 15]
-            depth: 2
             syntax: [
               step: 2
               cast: [35 13 35 14]
@@ -880,7 +793,6 @@
             expr: a
             range: [35 13 35 14]
             upper: [35 4 35 15]
-            depth: 2
             syntax: [
               word: a
               recent: [3 1 3 3]
@@ -892,7 +804,6 @@
         expr: o:
         range: [36 1 36 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [36 4 36 5]
@@ -902,7 +813,6 @@
         expr: l
         range: [36 4 36 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: l
           recent: [35 1 35 3]
@@ -912,7 +822,6 @@
         expr: r:
         range: [38 1 38 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [38 4 38 8]
@@ -922,7 +831,6 @@
         expr: func
         range: [38 4 38 8]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: func
           step: 3
@@ -936,14 +844,12 @@
         expr: [a [test] b [test!] 
         range: [38 9 44 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a
             range: [39 2 39 3]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -955,14 +861,12 @@
             expr: [test]
             range: [39 4 39 10]
             upper: [38 9 44 2]
-            depth: 2
             nested: 
             [
               [
                 expr: test
                 range: [39 5 39 9]
                 upper: [39 4 39 10]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -978,7 +882,6 @@
             expr: b
             range: [40 2 40 3]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -990,14 +893,12 @@
             expr: [test!]
             range: [40 4 40 11]
             upper: [38 9 44 2]
-            depth: 2
             nested: 
             [
               [
                 expr: test!
                 range: [40 5 40 10]
                 upper: [40 4 40 11]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1013,7 +914,6 @@
             expr: /part
             range: [41 2 41 7]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1027,7 +927,6 @@
             expr: length
             range: [41 8 41 14]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1040,14 +939,12 @@
             expr: [integer! string!]
             range: [41 15 41 33]
             upper: [38 9 44 2]
-            depth: 2
             nested: 
             [
               [
                 expr: integer!
                 range: [41 16 41 24]
                 upper: [41 15 41 33]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1056,7 +953,6 @@
                 expr: string!
                 range: [41 25 41 32]
                 upper: [41 15 41 33]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1071,7 +967,6 @@
             expr: return:
             range: [42 2 42 9]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-return
               args: [
@@ -1083,14 +978,12 @@
             expr: [block!]
             range: [42 10 42 18]
             upper: [38 9 44 2]
-            depth: 2
             nested: 
             [
               [
                 expr: block!
                 range: [42 11 42 17]
                 upper: [42 10 42 18]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1105,7 +998,6 @@
             expr: /local
             range: [43 2 43 8]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1120,7 +1012,6 @@
             expr: x
             range: [43 9 43 10]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1132,7 +1023,6 @@
             expr: y
             range: [43 11 43 12]
             upper: [38 9 44 2]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1150,14 +1040,12 @@
         expr: [x: 1 y: 1 a + b + 1
         range: [44 2 47 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: x:
             range: [45 2 45 4]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               step: 2
               value: [45 5 45 6]
@@ -1168,13 +1056,11 @@
             expr: 1
             range: [45 5 45 6]
             upper: [44 2 47 2]
-            depth: 2
           ]
           [
             expr: y:
             range: [45 7 45 9]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               step: 2
               value: [45 10 45 11]
@@ -1185,13 +1071,11 @@
             expr: 1
             range: [45 10 45 11]
             upper: [44 2 47 2]
-            depth: 2
           ]
           [
             expr: a
             range: [46 2 46 3]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               word: a
               recent: [3 1 3 3]
@@ -1202,7 +1086,6 @@
             expr: +
             range: [46 4 46 5]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               word: +
             ]
@@ -1211,7 +1094,6 @@
             expr: b
             range: [46 6 46 7]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               word: b
               recent: [4 1 4 3]
@@ -1222,7 +1104,6 @@
             expr: +
             range: [46 8 46 9]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               word: +
             ]
@@ -1231,13 +1112,11 @@
             expr: 1
             range: [46 10 46 11]
             upper: [44 2 47 2]
-            depth: 2
           ]
           [
             expr: +
             range: [46 12 46 13]
             upper: [44 2 47 2]
-            depth: 2
             syntax: [
               word: +
             ]
@@ -1246,7 +1125,6 @@
             expr: 1
             range: [46 14 46 15]
             upper: [44 2 47 2]
-            depth: 2
           ]
         ]
         syntax: [
@@ -1258,7 +1136,6 @@
         expr: s:
         range: [49 1 49 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [49 4 49 12]
@@ -1268,7 +1145,6 @@
         expr: function
         range: [49 4 49 12]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: function
           step: 3
@@ -1282,14 +1158,12 @@
         expr: [uri [string!] code 
         range: [49 13 49 56]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: uri
             range: [49 14 49 17]
             upper: [49 13 49 56]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1301,14 +1175,12 @@
             expr: [string!]
             range: [49 18 49 27]
             upper: [49 13 49 56]
-            depth: 2
             nested: 
             [
               [
                 expr: string!
                 range: [49 19 49 26]
                 upper: [49 18 49 27]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1323,7 +1195,6 @@
             expr: code
             range: [49 28 49 32]
             upper: [49 13 49 56]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1335,14 +1206,12 @@
             expr: [string!]
             range: [49 33 49 42]
             upper: [49 13 49 56]
-            depth: 2
             nested: 
             [
               [
                 expr: string!
                 range: [49 34 49 41]
                 upper: [49 33 49 42]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1357,7 +1226,6 @@
             expr: blk
             range: [49 43 49 46]
             upper: [49 13 49 56]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1369,14 +1237,12 @@
             expr: [block!]
             range: [49 47 49 55]
             upper: [49 13 49 56]
-            depth: 2
             nested: 
             [
               [
                 expr: block!
                 range: [49 48 49 54]
                 upper: [49 47 49 55]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1397,14 +1263,12 @@
         expr: [either uri [return 
         range: [49 56 55 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: either
             range: [50 2 50 8]
             upper: [49 56 55 2]
-            depth: 2
             syntax: [
               word: either
             ]
@@ -1413,7 +1277,6 @@
             expr: uri
             range: [50 9 50 12]
             upper: [49 56 55 2]
-            depth: 2
             syntax: [
               word: uri
               declare: [49 14 49 17]
@@ -1423,45 +1286,38 @@
             expr: [return reduce [uri 
             range: [50 13 52 3]
             upper: [49 56 55 2]
-            depth: 2
             nested: 
             [
               [
                 expr: return
                 range: [51 3 51 9]
                 upper: [50 13 52 3]
-                depth: 3
               ]
               [
                 expr: reduce
                 range: [51 10 51 16]
                 upper: [50 13 52 3]
-                depth: 3
               ]
               [
                 expr: [uri code blk]
                 range: [51 17 51 31]
                 upper: [50 13 52 3]
-                depth: 3
                 nested: 
                 [
                   [
                     expr: uri
                     range: [51 18 51 21]
                     upper: [51 17 51 31]
-                    depth: 4
                   ]
                   [
                     expr: code
                     range: [51 22 51 26]
                     upper: [51 17 51 31]
-                    depth: 4
                   ]
                   [
                     expr: blk
                     range: [51 27 51 30]
                     upper: [51 17 51 31]
-                    depth: 4
                   ]
                 ]
               ]
@@ -1471,45 +1327,38 @@
             expr: [return reduce [uri 
             range: [52 3 54 3]
             upper: [49 56 55 2]
-            depth: 2
             nested: 
             [
               [
                 expr: return
                 range: [53 3 53 9]
                 upper: [52 3 54 3]
-                depth: 3
               ]
               [
                 expr: reduce
                 range: [53 10 53 16]
                 upper: [52 3 54 3]
-                depth: 3
               ]
               [
                 expr: [uri code blk]
                 range: [53 17 53 31]
                 upper: [52 3 54 3]
-                depth: 3
                 nested: 
                 [
                   [
                     expr: uri
                     range: [53 18 53 21]
                     upper: [53 17 53 31]
-                    depth: 4
                   ]
                   [
                     expr: code
                     range: [53 22 53 26]
                     upper: [53 17 53 31]
-                    depth: 4
                   ]
                   [
                     expr: blk
                     range: [53 27 53 30]
                     upper: [53 17 53 31]
-                    depth: 4
                   ]
                 ]
               ]
@@ -1525,7 +1374,6 @@
         expr: fff:
         range: [57 1 57 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [57 6 57 7]
@@ -1535,13 +1383,11 @@
         expr: 3
         range: [57 6 57 7]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: ft:
         range: [59 1 59 4]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [59 5 59 9]
@@ -1551,7 +1397,6 @@
         expr: func
         range: [59 5 59 9]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: func
           step: 3
@@ -1565,14 +1410,12 @@
         expr: [a [block!] b [map! 
         range: [59 10 59 104]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a
             range: [59 11 59 12]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1584,14 +1427,12 @@
             expr: [block!]
             range: [59 13 59 21]
             upper: [59 10 59 104]
-            depth: 2
             nested: 
             [
               [
                 expr: block!
                 range: [59 14 59 20]
                 upper: [59 13 59 21]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1606,7 +1447,6 @@
             expr: b
             range: [59 22 59 23]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1618,14 +1458,12 @@
             expr: [map! integer!]
             range: [59 24 59 39]
             upper: [59 10 59 104]
-            depth: 2
             nested: 
             [
               [
                 expr: map!
                 range: [59 25 59 29]
                 upper: [59 24 59 39]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1634,7 +1472,6 @@
                 expr: integer!
                 range: [59 30 59 38]
                 upper: [59 24 59 39]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1649,7 +1486,6 @@
             expr: return:
             range: [59 40 59 47]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-return
               args: [
@@ -1662,14 +1498,12 @@
             expr: [integer!]
             range: [59 48 59 58]
             upper: [59 10 59 104]
-            depth: 2
             nested: 
             [
               [
                 expr: integer!
                 range: [59 49 59 57]
                 upper: [59 48 59 58]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1684,7 +1518,6 @@
             expr: c
             range: [59 59 59 60]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1696,14 +1529,12 @@
             expr: [integer!]
             range: [59 61 59 71]
             upper: [59 10 59 104]
-            depth: 2
             nested: 
             [
               [
                 expr: integer!
                 range: [59 62 59 70]
                 upper: [59 61 59 71]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1718,7 +1549,6 @@
             expr: /c
             range: [59 72 59 74]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1733,7 +1563,6 @@
             expr: a
             range: [59 75 59 76]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1747,14 +1576,12 @@
             expr: [integer!]
             range: [59 77 59 87]
             upper: [59 10 59 104]
-            depth: 2
             nested: 
             [
               [
                 expr: integer!
                 range: [59 78 59 86]
                 upper: [59 77 59 87]
-                depth: 3
                 syntax: [
                   type: func-type-item
                 ]
@@ -1769,7 +1596,6 @@
             expr: /d
             range: [59 88 59 90]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1782,7 +1608,6 @@
             expr: /local
             range: [59 91 59 97]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1798,7 +1623,6 @@
             expr: x
             range: [59 98 59 99]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1810,7 +1634,6 @@
             expr: y
             range: [59 100 59 101]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1822,7 +1645,6 @@
             expr: z
             range: [59 102 59 103]
             upper: [59 10 59 104]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1840,14 +1662,12 @@
         expr: [reduce [a b c d] fi
         range: [59 104 62 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: reduce
             range: [60 2 60 8]
             upper: [59 104 62 2]
-            depth: 2
             syntax: [
               word: reduce
             ]
@@ -1856,32 +1676,27 @@
             expr: [a b c d]
             range: [60 9 60 18]
             upper: [59 104 62 2]
-            depth: 2
             nested: 
             [
               [
                 expr: a
                 range: [60 10 60 11]
                 upper: [60 9 60 18]
-                depth: 3
               ]
               [
                 expr: b
                 range: [60 12 60 13]
                 upper: [60 9 60 18]
-                depth: 3
               ]
               [
                 expr: c
                 range: [60 14 60 15]
                 upper: [60 9 60 18]
-                depth: 3
               ]
               [
                 expr: d
                 range: [60 16 60 17]
                 upper: [60 9 60 18]
-                depth: 3
               ]
             ]
           ]
@@ -1889,7 +1704,6 @@
             expr: find/match
             range: [61 2 61 12]
             upper: [59 104 62 2]
-            depth: 2
             syntax: [
               word: find
             ]
@@ -1898,13 +1712,11 @@
             expr: "adb"
             range: [61 13 61 18]
             upper: [59 104 62 2]
-            depth: 2
           ]
           [
             expr: "a"
             range: [61 19 61 22]
             upper: [59 104 62 2]
-            depth: 2
           ]
         ]
         syntax: [
@@ -1916,7 +1728,6 @@
         expr: fh1:
         range: [64 1 64 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [64 6 64 9]
@@ -1926,7 +1737,6 @@
         expr: has
         range: [64 6 64 9]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: has
           step: 2
@@ -1940,14 +1750,12 @@
         expr: [/ref a b]
         range: [64 10 64 20]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: /ref
             range: [64 11 64 15]
             upper: [64 10 64 20]
-            depth: 2
             syntax: [
               type: func-refinement
               args: [
@@ -1963,7 +1771,6 @@
             expr: a
             range: [64 16 64 17]
             upper: [64 10 64 20]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1975,7 +1782,6 @@
             expr: b
             range: [64 18 64 19]
             upper: [64 10 64 20]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -1993,7 +1799,6 @@
         expr: fh2:
         range: [65 1 65 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [65 6 65 9]
@@ -2003,7 +1808,6 @@
         expr: has
         range: [65 6 65 9]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: has
           step: 3
@@ -2017,14 +1821,12 @@
         expr: [a b]
         range: [65 10 65 15]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a
             range: [65 11 65 12]
             upper: [65 10 65 15]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -2035,7 +1837,6 @@
             expr: b
             range: [65 13 65 14]
             upper: [65 10 65 15]
-            depth: 2
             syntax: [
               type: func-param
               args: [
@@ -2052,7 +1853,6 @@
         expr: []
         range: [65 15 65 17]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           type: body
           parent: [65 6 65 9]
@@ -2062,7 +1862,6 @@
         expr: z:
         range: [67 1 67 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [67 4 67 5]
@@ -2072,7 +1871,6 @@
         expr: z
         range: [67 4 67 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: z
           recent: [67 1 67 3]
@@ -2082,7 +1880,6 @@
         expr: blk:
         range: [69 1 69 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [69 6 69 12]
@@ -2092,20 +1889,17 @@
         expr: [a: 1]
         range: [69 6 69 12]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a:
             range: [69 7 69 9]
             upper: [69 6 69 12]
-            depth: 2
           ]
           [
             expr: 1
             range: [69 10 69 11]
             upper: [69 6 69 12]
-            depth: 2
           ]
         ]
       ]
@@ -2113,7 +1907,6 @@
         expr: ctx:
         range: [70 1 70 5]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           cast: [70 6 70 13]
@@ -2123,7 +1916,6 @@
         expr: context
         range: [70 6 70 13]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: context
           step: 2
@@ -2136,14 +1928,12 @@
         expr: [a: none]
         range: [70 14 72 2]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a:
             range: [71 2 71 4]
             upper: [70 14 72 2]
-            depth: 2
             syntax: [
               step: 2
               cast: [71 5 71 9]
@@ -2154,7 +1944,6 @@
             expr: none
             range: [71 5 71 9]
             upper: [70 14 72 2]
-            depth: 2
             syntax: [
               word: none
             ]
@@ -2169,7 +1958,6 @@
         expr: do
         range: [74 1 74 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: do
         ]
@@ -2178,7 +1966,6 @@
         expr: bind
         range: [74 4 74 8]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: bind
         ]
@@ -2187,7 +1974,6 @@
         expr: blk
         range: [74 9 74 12]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: blk
           recent: [69 1 69 5]
@@ -2197,7 +1983,6 @@
         expr: ctx
         range: [74 13 74 16]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: ctx
           recent: [70 1 70 5]
@@ -2207,7 +1992,6 @@
         expr: if
         range: [76 1 76 3]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: if
         ]
@@ -2216,7 +2000,6 @@
         expr: all
         range: [76 4 76 7]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           word: all
           step: 3
@@ -2229,7 +2012,6 @@
         expr: tt:
         range: [76 8 76 11]
         upper: [1 1 77 1]
-        depth: 1
         syntax: [
           step: 2
           value: [76 12 76 30]
@@ -2239,14 +2021,12 @@
         expr: [a = 1 integer? a]
         range: [76 12 76 30]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: a
             range: [76 13 76 14]
             upper: [76 12 76 30]
-            depth: 2
             syntax: [
               word: a
               recent: [3 1 3 3]
@@ -2256,7 +2036,6 @@
             expr: =
             range: [76 15 76 16]
             upper: [76 12 76 30]
-            depth: 2
             syntax: [
               word: =
             ]
@@ -2265,13 +2044,11 @@
             expr: 1
             range: [76 17 76 18]
             upper: [76 12 76 30]
-            depth: 2
           ]
           [
             expr: integer?
             range: [76 19 76 27]
             upper: [76 12 76 30]
-            depth: 2
             syntax: [
               word: integer?
             ]
@@ -2280,7 +2057,6 @@
             expr: a
             range: [76 28 76 29]
             upper: [76 12 76 30]
-            depth: 2
             syntax: [
               word: a
               recent: [3 1 3 3]
@@ -2296,26 +2072,22 @@
         expr: [print 3]
         range: [76 30 76 39]
         upper: [1 1 77 1]
-        depth: 1
         nested: 
         [
           [
             expr: print
             range: [76 31 76 36]
             upper: [76 30 76 39]
-            depth: 2
           ]
           [
             expr: 3
             range: [76 37 76 38]
             upper: [76 30 76 39]
-            depth: 2
           ]
         ]
       ]
     ]
     source: {Red he: []^/^/a: 'tes
-    max-depth: 6
     syntax: [
       extra: [
         [10 4 10 7]
@@ -2461,73 +2233,61 @@ Error/Warning: ---------------------------------------
         expr: f1:
         range: [11 5 11 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f2:
         range: [12 5 12 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f3:
         range: [13 5 13 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f4:
         range: [14 5 14 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f5:
         range: [15 5 15 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f6:
         range: [16 5 16 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: f7:
         range: [17 5 17 8]
         upper: [10 43 19 5]
-        depth: 5
       ]
       [
         expr: ff:
         range: [10 4 10 7]
         upper: [9 36 26 4]
-        depth: 4
       ]
       [
         expr: fff:
         range: [57 1 57 5]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: ft:
         range: [59 1 59 4]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: fh1:
         range: [64 1 64 5]
         upper: [1 1 77 1]
-        depth: 1
       ]
       [
         expr: fh2:
         range: [65 1 65 5]
         upper: [1 1 77 1]
-        depth: 1
       ]
     ]
     source: {Red he: []^/^/a: 'tes
