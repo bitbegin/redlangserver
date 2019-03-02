@@ -127,11 +127,11 @@ TextDocumentSyncKind: [
 ]
 
 
-;trigger-string: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*"
-;trigger-chars: []
-;forall trigger-string [
-;	append trigger-chars to string! trigger-string/1
-;]
+trigger-string: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
+trigger-chars: []
+forall trigger-string [
+	append trigger-chars to string! trigger-string/1
+]
 on-initialize: function [params [map!]][
 	set 'client-caps params
 	set 'auto-complete? params/initializationOptions/autoComplete
@@ -141,7 +141,7 @@ on-initialize: function [params [map!]][
 	put caps 'completionProvider
 		make map! reduce [
 			'resolveProvider true
-			'triggerCharacters ["/" "%"]
+			'triggerCharacters trigger-string
 		]
 
 	json-body/result: make map! reduce [
@@ -268,7 +268,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-column column
 	comps: source-syntax/get-completions uri line + 1 column + 1
 	json-body/result: make map! reduce [
-		'isIncomplete false
+		;'isIncomplete true
 		'items comps
 	]
 	response

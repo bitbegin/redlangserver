@@ -677,6 +677,10 @@ semantic: context [
 		resolve top
 	]
 
+	to-range: function [src [string!] pc [block!]][
+		append ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
+	]
+
 	format: function [top [block!] /semantic /pos][
 		buffer: make string! 1000
 		newline: function [cnt [integer!]] [
@@ -684,9 +688,6 @@ semantic: context [
 			append/dup buffer " " cnt
 		]
 		src: top/1/source
-		to-range: function [pc [block!]][
-			append ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
-		]
 		format*: function [pc [block!] depth [integer!]][
 			pad: depth * 4
 			newline pad
@@ -707,11 +708,11 @@ semantic: context [
 				]
 				newline pad + 4
 				append buffer "range: "
-				append buffer mold/flat to-range pc
+				append buffer mold/flat to-range src pc
 				if pc/1/upper [
 					newline pad + 4
 					append buffer "upper: "
-					append buffer mold/flat to-range pc/1/upper
+					append buffer mold/flat to-range src pc/1/upper
 				]
 				if pc/1/depth [
 					newline pad + 4
@@ -755,25 +756,25 @@ semantic: context [
 					if value: pc/1/syntax/value [
 						newline pad + 6
 						append buffer "value: "
-						append buffer mold/flat to-range value
+						append buffer mold/flat to-range src value
 					]
 
 					if cast: pc/1/syntax/cast [
 						newline pad + 6
 						append buffer "cast: "
-						append buffer mold/flat to-range cast
+						append buffer mold/flat to-range src cast
 					]
 
 					if recent: pc/1/syntax/recent [
 						newline pad + 6
 						append buffer "recent: "
-						append buffer mold/flat to-range recent
+						append buffer mold/flat to-range src recent
 					]
 
 					if declare: pc/1/syntax/declare [
 						newline pad + 6
 						append buffer "declare: "
-						append buffer mold/flat to-range declare
+						append buffer mold/flat to-range src declare
 					]
 
 					if resolved: pc/1/syntax/resolved [
@@ -786,7 +787,7 @@ semantic: context [
 							append buffer resolved/(i * 2 + 1)
 							append buffer ": "
 							value: resolved/(i * 2 + 2)
-							append buffer mold/flat to-range value
+							append buffer mold/flat to-range src value
 							i: i + 1
 						]
 						newline pad + 6
@@ -798,7 +799,7 @@ semantic: context [
 						append buffer "extra: ["
 						forall extra [
 							newline pad + 8
-							append buffer mold/flat to-range extra
+							append buffer mold/flat to-range src extra
 						]
 						newline pad + 6
 						append buffer "]"
@@ -813,7 +814,7 @@ semantic: context [
 					if parent: pc/1/syntax/parent [
 						newline pad + 6
 						append buffer "parent: "
-						append buffer mold/flat to-range parent
+						append buffer mold/flat to-range src parent
 					]
 
 					if args: pc/1/syntax/args [
@@ -828,7 +829,7 @@ semantic: context [
 								value: args/(i * 2 + 2)
 								forall value [
 									newline pad + 10
-									append buffer mold/flat to-range value
+									append buffer mold/flat to-range src value
 								]
 								newline pad + 8
 								append buffer "]"
@@ -836,7 +837,7 @@ semantic: context [
 								append buffer key
 								append buffer ": "
 								value: args/(i * 2 + 2)
-								append buffer mold/flat to-range value
+								append buffer mold/flat to-range src value
 							]
 							i: i + 1
 						]
@@ -1055,6 +1056,55 @@ source-syntax: context [
 		false
 	]
 
+	complete-file: function [file [file!] comps [block!] range [map!]][
+		insert str: to string! file "%"
+		if error? completions: try [red-complete-ctx/red-complete-file str no][
+			exit
+		]
+		either #"/" = last file [
+			filter: ""
+			range/start: range/end
+		][
+			either item: find/tail/last file "/" [
+				range/start/character: range/start/character + index? item
+				filter: find/tail/last str "/"
+			][
+				range/start/character: range/start/character + 1
+				filter: next str
+			]
+		]
+		forall completions [
+			if file? item-str: completions/1 [
+				item-str: to string! item-str
+				insert item-str "%"
+			]
+			slash-end?: no
+			if #"/" = last item-str [
+				remove back tail item-str
+				slash-end?: yes
+			]
+			either item2: find/tail/last item-str "/" [
+				item-str: item2
+			][
+				item-str: next item-str
+			]
+			if slash-end? [
+				append item-str "/"
+			]
+			item-file: next mold to file item-str
+			append comps make map! reduce [
+				'label item-str
+				'kind CompletionItemKind/File
+				'filterText? filter
+				'insertTextFormat 1
+				'textEdit make map! reduce [
+					'range range
+					'newText item-file
+				]
+			]
+		]
+	]
+
 	get-completions: function [uri [string!] line [integer!] column [integer!]][
 		unless top: find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
@@ -1067,9 +1117,6 @@ source-syntax: context [
 		][
 			return none
 		]
-		if pc/1/expr = [%][
-			return 'continue
-		]
 		unless any [
 			file? pc/1/expr/1
 			path? pc/1/expr/1
@@ -1077,10 +1124,24 @@ source-syntax: context [
 		][
 			return none
 		]
-		str: mold pc/1/expr/1
+		str: to string! pc/1/expr/1
 		comps: clear last-comps
+		range: semantic/form-range top/1/source pc
 
 		if word? pc/1/expr/1 [
+			if op? get pc/1/expr/1 [
+				append comps make map! reduce [
+					'label str
+					'kind CompletionItemKind/Operator
+					'filterText? str
+					'insertTextFormat 1
+					'textEdit make map! reduce [
+						'range range
+						'newText str
+					]
+				]
+				return comps
+			]
 			forall sources [
 				top2: sources/1/syntax
 				ctop: either sources/1/uri = uri [
@@ -1130,19 +1191,16 @@ source-syntax: context [
 		]
 
 		if file? pc/1/expr/1 [
-			completions: red-complete-ctx/red-complete-file str no
-			forall completions [
-				append comps make map! reduce [
-					'label completions/1
-					'kind CompletionItemKind/File
-				]
-			]
+			complete-file pc/1/expr/1 comps range
 			return comps
 		]
 	]
 
 	resolve-completion: function [params [map!]][
-		if params/kind = CompletionItemKind/Keyword [
+		if any [
+			params/kind = CompletionItemKind/Keyword
+			params/kind = CompletionItemKind/Operator
+		][
 			word: to word! params/label
 			if datatype? get word [
 				return rejoin [params/label " is a base datatype!"]
