@@ -233,12 +233,12 @@ on-textDocument-didChange: function [params [map!]][
 	uri: params/textDocument/uri
 	set 'last-uri uri
 	set 'last-diagnostics source-syntax/add-source/change? uri source
-	json-body/method: "textDocument/publishDiagnostics"
-	json-body/params: make map! reduce [
-		'uri uri
-		'diagnostics []
-	]
-	response
+	;json-body/method: "textDocument/publishDiagnostics"
+	;json-body/params: make map! reduce [
+	;	'uri uri
+	;	'diagnostics []
+	;]
+	;response
 ]
 
 on-textDocument-didSave: function [params [map!]][

@@ -911,10 +911,7 @@ semantic: context [
 			word: to string! npc/1/expr/1
 			if any [
 				empty? str
-				all [
-					str <> word
-					find/match word str
-				]
+				find/match word str
 			][
 				if all [
 					unique? word
@@ -958,7 +955,15 @@ semantic: context [
 			]
 		]
 
-		unless extra [
+		either extra [
+			str: to string! pc/1/expr/1
+			npc: top/1/nested
+			forall npc [
+				if set-word? npc/1/expr/1 [
+					collect* npc
+				]
+			]
+		][
 			either pc/1/nested [
 				collect-func-spec pc
 				collect-set-word pc/1/nested
@@ -1046,8 +1051,10 @@ source-syntax: context [
 		false
 	]
 
-	complete-file: function [file [file!] comps [block!] range [map!]][
-		insert str: to string! file "%"
+	complete-file: function [uri [string!] top [block!] pc [block!] comps [block!]][
+		range: semantic/form-range top/1/source pc
+		str: to string! pc/1/expr/1
+		insert str: to string! file: pc/1/expr/1 "%"
 		if error? completions: try [red-complete-ctx/red-complete-file str no][
 			exit
 		]
@@ -1095,6 +1102,114 @@ source-syntax: context [
 		]
 	]
 
+	complete-word: function [uri [string!] top [block!] pc [block!] comps [block!]][
+		range: semantic/form-range top/1/source pc
+		str: to string! pc/1/expr/1
+		system-completion-kind: function [word [word!]][
+			type: type?/word get word
+			kind: case [
+				datatype? get word [
+					CompletionItemKind/Keyword
+				]
+				typeset? get word [
+					CompletionItemKind/Keyword
+				]
+				'op! = type [
+					CompletionItemKind/Operator
+				]
+				find [action! native! function! routine!] type [
+					CompletionItemKind/Function
+				]
+				'object! = type [
+					CompletionItemKind/Class
+				]
+				true [
+					CompletionItemKind/Variable
+				]
+			]
+		]
+		complete-system-word: function [][
+			words: system-words/system-words
+			forall words [
+				sys-word: mold words/1
+				if find/match sys-word str [
+					append comps make map! reduce [
+						'label sys-word
+						'kind system-completion-kind words/1
+						'filterText? str
+						'insertTextFormat 1
+						'textEdit make map! reduce [
+							'range range
+							'newText sys-word
+						]
+						'data make map! reduce [
+							'type "system"
+						]
+					]
+				]
+			]
+		]
+		variable-kind: function [pc [block!]][
+			if cast: pc/1/syntax/cast [
+				if find [func function does has] cast/1/expr/1 [
+					return CompletionItemKind/Function
+				]
+				if cast/1/expr/1 = 'context [
+					return CompletionItemKind/Class
+				]
+				return CompletionItemKind/Variable
+			]
+			if pc/1/syntax/declare [
+				return CompletionItemKind/TypeParameter
+			]
+			CompletionItemKind/Variable
+		]
+		forall sources [
+			top2: sources/1/syntax
+			ctop: either sources/1/uri = uri [
+				semantic/collect-completions top2 pc
+			][
+				semantic/collect-completions/extra top2 pc
+			]
+			if collects: ctop/1/nested [
+				forall collects [
+					comp: make map! reduce [
+						'label lable: to string! collects/1/expr/1
+						'kind variable-kind collects
+						'filterText? str
+						'insertTextFormat 1
+						'textEdit make map! reduce [
+							'range range
+							'newText lable
+						]
+						'data make map! reduce [
+							'uri uri
+							's collects/1/s
+							'e collects/1/e
+						]
+					]
+					if sources/1/uri = uri [
+						put comp 'preselect true
+					]
+					append comps comp
+				]
+			]
+		]
+		complete-system-word
+	]
+
+	complete-path: function [uri [string!] top [block!] pc [block!] comps [block!]][
+		range: semantic/form-range top/1/source pc
+		str: to string! pc/1/expr/1
+		completions: red-complete-ctx/red-complete-path str no
+		forall completions [
+			append comps make map! reduce [
+				'label completions/1
+				'kind CompletionItemKind/Property
+			]
+		]
+	]
+
 	get-completions: function [uri [string!] line [integer!] column [integer!]][
 		unless top: find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
@@ -1107,89 +1222,51 @@ source-syntax: context [
 		][
 			return none
 		]
-		unless any [
-			file? pc/1/expr/1
-			path? pc/1/expr/1
-			word? pc/1/expr/1
-		][
-			return none
-		]
-		str: to string! pc/1/expr/1
 		comps: clear last-comps
-		range: semantic/form-range top/1/source pc
+		case [
+			file? pc/1/expr/1 [complete-file uri top pc comps]
+			path? pc/1/expr/1 [complete-path uri top pc comps]
+			word? pc/1/expr/1 [complete-word uri top pc comps]
+			true [comps: none]
+		]
+		comps
+	]
 
-		if word? pc/1/expr/1 [
-			if op? get pc/1/expr/1 [
-				append comps make map! reduce [
-					'label str
-					'kind CompletionItemKind/Operator
-					'filterText? str
-					'insertTextFormat 1
-					'textEdit make map! reduce [
-						'range range
-						'newText str
-					]
-				]
-				return comps
+	func-info: function [pc [block!] name [string!]][
+		func-info*: function [fn [word!] spec [block! none!] name [string!]][
+			either spec [
+				*-*spec*-*: do reduce [fn spec []]
+			][
+				*-*spec*-*: do reduce [fn []]
 			]
-			forall sources [
-				top2: sources/1/syntax
-				ctop: either sources/1/uri = uri [
-					semantic/collect-completions top2 pc
+			str: help-string *-*spec*-*
+			replace/all str "*-*spec*-*" name
+			return str
+		]
+		if pc/1/syntax/resolved [
+			if all [
+				find [func function has] pc/1/syntax/word
+				spec: pc/1/syntax/resolved/spec
+			][
+				if any [
+					none? spec/1/nested
+					semantic/contain-error? spec/1/nested
 				][
-					semantic/collect-completions/extra top2 pc
+					return func-info* pc/1/syntax/word [] name
 				]
-				if collects: ctop/1/nested [
-					forall collects [
-						comp: make map! reduce [
-							'label to string! collects/1/expr
-							'kind CompletionItemKind/Variable
-							'data make map! reduce [
-								'uri uri
-								's collects/1/s
-								'e collects/1/e
-							]
-						]
-						if sources/1/1 = uri [
-							put comp 'preselect true
-						]
-						append comps comp
-					]
-				]
+				return func-info* pc/1/syntax/word spec/1/expr/1 name
 			]
-			words: system-words/system-words
-			forall words [
-				sys-word: mold words/1
-				if find/match sys-word str [
-					append comps make map! reduce [
-						'label sys-word
-						'kind CompletionItemKind/Keyword
-					]
-				]
+			if pc/1/syntax/word = 'does [
+				return func-info* pc/1/syntax/word none name
 			]
-			return comps
 		]
-		if path? pc/1/expr/1 [
-			completions: red-complete-ctx/red-complete-path str no
-			forall completions [
-				append comps make map! reduce [
-					'label completions/1
-					'kind CompletionItemKind/Property
-				]
-			]
-			return comps
-		]
-
-		if file? pc/1/expr/1 [
-			complete-file pc/1/expr/1 comps range
-			return comps
-		]
+		none
 	]
 
 	resolve-completion: function [params [map!]][
-		if any [
-			params/kind = CompletionItemKind/Keyword
-			params/kind = CompletionItemKind/Operator
+		if all [
+			params/data
+			params/data/type = "system"
 		][
 			word: to word! params/label
 			if datatype? get word [
@@ -1198,65 +1275,57 @@ source-syntax: context [
 			return system-words/get-word-info word
 		]
 		if all [
-			params/kind = CompletionItemKind/Variable
 			params/data
-		][
 			uri: params/data/uri
-			s: to integer! params/data/s
-			e: to integer! params/data/e
+			s: params/data/s
+			e: params/data/e
+		][
+			s: to integer! s
+			e: to integer! e
 			unless top: find-top uri [return none]
 			unless pc: semantic/find-expr top s e [
 				return none
+			]
+			if declare: pc/1/syntax/declare [
+				if any [
+					word? declare/1/expr/1
+					get-word? declare/1/expr/1
+					refinement? declare/1/expr/1
+				][
+					if declare/1/syntax/args/refs [
+						return rejoin [params/label " is a local argument"]
+					]
+					if all [
+						declare/2
+						block? declare/2/expr/1
+					][
+						return rejoin [params/label " is a function argument^/type: " mold declare/2/expr/1]
+					]
+					return rejoin [params/label " is a function argument"]
+				]
+				return rejoin [params/label " is a local argument"]
+				
+			]
+			if cast: pc/1/syntax/cast [
+				if info: func-info cast params/label [
+					return info
+				]
+				if cast/1/syntax/word = 'context [
+					return rejoin [params/label " is a context!"]
+				]
 			]
 			return rejoin [params/label " is a variable!"]
 		]
 		none
 	]
 
-	system-completion-kind: function [word [word!]][
-		type: type? get word
-		kind: case [
-			datatype? get word [
-				CompletionItemKind/Keyword
-			]
-			typeset? get word [
-				CompletionItemKind/Keyword
-			]
-			op! = type [
-				CompletionItemKind/Operator
-			]
-			find reduce [action! native! function! routine!] type [
-				CompletionItemKind/Function
-			]
-			object! = type [
-				CompletionItemKind/Class
-			]
-			true [
-				CompletionItemKind/Variable
-			]
-		]
-	]
-
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		has-spec?: function [npc [block!]][
-			if all [
-				cast: npc/1/syntax/cast
-				cast/1/syntax/resolved
-				spec: cast/1/syntax/resolved/spec
-			][
-				if find [func function has] word: cast/1/syntax/word [
-					if all [
-						spec/1/nested
-						semantic/contain-error? spec/1/nested
-					][
-						return rejoin [mold npc/1/expr/1 " is a function^/but with wrong syntax in spec"]
-					]
-					*-*spec*-*: do reduce [word spec/1/expr/1 []]
-					str: help-string *-*spec*-*
-					replace/all str "*-*spec*-*" to string! npc/1/expr/1
-					return str
+			if cast: npc/1/syntax/cast [
+				if info: func-info cast mold npc/1/expr/1 [
+					return info
 				]
-				if word = 'context [
+				if cast/1/syntax/word = 'context [
 					return rejoin [mold npc/1/expr/1 " is a context"]
 				]
 			]

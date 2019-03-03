@@ -10,6 +10,13 @@ Red [
 #include %lexer.red
 
 ast: context [
+	uri-to-file: function [uri [string!]][
+		src: copy find/tail uri "file:///"
+		replace src "%3A" ""
+		insert src "%/"
+		load src
+	]
+
 	form-pos: function [pos [string!]][
 		start: end: head pos
 		line: 0
