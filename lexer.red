@@ -53,6 +53,7 @@ lexer: context [
 		src	 [string!]
 		dst	 [block! none!]
 		trap [logic!]
+		allow-slash [logic!]
 		/one
 		/only											;-- force returning the loaded value (with /one)
 		/part
@@ -400,6 +401,13 @@ lexer: context [
 					| begin-symbol-rule			(to-word stack copy/part s e word!)
 					| paren-rule
 					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
+					| to any [ws-no-count | end] (
+						either allow-slash [
+							to-word stack "`?`" word!
+						][
+							throw-error [path! path]
+						]
+					)
 					;@@ add more datatypes here
 					| (throw-error [path! path])
 					  reject

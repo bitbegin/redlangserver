@@ -1016,8 +1016,8 @@ source-syntax: context [
 		]
 	]
 
-	add-source: function [uri [string!] code [string!]][
-		if map? res: ast/analysis code [
+	add-source: function [uri [string!] code [string!] /change?][
+		if map? res: ast/analysis code change? [
 			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
 			info: res/error/arg2

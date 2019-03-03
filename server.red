@@ -232,7 +232,7 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	set 'last-diagnostics source-syntax/add-source uri source
+	set 'last-diagnostics source-syntax/add-source/change? uri source
 	json-body/method: "textDocument/publishDiagnostics"
 	json-body/params: make map! reduce [
 		'uri uri
