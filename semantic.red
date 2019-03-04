@@ -61,38 +61,35 @@ semantic: context [
 		find-expr* top s e
 	]
 
-	position?: function [top [block!] pos [integer!] /outer][
-		position*: function [pc [block!] pos [integer!]][
-			cascade: [
-				if pc/1/nested [
-					if ret: position* pc/1/nested pos [return ret]
-				]
-				return pc
-			]
-			forall pc [
-				if all [
-					pc/1/s <= pos
-					pc/1/e >= pos
-				][
-					if any [
-						outer
+	position?: function [pc [block!] pos [integer!]][
+		top: pc
+		forall pc [
+			if all [
+				pc/1/s <= pos
+				pc/1/e >= pos
+			][
+				if any [
+					all [
 						pc/1/e <> pos
-					][do cascade]
-					if all [
-						outer
+						none? pc/1/nested
+					]
+					all [
+						pc/1/e = pos
+						top <> pc
 						any [
 							tail? next pc
 							pc/2/s <> pos
 						]
-					][
-						return pc
 					]
-					break
+				][
+					return pc
+				]
+				if pc/1/nested [
+					if ret: position? pc/1/nested pos [return ret]
 				]
 			]
-			none
 		]
-		position* top pos
+		none
 	]
 
 	syntax-error: function [pc [block!] word [word!] args][
@@ -973,8 +970,8 @@ source-syntax: context [
 			]
 			return reduce [diag]
 		]
+		add-source-to-table uri res
 		unless change? [
-			add-source-to-table uri res
 			clear file-block
 			semantic/analysis res
 			err: semantic/collect-errors res
@@ -991,11 +988,11 @@ source-syntax: context [
 completion: context [
 	last-comps: clear []
 
-	complete-file: function [top [block!] pc [block!] result [block!]][
+	complete-file: function [top [block!] pc [block!] comps [block!]][
 		range: semantic/form-range top/1/source pc
 		str: to string! pc/1/expr/1
 		insert str: to string! file: pc/1/expr/1 "%"
-		if error? comps: try [red-complete-ctx/red-complete-file str no][
+		if error? result: try [red-complete-ctx/red-complete-file str no][
 			exit
 		]
 		either #"/" = last file [
@@ -1010,8 +1007,8 @@ completion: context [
 				filter: next str
 			]
 		]
-		forall comps [
-			if file? item-str: comps/1 [
+		forall result [
+			if file? item-str: result/1 [
 				item-str: to string! item-str
 				insert item-str "%"
 			]
@@ -1029,7 +1026,7 @@ completion: context [
 				append item-str "/"
 			]
 			item-file: next mold to file item-str
-			append result make map! reduce [
+			append comps make map! reduce [
 				'label item-str
 				'kind CompletionItemKind/File
 				'filterText? filter
@@ -1064,7 +1061,7 @@ completion: context [
 						]
 						all [
 							not same
-							find nstring string
+							find/match nstring string
 						]
 					][
 						if unique? result nword [
@@ -1118,14 +1115,14 @@ completion: context [
 		sources: source-syntax/sources
 		forall sources [
 			either sources/1 = top [
-				complete-word* top pc result
+				collect-word* top pc result
 			][
-				complete-word*/only top pc result
+				collect-word*/only sources/1 pc result
 			]
 		]
 	]
 
-	complete-word: function [top [block!] pc [block!] result [block!]][
+	complete-word: function [top [block!] pc [block!] comps [block!]][
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -1150,8 +1147,14 @@ completion: context [
 			]
 		]
 		range: semantic/form-range top/1/source pc
+		if any [
+			lit-word? pc/1/expr/1
+			get-word? pc/1/expr/1
+		][
+			range/start/character: range/start/character + 1
+		]
 		string: to string! to word! pc/1/expr/1
-		collect-word top pc result
+		collect-word top pc result: clear []
 		forall result [
 			rpc: result/1
 			top: rpc
@@ -1165,9 +1168,11 @@ completion: context [
 				]
 				type = 'set-word! [
 					npc: rpc
-					while any [
-						not tail? npc: next npc
-						set-word? npc/1/expr/1
+					while [
+						all [
+							not tail? npc: next npc
+							set-word? npc/1/expr/1
+						]
 					][]
 					unless tail? npc [
 						case [
@@ -1181,17 +1186,12 @@ completion: context [
 					]
 				]
 			]
-			if any [
-				lit-word? pc/1/expr/1
-				get-word? pc/1/expr/1
-			][
-				range/start/character: range/start/character + 1
-			]
-			append result make map! reduce [
+			append comps make map! reduce [
 				'label rstring
 				'kind kind
 				'filterText? string
 				'insertTextFormat 1
+				'preselect true
 				'textEdit make map! reduce [
 					'range range
 					'newText rstring
@@ -1228,7 +1228,7 @@ completion: context [
 	complete: function [uri [string!] line [integer!] column [integer!]][
 		unless top: source-syntax/find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
-		unless pc: semantic/position?/outer top index? pos [
+		unless pc: semantic/position? top index? pos [
 			return none
 		]
 		type: type?/word pc/1/expr/1
@@ -1242,6 +1242,7 @@ completion: context [
 		]
 		if find [word! lit-word! get-word!] type [
 			complete-word top pc comps
+			return comps
 		]
 		none
 	]
@@ -1283,7 +1284,7 @@ completion: context [
 	resolve-word: function [top [block!] pc [block!] string [string!]][
 		unless pc/1/info [return none]
 		if pc/1/info = 'declare [
-			ret: rejoin [params/label " is a function argument!"]
+			ret: rejoin [string " is a function argument!"]
 			if all [
 				pc/2
 				block? pc/2/expr/1
@@ -1296,7 +1297,7 @@ completion: context [
 			if pc/2 [
 				case [
 					pc/2/expr/1 = 'context [
-						return rejoin [params/label " is a context!"]
+						return rejoin [string " is a context!"]
 					]
 					find [func function has] pc/2/expr/1 [
 						if all [
@@ -1312,13 +1313,13 @@ completion: context [
 					pc/2/expr/1 = 'make [
 						if pc/3 [
 							if pc/3/expr/1 = 'object! [
-								return rejoin [params/label " is a object!"]
+								return rejoin [string " is a object!"]
 							]
 							if all [
 								word? pc/3/expr/1
 								pc/3/expr/1 <> to word! pc/1/expr/1		;invoid casted define
 							][
-								ret: rejoin [params/label " is a object!"]
+								ret: rejoin [string " is a object!"]
 								if find-set-context skip pc 2 [
 									append ret "(inherit)"
 									return ret
@@ -1327,7 +1328,9 @@ completion: context [
 							]
 						]
 					]
+					word? pc/2/expr/1 [return none]
 				]
+				return rejoin [string " is a " mold type?/word pc/2/expr/1 " variable."]
 			]
 			return none
 		]
@@ -1353,11 +1356,14 @@ completion: context [
 			uri: params/data/uri
 			s: to integer! params/data/s
 			e: to integer! params/data/e
-			unless top: find-top uri [return none]
+			unless top: source-syntax/find-top uri [return none]
 			unless pc: semantic/find-expr top s e [
 				return none
 			]
-			return resolve-word top pc
+			if str: resolve-word top pc params/label [
+				append str rejoin ["^/^/FILE: " mold ast/uri-to-file uri]
+			]
+			return str
 		]
 		none
 	]
