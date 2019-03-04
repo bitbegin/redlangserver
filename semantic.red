@@ -7,6 +7,8 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
+file-block: []
+
 semantic: context [
 	throw-error: register-error 'semantic
 
@@ -631,6 +633,17 @@ semantic: context [
 				]
 				return step
 			]
+			if pc/1/expr = [#include][
+				if any [
+					tail? pc/2
+					not file? pc/2/expr/1
+				][
+					syntax-error pc 'miss-expr "file!"
+					return 1
+				]
+				repend/only file-block [top/1/uri pc/2/expr/1]
+				return 2
+			]
 			if all [
 				pc/1/nested
 				paren? pc/1/expr/1
@@ -723,6 +736,11 @@ semantic: context [
 					newline pad + 4
 					append buffer "source: "
 					append buffer mold/flat/part pc/1/source 20
+				]
+				if pc/1/uri [
+					newline pad + 4
+					append buffer "uri: "
+					append buffer pc/1/uri
 				]
 				if all [
 					semantic
@@ -896,140 +914,56 @@ semantic: context [
 		]
 		contain-error* top
 	]
-
-	collect-completions: function [top [block!] pc [block!] /extra][
-		ret: clear []
-		str: clear ""
-		unique?: function [word [string!]][
-			npc: ret
-			forall npc [
-				if word = to string! npc/1/expr/1 [return false]
-			]
-			true
-		]
-		collect*: function [npc [block!]][
-			word: to string! npc/1/expr/1
-			if any [
-				empty? str
-				find/match word str
-			][
-				if all [
-					unique? word
-					npc <> pc
-				][
-					append/only ret npc/1
-				]
-			]
-		]
-		collect-set-word: function [npc [block!]][
-			forall npc [
-				if set-word? npc/1/expr/1 [
-					collect* npc
-				]
-			]
-		]
-
-		collect-arg: function [spec [block!]][
-			if npc: spec/1/nested [
-				forall npc [
-					if find [word! lit-word! get-word! refinement!] type?/word npc/1/expr/1 [
-						collect* npc
-					]
-				]
-			]
-		]
-
-		collect-func-spec: function [pc [block! none!]][
-			unless pc [exit]
-			par: pc/1/upper
-			if all [
-				par
-				block? par/1/expr/1
-				par/1/syntax
-				par/1/syntax/type = 'body
-				parent: par/1/syntax/parent
-				find [func has function does] parent/1/syntax/word
-				spec: parent/1/syntax/resolved/spec
-			][
-				collect-arg spec
-			]
-		]
-
-		either extra [
-			str: to string! pc/1/expr/1
-			npc: top/1/nested
-			forall npc [
-				if set-word? npc/1/expr/1 [
-					collect* npc
-				]
-			]
-		][
-			either pc/1/nested [
-				collect-func-spec pc
-				collect-set-word pc/1/nested
-			][
-				unless find [word! get-word! file!] type?/word pc/1/expr/1 [
-					return reduce [reduce ['expr [] 'source top/1/source 's top/1/s 'e top/1/e 'nested ret]]
-				]
-				str: to string! pc/1/expr/1
-			]
-
-			npc: pc
-			until [
-				par: npc/1/upper
-				collect-func-spec par
-				collect-set-word head npc
-				not npc: par
-			]
-		]
-		if npc: top/1/syntax/extra [
-			forall npc [
-				if set-word? npc/1/expr/1 [
-					collect* npc
-				]
-			]
-		]
-		reduce [reduce ['expr [] 'source top/1/source 's top/1/s 'e top/1/e 'nested ret]]
-	]
 ]
 
+
+
 source-syntax: context [
-	sources: make block! 4
-	last-comps: []
+	sources: []
+
+	find-top: function [uri [string!]][
+		forall sources [
+			if sources/1/1/uri = uri [
+				return sources/1
+			]
+		]
+		false
+	]
 
 	find-source: function [uri [string!]][
 		forall sources [
-			if sources/1/uri = uri [
+			if sources/1/1/uri = uri [
 				return sources
 			]
 		]
 		false
 	]
 
-	find-top: function [uri [string!]][
-		unless item: find-source uri [
-			return none
-		]
-		item/1/syntax
-	]
-
 	add-source-to-table: function [uri [string!] syntax [block!]][
+		repend syntax/1 ['uri uri]
 		either item: find-source uri [
-			item/1/syntax: syntax
+			item/1: syntax
 		][
-			append/only sources reduce ['uri uri 'syntax syntax]
+			append/only sources syntax
 		]
 	]
 
 	add-source: function [uri [string!] code [string!] /change?][
+		if all [
+			change?
+			top: find-top uri
+			top/1/source = code
+		][return none]
+		diagnostics: clear []
 		if map? res: ast/analysis code change? [
 			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
 			info: res/error/arg2
 			if part: find info line-cs [info: copy/part info part]
 			message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
-			return reduce [
-				make map! reduce [
+			diag: make map! reduce [
+				'uri uri
+				'diagnostics make map! reduce [
 					'range range
 					'severity 1
 					'code 1
@@ -1037,25 +971,31 @@ source-syntax: context [
 					'message message
 				]
 			]
+			return reduce [diag]
 		]
-		add-source-to-table uri res
-		semantic/analysis res
-		semantic/collect-errors res
-	]
-
-	semicolon?: function [pc [block!] pos [string!] column [integer!]][
-		if pos/1 = #";" [return true]
-		repeat count column [
-			if pos/(0 - count) = #";" [return true]
+		unless change? [
+			add-source-to-table uri res
+			clear file-block
+			semantic/analysis res
+			err: semantic/collect-errors res
+			diags: make map! reduce [
+				'uri uri
+				'diagnostics err
+			]
+			return diags
 		]
-		false
+		none
 	]
+]
 
-	complete-file: function [uri [string!] top [block!] pc [block!] comps [block!]][
+completion: context [
+	last-comps: clear []
+
+	complete-file: function [top [block!] pc [block!] result [block!]][
 		range: semantic/form-range top/1/source pc
 		str: to string! pc/1/expr/1
 		insert str: to string! file: pc/1/expr/1 "%"
-		if error? completions: try [red-complete-ctx/red-complete-file str no][
+		if error? comps: try [red-complete-ctx/red-complete-file str no][
 			exit
 		]
 		either #"/" = last file [
@@ -1070,8 +1010,8 @@ source-syntax: context [
 				filter: next str
 			]
 		]
-		forall completions [
-			if file? item-str: completions/1 [
+		forall comps [
+			if file? item-str: comps/1 [
 				item-str: to string! item-str
 				insert item-str "%"
 			]
@@ -1089,7 +1029,7 @@ source-syntax: context [
 				append item-str "/"
 			]
 			item-file: next mold to file item-str
-			append comps make map! reduce [
+			append result make map! reduce [
 				'label item-str
 				'kind CompletionItemKind/File
 				'filterText? filter
@@ -1102,9 +1042,90 @@ source-syntax: context [
 		]
 	]
 
-	complete-word: function [uri [string!] top [block!] pc [block!] comps [block!]][
-		range: semantic/form-range top/1/source pc
-		str: to string! pc/1/expr/1
+	unique?: function [npc [block!] word [word!]][
+		forall npc [
+			if word = to word! npc/1/1/expr/1 [return false]
+		]
+		true
+	]
+
+	collect-word*: function [top [block!] pc [block!] result [block!] /only /same][
+		word: to word! pc/1/expr/1
+		string: to string! word
+		collect*: function [npc [block!] type [block!] info [word!] /back?][
+			until [
+				if find type type?/word npc/1/expr/1 [
+					nword: to word! npc/1/expr/1
+					nstring: to string! nword
+					if any [
+						all [
+							same
+							word = nword
+						]
+						all [
+							not same
+							find nstring string
+						]
+					][
+						if unique? result nword [
+							repend npc/1 ['info info]
+							append/only result npc
+						]
+					]
+				]
+				either back? [
+					npc2: back npc
+					either npc = npc2 [
+						npc: none
+					][
+						npc: npc2
+					]
+				][
+					if tail? npc: next npc [npc: none]
+				]
+				none? npc
+			]
+		]
+		if only [
+			collect*/back? back tail top/1/nested [set-word!] 'set
+			exit
+		]
+		npc: npc2: pc
+		forever [
+			collect*/back? back npc [set-word!] 'set
+			either all [
+				par: npc2/1/upper
+				top <> par
+			][
+				if all [
+					par/-1
+					block? par/-1/expr/1
+				][
+					if all [
+						par/-2
+						find [func function has] par/-2/epxr/1
+					][
+						collect* par/-1/nested [word! lit-word! refinement!] 'declare
+					]
+				]
+				npc2: par
+				npc: tail par
+			][break]
+		]
+	]
+
+	collect-word: function [top [block!] pc [block!] result [block!]][
+		sources: source-syntax/sources
+		forall sources [
+			either sources/1 = top [
+				complete-word* top pc result
+			][
+				complete-word*/only top pc result
+			]
+		]
+	]
+
+	complete-word: function [top [block!] pc [block!] result [block!]][
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -1128,142 +1149,193 @@ source-syntax: context [
 				]
 			]
 		]
-		complete-system-word: function [][
-			words: system-words/system-words
-			forall words [
-				sys-word: mold words/1
-				if find/match sys-word str [
-					append comps make map! reduce [
-						'label sys-word
-						'kind system-completion-kind words/1
-						'filterText? str
-						'insertTextFormat 1
-						'textEdit make map! reduce [
-							'range range
-							'newText sys-word
-						]
-						'data make map! reduce [
-							'type "system"
-						]
-					]
-				]
-			]
-		]
-		variable-kind: function [pc [block!]][
-			if cast: pc/1/syntax/cast [
-				if find [func function does has] cast/1/expr/1 [
-					return CompletionItemKind/Function
-				]
-				if cast/1/expr/1 = 'context [
-					return CompletionItemKind/Class
-				]
-				return CompletionItemKind/Variable
-			]
-			if pc/1/syntax/declare [
-				return CompletionItemKind/TypeParameter
-			]
-			CompletionItemKind/Variable
-		]
-		forall sources [
-			top2: sources/1/syntax
-			ctop: either sources/1/uri = uri [
-				semantic/collect-completions top2 pc
-			][
-				semantic/collect-completions/extra top2 pc
-			]
-			if collects: ctop/1/nested [
-				forall collects [
-					comp: make map! reduce [
-						'label lable: to string! collects/1/expr/1
-						'kind variable-kind collects
-						'filterText? str
-						'insertTextFormat 1
-						'textEdit make map! reduce [
-							'range range
-							'newText lable
-						]
-						'data make map! reduce [
-							'uri uri
-							's collects/1/s
-							'e collects/1/e
-						]
-					]
-					if sources/1/uri = uri [
-						put comp 'preselect true
-					]
-					append comps comp
-				]
-			]
-		]
-		complete-system-word
-	]
-
-	complete-path: function [uri [string!] top [block!] pc [block!] comps [block!]][
 		range: semantic/form-range top/1/source pc
-		str: to string! pc/1/expr/1
-		completions: red-complete-ctx/red-complete-path str no
-		forall completions [
-			append comps make map! reduce [
-				'label completions/1
-				'kind CompletionItemKind/Property
+		string: to string! to word! pc/1/expr/1
+		collect-word top pc result
+		forall result [
+			rpc: result/1
+			top: rpc
+			while [par: top/1/upper][top: par]
+			kind: CompletionItemKind/Variable
+			type: type?/word rpc/1/expr/1
+			rstring: to string! to word! rpc/1/expr/1
+			case [
+				find [word! lit-word! refinement!] type [
+					kind: CompletionItemKind/TypeParameter
+				]
+				type = 'set-word! [
+					npc: rpc
+					while any [
+						not tail? npc: next npc
+						set-word? npc/1/expr/1
+					][]
+					unless tail? npc [
+						case [
+							find [func function does has] npc/1/expr/1 [
+								kind: CompletionItemKind/Function
+							]
+							npc/1/expr/1 = 'context [
+								kind: CompletionItemKind/Struct
+							]
+						]
+					]
+				]
+			]
+			if any [
+				lit-word? pc/1/expr/1
+				get-word? pc/1/expr/1
+			][
+				range/start/character: range/start/character + 1
+			]
+			append result make map! reduce [
+				'label rstring
+				'kind kind
+				'filterText? string
+				'insertTextFormat 1
+				'textEdit make map! reduce [
+					'range range
+					'newText rstring
+				]
+				'data make map! reduce [
+					'uri top/1/uri
+					's rpc/1/s
+					'e rpc/1/e
+					'type "word"
+				]
+			]
+		]
+		words: system-words/system-words
+		forall words [
+			sys-string: to string! words/1
+			if find/match sys-string string [
+				append comps make map! reduce [
+					'label sys-string
+					'kind system-completion-kind words/1
+					'filterText? string
+					'insertTextFormat 1
+					'textEdit make map! reduce [
+						'range range
+						'newText sys-string
+					]
+					'data make map! reduce [
+						'type "system"
+					]
+				]
 			]
 		]
 	]
 
-	get-completions: function [uri [string!] line [integer!] column [integer!]][
-		unless top: find-top uri [return none]
+	complete: function [uri [string!] line [integer!] column [integer!]][
+		unless top: source-syntax/find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
 		unless pc: semantic/position?/outer top index? pos [
 			return none
 		]
-		if all [
-			block? pc/1/expr/1
-			semicolon? pc pos column
-		][
+		type: type?/word pc/1/expr/1
+		unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
 			return none
 		]
 		comps: clear last-comps
-		case [
-			file? pc/1/expr/1 [complete-file uri top pc comps]
-			path? pc/1/expr/1 [complete-path uri top pc comps]
-			word? pc/1/expr/1 [complete-word uri top pc comps]
-			true [comps: none]
+		if type = 'file! [
+			complete-file top pc comps
+			return comps
 		]
-		comps
+		if find [word! lit-word! get-word!] type [
+			complete-word top pc comps
+		]
+		none
 	]
 
-	func-info: function [pc [block!] name [string!]][
-		func-info*: function [fn [word!] spec [block! none!] name [string!]][
-			either spec [
-				*-*spec*-*: do reduce [fn spec []]
-			][
-				*-*spec*-*: do reduce [fn []]
-			]
-			str: help-string *-*spec*-*
-			replace/all str "*-*spec*-*" name
-			return str
+	func-info: function [fn [word!] spec [block! none!] name [string!]][
+		either spec [
+			*-*spec*-*: do reduce [fn spec []]
+		][
+			*-*spec*-*: do reduce [fn []]
 		]
-		if pc/1/syntax/resolved [
+		str: help-string *-*spec*-*
+		replace/all str "*-*spec*-*" name
+		return str
+	]
+
+	find-set-context: function [top [block!] pc [block!]][
+		word: to word! pc/1/expr/1
+		npc: pc
+		while [npc2: back npc npc <> npc2][
+			npc: npc2
 			if all [
-				find [func function has] pc/1/syntax/word
-				spec: pc/1/syntax/resolved/spec
-			][
-				if any [
-					none? spec/1/nested
-					semantic/contain-error? spec/1/nested
-				][
-					return func-info* pc/1/syntax/word [] name
+				set-word? npc/1/expr/1
+				npc/2
+				any [
+					npc/2/expr/1 = 'context
+					all [
+						npc/2/expr/1 = 'make
+						npc/3
+						npc/3/expr/1 = 'block!
+					]
 				]
-				return func-info* pc/1/syntax/word spec/1/expr/1 name
-			]
-			if pc/1/syntax/word = 'does [
-				return func-info* pc/1/syntax/word none name
+			][
+				return npc
 			]
 		]
 		none
 	]
 
-	resolve-completion: function [params [map!]][
+	resolve-word: function [top [block!] pc [block!] string [string!]][
+		unless pc/1/info [return none]
+		if pc/1/info = 'declare [
+			ret: rejoin [params/label " is a function argument!"]
+			if all [
+				pc/2
+				block? pc/2/expr/1
+			][
+				return rejoin [ret "^/type: " mold pc/2/expr/1]
+			]
+			return ret
+		]
+		if pc/1/info = 'set [
+			if pc/2 [
+				case [
+					pc/2/expr/1 = 'context [
+						return rejoin [params/label " is a context!"]
+					]
+					find [func function has] pc/2/expr/1 [
+						if all [
+							pc/3
+							block? pc/3/expr/1
+						][
+							return func-info pc/2/expr/1 pc/3/expr/1 to string! pc/1/expr/1
+						]
+					]
+					pc/2/expr/1 = 'does [
+						return func-info pc/2/expr/1 [] to string! pc/1/expr/1
+					]
+					pc/2/expr/1 = 'make [
+						if pc/3 [
+							if pc/3/expr/1 = 'object! [
+								return rejoin [params/label " is a object!"]
+							]
+							if all [
+								word? pc/3/expr/1
+								pc/3/expr/1 <> to word! pc/1/expr/1		;invoid casted define
+							][
+								ret: rejoin [params/label " is a object!"]
+								if find-set-context skip pc 2 [
+									append ret "(inherit)"
+									return ret
+								]
+								return ret
+							]
+						]
+					]
+				]
+			]
+			return none
+		]
+		none
+	]
+
+	resolve: function [params [map!]][
+		if params/kind = CompletionItemKind/File [return none]
 		if all [
 			params/data
 			params/data/type = "system"
@@ -1276,144 +1348,16 @@ source-syntax: context [
 		]
 		if all [
 			params/data
-			uri: params/data/uri
-			s: params/data/s
-			e: params/data/e
+			params/data/type = "word"
 		][
-			s: to integer! s
-			e: to integer! e
+			uri: params/data/uri
+			s: to integer! params/data/s
+			e: to integer! params/data/e
 			unless top: find-top uri [return none]
 			unless pc: semantic/find-expr top s e [
 				return none
 			]
-			if declare: pc/1/syntax/declare [
-				if any [
-					word? declare/1/expr/1
-					get-word? declare/1/expr/1
-					refinement? declare/1/expr/1
-				][
-					if declare/1/syntax/args/refs [
-						return rejoin [params/label " is a local argument"]
-					]
-					if all [
-						declare/2
-						block? declare/2/expr/1
-					][
-						return rejoin [params/label " is a function argument^/type: " mold declare/2/expr/1]
-					]
-					return rejoin [params/label " is a function argument"]
-				]
-				return rejoin [params/label " is a local argument"]
-				
-			]
-			if cast: pc/1/syntax/cast [
-				if info: func-info cast params/label [
-					return info
-				]
-				if cast/1/syntax/word = 'context [
-					return rejoin [params/label " is a context!"]
-				]
-			]
-			return rejoin [params/label " is a variable!"]
-		]
-		none
-	]
-
-	hover: function [uri [string!] line [integer!] column [integer!]][
-		has-spec?: function [npc [block!]][
-			if cast: npc/1/syntax/cast [
-				if info: func-info cast mold npc/1/expr/1 [
-					return info
-				]
-				if cast/1/syntax/word = 'context [
-					return rejoin [mold npc/1/expr/1 " is a context"]
-				]
-			]
-			return none
-		]
-		unless top: find-top uri [return none]
-		pos: ast/to-pos top/1/source line column
-		unless pc: semantic/position?/outer top index? pos [
-			return none
-		]
-		if all [
-			block? pc/1/expr/1
-			semicolon? pc pos column
-		][
-			return none
-		]
-		unless pc/1/syntax [
-			case [
-				word? pc/1/expr/1 [
-					word: pc/1/expr/1
-					if datatype? get word [
-						return rejoin [mold pc/1/expr/1 " is a base datatype!"]
-					]
-				]
-				path? pc/1/expr/1 [
-					word: pc/1/expr/1/1
-				]
-				true [
-					type: type?/word pc/1/expr/1
-					if find [block! paren! map!] type [
-						return rejoin [mold mold/flat/part pc/1/expr/1 16 "...^/is a " mold type]
-					]
-					unless find [set-word! set-path!] type [
-						return rejoin [mold pc/1/expr/1 " is a literal^/type: " mold type]
-					]
-					return none
-				]
-			]
-			return system-words/get-word-info word
-		]
-		if any [
-			lit-word? pc/1/expr/1
-			set-word? pc/1/expr/1
-		][
-			if value: pc/1/syntax/value [
-				return rejoin [mold pc/1/expr/1 
-					either pc/1/syntax/declare [
-						" is a function argument^/"
-					][
-						" is a variable^/"
-					]
-					"value type: "
-					mold type?/word value/1/expr/1
-				]
-			]
-			return has-spec? pc
-		]
-
-		if any [
-			word? pc/1/expr/1
-			get-word? pc/1/expr/1
-			path? pc/1/expr/1
-			get-path? pc/1/expr/1
-		][
-			if pc/1/syntax/declare [
-				return rejoin [mold pc/1/expr/1 " is a function argument"]
-			]
-			if recent: pc/1/syntax/recent [
-				if value: recent/1/syntax/value [
-					return rejoin [mold pc/1/expr/1 " is a variable^/"
-						"value type: " mold type?/word value/1/expr/1
-					]
-				]
-				return has-spec? recent
-			]
-			if all [
-				pc/1/syntax/word
-				system-words/system? pc/1/syntax/word
-			][
-				return system-words/get-word-info pc/1/syntax/word
-			]
-			if all [
-				word? word: pc/1/expr/1
-				pc/1/syntax/type = 'func-type-item
-				datatype? get word
-			][
-				return rejoin [mold word " is a base datatype!"]
-			]
+			return resolve-word top pc
 		]
 		none
 	]

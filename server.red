@@ -210,13 +210,11 @@ on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	diagnostics: source-syntax/add-source uri source
-	json-body/method: "textDocument/publishDiagnostics"
-	json-body/params: make map! reduce [
-		'uri uri
-		'diagnostics diagnostics
+	if diags: source-syntax/add-source uri source [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: diags
+		response
 	]
-	response
 ]
 
 on-textDocument-didClose: function [params [map!]][
@@ -232,25 +230,22 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	set 'last-diagnostics source-syntax/add-source/change? uri source
-	;json-body/method: "textDocument/publishDiagnostics"
-	;json-body/params: make map! reduce [
-	;	'uri uri
-	;	'diagnostics []
-	;]
-	;response
+	if diags: source-syntax/add-source/change? uri source [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: diags
+		response
+	]
 ]
 
 on-textDocument-didSave: function [params [map!]][
 	uri: params/textDocument/uri
-	if uri = last-uri [
-		json-body/method: "textDocument/publishDiagnostics"
-		json-body/params: make map! reduce [
-			'uri uri
-			'diagnostics last-diagnostics
+	if top: source-syntax/find-top uri [
+		source: top/1/source
+		if diags: source-syntax/add-source uri source [
+			json-body/method: "textDocument/publishDiagnostics"
+			json-body/params: diags
+			response
 		]
-		set 'last-diagnostics none
-		response
 	]
 ]
 
@@ -266,7 +261,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-uri uri
 	set 'last-line line
 	set 'last-column column
-	comps: source-syntax/get-completions uri line + 1 column + 1
+	comps: completion/complete uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		;'isIncomplete true
 		'items comps
@@ -275,7 +270,7 @@ on-textDocument-completion: function [params [map!]][
 ]
 
 on-completionItem-resolve: function [params [map!]][
-	hstr: source-syntax/resolve-completion params
+	hstr: completion/resolve params
 	put params 'documentation either hstr [hstr][""]
 	json-body/result: params
 	response
@@ -315,7 +310,7 @@ on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	result: source-syntax/hover uri line + 1 column + 1
+	result: none;source-syntax/hover uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range none

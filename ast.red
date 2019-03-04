@@ -16,7 +16,20 @@ ast: context [
 		insert src "%/"
 		load src
 	]
-
+	file-to-uri: function [file [file!]][
+		src: mold file
+		src: copy skip src 2
+		insert next src "%3A"
+		insert src "file:///"
+		src
+	]
+	semicolon?: function [pc [block!] pos [string!] column [integer!]][
+		if pos/1 = #";" [return true]
+		repeat count column [
+			if pos/(0 - count) = #";" [return true]
+		]
+		false
+	]
 	form-pos: function [pos [string!]][
 		start: end: head pos
 		line: 0
