@@ -1087,8 +1087,10 @@ completion: context [
 		]
 		npc: npc2: pc
 		forever [
-			collect*/back? back npc [set-word!] 'set
+			npc: back npc
+			collect*/back? npc [set-word!] 'set
 			either all [
+				not tail? npc2
 				par: npc2/1/upper
 				none? par/1/source
 			][
@@ -1332,8 +1334,10 @@ completion: context [
 		]
 		npc: npc2: pc
 		forever [
-			collect* back npc
+			npc: back npc
+			collect* npc
 			either all [
+				not tail? npc2
 				par: npc2/1/upper
 				none? par/1/source
 			][
@@ -1654,6 +1658,9 @@ completion: context [
 				]
 			]
 			return rejoin [string " is a " mold type?/word pc/2/expr/1 " variable."]
+		]
+		if refinement? pc/1/expr/1 [
+			return rejoin [string " is a function's refinement!"]
 		]
 		none
 	]

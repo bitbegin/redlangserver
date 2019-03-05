@@ -81,12 +81,12 @@ ast: context [
 	]
 
 	analysis: function [src [string!]][
-		ast: make block! 1
-		res: lexer/transcode/ast src none true yes ast
+		out: make block! 1
+		res: lexer/transcode/ast src none true yes out
 		if error? res/3 [
 			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
-		repend ast/1 ['source src]
-		ast
+		repend out/1 ['source src]
+		out
 	]
 ]
