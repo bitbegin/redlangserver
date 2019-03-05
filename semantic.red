@@ -931,18 +931,20 @@ source-syntax: context [
 	sources: []
 
 	find-top: function [uri [string!]][
-		forall sources [
-			if sources/1/1/uri = uri [
-				return sources/1
+		ss: sources
+		forall ss [
+			if ss/1/1/uri = uri [
+				return ss/1
 			]
 		]
 		false
 	]
 
 	find-source: function [uri [string!]][
-		forall sources [
-			if sources/1/1/uri = uri [
-				return sources
+		ss: sources
+		forall ss [
+			if ss/1/1/uri = uri [
+				return ss
 			]
 		]
 		false
@@ -1354,7 +1356,14 @@ completion: context [
 			until [
 				if all [
 					not slash-end?
-					set-word? npc/1/expr/1
+					any [
+						set-word? npc/1/expr/1
+						all [
+							refinement? npc/1/expr/1
+							par: npc/1/upper
+							find [func function] par/-1/expr/1
+						]
+					]
 					find/match to string! npc/1/expr/1 string
 				][
 					if unique? result to word! npc/1/expr/1 [
@@ -1560,6 +1569,8 @@ completion: context [
 		collect-path top pc pcs
 		forall pcs [
 			rpc: pcs/1
+			ntop: rpc
+			while [par: ntop/1/upper][ntop: par]
 			nstring: to string! rpc/1/expr/1
 			append comps make map! reduce [
 				'label nstring
@@ -1572,7 +1583,7 @@ completion: context [
 					'newText nstring
 				]
 				'data make map! reduce [
-					'uri top/1/uri
+					'uri ntop/1/uri
 					's rpc/1/s
 					'e rpc/1/e
 					'type "path"
