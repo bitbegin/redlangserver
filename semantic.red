@@ -1344,13 +1344,23 @@ completion: context [
 		result
 	]
 
-	collect-sub-word*: function [pc [block!] par [word!] sub [word! none!] result [block!] *all? [logic!]][
-		collect*: function [npc [block!] sub* [word! none!]][
-			sub-string: to string! sub*
+	collect-sub-word*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
+		string: to string! word
+		collect*: function [npc [block!]][
 			until [
 				if all [
+					not slash-end?
 					set-word? npc/1/expr/1
-					par = to word! npc/1/expr/1
+					find/match to string! npc/1/expr/1 string
+				][
+					if unique? result to word! npc/1/expr/1 [
+						append/only result npc
+					]
+				]
+				if all [
+					slash-end?
+					set-word? npc/1/expr/1
+					word = to word! npc/1/expr/1
 					npc/2
 				][
 					case [
@@ -1363,15 +1373,11 @@ completion: context [
 							block? npc/4/expr/1
 						][
 							forall spec [
-								if refinement? spec/1/expr/1 [
-									if any [
-										*all?
-										find/match to string! spec/1/expr/1 sub-string
-									][
-										if unique? result to word! spec/1/expr/1 [
-											append/only result spec
-										]
-									]
+								if all [
+									refinement? spec/1/expr/1
+									unique? result to word! spec/1/expr/1
+								][
+									append/only result spec
 								]
 							]
 						]
@@ -1392,15 +1398,11 @@ completion: context [
 							]
 						][
 							forall spec [
-								if set-word? spec/1/expr/1 [
-									if any [
-										*all?
-										find/match to string! spec/1/expr/1 sub-string
-									][
-										if unique? result to word! spec/1/expr/1 [
-											append/only result spec
-										]
-									]
+								if all [
+									set-word? spec/1/expr/1
+									unique? result to word! spec/1/expr/1
+								][
+									append/only result spec
 								]
 							]
 						]
@@ -1414,30 +1416,22 @@ completion: context [
 							spec: npc/4/nested
 						][
 							forall spec [
-								if set-word? spec/1/expr/1 [
-									if any [
-										*all?
-										find/match to string! spec/1/expr/1 sub-string
-									][
-										if unique? result to word! spec/1/expr/1 [
-											append/only result spec
-										]
-									]
+								if all [
+									set-word? spec/1/expr/1
+									unique? result to word! spec/1/expr/1
+								][
+									append/only result spec
 								]
 							]
 							specs: clear []
 							if find-set-context skip npc 2 specs [
 								forall specs [
 									spec: specs/1
-									if set-word? spec/1/expr/1 [
-										if any [
-											*all?
-											find/match to string! spec/1/expr/1 sub-string
-										][
-											if unique? result to word! spec/1/expr/1 [
-												append/only result spec
-											]
-										]
+									if all [
+										set-word? spec/1/expr/1
+										unique? result to word! spec/1/expr/1
+									][
+										append/only result spec
 									]
 								]
 							]
@@ -1454,7 +1448,7 @@ completion: context [
 				none? npc
 			]
 		]
-		collect* back pc sub
+		collect* back pc
 		result
 	]
 
@@ -1466,28 +1460,39 @@ completion: context [
 		]
 
 		ret: collect-root-word* pc path/1
-		unless path/2 [append result ret exit]
+		unless path/2 [
+			tops: ret
+			forall tops [
+				npc: npc2: back tail tops/1
+				until [
+					if set-word? npc/1/expr/1 [
+						if unique? result to word! npc/1/expr/1 [
+							append/only result npc
+						]
+					]
+					npc2: back npc
+					either npc = npc2 [
+						npc: none
+					][
+						npc: npc2
+					]
+					none? npc
+				]
+			]
+			exit
+		]
 		path: next path
 		until [
 			tops: ret
 			ret: make block! 4
-			par: path/1
-			sub: path/2
-			path: skip path 2
-			*all?: no
-			if any [
-				none? sub
-				all [
-					tail? path
-					not slash-end?
-				]
-			][
-				*all?: yes
+			slash?: slash-end?
+			unless tail? next path [
+				slash?: yes
 			]
 			forall tops [
-				collect-sub-word* tops/1 par sub ret *all?
+				collect-sub-word* tail tops/1 path/1 ret slash?
 			]
-			tail? path
+			tail? path: next path
 		]
 		append result ret
 	]
@@ -1531,7 +1536,7 @@ completion: context [
 				]
 			]
 		]
-		path: pc/1/expr/1
+		path: copy pc/1/expr/1
 		fword: pc/1/expr/1/1
 		fstring: to string! fword
 		filter: to string! last pc/1/expr/1
@@ -1545,7 +1550,7 @@ completion: context [
 		either slash-end? [
 			range/start/character: range/end/character
 		][
-			range/end/character: range/end/character - length? filter
+			range/start/character: range/end/character - length? filter
 		]
 		pcs: clear []
 		collect-path top pc pcs
@@ -1615,7 +1620,6 @@ completion: context [
 	]
 
 	resolve-word: function [top [block!] pc [block!] string [string!]][
-		unless pc/1/info [return none]
 		if pc/1/info = 'declare [
 			ret: rejoin [string " is a function argument!"]
 			if all [
@@ -1626,30 +1630,30 @@ completion: context [
 			]
 			return ret
 		]
-		if pc/1/info = 'set [
-			if pc/2 [
-				if find-set-context pc none [
-					return rejoin [string " is a context!"]
-				]
-				case [
-					find [func function has] pc/2/expr/1 [
-						if all [
-							pc/3
-							block? pc/3/expr/1
-						][
-							return func-info pc/2/expr/1 pc/3/expr/1 to string! pc/1/expr/1
-						]
-					]
-					pc/2/expr/1 = 'does [
-						return func-info pc/2/expr/1 [] to string! pc/1/expr/1
-					]
-					word? pc/2/expr/1 [
-						return rejoin [string ": " mold pc/2/expr/1]
-					]
-				]
-				return rejoin [string " is a " mold type?/word pc/2/expr/1 " variable."]
+		if all [
+			set-word? pc/1/expr/1
+			pc/2
+		][
+			if find-set-context pc none [
+				return rejoin [string " is a context!"]
 			]
-			return none
+			case [
+				find [func function has] pc/2/expr/1 [
+					if all [
+						pc/3
+						block? pc/3/expr/1
+					][
+						return func-info pc/2/expr/1 pc/3/expr/1 to string! pc/1/expr/1
+					]
+				]
+				pc/2/expr/1 = 'does [
+					return func-info pc/2/expr/1 [] to string! pc/1/expr/1
+				]
+				word? pc/2/expr/1 [
+					return rejoin [string ": " mold pc/2/expr/1]
+				]
+			]
+			return rejoin [string " is a " mold type?/word pc/2/expr/1 " variable."]
 		]
 		none
 	]
@@ -1676,7 +1680,10 @@ completion: context [
 		]
 		if all [
 			params/data
-			params/data/type = "word"
+			any [
+				params/data/type = "word"
+				params/data/type = "path"
+			]
 		][
 			uri: params/data/uri
 			s: to integer! params/data/s
