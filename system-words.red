@@ -29,6 +29,32 @@ system-words: context [
 		][none]
 	]
 
+	get-path-info: func [path [path!]][
+		either find system-words path/1 [
+			n: copy path
+			while [
+				all [
+					not tail? n
+					error? ret: try [
+						either 1 = length? n [
+							n2: to word! n/1
+							help-string :n2
+						][
+							help-string :n
+						]
+					]
+				]
+			][
+				remove back tail n
+			]
+			if error? ret [print ret
+				return none]
+			ret
+		][
+			none
+		]
+	]
+
 	func-spec-ctx: context [
 		func-spec: context [
 			desc: none				; string!							desc

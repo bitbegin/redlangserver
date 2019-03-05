@@ -11,8 +11,11 @@ Red []
 file: %testx.red
 code: read file
 code-ast: clear []
+print now/precise
 code-ast: ast/analysis code
+print now/precise
 semantic/analysis code-ast
+print now/precise
 print semantic/format/semantic code-ast
 
 

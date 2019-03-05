@@ -42,6 +42,7 @@ r: func [
 	return: [block!] ;--tests
 	/local x y
 ][
+	if part [length]
 	x: 1 y: 1
 	a + b + 1 + 1
 ]

@@ -80,9 +80,9 @@ ast: context [
 		]
 	]
 
-	analysis: function [src [string!] allow-slash [logic!]][
+	analysis: function [src [string!]][
 		ast: make block! 1
-		res: lexer/transcode/ast src none true allow-slash ast
+		res: lexer/transcode/ast src none true yes ast
 		if error? res/3 [
 			return make map! reduce ['pos form-pos res/2 'error res/3]
 		]
