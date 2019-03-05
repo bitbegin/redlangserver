@@ -1323,6 +1323,7 @@ completion: context [
 					]
 				][
 					append/only result spec
+					break
 				]
 
 				npc2: back npc
