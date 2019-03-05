@@ -61,35 +61,37 @@ semantic: context [
 		find-expr* top s e
 	]
 
-	position?: function [pc [block!] pos [integer!]][
-		top: pc
-		forall pc [
-			if all [
-				pc/1/s <= pos
-				pc/1/e >= pos
-			][
-				if any [
-					all [
-						pc/1/e <> pos
-						none? pc/1/nested
-					]
-					all [
-						pc/1/e = pos
-						top <> pc
-						any [
-							tail? next pc
-							pc/2/s <> pos
-						]
-					]
+	position?: function [top [block!] pos [integer!]][
+		position?*: function [pc [block!]][
+			forall pc [
+				if all [
+					pc/1/s <= pos
+					pc/1/e >= pos
 				][
-					return pc
-				]
-				if pc/1/nested [
-					if ret: position? pc/1/nested pos [return ret]
+					if any [
+						all [
+							pc/1/e <> pos
+							none? pc/1/nested
+						]
+						all [
+							pc/1/e = pos
+							top <> pc
+							any [
+								tail? next pc
+								pc/2/s <> pos
+							]
+						]
+					][
+						return pc
+					]
+					if pc/1/nested [
+						if ret: position?* pc/1/nested [return ret]
+					]
 				]
 			]
+			none
 		]
-		none
+		position?* top
 	]
 
 	syntax-error: function [pc [block!] word [word!] args][
@@ -1099,13 +1101,11 @@ completion: context [
 				if all [
 					par/-1
 					block? par/-1/expr/1
+					spec: par/-1/nested
+					par/-2
+					find [func function has] par/-2/expr/1
 				][
-					if all [
-						par/-2
-						find [func function has] par/-2/expr/1
-					][
-						collect* par/-1/nested [word! lit-word! refinement!] 'declare
-					]
+					collect* spec [word! lit-word! refinement!] 'declare
 				]
 				npc2: par
 				npc: tail par
