@@ -1293,11 +1293,13 @@ completion: context [
 							block? npc/3/expr/1
 							npc/4
 							block? npc/4/expr/1
+							spec: npc/3/nested
 						]
 						all [
 							npc/2/expr/1 = 'context
 							npc/3
 							block? npc/3/expr/1
+							spec: npc/3/nested
 						]
 						all [
 							npc/2/expr/1 = 'make
@@ -1306,15 +1308,17 @@ completion: context [
 								all [
 									word? npc/3/expr/1
 									npc/3/expr/1 <> word
+									find-set-context skip npc 2 result
 								]
 								npc/3/expr/1 = 'object!
 							]
 							npc/4
 							block? npc/4/expr/1
+							spec: npc/4/nested
 						]
 					]
 				][
-					append/only result npc
+					append/only result spec
 				]
 
 				npc2: back npc
@@ -1532,7 +1536,7 @@ completion: context [
 		fstring: to string! fword
 		filter: to string! last pc/1/expr/1
 		slash-end?: no
-		if '`*?~+-= = filter [
+		if '`*?~+-= = last pc/1/expr/1 [
 			remove back tail path
 			slash-end?: yes
 			filter: ""
