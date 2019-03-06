@@ -1304,7 +1304,6 @@ completion: context [
 					switch ret: find-set?/*all? rpc to word! rpc/1/expr/1 none no [
 						context		[kind: CompletionItemKind/Struct]
 						func		[kind: CompletionItemKind/Function]
-						switch ret 
 					]
 				]
 			]
@@ -1484,7 +1483,7 @@ completion: context [
 			either sources/1 = top [
 				collect-path* pc to path! pc/1/expr/1 result
 			][
-				collect-path* tail sources/1/1/nested to path! pc/1/expr/1 result
+				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 result
 			]
 		]
 	]
