@@ -1258,6 +1258,17 @@ completion: context [
 		none
 	]
 
+	snippets: [
+		"red.title.snippet"		"Red [ Title ]"					"Red [^/^-Title: ^"${2:title}^"^/]^/"
+		"red.view.snippet"		"Red [ Title NeedsView ]"		"Red [^/^-Title: ^"${2:title}^"^/^-Needs: 'View^/]^/"
+		"either.snippet"		"either condition [ ][ ]"		"either ${1:condition} [^/^-${2:exp}^/][^/^-${3:exp}^/]^/"
+		"func.snippet"			"func [args][ ]"				"func [${1:arg}][^/^-${2:exp}^/]^/"
+		"function.snippet"		"function [args][ ]"			"function [${1:arg}][^/^-${2:exp}^/]^/"
+		"while.snippet"			"while [ condition ] [ ]"		"while [${1:condition}][^/^-${2:exp}^/]^/"
+		"forall.snippet"		"forall series [ ]"				"forall ${1:series} [^/^-${2:exp}^/]^/"
+		"foreach.snippet"		"foreach iteration series [ ]"	"foreach ${1:iteration} ${2:series} [^/^-${3:exp}^/]^/"
+	]
+
 	complete-word: function [top [block!] pc [block!] comps [block!]][
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
@@ -1280,6 +1291,30 @@ completion: context [
 				true [
 					CompletionItemKind/Variable
 				]
+			]
+		]
+		complete-snippet: function [][
+			if word? pc/1/expr/1 [
+				len: (length? snippets) / 3
+				repeat i len [
+					if find/match snippets/(i * 3 - 2) string [
+						append comps make map! reduce [
+							'label snippets/(i * 3 - 2)
+							'kind CompletionItemKind/Keyword
+							'filterText? string
+							'insertTextFormat 2
+							'textEdit make map! reduce [
+								'range range
+								'newText snippets/(i * 3)
+							]
+							'data make map! reduce [
+								'type "snippet"
+								'index (i * 3 - 1)
+							]
+						]
+					]
+				]
+
 			]
 		]
 		range: semantic/form-range top/1/source pc
@@ -1346,6 +1381,7 @@ completion: context [
 				]
 			]
 		]
+		complete-snippet
 	]
 
 	collect-func-refinement*: function [specs [block!] result [block!]][
@@ -1672,6 +1708,13 @@ completion: context [
 				return rejoin [params/label " is a base datatype!"]
 			]
 			return system-words/get-word-info word
+		]
+		if all [
+			params/data
+			params/data/type = "snippet"
+			index: params/data/index
+		][
+			return snippets/:index
 		]
 		if all [
 			params/data
