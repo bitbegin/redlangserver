@@ -967,24 +967,25 @@ source-syntax: context [
 			top: find-top uri
 			top/1/source = code
 		][return none]
-		diagnostics: clear []
 		if map? res: ast/analysis code [
 			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
 			info: res/error/arg2
 			if part: find info line-cs [info: copy/part info part]
 			message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
-			diag: make map! reduce [
+			diags: make map! reduce [
 				'uri uri
-				'diagnostics make map! reduce [
-					'range range
-					'severity 1
-					'code 1
-					'source "lexer"
-					'message message
+				'diagnostics reduce [
+					make map! reduce [
+						'range range
+						'severity 1
+						'code 1
+						'source "lexer"
+						'message message
+					]
 				]
 			]
-			return reduce [diag]
+			return diags
 		]
 		add-source-to-table uri res
 		unless change? [
@@ -1232,7 +1233,9 @@ completion: context [
 						]
 					]
 				]
-				head? npc: back npc
+				npc2: npc
+				npc: back npc
+				head? npc2
 			]
 			none
 		]
@@ -1369,7 +1372,9 @@ completion: context [
 				][
 					append/only result npc
 				]
-				head? npc: back npc
+				npc2: npc
+				npc: back npc
+				head? npc2
 			]
 		]
 	]
@@ -1405,7 +1410,9 @@ completion: context [
 						]
 					]
 				]
-				head? npc: back npc
+				npc2: npc
+				npc: back npc
+				head? npc2
 			]
 		]
 		collect* back tail pc
