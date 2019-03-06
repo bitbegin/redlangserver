@@ -1145,7 +1145,7 @@ completion: context [
 						all [
 							word? pc/2/expr/1
 							pc/2/expr/1 <> to word! opc/1/expr/1
-							find-set?/*context? next pc specs upper
+							find-set?/*context? next pc pc/2/expr/1 specs upper
 						]
 					]
 				]
@@ -1247,7 +1247,7 @@ completion: context [
 			while [
 				all [
 					par: npc/1/upper
-					par/1/source
+					none? par/1/source
 				]
 			][
 				npc: par
@@ -1465,9 +1465,12 @@ completion: context [
 				slash?: yes
 			]
 			forall tops [
-				either all [
-					par: tops/1/1/upper
-					find [func function] par/-1/expr/1
+				either any [
+					type = 'func
+					all [
+						par: tops/1/1/upper
+						find [func function] par/-1/expr/1
+					]
 				][
 					collect-slash-func* tops/1 path/1 nspecs: make block! 4 slash?
 					unless path/2 [
