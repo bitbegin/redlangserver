@@ -171,10 +171,12 @@ semantic: context [
 				code: read file
 			][
 				uri: ast/file-to-uri file
+				write-log rejoin ["include: " uri]
 				if any [
 					not top: find-top uri
 					top/1/source <> code
 				][
+					write-log "will parse code..."
 					add-source* uri code
 				]
 			]
