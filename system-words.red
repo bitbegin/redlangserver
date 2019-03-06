@@ -47,8 +47,7 @@ system-words: context [
 			][
 				remove back tail n
 			]
-			if error? ret [print ret
-				return none]
+			if error? ret [return none]
 			ret
 		][
 			none

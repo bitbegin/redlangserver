@@ -1124,6 +1124,138 @@ completion: context [
 		]
 	]
 
+	next-context?: function [opc [block!] pc [block!] specs [block! none!] upper [logic!]][
+		spec: none
+		if all [
+			pc/1
+			pc/2
+			any [
+				all [
+					find [context object] pc/1/expr/1
+					block? pc/2/expr/1
+					spec: pc/2
+				]
+				all [
+					pc/1/expr/1 = 'make
+					pc/3
+					spec: pc/3
+					any [
+						pc/2/expr/1 = 'object!
+						all [
+							word? pc/2/expr/1
+							pc/2/expr/1 <> to word! opc/1/expr/1
+							find-set?/*context? next pc specs upper
+						]
+					]
+				]
+			]
+		][
+			if all [
+				specs
+				spec
+				spec/nested
+			][
+				append/only specs spec/nested
+			]
+			return true
+		]
+		false
+	]
+
+	next-func?: function [pc [block!] specs [block! none!]][
+		spec: none
+		if all [
+			pc/1
+			pc/2
+			find [func function has does] pc/1/expr/1
+			block? pc/2/expr/1
+			any [
+				all [
+					find [func function] pc/1/expr/1
+					pc/3
+					block? pc/3/expr/1
+					spec: pc/2
+				]
+				pc/1/expr/1 = 'does
+				all [
+					pc/1/expr/1 = 'has
+					pc/3
+					block? pc/3/expr/1
+				]
+			]
+		][
+			if all [
+				specs
+				spec
+				spec/nested
+			][
+				append/only specs spec/nested
+			]
+			return true
+		]
+		false
+	]
+
+	find-set?: function [pc* [block!] word [word!] specs [block! none!] upper [logic!] /*func? /*context? /*all?][
+		find-set?*: function [pc [block!]][
+			npc: pc
+			until [
+				if all [
+					set-word? npc/1/expr/1
+					word = to word! npc/1/expr/1
+				][
+					npc2: npc
+					while [
+						all [
+							not tail? npc2: next npc2
+							set-word? npc2/1/expr/1
+						]
+					][]
+					unless tail? npc2 [
+						if all [
+							any [*context? *all?]
+							next-context? npc npc2 specs upper
+						][
+							return 'context
+						]
+						if all [
+							any [*func? *all?]
+							next-func? npc2 specs
+						][
+							return 'func
+						]
+						if *all? [
+							if specs [
+								append/only specs npc2
+							]
+							return 'value
+						]
+					]
+				]
+				head? npc: back npc
+			]
+			none
+		]
+		if ret: find-set?* pc* [
+			return ret
+		]
+		npc: pc*
+		if upper [
+			while [
+				all [
+					par: npc/1/upper
+					par/1/source
+				]
+			][
+				npc: par
+				if ret: find-set?* back tail npc [
+					return ret
+				]
+			]
+		]
+		none
+	]
+
 	complete-word: function [top [block!] pc [block!] comps [block!]][
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
@@ -1169,22 +1301,10 @@ completion: context [
 					kind: CompletionItemKind/TypeParameter
 				]
 				type = 'set-word! [
-					npc: rpc
-					while [
-						all [
-							not tail? npc: next npc
-							set-word? npc/1/expr/1
-						]
-					][]
-					unless tail? npc [
-						case [
-							find [func function does has] npc/1/expr/1 [
-								kind: CompletionItemKind/Function
-							]
-							npc/1/expr/1 = 'context [
-								kind: CompletionItemKind/Struct
-							]
-						]
+					switch ret: find-set?/*all? rpc to word! rpc/1/expr/1 none no [
+						context		[kind: CompletionItemKind/Struct]
+						func		[kind: CompletionItemKind/Function]
+						switch ret 
 					]
 				]
 			]
@@ -1227,144 +1347,41 @@ completion: context [
 		]
 	]
 
-	find-set-context: function [pc [block!] specs [block! none!]][
-		word: to word! pc/1/expr/1
-		find-set-context*: function [npc [block!]][
-			npc2: npc
-			until [
-				npc: npc2
-				if all [
-					set-word? npc/1/expr/1
-					word = to word! npc/1/expr/1
-					npc/2
-					any [
-						all [
-							npc/2/expr/1 = 'context
-							npc/3
-							block? npc/3/expr/1
-							spec: npc/3/nested
-						]
-						all [
-							npc/2/expr/1 = 'make
-							npc/3
-							npc/3/expr/1 = 'block!
-							npc/4
-							block? npc/4/expr/1
-							spec: npc/4/nested
-						]
-						all [
-							npc/2/expr/1 = 'make
-							npc/3
-							word? npc/3/expr/1
-							word <> npc/3/expr/1
-							npc/4
-							block? npc/4/expr/1
-							spec: npc/4/nested
-							ret: find-set-context* skip npc 2
-						]
+	collect-func-refinement*: function [specs [block!] result [block!]][
+		forall specs [
+			npc: specs/1
+			forall npc [
+				if refinement? npc/1/expr/1 [
+					if npc/1/expr = [/local] [break]
+					if unique? result to word! npc/1/expr/1 [
+						append/only result npc
 					]
-				][
-					if specs [
-						append/only specs spec
-					]
-					return true
-				]
-				npc2: back npc
-				npc = npc2
-			]
-			if par: npc/1/upper [
-				if ret: find-set-context* back tail par [
-					return ret
 				]
 			]
-			false
 		]
-		find-set-context* pc
 	]
-
-	collect-root-word*: function [pc [block!] word [word!]][
-		result: make block! 16
-		collect*: function [npc [block!]][
+	collect-context-set-word*: function [specs [block!] result [block!]][
+		forall specs [
+			npc: back tail specs/1
 			until [
 				if all [
 					set-word? npc/1/expr/1
-					word = to word! npc/1/expr/1
-					npc/2
-					any [
-						all [
-							find [func function] npc/2/expr/1
-							npc/3
-							block? npc/3/expr/1
-							npc/4
-							block? npc/4/expr/1
-							spec: npc/3/nested
-						]
-						all [
-							npc/2/expr/1 = 'context
-							npc/3
-							block? npc/3/expr/1
-							spec: npc/3/nested
-						]
-						all [
-							npc/2/expr/1 = 'make
-							npc/3
-							any [
-								all [
-									word? npc/3/expr/1
-									npc/3/expr/1 <> word
-									find-set-context skip npc 2 result
-								]
-								npc/3/expr/1 = 'object!
-							]
-							npc/4
-							block? npc/4/expr/1
-							spec: npc/4/nested
-						]
-					]
+					unique? result to word! npc/1/expr/1
 				][
-					append/only result spec
-					break
+					append/only result npc
 				]
-
-				npc2: back npc
-				either npc = npc2 [
-					npc: none
-				][
-					npc: npc2
-				]
-				none? npc
+				head? npc: back npc
 			]
 		]
-		npc: npc2: pc
-		forever [
-			npc: back npc
-			collect* npc
-			either all [
-				not tail? npc2
-				par: npc2/1/upper
-				none? par/1/source
-			][
-				npc2: par
-				npc: tail par
-			][break]
-		]
-		result
 	]
 
-	collect-sub-word*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
+	collect-slash-context*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
 		string: to string! word
 		collect*: function [npc [block!]][
 			until [
 				if all [
 					not slash-end?
-					any [
-						set-word? npc/1/expr/1
-						all [
-							refinement? npc/1/expr/1
-							par: npc/1/upper
-							find [func function] par/-1/expr/1
-						]
-					]
+					set-word? npc/1/expr/1
 					find/match to string! npc/1/expr/1 string
 				][
 					if unique? result to word! npc/1/expr/1 [
@@ -1377,93 +1394,43 @@ completion: context [
 					word = to word! npc/1/expr/1
 					npc/2
 				][
-					case [
-						all [
-							find [func function] npc/2/expr/1
-							npc/3
-							block? npc/3/expr/1
-							spec: npc/3/nested
-							npc/4
-							block? npc/4/expr/1
-						][
-							forall spec [
-								if all [
-									refinement? spec/1/expr/1
-									unique? result to word! spec/1/expr/1
-								][
-									append/only result spec
-								]
-							]
+					specs: clear []
+					switch find-set?/*func?/*context? npc word specs false [
+						context [
+							collect-context-set-word* specs result
+							break
 						]
-						any [
-							all [
-								npc/2/expr/1 = 'context
-								npc/3
-								block? npc/3/expr/1
-								spec: npc/3/nested
-							]
-							all [
-								npc/2/expr/1 = 'make
-								npc/3
-								npc/3/expr/1 = 'object!
-								npc/4
-								block? npc/4/expr/1
-								spec: npc/4/nested
-							]
-						][
-							forall spec [
-								if all [
-									set-word? spec/1/expr/1
-									unique? result to word! spec/1/expr/1
-								][
-									append/only result spec
-								]
-							]
-						]
-						all [
-							npc/2/expr/1 = 'make
-							npc/3
-							word? npc/3/expr/1
-							npc/3/expr/1 <> npc/1/expr/1
-							npc/4
-							block? npc/4/expr/1
-							spec: npc/4/nested
-						][
-							forall spec [
-								if all [
-									set-word? spec/1/expr/1
-									unique? result to word! spec/1/expr/1
-								][
-									append/only result spec
-								]
-							]
-							specs: clear []
-							if find-set-context skip npc 2 specs [
-								forall specs [
-									spec: specs/1
-									if all [
-										set-word? spec/1/expr/1
-										unique? result to word! spec/1/expr/1
-									][
-										append/only result spec
-									]
-								]
-							]
+						func [
+							collect-func-refinement* specs result
+							break
 						]
 					]
 				]
-
-				npc2: back npc
-				either npc = npc2 [
-					npc: none
-				][
-					npc: npc2
-				]
-				none? npc
+				head? npc: back npc
 			]
 		]
-		collect* back pc
-		result
+		collect* back tail pc
+	]
+
+	collect-slash-func*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
+		string: to string! word
+		collect*: function [npc [block!]][
+			forall npc [
+				if all [
+					refinement? npc/1/expr/1
+					any [
+						slash-end?
+						find/match to string! npc/1/expr/1 string
+					]
+				][
+					if npc/1/expr = [/local][break]
+					if unique? result to word! npc/1/expr/1 [
+						append/only result npc
+					]
+				]
+			]
+		]
+		collect* pc
 	]
 
 	collect-path*: function [pc [block!] path [path!] result [block!]][
@@ -1473,42 +1440,42 @@ completion: context [
 			slash-end?: yes
 		]
 
-		ret: collect-root-word* pc path/1
+		specs: make block! 16
+		unless type: find-set?/*func?/*context? pc path/1 specs true [
+			exit
+		]
 		unless path/2 [
-			tops: ret
-			forall tops [
-				npc: npc2: back tail tops/1
-				until [
-					if set-word? npc/1/expr/1 [
-						if unique? result to word! npc/1/expr/1 [
-							append/only result npc
-						]
-					]
-					npc2: back npc
-					either npc = npc2 [
-						npc: none
-					][
-						npc: npc2
-					]
-					none? npc
-				]
+			switch type [
+				context		[collect-context-set-word* specs result]
+				func		[collect-func-refinement* specs result]
 			]
 			exit
 		]
 		path: next path
 		until [
-			tops: ret
-			ret: make block! 4
+			tops: specs
 			slash?: slash-end?
 			unless tail? next path [
 				slash?: yes
 			]
 			forall tops [
-				collect-sub-word* tail tops/1 path/1 ret slash?
+				either all [
+					par: tops/1/1/upper
+					find [func function] par/-1/expr/1
+				][
+					collect-slash-func* tops/1 path/1 nspecs: make block! 4 slash?
+					unless path/2 [
+						append result nspecs
+					]
+				][
+					collect-slash-context* tops/1 path/1 specs: make block! 4 slash?
+					unless path/2 [
+						append result specs
+					]
+				]
 			]
 			tail? path: next path
 		]
-		append result ret
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
@@ -1525,12 +1492,18 @@ completion: context [
 	complete-path: function [top [block!] pc [block!] comps [block!]][
 		complete-sys-path: function [][
 			words: system-words/system-words
+			cstr: to string! path
+			if slash-end? [
+				append cstr "/"
+			]
+			tstr: find/tail/last cstr "/"
+			tstr: copy/part cstr tstr
 			unless find words fword [exit]
-			if error? result: try [red-complete-ctx/red-complete-path to string! pc/1/expr/1 no][
+			if error? result: try [red-complete-ctx/red-complete-path cstr no][
 				exit
 			]
 			forall result [
-				unless nstring: find/tail/last result/1 [
+				unless nstring: find/tail/last result/1 "/" [
 					nstring: result/1
 				]
 				append comps make map! reduce [
@@ -1544,7 +1517,7 @@ completion: context [
 						'newText nstring
 					]
 					'data make map! reduce [
-						'path to string! path
+						'path append copy tstr nstring
 						'type "system-path"
 					]
 				]
@@ -1650,26 +1623,24 @@ completion: context [
 			set-word? pc/1/expr/1
 			pc/2
 		][
-			if find-set-context pc none [
-				return rejoin [string " is a context!"]
-			]
-			case [
-				find [func function has] pc/2/expr/1 [
+			specs: clear []
+			switch ret: find-set?/*all? pc to word! pc/1/expr/1 specs no [
+				context		[return rejoin [string " is a context!"]]
+				func		[
 					if all [
-						pc/3
-						block? pc/3/expr/1
+						upper: specs/1/1/upper
+						word? upper/-1/expr/1
 					][
-						return func-info pc/2/expr/1 pc/3/expr/1 to string! pc/1/expr/1
+						return func-info upper/-1/expr/1 upper/1/expr/1 to string! pc/1/expr/1
 					]
 				]
-				pc/2/expr/1 = 'does [
-					return func-info pc/2/expr/1 [] to string! pc/1/expr/1
-				]
-				word? pc/2/expr/1 [
-					return rejoin [string ": " mold pc/2/expr/1]
+				value		[
+					if word? expr: specs/1/1/expr/1 [
+						return rejoin [string ": " mold expr]
+					]
+					return rejoin [string " is a " mold type?/word expr " variable."]
 				]
 			]
-			return rejoin [string " is a " mold type?/word pc/2/expr/1 " variable."]
 		]
 		if refinement? pc/1/expr/1 [
 			return rejoin [string " is a function's refinement!"]
@@ -1694,7 +1665,7 @@ completion: context [
 			params/data/type = "system-path"
 			params/data/path
 		][
-			path: to path! params/data/path
+			path: load params/data/path
 			return system-words/get-path-info path
 		]
 		if all [
