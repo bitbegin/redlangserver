@@ -165,6 +165,20 @@ semantic: context [
 	]
 
 	analysis-error: function [top [block!]][
+		include-file: function [file [file!]][
+			if all [
+				exists? file
+				code: read file
+			][
+				uri: ast/file-to-uri file
+				if any [
+					not top: find-top uri
+					top/1/source <> code
+				][
+					add-source* uri code
+				]
+			]
+		]
 		analysis-each: function [pc [block!]][
 			if all [
 				path? pc/1/expr/1
@@ -212,6 +226,48 @@ semantic: context [
 				analysis-iter nested
 				return 3
 			]
+			if all [
+				issue? pc/1/expr/1
+				"include" = to string! pc/1/expr/1
+				pc/2
+				file? file: pc/2/expr/1
+			][
+				if #"/" = last file [
+					return 2
+				]
+				if #"/" = first file [
+					include-file file
+					return 2
+				]
+				dir: copy origin-dir
+				unless find file "/" [
+					append dir file
+					include-file dir
+					return 2
+				]
+				nfile: copy file
+				forever [
+					unless t1: find/tail nfile "/" [
+						append dir nfile
+						include-file dir
+						return 2
+					]
+					t2: copy/part nfile t1
+					case [
+						t2 = %../ [
+							unless dir: dir-back dir [
+								return 2
+							]
+						]
+						t2 = %./ []
+						true [
+							append dir t2
+						]
+					]
+					nfile: t1
+				]
+				return 2
+			]
 			1
 		]
 
@@ -222,12 +278,29 @@ semantic: context [
 			]
 		]
 
+		dir-back: function [dir* [file!]][
+			dir: copy dir*
+			if #"/" = last dir [return none]
+			remove back tail dir
+			unless t1: find/last/tail dir "/" [
+				return none
+			]
+			copy/part dir t1
+		]
+
+		origin-file: ast/uri-to-file top/1/uri
+		tfile: find/tail/last origin-file "/"
+		origin-dir: copy/part origin-file tfile
+
 		analysis-iter top/1/nested
+		err: collect-errors top
+		append diagnostics make map! reduce [
+			'uri top/1/uri
+			'diagnostics err
+		]
 	]
 
-	add-source: function [uri [string!] code [string!]][
-		clear diagnostics
-		clear file-block
+	add-source*: function [uri [string!] code [string!]][
 		if map? res: ast/analysis code [
 			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
@@ -248,13 +321,15 @@ semantic: context [
 			]
 			return diagnostics
 		]
+
 		add-source-to-table uri res
-		semantic/analysis-error res
-		err: semantic/collect-errors res
-		append diagnostics make map! reduce [
-			'uri uri
-			'diagnostics err
-		]
+		analysis-error res
+	]
+
+	add-source: function [uri [string!] code [string!]][
+		clear diagnostics
+		clear file-block
+		add-source* uri code
 		diagnostics
 	]
 ]
