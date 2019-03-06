@@ -230,7 +230,7 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	if diags: source-syntax/add-source/change? uri source [
+	if diags: source-syntax/add-source uri source [
 		json-body/method: "textDocument/publishDiagnostics"
 		json-body/params: diags
 		response
