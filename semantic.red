@@ -7,41 +7,10 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-file-block: []
-
 semantic: context [
-	throw-error: register-error 'semantic
-
-	create-error: function [pc [block!] type [word!] word [word!] message [string!]][
-		error: reduce [
-			'severity DiagnosticSeverity/(type)
-			'code to string! word
-			'source "Syntax"
-			'message message
-		]
-		unless pc/error [
-			repend pc ['error error]
-			exit
-		]
-		errors: pc/error
-		either block? errors/1 [
-			forall errors [
-				if errors/1/code = error/code [exit]
-			]
-			repend/only pc/error error
-		][
-			if errors/code = error/code [exit]
-			pc/error: reduce [errors error]
-		]
-	]
-
-	literal-type: [
-		binary! char! date! email! file! float!
-		lit-path! lit-word!
-		integer! issue! logic! map! pair!
-		percent! refinement! string! tag! time!
-		tuple! url!
-	]
+	sources: []
+	file-block: []
+	diagnostics: []
 
 	find-expr: function [top [block!] s [integer!] e [integer!]][
 		find-expr*: function [pc [block!] s [integer!] e [integer!]][
@@ -94,40 +63,60 @@ semantic: context [
 		position?* top
 	]
 
+	find-top: function [uri [string!]][
+		ss: sources
+		forall ss [
+			if ss/1/1/uri = uri [
+				return ss/1
+			]
+		]
+		false
+	]
+
+	find-source: function [uri [string!]][
+		ss: sources
+		forall ss [
+			if ss/1/1/uri = uri [
+				return ss
+			]
+		]
+		false
+	]
+
+	add-source-to-table: function [uri [string!] syntax [block!]][
+		repend syntax/1 ['uri uri]
+		either item: find-source uri [
+			item/1: syntax
+		][
+			append/only sources syntax
+		]
+	]
+
+	create-error: function [pc [block!] type [word!] word [word!] message [string!]][
+		error: reduce [
+			'severity DiagnosticSeverity/(type)
+			'code to string! word
+			'source "Syntax"
+			'message message
+		]
+		unless pc/error [
+			repend pc ['error error]
+			exit
+		]
+		errors: pc/error
+		either block? errors/1 [
+			forall errors [
+				if errors/1/code = error/code [exit]
+			]
+			repend/only pc/error error
+		][
+			if errors/code = error/code [exit]
+			pc/error: reduce [errors error]
+		]
+	]
+
 	syntax-error: function [pc [block!] word [word!] args][
 		switch/default word [
-			unsupport [
-				create-error pc/1 'Warning 'unsupport
-					rejoin [mold pc/1/expr/1 " -- unsupport type: " args]
-			]
-			miss-expr [
-				create-error pc/1 'Error 'miss-expr
-					rejoin [mold pc/1/expr/1 " -- need a type: " args]
-			]
-			recursive-define [
-				create-error pc/1 'Error 'recursive-define
-					rejoin [mold pc/1/expr/1 " -- recursive define"]
-			]
-			double-define [
-				create-error pc/1 'Error 'double-define
-					rejoin [mold pc/1/expr/1 " -- double define: " args]
-			]
-			invalid-arg [
-				create-error pc/1 'Error 'invalid-arg
-					rejoin [mold pc/1/expr/1 " -- invalid argument for: " args]
-			]
-			invalid-datatype [
-				create-error pc/1 'Error 'invalid-datatype
-					rejoin [mold pc/1/expr/1 " -- invalid datatype: " args]
-			]
-			forbidden-refine [
-				create-error pc/1 'Error 'forbidden-refine
-					rejoin [mold pc/1/expr/1 " -- forbidden refinement: " args]
-			]
-			define-lag [
-				create-error pc/1 'Warning 'define-lag
-					rejoin [mold pc/1/expr/1 " -- definition is lagging"]
-			]
 			invalid-path [
 				path: copy pc/1/expr/1
 				remove back tail path
@@ -142,10 +131,6 @@ semantic: context [
 			create-error pc/1 'Error 'unknown
 				rejoin [mold pc/1/expr/1 " -- unknown error: " mold word]
 		]
-	]
-
-	to-range: function [src [string!] pc [block!]][
-		append ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
 	]
 
 	form-range: function [src [string!] pc [block!]][
@@ -239,50 +224,17 @@ semantic: context [
 
 		analysis-iter top/1/nested
 	]
-]
-
-
-
-source-syntax: context [
-	sources: []
-
-	find-top: function [uri [string!]][
-		ss: sources
-		forall ss [
-			if ss/1/1/uri = uri [
-				return ss/1
-			]
-		]
-		false
-	]
-
-	find-source: function [uri [string!]][
-		ss: sources
-		forall ss [
-			if ss/1/1/uri = uri [
-				return ss
-			]
-		]
-		false
-	]
-
-	add-source-to-table: function [uri [string!] syntax [block!]][
-		repend syntax/1 ['uri uri]
-		either item: find-source uri [
-			item/1: syntax
-		][
-			append/only sources syntax
-		]
-	]
 
 	add-source: function [uri [string!] code [string!]][
+		clear diagnostics
+		clear file-block
 		if map? res: ast/analysis code [
 			range: ast/to-range res/pos res/pos
 			line-cs: charset [#"^M" #"^/"]
 			info: res/error/arg2
 			if part: find info line-cs [info: copy/part info part]
 			message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
-			diags: make map! reduce [
+			append diagnostics make map! reduce [
 				'uri uri
 				'diagnostics reduce [
 					make map! reduce [
@@ -294,17 +246,16 @@ source-syntax: context [
 					]
 				]
 			]
-			return diags
+			return diagnostics
 		]
 		add-source-to-table uri res
-		clear file-block
 		semantic/analysis-error res
 		err: semantic/collect-errors res
-		diags: make map! reduce [
+		append diagnostics make map! reduce [
 			'uri uri
 			'diagnostics err
 		]
-		return diags
+		diagnostics
 	]
 ]
 
@@ -420,7 +371,7 @@ completion: context [
 	]
 
 	collect-word: function [top [block!] pc [block!] result [block!]][
-		sources: source-syntax/sources
+		sources: semantic/sources
 		forall sources [
 			either sources/1 = top [
 				collect-word* pc to word! pc/1/expr/1 result
@@ -829,7 +780,7 @@ completion: context [
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
-		sources: source-syntax/sources
+		sources: semantic/sources
 		forall sources [
 			either sources/1 = top [
 				collect-path* pc to path! pc/1/expr/1 result
@@ -918,7 +869,7 @@ completion: context [
 	]
 
 	complete: function [uri [string!] line [integer!] column [integer!]][
-		unless top: source-syntax/find-top uri [return none]
+		unless top: semantic/find-top uri [return none]
 		pos: ast/to-pos top/1/source line column
 		unless pc: semantic/position? top index? pos [
 			return none
@@ -1040,7 +991,7 @@ completion: context [
 			uri: params/data/uri
 			s: to integer! params/data/s
 			e: to integer! params/data/e
-			unless top: source-syntax/find-top uri [return none]
+			unless top: semantic/find-top uri [return none]
 			unless pc: semantic/find-expr top s e [
 				return none
 			]

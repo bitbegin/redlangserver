@@ -210,7 +210,7 @@ on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	if diags: source-syntax/add-source uri source [
+	if diags: semantic/add-source uri source [
 		json-body/method: "textDocument/publishDiagnostics"
 		json-body/params: diags
 		response
@@ -220,7 +220,7 @@ on-textDocument-didOpen: function [params [map!]][
 on-textDocument-didClose: function [params [map!]][
 	uri: params/textDocument/uri
 	set 'last-uri none
-	if item: source-syntax/find-source uri [
+	if item: semantic/find-source uri [
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
 	]
@@ -230,7 +230,7 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	if diags: source-syntax/add-source uri source [
+	if diags: semantic/add-source uri source [
 		json-body/method: "textDocument/publishDiagnostics"
 		json-body/params: diags
 		response
@@ -239,9 +239,9 @@ on-textDocument-didChange: function [params [map!]][
 
 on-textDocument-didSave: function [params [map!]][
 	uri: params/textDocument/uri
-	if top: source-syntax/find-top uri [
+	if top: semantic/find-top uri [
 		source: top/1/source
-		if diags: source-syntax/add-source uri source [
+		if diags: semantic/add-source uri source [
 			json-body/method: "textDocument/publishDiagnostics"
 			json-body/params: diags
 			response
@@ -310,7 +310,7 @@ on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	result: none;source-syntax/hover uri line + 1 column + 1
+	result: none;semantic/hover uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range none
