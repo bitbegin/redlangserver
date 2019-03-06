@@ -1065,14 +1065,13 @@ completion: context [
 
 	collect-word*: function [pc [block!] word [word!] result [block!]][
 		string: to string! word
-		collect*: function [npc [block!] type [block!] info [word!] /back?][
+		collect*: function [npc [block!] type [block!] /back?][
 			until [
 				if find type type?/word npc/1/expr/1 [
 					nword: to word! npc/1/expr/1
 					nstring: to string! nword
 					if find/match nstring string [
 						if unique? result nword [
-							repend npc/1 ['info info]
 							append/only result npc
 						]
 					]
@@ -1093,7 +1092,7 @@ completion: context [
 		npc: npc2: pc
 		forever [
 			npc: back npc
-			collect*/back? npc [set-word!] 'set
+			collect*/back? npc [set-word!]
 			either all [
 				not tail? npc2
 				par: npc2/1/upper
@@ -1106,7 +1105,7 @@ completion: context [
 					par/-2
 					find [func function has] par/-2/expr/1
 				][
-					collect* spec [word! lit-word! refinement!] 'declare
+					collect* spec [word! lit-word! refinement!]
 				]
 				npc2: par
 				npc: tail par
@@ -1618,16 +1617,6 @@ completion: context [
 	]
 
 	resolve-word: function [top [block!] pc [block!] string [string!]][
-		if pc/1/info = 'declare [
-			ret: rejoin [string " is a function argument!"]
-			if all [
-				pc/2
-				block? pc/2/expr/1
-			][
-				return rejoin [ret "^/type: " mold pc/2/expr/1]
-			]
-			return ret
-		]
 		if all [
 			set-word? pc/1/expr/1
 			pc/2
@@ -1638,6 +1627,7 @@ completion: context [
 				func		[
 					if all [
 						upper: specs/1/1/upper
+						upper/-1
 						word? upper/-1/expr/1
 					][
 						return func-info upper/-1/expr/1 upper/1/expr/1 to string! pc/1/expr/1
@@ -1651,8 +1641,22 @@ completion: context [
 				]
 			]
 		]
-		if refinement? pc/1/expr/1 [
-			return rejoin [string " is a function's refinement!"]
+		if all [
+			upper: pc/1/upper
+			upper/-1
+			find [func function has] upper/-1/expr/1
+		][
+			if refinement? pc/1/expr/1 [
+				return rejoin [string " is a function refinement!"]
+			]
+			ret: rejoin [string " is a function argument!"]
+			if all [
+				pc/2
+				block? pc/2/expr/1
+			][
+				return rejoin [ret "^/type: " mold pc/2/expr/1]
+			]
+			return ret
 		]
 		none
 	]
