@@ -165,22 +165,6 @@ semantic: context [
 	]
 
 	analysis-error: function [top [block!]][
-		include-file: function [file [file!]][
-			if all [
-				exists? file
-				code: read file
-			][
-				uri: ast/file-to-uri file
-				write-log rejoin ["include: " uri]
-				if any [
-					not top: find-top uri
-					top/1/source <> code
-				][
-					write-log "will parse code..."
-					add-source* uri code
-				]
-			]
-		]
 		analysis-each: function [pc [block!]][
 			if all [
 				path? pc/1/expr/1
@@ -228,6 +212,48 @@ semantic: context [
 				analysis-iter nested
 				return 3
 			]
+			1
+		]
+
+		analysis-iter: function [pc [block!]][
+			while [not tail? pc] [
+				step: analysis-each pc
+				pc: skip pc step
+			]
+		]
+
+		write-log "analysis-error: begin"
+		write-log mold now/precise
+
+		analysis-iter top/1/nested
+		err: collect-errors top
+		append diagnostics make map! reduce [
+			'uri top/1/uri
+			'diagnostics err
+		]
+		write-log mold now/precise
+		write-log "analysis-error: end"
+	]
+
+	add-include-file: function [top [block!]][
+		include-file: function [file [file!]][
+			if all [
+				exists? file
+				code: read file
+			][
+				uri: ast/file-to-uri file
+				write-log rejoin ["include: " uri]
+				if any [
+					not top: find-top uri
+					top/1/source <> code
+				][
+					write-log "will parse code..."
+					add-source* uri code
+				]
+			]
+		]
+
+		include-each: function [pc [block!]][
 			if all [
 				issue? pc/1/expr/1
 				"include" = to string! pc/1/expr/1
@@ -273,9 +299,9 @@ semantic: context [
 			1
 		]
 
-		analysis-iter: function [pc [block!]][
+		include-iter: function [pc [block!]][
 			while [not tail? pc] [
-				step: analysis-each pc
+				step: include-each pc
 				pc: skip pc step
 			]
 		]
@@ -290,16 +316,16 @@ semantic: context [
 			copy/part dir t1
 		]
 
+		write-log "add-include-file: begin"
+		write-log mold now/precise
+
 		origin-file: ast/uri-to-file top/1/uri
 		tfile: find/tail/last origin-file "/"
 		origin-dir: copy/part origin-file tfile
 
-		analysis-iter top/1/nested
-		err: collect-errors top
-		append diagnostics make map! reduce [
-			'uri top/1/uri
-			'diagnostics err
-		]
+		include-iter top/1/nested
+		write-log "add-include-file: end"
+		write-log mold now/precise
 	]
 
 	add-source*: function [uri [string!] code [string!]][
@@ -325,7 +351,7 @@ semantic: context [
 		]
 
 		add-source-to-table uri res
-		analysis-error res
+		add-include-file res
 	]
 
 	add-source: function [uri [string!] code [string!]][
@@ -996,12 +1022,14 @@ completion: context [
 				context		[return rejoin [string " is a context!"]]
 				func		[
 					if all [
+						not empty? specs
 						upper: specs/1/1/upper
 						upper/-1
 						word? upper/-1/expr/1
 					][
 						return func-info upper/-1/expr/1 upper/1/expr/1 to string! pc/1/expr/1
 					]
+					return func-info 'func [] to string! pc/1/expr/1
 				]
 				value		[
 					if word? expr: specs/1/1/expr/1 [

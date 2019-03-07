@@ -28,7 +28,13 @@ shutdown?: no
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
-	if logger [write logger "^/"]
+	if logger [
+		if exists? _logger [
+			txt: read _logger
+			write %logger.bak txt
+		]
+		write logger "^/"
+	]
 ]
 
 write-newline: does [
@@ -232,12 +238,14 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	if diags: semantic/add-source uri source [
+	either diags: semantic/add-source uri source [
 		forall diags [
 			json-body/method: "textDocument/publishDiagnostics"
 			json-body/params: diags/1
 			response
 		]
+	][
+		write-log mold now/precise
 	]
 ]
 
