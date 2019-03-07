@@ -77,7 +77,7 @@ json: context [
 		keep (make map! list)
 	]
 	
-	array: [#"[" collect opt [any [ws value #","] ws value] ws #"]"]
+	array: [#"[" collect opt [ws value any [ws #"," ws value]] ws #"]"]
 	
 	decode: function [data [string!] return: [block! object!]][
 		parse data [collect any [blank | object-rule | array]]
