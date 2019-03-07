@@ -793,16 +793,8 @@ completion: context [
 					word = to word! npc/1/expr/1
 					npc/2
 				][
-					specs: clear []
-					switch find-set?/*func?/*context? npc word specs false [
-						context [
-							collect-context-set-word* specs result
-							break
-						]
-						func [
-							collect-func-refinement* specs result
-							break
-						]
+					if find-set?/*func?/*context? npc word result false [
+						break
 					]
 				]
 				npc2: npc
@@ -883,12 +875,13 @@ completion: context [
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
+		collect-path* pc to path! pc/1/expr/1 result
+		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
-			either sources/1 = top [
-				collect-path* pc to path! pc/1/expr/1 result
-			][
+			if sources/1 <> top [
 				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 result
+				if 0 < length? result [exit]
 			]
 		]
 	]
@@ -950,9 +943,22 @@ completion: context [
 			ntop: rpc
 			while [par: ntop/1/upper][ntop: par]
 			nstring: to string! rpc/1/expr/1
+			kind: CompletionItemKind/Variable
+			type: type?/word rpc/1/expr/1
+			case [
+				find [word! lit-word! refinement!] type [
+					kind: CompletionItemKind/TypeParameter
+				]
+				type = 'set-word! [
+					switch ret: find-set?/*all? rpc to word! rpc/1/expr/1 none no [
+						context		[kind: CompletionItemKind/Struct]
+						func		[kind: CompletionItemKind/Function]
+					]
+				]
+			]
 			append comps make map! reduce [
 				'label nstring
-				'kind CompletionItemKind/Field
+				'kind kind
 				'filterText? filter
 				'insertTextFormat 1
 				'preselect true
