@@ -225,7 +225,7 @@ on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	either diags: semantic/add-source uri source [
+	either not empty? diags: semantic/add-source uri source [
 		forall diags [
 			json-body/method: "textDocument/publishDiagnostics"
 			json-body/params: diags/1
@@ -250,7 +250,7 @@ on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	either diags: semantic/add-source uri source [
+	either not empty? diags: semantic/add-source uri source [
 		forall diags [
 			json-body/method: "textDocument/publishDiagnostics"
 			json-body/params: diags/1
@@ -265,7 +265,7 @@ on-textDocument-didSave: function [params [map!]][
 	uri: params/textDocument/uri
 	if top: semantic/find-top uri [
 		source: top/1/source
-		either diags: semantic/add-source uri source [
+		either not empty? diags: semantic/add-source uri source [
 			forall diags [
 				json-body/method: "textDocument/publishDiagnostics"
 				json-body/params: diags/1
