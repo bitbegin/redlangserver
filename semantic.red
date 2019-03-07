@@ -1113,4 +1113,31 @@ completion: context [
 		]
 		none
 	]
+
+	hover: function [uri [string!] line [integer!] column [integer!]][
+		unless top: semantic/find-top uri [return none]
+		pos: ast/to-pos top/1/source line column
+		unless pc: semantic/position? top index? pos [
+			return none
+		]
+		type: type?/word pc/1/expr/1
+		unless find [word! lit-word! get-word! path! lit-path! get-path!] type [
+			return none
+		]
+		either any-path? expr: pc/1/expr/1 [
+			word: expr/1
+		][
+			word: to word! expr
+		]
+		if system-words/system? word [
+			if all[
+				any-word? expr
+				datatype? get word
+			][
+				return rejoin [mold word " is a base datatype!"]
+			]
+			return system-words/get-word-info word
+		]
+		none
+	]
 ]

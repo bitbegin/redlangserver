@@ -212,16 +212,27 @@ on-shutdown: function [params [map! none!]][
 	set 'shutdown? yes
 ]
 
+clear-diag: function [uri [string!]][
+	json-body/method: "textDocument/publishDiagnostics"
+	json-body/params: make map! reduce [
+		'uri	uri
+		'diagnostics []
+	]
+	response
+]
+
 on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
 	set 'last-uri uri
-	if diags: semantic/add-source uri source [
+	either diags: semantic/add-source uri source [
 		forall diags [
 			json-body/method: "textDocument/publishDiagnostics"
 			json-body/params: diags/1
 			response
 		]
+	][
+		clear-diag uri
 	]
 ]
 
@@ -231,6 +242,7 @@ on-textDocument-didClose: function [params [map!]][
 	if item: semantic/find-source uri [
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
+		clear-diag uri
 	]
 ]
 
@@ -253,12 +265,14 @@ on-textDocument-didSave: function [params [map!]][
 	uri: params/textDocument/uri
 	if top: semantic/find-top uri [
 		source: top/1/source
-		if diags: semantic/add-source uri source [
+		either diags: semantic/add-source uri source [
 			forall diags [
 				json-body/method: "textDocument/publishDiagnostics"
 				json-body/params: diags/1
 				response
 			]
+		][
+			clear-diag uri
 		]
 	]
 ]
@@ -324,7 +338,7 @@ on-textDocument-hover: function [params [map!]][
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	result: none;semantic/hover uri line + 1 column + 1
+	result: completion/hover uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range none
