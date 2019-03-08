@@ -11,6 +11,80 @@ Red [
 ]
 
 lexer: context [
+	uri-to-file: function [uri [string!]][
+		src: copy find/tail uri "file:///"
+		replace src "%3A" ""
+		insert src "%/"
+		load src
+	]
+	file-to-uri: function [file [file!]][
+		src: mold file
+		src: copy skip src 2
+		insert next src "%3A"
+		insert src "file:///"
+		src
+	]
+	semicolon?: function [pc [block!] pos [string!] column [integer!]][
+		if pos/1 = #";" [return true]
+		repeat count column [
+			if pos/(0 - count) = #";" [return true]
+		]
+		false
+	]
+	pos-line?: function [pos [string!]][
+		start: end: head pos
+		line: 0
+		while [
+			not all [
+				(index? pos) >= (index? start)
+				(index? pos) < (index? end)
+			]
+		][
+			line: line + 1
+			start: end
+			unless end: find/tail start #"^/" [
+				end: tail start break
+			]
+		]
+		if line = 0 [line: 1]
+		column: (index? pos) - (index? start)
+		reduce [line column + 1]
+	]
+	pos-range?: function [s [string!] e [string!]][
+		range: make block! 4
+		append range pos-line? s
+		append range pos-line? e
+		range
+	]
+	line-pos?: function [src [string!] line [integer!] column [integer!]][
+		start: end: src
+		cnt: 0
+		until [
+			cnt: cnt + 1
+			start: end
+			unless end: find/tail start #"^/" [
+				end: tail start break
+			]
+			if line <= cnt [break]
+		]
+		if line <> cnt [return end]
+		len: (index? end) - (index? start)
+		if column > len [return end]
+		skip start column - 1
+	]
+	form-range: function [range [block!] /keep][
+		make map! reduce [
+			'start make map! reduce [
+				'line either keep [range/1][range/1 - 1]
+				'character either keep [range/2][range/2 - 1]
+			]
+			'end make map! reduce [
+				'line either keep [range/3][range/3 - 1]
+				'character either keep [range/4][range/4 - 1]
+			]
+		]
+	]
+
 	throw-error: :system/lexer/throw-error
 	
 	make-hm: :system/lexer/make-hm
@@ -81,6 +155,7 @@ lexer: context [
 			ast-nested: none
 			ast-block: none
 			ast-upper: none
+			ast-error: none
 			rs-stack: make block! 200
 			append/only ast-stack out
 			append/only ast-stack make block! 100
@@ -93,11 +168,16 @@ lexer: context [
 				][
 					ast-upper: tail pick tail ast-stack -2
 				]
-				ast-block: reduce ['expr reduce [value] 's index? rs 'e index? re]
+				either ast-error [
+					ast-block: reduce ['expr reduce [value ast-error] 'range pos-range? rs re]
+				][
+					ast-block: reduce ['expr reduce [value] 'range pos-range? rs re]
+				]
 				if ast-upper [repend ast-block ['upper ast-upper]]
 				if ast-nested [repend ast-block ['nested ast-nested]]
 				append/only last ast-stack ast-block
 				ast-nested: none
+				ast-error: none
 			]
 		]
 		pop-ast: [
@@ -403,7 +483,8 @@ lexer: context [
 					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
 					| to any [ws-no-count | end] (
 						either allow-error [
-							to-word stack "`*?~+-=" word!
+							ast-error: "`*?~+-="
+							to-word stack ast-error word!
 						][
 							throw-error [path! path]
 						]
@@ -447,6 +528,14 @@ lexer: context [
 					path-rule (type: get-path!)
 					| (to-word stack copy/part s e type)	;-- get-word matched
 				]
+				| to any [ws-no-count | end] (
+					either allow-error [
+						ast-error: "`*?~+-="
+						to-word stack ast-error type
+					][
+						throw-error [type back s]
+					]
+				)
 			]
 		]
 
@@ -459,14 +548,30 @@ lexer: context [
 						| (to-word stack copy/part s e type) ;-- lit-word matched
 					]
 				]
+				| to any [ws-no-count | end] (
+					either allow-error [
+						ast-error: "`*?~+-="
+						to-word stack ast-error type
+					][
+						throw-error [type back s]
+					]
+				)
 			]
 			opt [#":" (throw-error [type back s])]
 		]
 
 		issue-rule: [
 			#"#" (type: issue!) s: symbol-rule (
-				if (index? s) = index? e [throw-error [type skip s -4]]
-				to-word stack copy/part s e type
+				either (index? s) = index? e [
+					either allow-error [
+						ast-error: "`*?~+-="
+						to-word stack ast-error type
+					][
+						throw-error [type skip s -4]
+					]
+				][
+					to-word stack copy/part s e type
+				]
 			)
 		]
 		

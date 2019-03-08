@@ -11,51 +11,109 @@ semantic: context [
 	sources: []
 	file-block: []
 	diagnostics: []
+	write-log: :probe
 
-	find-expr: function [top [block!] s [integer!] e [integer!]][
-		find-expr*: function [pc [block!] s [integer!] e [integer!]][
+	find-expr: function [top [block!] range [block!]][
+		find-expr*: function [pc [block!]][
 			forall pc [
-				if all [
-					pc/1/s = s
-					pc/1/e = e
-				][
+				if pc/1/range = range [
 					return pc
 				]
 				if pc/1/nested [
-					if ret: find-expr* pc/1/nested s e [return ret]
+					if ret: find-expr* pc/1/nested [return ret]
 				]
 			]
 			none
 		]
-		find-expr* top s e
+		find-expr* top
 	]
 
-	position?: function [top [block!] pos [integer!]][
+	position?: function [top [block!] line [integer!] column [integer!]][
 		position?*: function [pc [block!]][
 			forall pc [
-				if all [
-					pc/1/s <= pos
-					pc/1/e >= pos
+				if any [
+					pc/1/range/1 > line
+					all [
+						pc/1/range/1 = line
+						pc/1/range/2 > column
+					]
 				][
-					if any [
-						all [
-							pc/1/e <> pos
-							none? pc/1/nested
+					return reduce ['head pc]
+				]
+				if any [
+					pc/1/range/3 < line
+					all [
+						pc/1/range/3 = line
+						pc/1/range/4 < column
+					]
+				][
+					if pc = top [
+						if pc/1/nested [
+							return position?* pc/1/nested
 						]
+						return reduce ['top-err pc]
+					]
+					unless pc/2 [
+						return reduce ['tail pc]
+					]
+					if any [
+						pc/2/range/1 > line
 						all [
-							pc/1/e = pos
-							top <> pc
-							any [
-								tail? next pc
-								pc/2/s <> pos
-							]
+							pc/2/range/1 = line
+							pc/2/range/2 > column
 						]
 					][
-						return pc
+						return reduce ['insert pc]
 					]
-					if pc/1/nested [
-						if ret: position?* pc/1/nested [return ret]
+				]
+				if all [
+					any [
+						pc/1/range/1 < line
+						all [
+							pc/1/range/1 = line
+							pc/1/range/2 <= column
+						]
 					]
+					any [
+						pc/1/range/3 > line
+						all [
+							pc/1/range/3 = line
+							pc/1/range/4 >= column
+						]
+					]
+				][
+					if all [
+						pc/1/range/3 = line
+						pc/1/range/4 = column
+					][
+						if pc = top [
+							if pc/1/nested [
+								return position?* pc/1/nested
+							]
+							return reduce ['top-err pc]
+						]
+						unless pc/2 [
+							return reduce ['last pc]
+						]
+						if all [
+							pc/2/range/1 = line
+							pc/2/range/2 = column
+						][
+							return reduce ['mid pc]
+						]
+						return reduce ['last pc]
+					]
+					unless pc/1/nested [
+						if any [
+							block? pc/1/expr/1
+							map? pc/1/expr/1
+							paren? pc/1/expr/1
+						][
+							return reduce ['empty pc]
+						]
+						return reduce ['one pc]
+					]
+					return position?* pc/1/nested
 				]
 			]
 			none
@@ -133,10 +191,6 @@ semantic: context [
 		]
 	]
 
-	form-range: function [src [string!] pc [block!]][
-		ast/to-range ast/form-pos at src pc/1/s ast/form-pos at src pc/1/e
-	]
-
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
@@ -146,12 +200,12 @@ semantic: context [
 					either block? error/1 [
 						forall error [
 							err: make map! error/1
-							err/range: form-range top/1/source pc
+							err/range: lexer/form-range pc/1/range
 							append ret err
 						]
 					][
 						err: make map! error
-						err/range: form-range top/1/source pc
+						err/range: lexer/form-range pc/1/range
 						append ret err
 					]
 				]
@@ -225,7 +279,9 @@ semantic: context [
 		write-log "analysis-error: begin"
 		write-log mold now/precise
 
-		analysis-iter top/1/nested
+		if top/1/nested [
+			analysis-iter top/1/nested
+		]
 		err: collect-errors top
 		append diagnostics make map! reduce [
 			'uri top/1/uri
@@ -235,13 +291,57 @@ semantic: context [
 		write-log "analysis-error: end"
 	]
 
+	related-file: function [dir [file!] file [file!]][
+		dir-back: function [dir* [file!]][
+			dir: copy dir*
+			if #"/" <> last dir [return none]
+			remove back tail dir
+			unless t1: find/last/tail dir "/" [
+				return none
+			]
+			copy/part dir t1
+		]
+		if #"/" = last file [
+			return none
+		]
+		if #"/" = first file [
+			return file
+		]
+		dir: copy dir
+		unless find file "/" [
+			append dir file
+			return dir
+		]
+		nfile: file
+		forever [
+			unless t1: find/tail nfile "/" [
+				append dir nfile
+				return dir
+			]
+			t2: copy/part nfile t1
+			case [
+				t2 = %../ [
+					unless dir: dir-back dir [
+						return none
+					]
+				]
+				t2 = %./ []
+				true [
+					append dir t2
+				]
+			]
+			nfile: t1
+		]
+		none
+	]
+
 	add-include-file: function [top [block!]][
 		include-file: function [file [file!]][
 			if all [
 				exists? file
 				code: read file
 			][
-				uri: ast/file-to-uri file
+				uri: lexer/file-to-uri file
 				write-log rejoin ["include: " uri]
 				if any [
 					not top: find-top uri
@@ -260,39 +360,8 @@ semantic: context [
 				pc/2
 				file? file: pc/2/expr/1
 			][
-				if #"/" = last file [
-					return 2
-				]
-				if #"/" = first file [
-					include-file file
-					return 2
-				]
-				dir: copy origin-dir
-				unless find file "/" [
-					append dir file
-					include-file dir
-					return 2
-				]
-				nfile: copy file
-				forever [
-					unless t1: find/tail nfile "/" [
-						append dir nfile
-						include-file dir
-						return 2
-					]
-					t2: copy/part nfile t1
-					case [
-						t2 = %../ [
-							unless dir: dir-back dir [
-								return 2
-							]
-						]
-						t2 = %./ []
-						true [
-							append dir t2
-						]
-					]
-					nfile: t1
+				if nfile: related-file origin-dir file [
+					include-file nfile
 				]
 				return 2
 			]
@@ -306,35 +375,24 @@ semantic: context [
 			]
 		]
 
-		dir-back: function [dir* [file!]][
-			dir: copy dir*
-			if #"/" = last dir [return none]
-			remove back tail dir
-			unless t1: find/last/tail dir "/" [
-				return none
-			]
-			copy/part dir t1
-		]
-
-		write-log "add-include-file: begin"
-		write-log mold now/precise
-
-		origin-file: ast/uri-to-file top/1/uri
+		origin-file: lexer/uri-to-file top/1/uri
 		tfile: find/tail/last origin-file "/"
 		origin-dir: copy/part origin-file tfile
 
-		include-iter top/1/nested
-		write-log "add-include-file: end"
-		write-log mold now/precise
+		if top/1/nested [
+			include-iter top/1/nested
+		]
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		if map? res: ast/analysis code [
-			range: ast/to-range res/pos res/pos
+		top: make block! 1
+		res: lexer/transcode/ast code none true yes top
+		if error? res/3 [
+			range: lexer/form-range lexer/pos-range? res/2 res/2
 			line-cs: charset [#"^M" #"^/"]
-			info: res/error/arg2
+			info: res/3/arg2
 			if part: find info line-cs [info: copy/part info part]
-			message: rejoin [res/error/id " ^"" res/error/arg1 "^" at: ^"" info "^""]
+			message: rejoin [res/3/id " ^"" res/3/arg1 "^" at: ^"" info "^""]
 			append diagnostics make map! reduce [
 				'uri uri
 				'diagnostics reduce [
@@ -347,11 +405,13 @@ semantic: context [
 					]
 				]
 			]
-			return diagnostics
+			clear top
+			repend/only top ['expr none 'range lexer/form-pos code lexer/form-pos tail code]
 		]
+		repend top/1 ['source code]
 
-		add-source-to-table uri res
-		add-include-file res
+		add-source-to-table uri top
+		add-include-file top
 	]
 
 	add-source: function [uri [string!] code [string!]][
@@ -360,13 +420,139 @@ semantic: context [
 		add-source* uri code
 		diagnostics
 	]
+
+	new-lines?: function [text [string!]][
+		ntext: text
+		n: 0
+		while [ntext: find/tail ntext "^/"][
+			n: n + 1
+		]
+		n
+	]
+
+	update-ws: function [pcs [block!] s-line [integer!] s-column [integer!] text [string!] ncode [string!]][
+		update-pc: function [npc* [block!] lines [integer!] end-chars [integer!]][
+			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
+			update*: function [npc [block!]][
+				either npc/1/range/1 = s-line [
+					npc/1/range/1: npc/1/range/1 + lines
+					npc/1/range/2: npc/1/range/2 - s-column + end-chars
+				][
+					npc/1/range/1: npc/1/range/1 + lines
+				]
+				either npc/1/range/3 = s-line [
+					npc/1/range/3: npc/1/range/3 + lines
+					npc/1/range/4: npc/1/range/4 - s-column + end-chars
+				][
+					npc/1/range/3: npc/1/range/3 + lines
+				]
+			]
+			update-pc-nested: function [npc [block!]][
+				forall npc [
+					update* npc
+					if npc/1/nested [
+						update-pc-nested npc/1/nested
+					]
+				]
+			]
+			update-pc-nested npc*
+			par: npc*/1/upper
+			while [par: par/1/upper][
+				update* par
+				update-pc-nested next par
+			]
+		]
+		
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		pc: pcs/2
+		switch/default pcs/1 [
+			head empty		[]
+			tail insert last mid one [
+				pc: next pc
+			]
+		][exit]
+		update-pc pc lines end-chars
+		if pcs/1 = 'one [
+			npc: pcs/2
+			either npc/1/range/3 = s-line [
+				npc/1/range/3: npc/1/range/3 + lines
+				npc/1/range/4: npc/1/range/4 - s-column + end-chars
+			][
+				npc/1/range/3: npc/1/range/3 + lines
+			]
+			spos: line-pos? ncode npc/1/range/1 npc/1/range/2
+			epos: line-pos? ncode npc/1/range/3 npc/1/range/4
+			str: copy/part spos epos
+			npc/1/expr: lexer/transcode str none no no
+		]
+	]
+
+	ws: charset " ^M^/^-"
+	update-source: function [uri [string!] changes [block!]][
+		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
+		write-log mold changes
+		unless ss: find-source uri [
+			return false
+		]
+		write-log mold ss/1
+		code: ss/1/1/source
+		ncode: code
+		forall changes [
+			range: changes/1/range
+			text: changes/1/text
+			rangeLength: changes/1/rangeLength
+			write-log mold range
+			s-line: range/start/line + 1
+			s-column: range/start/character + 1
+			e-line: range/end/line + 1
+			e-column: range/end/character + 1
+			spos: lexer/line-pos? ncode s-line s-column
+			epos: lexer/line-pos? ncode e-line e-column
+			otext: copy/part spos epos
+			code2: copy/part ncode spos
+			append code2 text
+			append code2 epos
+			if any [
+				not empty? otext
+				none? ss/1/1/nested
+			][
+				add-source uri code2
+				ncode: code2
+				continue
+			]
+			if ss/1/1/nested [
+				pcs: position? ss/1 e-line e-column
+				if all [
+					pcs
+					any [
+						pcs/1 <> 'one
+						string? pcs/2/1/expr/1
+					]
+					parse text [some ws]
+				][
+					update-ws pcs s-line s-column text ncode
+					ss/1/1/source: code2
+					ncode: code2
+					continue
+				]
+			]
+			add-source uri code2
+			ncode: code2
+		]
+		write-log mold ss/1
+	]
 ]
 
 completion: context [
 	last-comps: clear []
 
 	complete-file: function [top [block!] pc [block!] comps [block!]][
-		range: semantic/form-range top/1/source pc
+		range: pc/1/range
 		str: to string! pc/1/expr/1
 		insert str: to string! file: pc/1/expr/1 "%"
 		if error? result: try [red-complete-ctx/red-complete-file str no][
@@ -677,7 +863,7 @@ completion: context [
 
 			]
 		]
-		range: semantic/form-range top/1/source pc
+		range: pc/1/range
 		if any [
 			lit-word? pc/1/expr/1
 			get-word? pc/1/expr/1
@@ -716,8 +902,7 @@ completion: context [
 				]
 				'data make map! reduce [
 					'uri top/1/uri
-					's rpc/1/s
-					'e rpc/1/e
+					'range rpc/1/range
 					'type "word"
 				]
 			]
@@ -826,9 +1011,12 @@ completion: context [
 		collect* pc
 	]
 
-	collect-path*: function [pc [block!] path [path!] result [block!]][
+	collect-path*: function [pc [block!] path [path!] slash-str [string! none!] result [block!]][
 		slash-end?: no
-		if '`*?~+-= = last path [
+		if all [
+			slash-str
+			slash-str = to string! last path
+		][
 			remove back tail path
 			slash-end?: yes
 		]
@@ -875,12 +1063,12 @@ completion: context [
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
-		collect-path* pc to path! pc/1/expr/1 result
+		collect-path* pc to path! pc/1/expr/1 pc/1/expr/2 result
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 result
+				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 pc/1/expr/2 result
 				if 0 < length? result [exit]
 			]
 		]
@@ -925,12 +1113,15 @@ completion: context [
 		fstring: to string! fword
 		filter: to string! last pc/1/expr/1
 		slash-end?: no
-		if '`*?~+-= = last pc/1/expr/1 [
+		if all [
+			pc/1/expr/2
+			pc/1/expr/2 = to string! last pc/1/expr/1
+		][
 			remove back tail path
 			slash-end?: yes
 			filter: ""
 		]
-		range: semantic/form-range top/1/source pc
+		range: pc/1/range
 		either slash-end? [
 			range/start/character: range/end/character
 		][
@@ -968,8 +1159,7 @@ completion: context [
 				]
 				'data make map! reduce [
 					'uri ntop/1/uri
-					's rpc/1/s
-					'e rpc/1/e
+					'range rpc/1/range
 					'type "path"
 				]
 			]
@@ -979,10 +1169,20 @@ completion: context [
 
 	complete: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
-		pos: ast/to-pos top/1/source line column
-		unless pc: semantic/position? top index? pos [
+		unless pcs: semantic/position? top line column [
 			return none
 		]
+		pc: pcs/2
+		switch/default pcs/1 [
+			one		[]
+			last	[]
+			mid		[
+				type: type?/word pc/1/expr/1
+				unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
+					pc: next pc
+				]
+			]
+		][return none]
 		type: type?/word pc/1/expr/1
 		unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
 			return none
@@ -1100,14 +1300,13 @@ completion: context [
 			]
 		][
 			uri: params/data/uri
-			s: to integer! params/data/s
-			e: to integer! params/data/e
+			range: params/data/range
 			unless top: semantic/find-top uri [return none]
-			unless pc: semantic/find-expr top s e [
+			unless pc: semantic/find-expr top range [
 				return none
 			]
 			if str: resolve-word top pc params/label [
-				append str rejoin ["^/^/FILE: " mold ast/uri-to-file uri]
+				append str rejoin ["^/^/FILE: " mold lexer/uri-to-file uri]
 			]
 			return str
 		]
@@ -1116,10 +1315,20 @@ completion: context [
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
-		pos: ast/to-pos top/1/source line column
-		unless pc: semantic/position? top index? pos [
+		unless pcs: semantic/position? top line column [
 			return none
 		]
+		pc: pcs/2
+		switch/default pcs/1 [
+			one		[]
+			last	[]
+			mid		[
+				type: type?/word pc/1/expr/1
+				unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
+					pc: next pc
+				]
+			]
+		][return none]
 		type: type?/word pc/1/expr/1
 		unless find [word! lit-word! get-word! path! lit-path! get-path!] type [
 			return none
