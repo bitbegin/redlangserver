@@ -173,6 +173,42 @@ semantic: context [
 		]
 	]
 
+	format: function [top [block!] /semantic][
+		buffer: make string! 1000
+		newline: function [cnt [integer!]] [
+			append buffer lf
+			append/dup buffer " " cnt
+		]
+
+		format*: function [pc [block!] depth [integer!]][
+			pad: depth * 4
+			newline pad
+			append buffer "["
+			forall pc [
+				newline pad + 2
+				append buffer "["
+				newline pad + 4
+				append buffer "expr: "
+				append buffer mold/flat/part pc/1/expr/1 20
+				newline pad + 4
+				append buffer "range: "
+				append buffer mold/flat pc/1/range
+				if pc/1/nested [
+					newline pad + 4
+					append buffer "nested: "
+					format* pc/1/nested depth + 1
+				]
+				newline pad + 2
+				append buffer "]"
+			]
+			newline pad
+			append buffer "]"
+		]
+		format* top 0
+		buffer
+	]
+
+
 	syntax-error: function [pc [block!] word [word!] args][
 		switch/default word [
 			invalid-path [
@@ -386,7 +422,7 @@ semantic: context [
 
 	add-source*: function [uri [string!] code [string!]][
 		top: make block! 1
-		res: lexer/transcode/ast code none true yes top
+		res: lexer/transcode/ast code none true top
 		if error? res/3 [
 			range: lexer/form-range lexer/pos-range? res/2 res/2
 			line-cs: charset [#"^M" #"^/"]
@@ -430,36 +466,62 @@ semantic: context [
 		n
 	]
 
-	update-ws: function [pcs [block!] s-line [integer!] s-column [integer!] text [string!] ncode [string!]][
+	update-ws: function [
+			pcs [block!] s-line [integer!] s-column [integer!]
+			e-line [integer!] e-column [integer!]
+			text [string!] ncode [string!] forward? [logic!]
+	][
 		update-pc: function [npc* [block!] lines [integer!] end-chars [integer!]][
 			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
-			update*: function [npc [block!]][
-				either npc/1/range/1 = s-line [
+			update*: function [npc [block!] first* [logic!]][
+				if first* [
 					npc/1/range/1: npc/1/range/1 + lines
-					npc/1/range/2: npc/1/range/2 - s-column + end-chars
-				][
-					npc/1/range/1: npc/1/range/1 + lines
+					if npc/1/range/1 = s-line [
+						npc/1/range/2: npc/1/range/2 - s-column + end-chars + 1
+					]
 				]
-				either npc/1/range/3 = s-line [
-					npc/1/range/3: npc/1/range/3 + lines
-					npc/1/range/4: npc/1/range/4 - s-column + end-chars
-				][
-					npc/1/range/3: npc/1/range/3 + lines
+				npc/1/range/3: npc/1/range/3 + lines
+				if npc/1/range/3 = s-line [
+					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
 				]
 			]
-			update-pc-nested: function [npc [block!]][
+			update*-sub: function [npc [block!] first* [logic!]][
+				if first* [
+					npc/1/range/1: npc/1/range/1 - lines
+					if npc/1/range/1 = e-line [
+						npc/1/range/2: npc/1/range/2 - e-column + s-column
+					]
+				]
+				npc/1/range/3: npc/1/range/3 - lines
+				if npc/1/range/3 = s-line [
+					npc/1/range/4: npc/1/range/4 - e-column + s-column
+				]
+			]
+			update-pc-nested: function [npc [block!] first* [logic!]][
 				forall npc [
-					update* npc
+					either forward? [
+						update*-sub npc first*
+					][
+						update* npc first*
+					]
 					if npc/1/nested [
-						update-pc-nested npc/1/nested
+						update-pc-nested npc/1/nested first*
 					]
 				]
 			]
-			update-pc-nested npc*
-			par: npc*/1/upper
+			update-pc-nested npc* yes
+			either tail? npc* [
+				par: back npc*
+			][
+				par: npc*
+			]
 			while [par: par/1/upper][
-				update* par
-				update-pc-nested next par
+				either forward? [
+					update*-sub par no
+				][
+					update* par no
+				]
+				update-pc-nested next par no
 			]
 		]
 		
@@ -479,16 +541,21 @@ semantic: context [
 		update-pc pc lines end-chars
 		if pcs/1 = 'one [
 			npc: pcs/2
-			either npc/1/range/3 = s-line [
-				npc/1/range/3: npc/1/range/3 + lines
-				npc/1/range/4: npc/1/range/4 - s-column + end-chars
+			either forward? [
+				npc/1/range/3: npc/1/range/3 - lines
+				if npc/1/range/3 = e-line [
+					npc/1/range/4: npc/1/range/4 - e-column + s-column
+				]
 			][
 				npc/1/range/3: npc/1/range/3 + lines
+				if npc/1/range/3 = s-line [
+					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
+				]
 			]
 			spos: line-pos? ncode npc/1/range/1 npc/1/range/2
 			epos: line-pos? ncode npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
-			npc/1/expr: lexer/transcode str none no no
+			npc/1/expr: lexer/transcode str none no
 		]
 	]
 
@@ -499,28 +566,50 @@ semantic: context [
 		unless ss: find-source uri [
 			return false
 		]
-		write-log mold ss/1
+		write %f-log1.txt format ss/1
+		;write-log format ss/1
 		code: ss/1/1/source
 		ncode: code
 		forall changes [
 			range: changes/1/range
 			text: changes/1/text
+			write-log "text:"
+			write-log mold text
 			rangeLength: changes/1/rangeLength
+			write-log "range:"
 			write-log mold range
 			s-line: range/start/line + 1
 			s-column: range/start/character + 1
 			e-line: range/end/line + 1
 			e-column: range/end/character + 1
 			spos: lexer/line-pos? ncode s-line s-column
+			write-log "spos:"
+			write-log mold spos
 			epos: lexer/line-pos? ncode e-line e-column
+			write-log "epos:"
+			write-log mold epos
 			otext: copy/part spos epos
+			write-log "otext:"
+			write-log mold otext
 			code2: copy/part ncode spos
+			write-log "code2:"
+			write-log mold code2
 			append code2 text
+			write-log "append code2 text:"
+			write-log mold code2
 			append code2 epos
+			write-log "append code2 epos:"
+			write-log mold code2
+			otext-ws?: parse otext [some ws]
+			text-ws?: parse text [some ws]
 			if any [
-				not empty? otext
+				all [
+					not otext-ws?
+					not empty? otext
+				]
 				none? ss/1/1/nested
 			][
+				write-log "add-source1"
 				add-source uri code2
 				ncode: code2
 				continue
@@ -533,18 +622,35 @@ semantic: context [
 						pcs/1 <> 'one
 						string? pcs/2/1/expr/1
 					]
-					parse text [some ws]
+					all [
+						any [
+							empty? text
+							text-ws?
+						]
+						any [
+							empty? otext
+							otext-ws?
+						]
+					]
 				][
-					update-ws pcs s-line s-column text ncode
+					write-log "update-ws"
+					unless empty? text [
+						update-ws pcs s-line s-column e-line e-column text ncode no
+					]
+					unless empty? otext [
+						update-ws pcs s-line s-column e-line e-column otext ncode yes
+					]
 					ss/1/1/source: code2
 					ncode: code2
 					continue
 				]
 			]
+			write-log "add-source2"
 			add-source uri code2
 			ncode: code2
 		]
-		write-log mold ss/1
+		write %f-log2.txt format ss/1
+		;write-log format ss/1
 	]
 ]
 

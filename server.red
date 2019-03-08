@@ -11,7 +11,7 @@ Red [
 #include %lsp-const.red
 #include %json.red
 #include %system-words.red
-#include %ast.red
+#include %lexer.red
 #include %semantic.red
 
 logger: none
@@ -25,6 +25,8 @@ last-line: none
 last-column: none
 client-caps: none
 shutdown?: no
+
+versions: []
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -142,7 +144,7 @@ on-initialize: function [params [map!]][
 	set 'client-caps params
 	set 'auto-complete? params/initializationOptions/autoComplete
 	caps: copy #()
-	put caps 'textDocumentSync TextDocumentSyncKind/Full
+	put caps 'textDocumentSync TextDocumentSyncKind/Incremental
 	put caps 'hoverProvider true
 	put caps 'completionProvider
 		make map! reduce [
@@ -221,9 +223,26 @@ clear-diag: function [uri [string!]][
 	response
 ]
 
+find-uri: function [uri [string!]][
+	vs: versions
+	forall vs [
+		if vs/1/uri = uri [
+			return vs
+		]
+	]
+	none
+]
+
 on-textDocument-didOpen: function [params [map!]][
 	source: params/textDocument/text
 	uri: params/textDocument/uri
+	version: params/textDocument/version
+	either vs: find-uri uri [
+		vs/1/version: version
+	][
+		repend/only versions ['uri uri 'version version]
+	]
+
 	set 'last-uri uri
 	either not empty? diags: semantic/add-source uri source [
 		forall diags [
@@ -239,6 +258,9 @@ on-textDocument-didOpen: function [params [map!]][
 on-textDocument-didClose: function [params [map!]][
 	uri: params/textDocument/uri
 	set 'last-uri none
+	if vs: find-uri uri [
+		remove vs
+	]
 	if item: semantic/find-source uri [
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
@@ -249,16 +271,33 @@ on-textDocument-didClose: function [params [map!]][
 on-textDocument-didChange: function [params [map!]][
 	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
-	set 'last-uri uri
-	either not empty? diags: semantic/add-source uri source [
-		forall diags [
-			json-body/method: "textDocument/publishDiagnostics"
-			json-body/params: diags/1
-			response
-		]
+	version: params/textDocument/version
+	contentChanges: params/contentChanges
+	if all [
+		vs: find-uri uri
+		(vs/1/version + 1) = version
 	][
-		write-log mold now/precise
+		semantic/update-source uri contentChanges
+		vs/1/version: version
+		exit
 	]
+	json-body/error: make map! reduce [
+		'code -32002
+		'message "lost some text changes, please reopen this file!"
+	]
+	response
+
+
+	;set 'last-uri uri
+	;either not empty? diags: semantic/add-source uri source [
+	;	forall diags [
+	;		json-body/method: "textDocument/publishDiagnostics"
+	;		json-body/params: diags/1
+	;		response
+	;	]
+	;][
+	;	write-log mold now/precise
+	;]
 ]
 
 on-textDocument-didSave: function [params [map!]][
@@ -289,7 +328,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-uri uri
 	set 'last-line line
 	set 'last-column column
-	comps: completion/complete uri line + 1 column + 1
+	comps: [];completion/complete uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		;'isIncomplete true
 		'items comps
@@ -347,6 +386,7 @@ on-textDocument-hover: function [params [map!]][
 ]
 
 init-logger %logger.txt
+semantic/write-log: :write-log
 write-log mold system/options/args
 
 red-version-error: [

@@ -127,7 +127,6 @@ lexer: context [
 		src	 [string!]
 		dst	 [block! none!]
 		trap [logic!]
-		allow-error [logic!]
 		/one
 		/only											;-- force returning the loaded value (with /one)
 		/part
@@ -169,7 +168,7 @@ lexer: context [
 					ast-upper: tail pick tail ast-stack -2
 				]
 				either ast-error [
-					ast-block: reduce ['expr reduce [value ast-error] 'range pos-range? rs re]
+					ast-block: reduce ['expr reduce [value] 'err ast-error 'range pos-range? rs re]
 				][
 					ast-block: reduce ['expr reduce [value] 'range pos-range? rs re]
 				]
@@ -482,12 +481,8 @@ lexer: context [
 					| paren-rule
 					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
 					| to any [ws-no-count | end] (
-						either allow-error [
-							ast-error: "`*?~+-="
-							to-word stack ast-error word!
-						][
-							throw-error [path! path]
-						]
+						ast-error: ""
+						to-word stack ast-error word!
 					)
 					;@@ add more datatypes here
 					| (throw-error [path! path])
@@ -529,12 +524,8 @@ lexer: context [
 					| (to-word stack copy/part s e type)	;-- get-word matched
 				]
 				| to any [ws-no-count | end] (
-					either allow-error [
-						ast-error: "`*?~+-="
-						to-word stack ast-error type
-					][
-						throw-error [type back s]
-					]
+					ast-error: ""
+					to-word stack ast-error type
 				)
 			]
 		]
@@ -549,12 +540,8 @@ lexer: context [
 					]
 				]
 				| to any [ws-no-count | end] (
-					either allow-error [
-						ast-error: "`*?~+-="
-						to-word stack ast-error type
-					][
-						throw-error [type back s]
-					]
+					ast-error: ""
+					to-word stack ast-error type
 				)
 			]
 			opt [#":" (throw-error [type back s])]
@@ -563,12 +550,8 @@ lexer: context [
 		issue-rule: [
 			#"#" (type: issue!) s: symbol-rule (
 				either (index? s) = index? e [
-					either allow-error [
-						ast-error: "`*?~+-="
-						to-word stack ast-error type
-					][
-						throw-error [type skip s -4]
-					]
+					ast-error: ""
+					to-word stack ast-error type
 				][
 					to-word stack copy/part s e type
 				]
@@ -735,7 +718,7 @@ lexer: context [
 				value: back tail stack
 				value/1: make map! value/1
 				if ast [
-					value: value/1
+					value: map!
 					rs: last rs-stack remove back tail rs-stack
 					do pop-ast
 				]
@@ -756,7 +739,7 @@ lexer: context [
 			any-value
 			#"]" re: (
 				if ast [
-					value: last stack
+					value: block!
 					rs: last rs-stack remove back tail rs-stack
 					do pop-ast
 				]
@@ -777,7 +760,7 @@ lexer: context [
 			any-value 
 			#")" re: (
 				if ast [
-					value: last stack
+					value: paren!
 					rs: last rs-stack remove back tail rs-stack
 					do pop-ast
 				]
@@ -877,7 +860,7 @@ lexer: context [
 				parse/case src either one [one-value][red-rules]
 			][
 				if ast [
-					value: stack/1
+					value: block!
 					rs: last rs-stack remove back tail rs-stack
 					re: tail src
 					do pop-ast
