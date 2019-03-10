@@ -9,7 +9,6 @@ Red [
 
 semantic: context [
 	sources: []
-	file-block: []
 	diagnostics: []
 	write-log: :probe
 
@@ -453,7 +452,6 @@ semantic: context [
 
 	add-source: function [uri [string!] code [string!]][
 		clear diagnostics
-		clear file-block
 		add-source* uri code
 		diagnostics
 	]
@@ -525,7 +523,7 @@ semantic: context [
 				update-pc-nested next par no
 			]
 		]
-		
+		write-log "update-ws"
 		lines: new-lines? text
 		either lines = 0 [
 			end-chars: length? text
@@ -553,8 +551,8 @@ semantic: context [
 					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
 				]
 			]
-			spos: line-pos? ncode npc/1/range/1 npc/1/range/2
-			epos: line-pos? ncode npc/1/range/3 npc/1/range/4
+			spos: lexer/line-pos? ncode npc/1/range/1 npc/1/range/2
+			epos: lexer/line-pos? ncode npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
 			res: lexer/transcode str none yes
 			either error? res/3 [
@@ -579,8 +577,8 @@ semantic: context [
 				repend npc/1 ['err yes]
 			][
 				either 1 < length? (expr: res/1) [
-					write-log "add-source e"
-					add-source uri ncode
+					write-log "update-ws: add-source"
+					add-source* uri ncode
 					continue
 				][
 					npc/1/expr: expr
@@ -626,14 +624,19 @@ semantic: context [
 				update-pc-nested next par no
 			]
 		]
+		write-log "update-one"
 		pc: pcs/2
-		update-pc pc lines end-chars
+		update-pc pc end-chars
 		if pc/1/range/3 = s-line [
 			pc/1/range/4: pc/1/range/4 + end-chars
 		]
-		spos: line-pos? ncode pc/1/range/1 pc/1/range/2
-		epos: line-pos? ncode pc/1/range/3 pc/1/range/4
-		str: copy/part spos epos
+		spos: lexer/line-pos? ncode pc/1/range/1 pc/1/range/2
+		epos: lexer/line-pos? ncode pc/1/range/3 pc/1/range/4
+		if empty? str: copy/part spos epos [
+			remove pc
+			write-log "update-one: remove"
+			exit
+		]
 		res: lexer/transcode str none yes
 		either error? res/3 [
 			range: lexer/form-range pc/1/range
@@ -657,8 +660,8 @@ semantic: context [
 			repend pc/1 ['err yes]
 		][
 			either 1 < length? (expr: res/1) [
-				write-log "add-source 4"
-				add-source uri ncode
+				write-log "update-one: add-source"
+				add-source* uri ncode
 				continue
 			][
 				pc/1/expr: expr
@@ -669,8 +672,9 @@ semantic: context [
 
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
+		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
-		write-log mold changes
+		;write-log mold changes
 		unless ss: find-source uri [
 			return false
 		]
@@ -709,15 +713,19 @@ semantic: context [
 					none? epcs
 				][
 					write-log "add-source 1"
-					add-source uri code2
+					add-source* uri code2
 					ncode: code2
 					continue
 				]
+				pc: spcs/2
+				epc: epcs/2
 				if all [
-					spcs = epcs
 					any [
 						epcs/1 <> 'one
-						string? epcs/2/1/expr/1
+						all [
+							not none? epc/1/err
+							string? epc/1/expr/1
+						]
 					]
 					all [
 						any [
@@ -730,7 +738,6 @@ semantic: context [
 						]
 					]
 				][
-					write-log "update-ws"
 					unless empty? text [
 						update-ws ss/1/1/uri epcs s-line s-column e-line e-column text ncode no
 					]
@@ -741,8 +748,6 @@ semantic: context [
 					ncode: code2
 					continue
 				]
-				pc: spcs/2
-				epc: epcs/2
 				if all [
 					any [
 						all [
@@ -826,6 +831,7 @@ semantic: context [
 									]
 								]
 							]
+							write-log "update-more: error"
 							expr: reduce [text ""]
 							insert/only pc reduce ['expr text 'err yes 'range range 'upper epc/1/upper]
 							ss/1/1/source: code2
@@ -833,10 +839,11 @@ semantic: context [
 							continue
 						]
 						if 1 < length? (expr: res/1) [
-							write-log "add-source 3"
-							add-source uri ncode
+							write-log "update-more: add-source"
+							add-source* uri ncode
 							continue
 						]
+						write-log "update-more"
 						insert/only pc reduce ['expr expr 'range range 'upper epc/1/upper]
 						ss/1/1/source: code2
 						ncode: code2
@@ -844,13 +851,14 @@ semantic: context [
 					]
 				]
 			]
-			write-log "add-source 4"
-			add-source uri code2
+			write-log "add-source 2"
+			add-source* uri code2
 			ncode: code2
 		]
 		write %f-log2.txt format ss/1
 		write/append %f-log2.txt "^/"
 		write/append %f-log2.txt ss/1/1/source
+		diagnostics
 	]
 ]
 
@@ -858,7 +866,7 @@ completion: context [
 	last-comps: clear []
 
 	complete-file: function [top [block!] pc [block!] comps [block!]][
-		range: pc/1/range
+		range: lexer/form-range pc/1/range
 		str: to string! pc/1/expr/1
 		insert str: to string! file: pc/1/expr/1 "%"
 		if error? result: try [red-complete-ctx/red-complete-file str no][
@@ -952,7 +960,7 @@ completion: context [
 			][
 				if all [
 					par/-1
-					block? par/-1/expr/1
+					block! = par/-1/expr/1
 					spec: par/-1/nested
 					par/-2
 					find [func function has] par/-2/expr/1
@@ -984,12 +992,13 @@ completion: context [
 			any [
 				all [
 					find [context object] pc/1/expr/1
-					block? pc/2/expr/1
+					block! = pc/2/expr/1
 					spec: pc/2
 				]
 				all [
 					pc/1/expr/1 = 'make
 					pc/3
+					block! = pc/3/expr/1
 					spec: pc/3
 					any [
 						pc/2/expr/1 = 'object!
@@ -1020,19 +1029,19 @@ completion: context [
 			pc/1
 			pc/2
 			find [func function has does] pc/1/expr/1
-			block? pc/2/expr/1
+			block! = pc/2/expr/1
 			any [
 				all [
 					find [func function] pc/1/expr/1
 					pc/3
-					block? pc/3/expr/1
+					block! = pc/3/expr/1
 					spec: pc/2
 				]
 				pc/1/expr/1 = 'does
 				all [
 					pc/1/expr/1 = 'has
 					pc/3
-					block? pc/3/expr/1
+					block! = pc/3/expr/1
 				]
 			]
 		][
@@ -1169,7 +1178,7 @@ completion: context [
 
 			]
 		]
-		range: pc/1/range
+		range: lexer/form-range pc/1/range
 		if any [
 			lit-word? pc/1/expr/1
 			get-word? pc/1/expr/1
@@ -1421,7 +1430,7 @@ completion: context [
 			slash-end?: yes
 			filter: ""
 		]
-		range: pc/1/range
+		range: lexer/form-range pc/1/range
 		either slash-end? [
 			range/start/character: range/end/character
 		][
@@ -1518,6 +1527,21 @@ completion: context [
 		return str
 	]
 
+	get-block: function [pc [block!]][
+		ret: make block! 4
+		forall pc [
+			if find reduce [block! map! paren!] pc/1/expr/1 [
+				append/only ret make pc/1/expr/1 
+					either pc/1/nested [
+						get-block pc/1/nested
+					][[]]
+				continue
+			]
+			append ret pc/1/expr/1
+		]
+		ret
+	]
+
 	resolve-word: function [top [block!] pc [block!] string [string!]][
 		if all [
 			set-word? pc/1/expr/1
@@ -1533,7 +1557,7 @@ completion: context [
 						upper/-1
 						word? upper/-1/expr/1
 					][
-						return func-info upper/-1/expr/1 upper/1/expr/1 to string! pc/1/expr/1
+						return func-info upper/-1/expr/1 get-block upper/1/nested to string! pc/1/expr/1
 					]
 					return func-info 'func [] to string! pc/1/expr/1
 				]
@@ -1556,9 +1580,10 @@ completion: context [
 			ret: rejoin [string " is a function argument!"]
 			if all [
 				pc/2
-				block? pc/2/expr/1
+				block! = pc/2/expr/1
+				pc/2/nested
 			][
-				return rejoin [ret "^/type: " mold pc/2/expr/1]
+				return rejoin [ret "^/type: " mold get-block pc/2/nested]
 			]
 			return ret
 		]

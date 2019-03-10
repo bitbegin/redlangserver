@@ -123,7 +123,7 @@ dispatch-method: function [method [string!] params][
 		"textDocument/didSave"				[on-textDocument-didSave params]
 		"textDocument/completion"			[on-textDocument-completion params]
 		"completionItem/resolve"			[on-completionItem-resolve params]
-		"textDocument/documentSymbol"		[on-textDocument-symbol params]
+		;"textDocument/documentSymbol"		[on-textDocument-symbol params]
 		"textDocument/hover"				[on-textDocument-hover params]
 	]
 ]
@@ -277,7 +277,20 @@ on-textDocument-didChange: function [params [map!]][
 		vs: find-uri uri
 		(vs/1/version + 1) = version
 	][
-		semantic/update-source uri contentChanges
+		unless diags: semantic/update-source uri contentChanges [
+			json-body/error: make map! reduce [
+				'code -32002
+				'message "lost some text changes, please reopen this file!"
+			]
+			response exit
+		]
+		if not empty? diags [
+			forall diags [
+				json-body/method: "textDocument/publishDiagnostics"
+				json-body/params: diags/1
+				response exit
+			]
+		]
 		vs/1/version: version
 		exit
 	]
@@ -286,18 +299,6 @@ on-textDocument-didChange: function [params [map!]][
 		'message "lost some text changes, please reopen this file!"
 	]
 	response
-
-
-	;set 'last-uri uri
-	;either not empty? diags: semantic/add-source uri source [
-	;	forall diags [
-	;		json-body/method: "textDocument/publishDiagnostics"
-	;		json-body/params: diags/1
-	;		response
-	;	]
-	;][
-	;	write-log mold now/precise
-	;]
 ]
 
 on-textDocument-didSave: function [params [map!]][
@@ -328,7 +329,7 @@ on-textDocument-completion: function [params [map!]][
 	set 'last-uri uri
 	set 'last-line line
 	set 'last-column column
-	comps: [];completion/complete uri line + 1 column + 1
+	comps: completion/complete uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		;'isIncomplete true
 		'items comps
@@ -340,36 +341,6 @@ on-completionItem-resolve: function [params [map!]][
 	hstr: completion/resolve params
 	put params 'documentation either hstr [hstr][""]
 	json-body/result: params
-	response
-]
-
-on-textDocument-symbol: function [params [map!]][
-	uri: params/textDocument/uri
-	unless item: find-source uri [
-		json-body/result: ""
-		response
-		exit
-	]
-
-	blk: item/1/3
-	symbols: make block! 4
-	symbol: none
-	forall blk [
-		if blk/1/1 = none [continue]
-		;if set-word? blk/1/1 [
-		unless block? blk/1/1 [
-			range: red-lexer/to-range blk/1/2 blk/1/3
-			symbol: make map! reduce [
-				'name		mold blk/1/1
-				'kind		blk/1/4/3
-				'range		range
-				'selectionRange range
-			]
-			;write-log mold symbol
-			append symbols symbol
-		]
-	]
-	json-body/result: symbols
 	response
 ]
 
