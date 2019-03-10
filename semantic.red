@@ -1363,17 +1363,12 @@ completion: context [
 		collect* pc
 	]
 
-	collect-path*: function [pc [block!] path [path!] slash-str? [logic!] result [block!]][
-		slash-end?: no
-		if slash-str? [
-			slash-end?: yes
-		]
-
+	collect-path*: function [pc [block!] path [path!] slash-end? [logic!] result [block!]][
 		specs: make block! 16
 		unless type: find-set?/*func?/*context? pc path/1 specs true [
 			exit
 		]
-		unless path/2 [
+		if empty? to string! path/2 [
 			switch type [
 				context		[collect-context-set-word* specs result]
 				func		[collect-func-refinement* specs result]
@@ -1384,7 +1379,7 @@ completion: context [
 		until [
 			tops: specs
 			slash?: slash-end?
-			unless tail? next path [
+			if empty? to string! path/2 [
 				slash?: yes
 			]
 			forall tops [
@@ -1406,17 +1401,22 @@ completion: context [
 					]
 				]
 			]
-			tail? path: next path
+			any [
+				tail? path: next path
+				empty? to string! path/1
+			]
 		]
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
-		collect-path* pc to path! pc/1/expr/1 not none? pc/1/err result
+		path: to path! pc/1/expr/1
+		slash-end?: not none? pc/1/err
+		collect-path* pc path slash-end? result
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 not none? pc/1/err result
+				collect-path* back tail sources/1/1/nested path slash-end? result
 				if 0 < length? result [exit]
 			]
 		]
