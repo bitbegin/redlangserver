@@ -558,7 +558,7 @@ semantic: context [
 			spos: lexer/line-pos? ncode npc/1/range/1 npc/1/range/2
 			epos: lexer/line-pos? ncode npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
-			res: lexer/transcode str none yes
+			res: lexer/transcode/ast str none yes out: clear []
 			either error? res/3 [
 				range: lexer/form-range npc/1/range
 				line-cs: charset [#"^M" #"^/"]
@@ -578,7 +578,11 @@ semantic: context [
 					]
 				]
 				npc/1/expr/1: str
-				repend npc/1 ['err yes]
+				either find pc/1 'err [
+					npc/1/err: yes
+				][
+					repend npc/1 ['err yes]
+				]
 			][
 				either 1 < length? (expr: res/1) [
 					write-log "update-ws: add-source"
@@ -586,7 +590,19 @@ semantic: context [
 					continue
 				][
 					npc/1/expr: expr
-					if npc/1/err [npc/1/err: none]
+					either all [
+						out/1
+						out2: out/1/nested
+						out2/1/err
+					][
+						either find pc/1 'err [
+							npc/1/err: yes
+						][
+							repend npc/1 ['err yes]
+						]
+					][
+						if npc/1/err [npc/1/err: none]
+					]
 				]
 			]
 		]
@@ -643,7 +659,7 @@ semantic: context [
 		]
 		write-log mold pc/1/range
 		write-log mold str
-		res: lexer/transcode str none yes
+		res: lexer/transcode/ast str none yes out: clear []
 		either error? res/3 [
 			range: lexer/form-range pc/1/range
 			line-cs: charset [#"^M" #"^/"]
@@ -663,7 +679,11 @@ semantic: context [
 				]
 			]
 			pc/1/expr/1: str
-			repend pc/1 ['err yes]
+			either find pc/1 'err [
+				pc/1/err: yes
+			][
+				repend pc/1 ['err yes]
+			]
 		][
 			either 1 < length? (expr: res/1) [
 				write-log "update-one: add-source"
@@ -671,7 +691,19 @@ semantic: context [
 				continue
 			][
 				pc/1/expr: expr
-				if pc/1/err [pc/1/err: none]
+				either all [
+					out/1
+					out2: out/1/nested
+					out2/1/err
+				][
+					either find pc/1 'err [
+						pc/1/err: yes
+					][
+						repend pc/1 ['err yes]
+					]
+				][
+					if pc/1/err [pc/1/err: none]
+				]
 			]
 		]
 	]
