@@ -537,7 +537,11 @@ semantic: context [
 				pc: next pc
 			]
 		][exit]
-		update-pc pc lines end-chars
+		either pcs/1 = 'one [
+			update-pc next pc lines end-chars
+		][
+			update-pc pc lines end-chars
+		]
 		if pcs/1 = 'one [
 			npc: pcs/2
 			either forward? [
@@ -626,7 +630,7 @@ semantic: context [
 		]
 		write-log "update-one"
 		pc: pcs/2
-		update-pc pc end-chars
+		update-pc next pc end-chars
 		if pc/1/range/3 = s-line [
 			pc/1/range/4: pc/1/range/4 + end-chars
 		]
@@ -637,6 +641,8 @@ semantic: context [
 			write-log "update-one: remove"
 			exit
 		]
+		write-log mold pc/1/range
+		write-log mold str
 		res: lexer/transcode str none yes
 		either error? res/3 [
 			range: lexer/form-range pc/1/range
@@ -665,7 +671,7 @@ semantic: context [
 				continue
 			][
 				pc/1/expr: expr
-				if npc/1/err [npc/1/err: none]
+				if pc/1/err [pc/1/err: none]
 			]
 		]
 	]
@@ -698,6 +704,7 @@ semantic: context [
 			code2: copy/part ncode spos
 			append code2 text
 			append code2 epos
+			ncode: code2
 			otext-ws?: parse otext [some ws]
 			text-ws?: parse text [some ws]
 			if ss/1/1/nested [
@@ -713,8 +720,7 @@ semantic: context [
 					none? epcs
 				][
 					write-log "add-source 1"
-					add-source* uri code2
-					ncode: code2
+					add-source* uri ncode
 					continue
 				]
 				pc: spcs/2
@@ -744,8 +750,7 @@ semantic: context [
 					unless empty? otext [
 						update-ws ss/1/1/uri epcs s-line s-column e-line e-column otext ncode yes
 					]
-					ss/1/1/source: code2
-					ncode: code2
+					ss/1/1/source: ncode
 					continue
 				]
 				if all [
@@ -779,8 +784,7 @@ semantic: context [
 					]
 				][
 					update-one ss/1/1/uri epcs s-line s-column e-line e-column (length? text) - (length? otext) ncode
-					ss/1/1/source: code2
-					ncode: code2
+					ss/1/1/source: ncode
 					continue
 				]
 				if all [
@@ -812,6 +816,8 @@ semantic: context [
 						]
 					][
 						range: reduce [s-line s-column e-line e-column + length? text]
+						write-log "insert pc: "
+						write-log mold range
 						res: lexer/transcode text none yes
 						if error? res/3 [
 							nrange: lexer/form-range range
@@ -834,8 +840,7 @@ semantic: context [
 							write-log "update-more: error"
 							expr: reduce [text ""]
 							insert/only pc reduce ['expr text 'err yes 'range range 'upper epc/1/upper]
-							ss/1/1/source: code2
-							ncode: code2
+							ss/1/1/source: ncode
 							continue
 						]
 						if 1 < length? (expr: res/1) [
@@ -845,15 +850,13 @@ semantic: context [
 						]
 						write-log "update-more"
 						insert/only pc reduce ['expr expr 'range range 'upper epc/1/upper]
-						ss/1/1/source: code2
-						ncode: code2
+						ss/1/1/source: ncode
 						continue
 					]
 				]
 			]
 			write-log "add-source 2"
-			add-source* uri code2
-			ncode: code2
+			add-source* uri ncode
 		]
 		write %f-log2.txt format ss/1
 		write/append %f-log2.txt "^/"
@@ -1376,12 +1379,12 @@ completion: context [
 	]
 
 	collect-path: function [top [block!] pc [block!] result [block!]][
-		collect-path* pc to path! pc/1/expr/1 pc/1/err result
+		collect-path* pc to path! pc/1/expr/1 not none? pc/1/err result
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 pc/1/err result
+				collect-path* back tail sources/1/1/nested to path! pc/1/expr/1 not none? pc/1/err result
 				if 0 < length? result [exit]
 			]
 		]
@@ -1542,6 +1545,24 @@ completion: context [
 		ret
 	]
 
+	get-func-spec: function [pc [block!]][
+		ret: get-block pc
+		until [
+			if all [
+				reduce [ret/1] = [return:]
+				ret/2
+				block? ret/2
+				ret/3
+				string? ret/3
+			][
+				remove ret: skip ret 2
+				break
+			]
+			tail? ret: next ret
+		]
+		ret
+	]
+
 	resolve-word: function [top [block!] pc [block!] string [string!]][
 		if all [
 			set-word? pc/1/expr/1
@@ -1557,7 +1578,7 @@ completion: context [
 						upper/-1
 						word? upper/-1/expr/1
 					][
-						return func-info upper/-1/expr/1 get-block upper/1/nested to string! pc/1/expr/1
+						return func-info upper/-1/expr/1 get-func-spec upper/1/nested to string! pc/1/expr/1
 					]
 					return func-info 'func [] to string! pc/1/expr/1
 				]
