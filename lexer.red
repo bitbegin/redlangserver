@@ -44,10 +44,10 @@ lexer: context [
 	pos-line?: function [stack [block!] pos [string!]][
 		forall stack [
 			if all [
-				stack/1 <= pos
+				(index? stack/1) <= (index? pos)
 				any [
 					none? stack/2
-					stack/2 > pos
+					(index? stack/2) > (index? pos)
 				]
 			][
 				column: (index? pos) - (index? stack/1)
@@ -155,23 +155,23 @@ lexer: context [
 			unless empty? ast-nested [repend ast-block ['nested ast-nested]]
 			append/only last ast-stack ast-block
 			ast-nested: none
-			clear ast-error
+			ast-error: make block! 4
 		]
 		pop-ast: [
 			rs: last rs-stack remove back tail rs-stack
 			ast-nested: last ast-stack remove back tail ast-stack
 			do store-ast
 		]
-		push-error: function [type [word!] message [string!] level [word!] pos [string!]][
-			offset: pos-line? lin-stack pos
+		push-error: function [type [datatype!] message [string!] level [word!] pos [string!]][
+			offset: pos-line? line-stack pos
 			repend/only ast-error ['type type 'msg message 'level level 'at offset]
 		]
-		push-invalid: function [type [word!] pos [string!]][
-			offset: pos-line? lin-stack pos
+		push-invalid: function [type [datatype!] pos [string!]][
+			offset: pos-line? line-stack pos
 			repend/only ast-error ['type type 'msg "invalid" 'level 'Error 'at offset]
 		]
-		push-miss: function [type [word!] miss pos [string!]][
-			offset: pos-line? lin-stack pos
+		push-miss: function [type [datatype!] miss pos [string!]][
+			offset: pos-line? line-stack pos
 			repend/only ast-error ['type type 'msg 
 				rejoin ["missing: " mold miss] 'level 'Error 'at offset]
 		]
@@ -362,7 +362,7 @@ lexer: context [
 				| escaped-char
 				| skip
 			]
-			e: #"^"" | (push-miss type #"^"" e)
+			[e: #"^"" | (push-miss type #"^"" e)]
 		]
 
 		nested-curly-braces: [
@@ -817,6 +817,10 @@ lexer: context [
 		red-rules: [any-value any ws opt wrong-end]
 
 		parse/case src red-rules
+		value: block!
+		rs: head src
+		re: tail src
+		do pop-ast
 		ast-stack/1
 	]
 ]
