@@ -118,8 +118,9 @@ lexer: context [
 	new-line: :system/lexer/new-line
 
 	transcode: function [
-		src	 [string!]
-		return: [block!]
+		src			[string!]
+		lines		[block! none!]
+		return:		[block!]
 		/local
 			rs re epos ast-nested ast-block ast-upper
 			new s e c pos value cnt type process path
@@ -135,12 +136,17 @@ lexer: context [
 
 		ast-stack: clear []
 		ast-error: make block! 4
-		line-stack: make block! 200
 		rs-stack: make block! 200
+		type-stack: make block! 200
 		append/only ast-stack make block! 1
 		append/only ast-stack make block! 100
 		append rs-stack src
-		parse-line line-stack src
+		either lines [
+			line-stack: lines
+		][
+			line-stack: make block! 200
+			parse-line line-stack src
+		]
 		store-ast: [
 			either 1 = length? ast-stack [
 				ast-upper: none
@@ -148,14 +154,17 @@ lexer: context [
 				ast-upper: tail pick tail ast-stack -2
 			]
 			ast-block: reduce [
-				'expr reduce [value] 'error ast-error
+				'expr reduce [value]
 				'range pos-range? line-stack rs re
+			]
+			unless empty? ast-error [
+				repend ast-block ['error ast-error]
+				ast-error: make block! 4
 			]
 			if ast-upper [repend ast-block ['upper ast-upper]]
 			unless empty? ast-nested [repend ast-block ['nested ast-nested]]
 			append/only last ast-stack ast-block
 			ast-nested: none
-			ast-error: make block! 4
 		]
 		pop-ast: [
 			rs: last rs-stack remove back tail rs-stack
@@ -688,11 +697,13 @@ lexer: context [
 				append stack make block! 20
 				append/only ast-stack make block! 100
 				append rs-stack rs
+				append type-stack map!
 			)
 			any-value
-			#")" re: (
-				value: map!
-				pop/only stack
+			(value: last type-stack)
+			epos: [#")" | to end (push-miss value ")" epos)] re: (
+				remove back tail type-stack
+				remove back tail stack
 				do pop-ast
 			)
 		]
@@ -702,11 +713,13 @@ lexer: context [
 				append stack make block! 20
 				append/only ast-stack make block! 100
 				append rs-stack rs
+				append type-stack block!
 			)
 			any-value
-			#"]" re: (
-				value: block!
-				pop/only stack
+			(value: last type-stack)
+			epos: [#"]" | to end (push-miss value "]" epos)] re: (
+				remove back tail type-stack
+				remove back tail stack
 				do pop-ast
 			)
 		]
@@ -718,9 +731,10 @@ lexer: context [
 				append rs-stack rs
 			)
 			any-value
-			#")" re: (
-				value: paren!
-				pop/only stack
+			(value: last type-stack)
+			epos: [#")" | to end (push-miss value "]" epos)] re: (
+				remove back tail type-stack
+				remove back tail stack
 				do pop-ast
 			)
 		]
@@ -761,25 +775,12 @@ lexer: context [
 
 		comment-rule: [#";" [to #"^/" | to end]]
 
-		wrong-end: [epos: (
-				if 1 < length? stack [
-					type: type? last stack
-					value: case [
-						type = block! [#"]"]
-						type = paren! [#")"]
-					]
-					push-miss type value epos
-					value: type
-					pop/only stack
-					do pop-ast
-				]
-			)
-		]
-
-		right-bracket: [
-			#")"	(type: none! push-miss type "(" s)
-			#"]"	(type: none! push-miss type "[" s)
-			#"}"	(type: none! push-miss type "{" s)
+		invalid-rule: [
+			epos:
+			if (block! = last type-stack) ahead #"]" (type: none) break
+			| if (map! = last type-stack) ahead #")" (type: none) break
+			| if (paren! = last type-stack) ahead #")" (type: none) break
+			| skip (type: none! push-invalid type epos)
 		]
 
 		literal-value: [
@@ -805,22 +806,22 @@ lexer: context [
 				| paren-rule re:		(value: none)
 				| escaped-rule re:
 				| issue-rule re:		(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| right-bracket			(value: type)
-				| skip					(value: type: none! push-error type rejoin ["unknown " mold s/1] 'Error s)
+				| invalid-rule re:		(value: type)
 			](
 				if value [do store-ast]
 			)
 		]
 
-		one-value: [any ws pos: literal-value pos: to end opt wrong-end]
+		one-value: [any ws pos: literal-value pos: to end]
 		any-value: [pos: any [some ws | literal-value]]
-		red-rules: [any-value any ws opt wrong-end]
+		red-rules: [any-value any ws]
 
 		parse/case src red-rules
 		value: block!
 		rs: head src
 		re: tail src
 		do pop-ast
+		repend ast-stack/1 ['source src 'lines line-stack]
 		ast-stack/1
 	]
 ]
