@@ -821,7 +821,57 @@ lexer: context [
 		rs: head src
 		re: tail src
 		do pop-ast
-		repend ast-stack/1 ['source src 'lines line-stack]
+		repend ast-stack/1/1 ['source src 'lines line-stack]
 		ast-stack/1
+	]
+
+	format: function [top [block!]][
+		buffer: make string! 1000
+		newline: function [cnt [integer!]] [
+			append buffer lf
+			append/dup buffer " " cnt
+		]
+
+		format*: function [pc [block!] depth [integer!]][
+			pad: depth * 4
+			newline pad
+			append buffer "["
+			forall pc [
+				newline pad + 2
+				append buffer "["
+				newline pad + 4
+				append buffer "expr: "
+				append buffer mold/flat/part pc/1/expr/1 20
+				newline pad + 4
+				append buffer "range: "
+				append buffer mold/flat pc/1/range
+				if pc/1/nested [
+					newline pad + 4
+					append buffer "nested: "
+					format* pc/1/nested depth + 1
+				]
+				if pc/1/source [
+					newline pad + 4
+					append buffer "source: "
+					append buffer mold/flat/part pc/1/source 10
+				]
+				if lines: pc/1/lines [
+					newline pad + 4
+					append buffer "lines: ["
+					forall lines [
+						newline pad + 6
+						append buffer mold/flat/part lines/1 10
+					]
+					newline pad + 4
+					append buffer "]"
+				]
+				newline pad + 2
+				append buffer "]"
+			]
+			newline pad
+			append buffer "]"
+		]
+		format* top 0
+		buffer
 	]
 ]
