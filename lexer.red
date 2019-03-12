@@ -865,6 +865,21 @@ lexer: context [
 					newline pad + 4
 					append buffer "]"
 				]
+				if upper: pc/1/upper [
+					newline pad + 4
+					append buffer "upper: "
+					append buffer mold/flat upper/1/range
+				]
+				unless empty? errors: pc/1/error [
+					newline pad + 4
+					append buffer "error: ["
+					forall errors [
+						newline pad + 6
+						append buffer mold/flat errors/1
+					]
+					newline pad + 4
+					append buffer "]"
+				]
 				newline pad + 2
 				append buffer "]"
 			]
