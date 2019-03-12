@@ -33,25 +33,28 @@ lexer: context [
 	]
 	parse-line: function [stack [block!] src [string!]][
 		append stack src
+		append stack index? src
 		while [src: find/tail src #"^/"][
-			append stack src
+			append stack index? src
 		]
 	]
 	line-pos?: function [stack [block!] line [integer!] column [integer!]][
-		pos: pick stack line
-		skip pos column - 1
+		pos: pick stack line + 1
+		skip at stack/1 pos column - 1
 	]
 	pos-line?: function [stack [block!] pos [string!]][
+		pos: index? pos
+		stack: next stack
 		forall stack [
 			if all [
-				(index? stack/1) <= (index? pos)
+				stack/1 <= pos
 				any [
 					none? stack/2
-					(index? stack/2) > (index? pos)
+					stack/2 > pos
 				]
 			][
-				column: (index? pos) - (index? stack/1)
-				return reduce [index? stack column + 1]
+				column: pos - stack/1
+				return reduce [1 + index? stack column + 1]
 			]
 		]
 		none
@@ -132,7 +135,8 @@ lexer: context [
 	][
 		cs:		[- - - - - - - - - - - - - - - - - - - - - - - - - - - - -] ;-- memoized bitsets
 		stack:	clear []
-		append/only stack make block! 200
+		append/only stack make block! 20
+		append/only stack make block! 20
 
 		ast-stack: clear []
 		ast-error: make block! 4
@@ -532,7 +536,7 @@ lexer: context [
 					push-invalid type epos
 				)
 			]
-			opt epos: [#":" (push-invalid type epos)]
+			epos: opt [#":" (push-invalid type epos)]
 		]
 
 		issue-rule: [
@@ -669,7 +673,7 @@ lexer: context [
 				ahead [pair-end | ws | end | (type: pair! push-invalid type s) break]
 				(value: as-pair value make-number s e type type: pair!)
 			  ]
-			  if (type <> pair!) opt epos: [#":" [time-rule | (push-invalid type epos)]]
+			  epos: opt [#":" (if type = pair! [push-invalid type epos]) if (type <> pair!) time-rule]
 		]
 
 		float-special: [
@@ -694,7 +698,7 @@ lexer: context [
 
 		map-rule: [
 			"#(" (
-				append stack make block! 20
+				append/only stack make block! 20
 				append/only ast-stack make block! 100
 				append rs-stack rs
 				append type-stack map!
@@ -710,7 +714,7 @@ lexer: context [
 
 		block-rule: [
 			#"[" (
-				append stack make block! 20
+				append/only stack make block! 20
 				append/only ast-stack make block! 100
 				append rs-stack rs
 				append type-stack block!
@@ -726,9 +730,10 @@ lexer: context [
 
 		paren-rule: [
 			#"(" (
-				append stack make block! 8
+				append/only stack make paren! 8
 				append/only ast-stack make block! 8
 				append rs-stack rs
+				append type-stack paren!
 			)
 			any-value
 			(value: last type-stack)
@@ -858,6 +863,7 @@ lexer: context [
 				if lines: pc/1/lines [
 					newline pad + 4
 					append buffer "lines: ["
+					lines: next lines
 					forall lines [
 						newline pad + 6
 						append buffer mold/flat/part lines/1 10
