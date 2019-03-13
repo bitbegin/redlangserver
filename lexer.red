@@ -442,22 +442,43 @@ lexer: context [
 
 		base-2-rule: [
 			"2#{" (type: binary!) [
-				s: any [counted-newline | 8 [#"0" | #"1" ] | ws | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 2" 'Error epos) break] e: #"}"
-				| [any [#"}" | ws | skip] (push-error type "invalid base 2" 'Error e)]
+				s: any [counted-newline | 8 [#"0" | #"1" ] | ws | comment-rule | break]
+				[
+					e: #"}"
+					| some [[ahead #"}" | end] break | ws | skip]
+					epos: [
+						#"}" (push-error type "invalid base 2" 'Error epos)
+						| (push-miss type "}" epos)
+					]
+				]
 			] (base: 2)
 		]
 
 		base-16-rule: [
 			opt "16" "#{" (type: binary!) [
-				s: any [counted-newline | 2 hexa-char | ws | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 16" 'Error epos) break] e: #"}"
-				| [any [#"}" | ws | skip] (push-error type "invalid base 16" 'Error e)]
+				s: any [counted-newline | 2 hexa-char | ws | comment-rule | break]
+				[
+					e: #"}"
+					| some [[ahead #"}" | end] break | ws | skip]
+					epos: [
+						#"}" (push-error type "invalid base 16" 'Error epos)
+						| (push-miss type "}" epos)
+					]
+				]
 			] (base: 16)
 		]
 
 		base-64-rule: [
 			"64#{" (type: binary! cnt: 0) [
-				s: any [counted-newline | base64-char | ws (cnt: cnt + 1) | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 64" 'Error epos) break] e: #"}"
-				| [any [#"}" | ws | skip] (push-error type "invalid base 64" 'Error e)]
+				s: any [counted-newline | base64-char | ws (cnt: cnt + 1) | comment-rule | break]
+				[
+					e: #"}"
+					| some [[ahead #"}" | end] break | ws | skip]
+					epos: [
+						#"}" (push-error type "invalid base 64" 'Error epos)
+						| (push-miss type "}" epos)
+					]
+				]
 			](
 				cnt: (offset? s e) - cnt
 				if all [0 < cnt cnt < 4][push-error type "invalid base 64" 'Error e]
@@ -808,11 +829,15 @@ lexer: context [
 					| "routine!"	(value: routine!)
 				]
 				| "none" 			(value: none)
-				| ahead #"]" (value: type: error! push-invalid type pos) break
+				| any ws ahead #"]" (value: type: error! push-invalid type pos) break
 				| (value: error!) break
 			][
 				pos: any ws "]"
-				| some [[ahead #"]" | end] break | ws][#"]" | (type: error! push-invalid type pos)]
+				| some [[ahead #"]" | end] break | ws | skip]
+				epos: [
+					#"]" (type: error! push-invalid type epos)
+					| (type: error! push-miss either datatype? value [value][type] "]" epos)
+				]
 			]
 		]
 
