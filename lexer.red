@@ -386,7 +386,7 @@ lexer: context [
 				| skip (value: s/1)
 			][
 				e: #"^""
-				| [some [[ahead #"^"" | end] break | ws | skip] [#"^"" (push-invalid type back e) | (push-miss type #"^"" e)]]
+				| [some [[ahead #"^"" | end] break | ws | skip] epos: [#"^"" (push-invalid type epos) | (push-miss type #"^"" epos)]]
 			]
 		]
 
@@ -399,7 +399,7 @@ lexer: context [
 			]
 			[
 				e: #"^""
-				| [some [[ahead #"^"" | end] break | ws | skip] [#"^"" (push-invalid type back e) | (push-miss type #"^"" e)]]
+				| [some [[ahead #"^"" | end] break | ws | skip] epos: [#"^"" (push-invalid type epos) | (push-miss type #"^"" epos)]]
 			]
 		]
 
@@ -770,7 +770,7 @@ lexer: context [
 			)
 			nested-paren
 			(value: last type-stack)
-			epos: [#")" | end (push-miss value "]" epos)] epos: (
+			epos: [#")" | end (push-miss value ")" epos)] epos: (
 				re: now-line? epos
 				remove back tail type-stack
 				remove back tail stack
@@ -811,16 +811,18 @@ lexer: context [
 				| "none" 			(value: none)
 				| ahead #"]" (value: type: error! push-invalid type pos) break
 				| (value: error!) break
-			] pos: some [ahead #"]" break | ws | end break | epos: to #"^/" (type: error! push-invalid type epos)]
-			#"]" | epos: (type: error! push-invalid type epos)
+			][
+				pos: any ws "]"
+				| some [[ahead #"]" | end] break | ws][#"]" | (type: error! push-invalid type pos)]
+			]
 		]
 
 		comment-rule: [#";" [to #"^/" | to end]]
 
 		invalid-rule: [
 			epos:
-			ahead #"]" if (block! <> last type-stack) skip (type: error! push-invalid type epos) break
-			| ahead #")" if (all [map! <> last type-stack paren! <> last type-stack]) skip (type: error! push-invalid type epos) break
+			ahead #"]" if (block! <> last type-stack) skip (type: error! push-invalid type epos)
+			| ahead #")" if (all [map! <> last type-stack paren! <> last type-stack]) skip (type: error! push-invalid type epos)
 			| skip (type: error! push-invalid type epos)
 		]
 
@@ -851,12 +853,12 @@ lexer: context [
 			]
 		]
 
-		nested-block: [pos: some [ahead #"]" break | some ws | literal-value]]
-		nested-paren: [pos: some [ahead #")" break | some ws | literal-value]]
+		nested-block: [pos: some [[ahead #"]" | end] break | some ws | literal-value]]
+		nested-paren: [pos: some [[ahead #")" | end] break | some ws | literal-value]]
 		some-value: [pos: some [some ws | literal-value]]
 		red-rules: some-value
 
-		parse/case src red-rules
+		unless parse/case src red-rules [return false]
 		value: block!
 		rs: [1 1]
 		re: now-line? tail src
