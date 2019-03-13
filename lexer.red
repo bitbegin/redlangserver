@@ -386,7 +386,7 @@ lexer: context [
 				| skip (value: s/1)
 			][
 				e: #"^""
-				| (push-miss type #"^"" e)
+				| [some [[ahead #"^"" | end] break | ws | skip] [#"^"" (push-invalid type back e) | (push-miss type #"^"" e)]]
 			]
 		]
 
@@ -397,7 +397,10 @@ lexer: context [
 				| escaped-char
 				| skip
 			]
-			[e: #"^"" | (push-miss type #"^"" e)]
+			[
+				e: #"^""
+				| [some [[ahead #"^"" | end] break | ws | skip] [#"^"" (push-invalid type back e) | (push-miss type #"^"" e)]]
+			]
 		]
 
 		nested-curly-braces: [
