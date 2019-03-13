@@ -122,7 +122,6 @@ lexer: context [
 
 	transcode: function [
 		src			[string!]
-		lines		[block! none!]
 		return:		[block!]
 		/local
 			rs re epos ast-nested ast-block ast-upper
@@ -140,17 +139,14 @@ lexer: context [
 
 		ast-stack: clear []
 		ast-error: make block! 4
-		rs-stack: make block! 200
+		rs-stack: make block! 3000
 		type-stack: make block! 200
+		line-stack: make block! 3000
 		append/only ast-stack make block! 1
 		append/only ast-stack make block! 100
-		append rs-stack src
-		either lines [
-			line-stack: lines
-		][
-			line-stack: make block! 200
-			parse-line line-stack src
-		]
+		append line-stack src
+		append line-stack index? src
+		append/only rs-stack [1 1]
 		store-ast: [
 			either 1 = length? ast-stack [
 				ast-upper: none
@@ -159,7 +155,7 @@ lexer: context [
 			]
 			ast-block: reduce [
 				'expr reduce [value]
-				'range pos-range? line-stack rs re
+				'range append copy rs re
 			]
 			unless empty? ast-error [
 				repend ast-block ['error ast-error]
@@ -176,15 +172,15 @@ lexer: context [
 			do store-ast
 		]
 		push-error: function [type [datatype!] message [string!] level [word!] pos [string!]][
-			offset: pos-line? line-stack pos
+			offset: now-line? pos
 			repend/only ast-error ['type type 'msg message 'level level 'at offset]
 		]
 		push-invalid: function [type [datatype!] pos [string!]][
-			offset: pos-line? line-stack pos
+			offset: now-line? pos
 			repend/only ast-error ['type type 'msg "invalid" 'level 'Error 'at offset]
 		]
 		push-miss: function [type [datatype!] miss pos [string!]][
-			offset: pos-line? line-stack pos
+			offset: now-line? pos
 			repend/only ast-error ['type type 'msg 
 				rejoin ["missing: " mold miss] 'level 'Error 'at offset]
 		]
@@ -195,6 +191,17 @@ lexer: context [
 				if errors/1/level = 'Error [return yes]
 			]
 			no
+		]
+		now-line?: function [npos [string!]][
+			line: (length? line-stack) - 1
+			s: last line-stack
+			reduce [line (index? npos) - s + 1]
+		]
+		remove-lines: function [line [integer!]][
+			if line = last-line: ((length? line-stack) - 1) [exit]
+			loop last-line - line [
+				remove back tail line-stack
+			]
 		]
 		make-string: [
 			new: make type len: (index? e) - index? s
@@ -302,6 +309,21 @@ lexer: context [
 
 		;-- Whitespaces list from: http://en.wikipedia.org/wiki/Whitespace_character
 		ws: [
+			#"^/" epos: (append line-stack index? epos)
+			| ws-ASCII									;-- only the common whitespaces are matched
+			;| #"^(0085)"								;-- U+0085 (Newline)
+			| #"^(00A0)"								;-- U+00A0 (No-break space)
+			;| #"^(1680)"								;-- U+1680 (Ogham space mark)
+			;| #"^(180E)"								;-- U+180E (Mongolian vowel separator)
+			;| ws-U+2k									;-- U+2000-U+200A range
+			;| #"^(2028)"								;-- U+2028 (Line separator)
+			;| #"^(2029)"								;-- U+2029 (Paragraph separator)
+			;| #"^(202F)"								;-- U+202F (Narrow no-break space)
+			;| #"^(205F)"								;-- U+205F (Medium mathematical space)
+			;| #"^(3000)"								;-- U+3000 (Ideographic space)
+		]
+
+		ws-no-count: [
 			#"^/"
 			| ws-ASCII									;-- only the common whitespaces are matched
 			;| #"^(0085)"								;-- U+0085 (Newline)
@@ -323,7 +345,7 @@ lexer: context [
 			| #"^(2029)"								;-- U+2029 (Paragraph separator)
 		]
 
-		counted-newline: [pos: #"^/"]
+		counted-newline: [pos: #"^/" (append line-stack index? next pos)]
 
 		escaped-char: [
 			"^^(" [
@@ -399,7 +421,13 @@ lexer: context [
 
 		tag-rule: [
 			#"<" not [not-tag-1st | ws] (type: tag!)
-			 s: some [#"^"" thru #"^"" | #"'" thru #"'" | e: #">" break | skip]
+			 s: some [
+				ahead [#"^"" thru #"^""] #"^"" some [[#"^"" break | counted-newline | skip]]
+				| ahead [#"'" thru #"'"] #"'" some [[#"'" break | counted-newline | skip]]
+				| counted-newline
+				| e: #">" break
+				| skip
+			]
 			(if e/1 <> #">" [push-miss type ">" e])
 		]
 
@@ -411,25 +439,25 @@ lexer: context [
 
 		base-2-rule: [
 			"2#{" (type: binary!) [
-				s: any [counted-newline | 8 [#"0" | #"1" ] | ws | comment-rule] e: #"}"
-				| (push-error type "invalid base 2" 'Error)
+				s: any [counted-newline | 8 [#"0" | #"1" ] | ws | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 2" 'Error epos) break] e: #"}"
+				| [any [#"}" | ws | skip] (push-error type "invalid base 2" 'Error e)]
 			] (base: 2)
 		]
 
 		base-16-rule: [
 			opt "16" "#{" (type: binary!) [
-				s: any [counted-newline | 2 hexa-char | ws | comment-rule] e: #"}"
-				| (push-error type "invalid base 16" 'Error)
+				s: any [counted-newline | 2 hexa-char | ws | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 16" 'Error epos) break] e: #"}"
+				| [any [#"}" | ws | skip] (push-error type "invalid base 16" 'Error e)]
 			] (base: 16)
 		]
 
 		base-64-rule: [
 			"64#{" (type: binary! cnt: 0) [
-				s: any [counted-newline | base64-char | ws (cnt: cnt + 1) | comment-rule] e: #"}"
-				| (push-error type "invalid base 64" 'Error)
+				s: any [counted-newline | base64-char | ws (cnt: cnt + 1) | comment-rule | ahead #"}" break | epos: (push-error type "invalid base 64" 'Error epos) break] e: #"}"
+				| [any [#"}" | ws | skip] (push-error type "invalid base 64" 'Error e)]
 			](
 				cnt: (offset? s e) - cnt
-				if all [0 < cnt cnt < 4][push-error type "invalid base 64" 'Error]
+				if all [0 < cnt cnt < 4][push-error type "invalid base 64" 'Error e]
 				base: 64
 			)
 		]
@@ -438,22 +466,22 @@ lexer: context [
 
 		file-rule: [
 			s: #"%" [
-				epos: #"{" thru [#"}" | end] (push-invalid file! epos) break
+				epos: #"{" any [#"}" | ws | skip] (push-invalid file! epos) break
 				| line-string (process: make-string type: file!)
-				| s: any [ahead [not-file-char | ws] break | skip] e:
+				| s: any [ahead [not-file-char | ws-no-count] break | skip] e:
 				  (process: make-file type: file!)
 			]
 		]
 
 		url-rule: [
-			#":" not [not-url-char | ws | end]
-			any [#"@" | #":" | ahead [not-file-char | ws] break | skip] e:
+			#":" not [not-url-char | ws-no-count | end]
+			any [#"@" | #":" | ahead [not-file-char | ws-no-count] break | skip] e:
 			(type: url! store stack do make-file)
 		]
 
 		symbol-rule: [
 			(ot: none) some [
-				ahead [not-word-char | ws | control-char] break
+				ahead [not-word-char | ws-no-count | control-char] break
 				| #"<" ot: [ahead #"/" (ot: back ot) :ot break | none]	;-- a</b>
 				| #">" if (ot) [(ot: back ot) :ot break]				;-- a<b>
 				| skip
@@ -461,7 +489,7 @@ lexer: context [
 		]
 
 		begin-symbol-rule: [							;-- 1st char in symbols is restricted
-			[not ahead [not-word-1st | ws | control-char]]
+			[not ahead [not-word-1st | ws-no-count | control-char]]
 			symbol-rule
 		]
 
@@ -482,16 +510,16 @@ lexer: context [
 				]
 			]
 			opt [#":" (type: set-path! set-path back tail stack)][
-				ahead [path-end | ws | end] | epos: (push-invalid type epos)
+				ahead [path-end | ws-no-count | end] | epos: (push-invalid type epos)
 			]
 			(pop stack)
 		]
 
 		special-words: [
 			#"%" [ws | ahead file-end | end] (value: "%")	;-- special case for remainder op!
-			| #"/" ahead [slash-end | #"/" | ws | control-char | end][
+			| #"/" ahead [slash-end | #"/" | ws-no-count | control-char | end][
 				#"/"
-				ahead [slash-end | ws | control-char | end] (value: "//")
+				ahead [slash-end | ws-no-count | control-char | end] (value: "//")
 				| (value: "/")
 			]
 			| "<>" (value: "<>")
@@ -553,16 +581,16 @@ lexer: context [
 		refinement-rule: [
 			#"/" [
 				some #"/" (type: word!) e:				;--  ///... case
-				| ahead [not-word-char | ws | control-char] (type: word!) e: ;-- / case
+				| ahead [not-word-char | ws-no-count | control-char] (type: word!) e: ;-- / case
 				| symbol-rule (type: refinement! s: next s)
 			]
 			(to-word stack copy/part s e type)
 		]
 
 		sticky-word-rule: [								;-- protect from sticky words typos
-			ahead [integer-end | ws | end | epos: (push-invalid type epos)]
+			ahead [integer-end | ws-no-count | end | epos: (push-invalid type epos)]
 		]
-		hexa-rule: [2 8 hexa e: #"h" ahead [integer-end | ws | end]]
+		hexa-rule: [2 8 hexa e: #"h" ahead [integer-end | ws-no-count | end]]
 
 		tuple-value-rule: [byte 2 11 [#"." byte] e: (type: tuple!)]
 
@@ -670,7 +698,7 @@ lexer: context [
 			  (value: make-number s e type)
 			  opt [
 				[#"x" | #"X"] [s: integer-number-rule | (type: pair! push-invalid type s) break]
-				ahead [pair-end | ws | end | (type: pair! push-invalid type s) break]
+				ahead [pair-end | ws-no-count | end | (type: pair! push-invalid type s) break]
 				(value: as-pair value make-number s e type type: pair!)
 			  ]
 			  epos: opt [#":" (if type = pair! [push-invalid type epos]) if (type <> pair!) time-rule]
@@ -700,12 +728,13 @@ lexer: context [
 			"#(" (
 				append/only stack make block! 20
 				append/only ast-stack make block! 100
-				append rs-stack rs
+				append/only rs-stack rs
 				append type-stack map!
 			)
-			any-value
+			nested-paren
 			(value: last type-stack)
-			epos: [#")" | to end (push-miss value ")" epos)] re: (
+			epos: [#")" | end (push-miss value ")" epos)] epos: (
+				re: now-line? epos
 				remove back tail type-stack
 				remove back tail stack
 				do pop-ast
@@ -716,12 +745,13 @@ lexer: context [
 			#"[" (
 				append/only stack make block! 20
 				append/only ast-stack make block! 100
-				append rs-stack rs
+				append/only rs-stack rs
 				append type-stack block!
 			)
-			any-value
+			nested-block
 			(value: last type-stack)
-			epos: [#"]" | to end (push-miss value "]" epos)] re: (
+			epos: [#"]" | end (push-miss value "]" epos)] epos: (
+				re: now-line? epos
 				remove back tail type-stack
 				remove back tail stack
 				do pop-ast
@@ -732,12 +762,13 @@ lexer: context [
 			#"(" (
 				append/only stack make paren! 8
 				append/only ast-stack make block! 8
-				append rs-stack rs
+				append/only rs-stack rs
 				append type-stack paren!
 			)
-			any-value
+			nested-paren
 			(value: last type-stack)
-			epos: [#")" | to end (push-miss value "]" epos)] re: (
+			epos: [#")" | end (push-miss value "]" epos)] epos: (
+				re: now-line? epos
 				remove back tail type-stack
 				remove back tail stack
 				do pop-ast
@@ -775,56 +806,57 @@ lexer: context [
 					| "routine!"	(value: routine!)
 				]
 				| "none" 			(value: none)
-			] pos: any ws #"]"
+				| ahead #"]" (value: type: error! push-invalid type pos) break
+				| (value: error!) break
+			] pos: some [ahead #"]" break | ws | end break | epos: to #"^/" (type: error! push-invalid type epos)]
+			#"]" | epos: (type: error! push-invalid type epos)
 		]
 
 		comment-rule: [#";" [to #"^/" | to end]]
 
 		invalid-rule: [
 			epos:
-			if (block! = last type-stack) ahead #"]" (type: none) break
-			| if (map! = last type-stack) ahead #")" (type: none) break
-			| if (paren! = last type-stack) ahead #")" (type: none) break
-			| skip (type: none! push-invalid type epos)
+			ahead #"]" if (block! <> last type-stack) skip (type: error! push-invalid type epos) break
+			| ahead #")" if (all [map! <> last type-stack paren! <> last type-stack]) skip (type: error! push-invalid type epos) break
+			| skip (type: error! push-invalid type epos)
 		]
 
 		literal-value: [
-			pos: (e: none) rs: s: [
-				 string-rule re:		(either have-error? [value: type][value: do make-string])
-				| block-rule re:		(value: none)
-				| comment-rule re:		(value: none)
-				| tuple-rule re:		(either have-error? [value: type][value: make-tuple s e])
-				| hexa-rule re:			(value: make-hexa s e)
-				| binary-rule re:		(either have-error? [value: type][unless value: make-binary s e base [value: binary!]])
-				| email-rule re:		(value: do make-file)
-				| date-rule re:			(unless value [value: type])
-				| integer-rule re:		(unless value [value: type])
-				| float-rule re:		(either have-error? [value: type][unless value: make-float s e type [value: type]])
-				| tag-rule re:			(either have-error? [value: type][value: do make-string])
-				| word-rule re:			(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| lit-word-rule re:		(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| get-word-rule re:		(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| refinement-rule re:	(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| file-rule re:			(either have-error? [value: type][value: do process])
-				| char-rule re:			(either have-error? [value: type][if value > 10FFFFh [push-invalid type s value: type]])
-				| map-rule re:			(value: none)
-				| paren-rule re:		(value: none)
-				| escaped-rule re:
-				| issue-rule re:		(either have-error? [value: type][value: last last stack] remove back tail last stack)
-				| invalid-rule re:		(value: type)
-			](
-				if value [do store-ast]
-			)
+			pos: (e: none rs: now-line? pos) s: [
+									  string-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: do make-string] do store-ast)
+				| (remove-lines rs/1) block-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) comment-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) tuple-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: make-tuple s e] do store-ast)
+				| (remove-lines rs/1) hexa-rule epos: (re: now-line? epos)			(value: make-hexa s e do store-ast)
+				| (remove-lines rs/1) binary-rule epos: (re: now-line? epos)		(either have-error? [value: type][unless value: make-binary s e base [value: binary!]] do store-ast)
+				| (remove-lines rs/1) email-rule epos: (re: now-line? epos)			(value: do make-file do store-ast)
+				| (remove-lines rs/1) date-rule epos: (re: now-line? epos)			(unless value [value: type] do store-ast)
+				| (remove-lines rs/1) integer-rule epos: (re: now-line? epos)		(unless value [value: type] do store-ast)
+				| (remove-lines rs/1) float-rule epos: (re: now-line? epos)			(either have-error? [value: type][unless value: make-float s e type [value: type]] do store-ast)
+				| (remove-lines rs/1) tag-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do make-string] do store-ast)
+				| (remove-lines rs/1) word-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) lit-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) get-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) refinement-rule epos: (re: now-line? epos)	(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) file-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do process] do store-ast)
+				| (remove-lines rs/1) char-rule epos: (re: now-line? epos)			(either have-error? [value: type][if value > 10FFFFh [push-invalid type s value: type]] do store-ast)
+				| (remove-lines rs/1) map-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) paren-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) escaped-rule epos: (re: now-line? epos)		(do store-ast)
+				| (remove-lines rs/1) issue-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) invalid-rule epos: (re: now-line? epos)		(value: type do store-ast)
+			]
 		]
 
-		one-value: [any ws pos: literal-value pos: to end]
-		any-value: [pos: any [some ws | literal-value]]
-		red-rules: [any-value any ws]
+		nested-block: [pos: some [ahead #"]" break | some ws | literal-value]]
+		nested-paren: [pos: some [ahead #")" break | some ws | literal-value]]
+		some-value: [pos: some [some ws | literal-value]]
+		red-rules: some-value
 
 		parse/case src red-rules
 		value: block!
-		rs: head src
-		re: tail src
+		rs: [1 1]
+		re: now-line? tail src
 		do pop-ast
 		repend ast-stack/1/1 ['source src 'lines line-stack]
 		ast-stack/1
@@ -847,9 +879,11 @@ lexer: context [
 				newline pad + 4
 				append buffer "expr: "
 				append buffer mold/flat/part pc/1/expr/1 20
-				newline pad + 4
-				append buffer "range: "
-				append buffer mold/flat pc/1/range
+				if pc/1/range [
+					newline pad + 4
+					append buffer "range: "
+					append buffer mold/flat pc/1/range
+				]
 				if pc/1/nested [
 					newline pad + 4
 					append buffer "nested: "
@@ -863,10 +897,12 @@ lexer: context [
 				if lines: pc/1/lines [
 					newline pad + 4
 					append buffer "lines: ["
+					newline pad + 6
+					append buffer mold/flat/part lines/1 10
 					lines: next lines
 					forall lines [
 						newline pad + 6
-						append buffer mold/flat/part lines/1 10
+						append buffer mold lines/1
 					]
 					newline pad + 4
 					append buffer "]"
