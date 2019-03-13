@@ -152,29 +152,6 @@ semantic: context [
 		]
 	]
 
-	create-error: function [pc [block!] type [word!] word [word!] message [string!]][
-		error: reduce [
-			'severity DiagnosticSeverity/(type)
-			'code to string! word
-			'source "Syntax"
-			'message message
-		]
-		unless pc/error [
-			repend pc ['error error]
-			exit
-		]
-		errors: pc/error
-		either block? errors/1 [
-			forall errors [
-				if errors/1/code = error/code [exit]
-			]
-			repend/only pc/error error
-		][
-			if errors/code = error/code [exit]
-			pc/error: reduce [errors error]
-		]
-	]
-
 	format: function [top [block!] /semantic][
 		buffer: make string! 1000
 		newline: function [cnt [integer!]] [
@@ -210,41 +187,24 @@ semantic: context [
 		buffer
 	]
 
-
-	syntax-error: function [pc [block!] word [word!] args][
-		switch/default word [
-			invalid-path [
-				path: copy pc/1/expr/1
-				remove back tail path
-				create-error pc/1 'Error 'invalid-path
-					rejoin [mold path "/ -- invalid path"]
-			]
-			invalid-spec [
-				create-error pc/1 'Error 'invalid-spec
-					rejoin ["invalid function spec: " args]
-			]
-		][
-			create-error pc/1 'Error 'unknown
-				rejoin [mold pc/1/expr/1 " -- unknown error: " mold word]
-		]
-	]
-
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
 			forall pc [
-				if pc/1/error [
-					error: pc/1/error
-					either block? error/1 [
-						forall error [
-							err: make map! error/1
-							err/range: lexer/form-range pc/1/range
-							append ret err
+				if errors: pc/1/error [
+					forall errors [
+						if all [
+							pc/1/expr/1 = paren!
+							pc/-1
+							pc/-1/expr/1 = path!
+						][continue]
+						append ret make map! reduce [
+							'severity DiagnosticSeverity/(errors/1/level)
+							'code mold errors/1/type
+							'source "Syntax"
+							'message errors/1/msg
+							'range lexer/form-range reduce [pc/1/range/1 pc/1/range/2 errors/1/range/1 errors/1/range/2]
 						]
-					][
-						err: make map! error
-						err/range: lexer/form-range pc/1/range
-						append ret err
 					]
 				]
 				if pc/1/nested [
@@ -254,77 +214,6 @@ semantic: context [
 		]
 		collect-errors* top
 		ret
-	]
-
-	analysis-error: function [top [block!]][
-		analysis-each: function [pc [block!]][
-			if all [
-				path? pc/1/expr/1
-				'`*?~+-= = last pc/1/expr/1
-			][
-				syntax-error pc 'invalid-path none
-				return 1
-			]
-			if all [
-				find [func function has] pc/1/expr/1
-				pc/2
-				block! = pc/2/expr/1
-				pc/3
-				block! = pc/3/expr/1
-			][
-				spec: pc/2/nested
-				;check spec
-				if pc/3/nested [
-					analysis-iter pc/3/nested
-				]
-				return 3
-			]
-			if all [
-				find [does context object] pc/1/expr/1
-				pc/2
-				block! = pc/2/expr/1
-				nested: pc/2/nested
-			][
-				analysis-iter nested
-				return 2
-			]
-			if all [
-				pc/1/expr/1 = 'make
-				pc/2
-				any [
-					pc/2/expr/1 = 'object!
-					word? pc/2/expr/1
-				]
-				pc/3
-				block! = pc/3/expr/1
-				nested: pc/3/nested
-			][
-				analysis-iter nested
-				return 3
-			]
-			1
-		]
-
-		analysis-iter: function [pc [block!]][
-			while [not tail? pc] [
-				step: analysis-each pc
-				pc: skip pc step
-			]
-		]
-
-		write-log "analysis-error: begin"
-		write-log mold now/precise
-
-		if top/1/nested [
-			analysis-iter top/1/nested
-		]
-		err: collect-errors top
-		append diagnostics make map! reduce [
-			'uri top/1/uri
-			'diagnostics err
-		]
-		write-log mold now/precise
-		write-log "analysis-error: end"
 	]
 
 	related-file: function [dir [file!] file [file!]][
@@ -421,31 +310,13 @@ semantic: context [
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		top: make block! 1
-		res: lexer/transcode/ast code none true top
-		if error? res/3 [
-			range: lexer/form-range lexer/pos-range? res/2 res/2
-			line-cs: charset [#"^M" #"^/"]
-			info: res/3/arg2
-			if part: find info line-cs [info: copy/part info part]
-			message: rejoin [res/3/id " ^"" res/3/arg1 "^" at: ^"" info "^""]
+		top: lexer/transcode code
+		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
-				'diagnostics reduce [
-					make map! reduce [
-						'range range
-						'severity 1
-						'code 1
-						'source "lexer"
-						'message message
-					]
-				]
+				'diagnostics errors
 			]
-			clear top
-			repend/only top ['expr none 'range lexer/form-pos code lexer/form-pos tail code]
 		]
-		repend top/1 ['source code]
-
 		add-source-to-table uri top
 		add-include-file top
 	]
