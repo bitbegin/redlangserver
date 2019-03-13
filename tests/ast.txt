@@ -1,7 +1,7 @@
-13-Mar-2019/16:10:09.786+08:00
-13-Mar-2019/16:10:09.789+08:00
-13-Mar-2019/16:10:09.789+08:00
-13-Mar-2019/16:10:09.985+08:00
+13-Mar-2019/21:11:03.632+08:00
+13-Mar-2019/21:11:03.635+08:00
+13-Mar-2019/21:11:03.635+08:00
+13-Mar-2019/21:11:03.831+08:00
 
 [
   [
@@ -2167,21 +2167,24 @@
                     upper: [156 17 161 4]
                   ]
                   [
+                    expr: path!
+                    range: [157 14 157 33]
+                    upper: [156 17 161 4]
+                    error: [
+                      [type path! msg "invalid" level Error at [157 33]]
+                    ]
+                  ]
+                  [
                     expr: paren!
-                    range: [157 14 157 39]
+                    range: [157 33 157 39]
                     nested: 
                     [
                       [
                         expr: type
                         range: [157 34 157 38]
-                        upper: [157 14 157 39]
+                        upper: [157 33 157 39]
                       ]
                     ]
-                    upper: [156 17 161 4]
-                  ]
-                  [
-                    expr: DiagnosticSeverity
-                    range: [157 14 157 39]
                     upper: [156 17 161 4]
                   ]
                   [
@@ -17588,41 +17591,44 @@
                             upper: [1195 18 1212 6]
                           ]
                           [
+                            expr: path!
+                            range: [1196 20 1196 29]
+                            upper: [1195 18 1212 6]
+                            error: [
+                              [type path! msg "invalid" level Error at [1196 29]]
+                            ]
+                          ]
+                          [
                             expr: paren!
-                            range: [1196 20 1196 40]
+                            range: [1196 29 1196 40]
                             nested: 
                             [
                               [
                                 expr: i
                                 range: [1196 30 1196 31]
-                                upper: [1196 20 1196 40]
+                                upper: [1196 29 1196 40]
                               ]
                               [
                                 expr: *
                                 range: [1196 32 1196 33]
-                                upper: [1196 20 1196 40]
+                                upper: [1196 29 1196 40]
                               ]
                               [
                                 expr: 3
                                 range: [1196 34 1196 35]
-                                upper: [1196 20 1196 40]
+                                upper: [1196 29 1196 40]
                               ]
                               [
                                 expr: -
                                 range: [1196 36 1196 37]
-                                upper: [1196 20 1196 40]
+                                upper: [1196 29 1196 40]
                               ]
                               [
                                 expr: 2
                                 range: [1196 38 1196 39]
-                                upper: [1196 20 1196 40]
+                                upper: [1196 29 1196 40]
                               ]
                             ]
-                            upper: [1195 18 1212 6]
-                          ]
-                          [
-                            expr: snippets
-                            range: [1196 20 1196 40]
                             upper: [1195 18 1212 6]
                           ]
                           [
@@ -17671,41 +17677,44 @@
                                     upper: [1197 37 1210 8]
                                   ]
                                   [
+                                    expr: path!
+                                    range: [1198 15 1198 24]
+                                    upper: [1197 37 1210 8]
+                                    error: [
+                                      [type path! msg "invalid" level Error at [1198 24]]
+                                    ]
+                                  ]
+                                  [
                                     expr: paren!
-                                    range: [1198 15 1198 35]
+                                    range: [1198 24 1198 35]
                                     nested: 
                                     [
                                       [
                                         expr: i
                                         range: [1198 25 1198 26]
-                                        upper: [1198 15 1198 35]
+                                        upper: [1198 24 1198 35]
                                       ]
                                       [
                                         expr: *
                                         range: [1198 27 1198 28]
-                                        upper: [1198 15 1198 35]
+                                        upper: [1198 24 1198 35]
                                       ]
                                       [
                                         expr: 3
                                         range: [1198 29 1198 30]
-                                        upper: [1198 15 1198 35]
+                                        upper: [1198 24 1198 35]
                                       ]
                                       [
                                         expr: -
                                         range: [1198 31 1198 32]
-                                        upper: [1198 15 1198 35]
+                                        upper: [1198 24 1198 35]
                                       ]
                                       [
                                         expr: 2
                                         range: [1198 33 1198 34]
-                                        upper: [1198 15 1198 35]
+                                        upper: [1198 24 1198 35]
                                       ]
                                     ]
-                                    upper: [1197 37 1210 8]
-                                  ]
-                                  [
-                                    expr: snippets
-                                    range: [1198 15 1198 35]
                                     upper: [1197 37 1210 8]
                                   ]
                                   [
@@ -17779,31 +17788,34 @@
                                         upper: [1202 35 1205 9]
                                       ]
                                       [
+                                        expr: path!
+                                        range: [1204 18 1204 27]
+                                        upper: [1202 35 1205 9]
+                                        error: [
+                                          [type path! msg "invalid" level Error at [1204 27]]
+                                        ]
+                                      ]
+                                      [
                                         expr: paren!
-                                        range: [1204 18 1204 34]
+                                        range: [1204 27 1204 34]
                                         nested: 
                                         [
                                           [
                                             expr: i
                                             range: [1204 28 1204 29]
-                                            upper: [1204 18 1204 34]
+                                            upper: [1204 27 1204 34]
                                           ]
                                           [
                                             expr: *
                                             range: [1204 30 1204 31]
-                                            upper: [1204 18 1204 34]
+                                            upper: [1204 27 1204 34]
                                           ]
                                           [
                                             expr: 3
                                             range: [1204 32 1204 33]
-                                            upper: [1204 18 1204 34]
+                                            upper: [1204 27 1204 34]
                                           ]
                                         ]
-                                        upper: [1202 35 1205 9]
-                                      ]
-                                      [
-                                        expr: snippets
-                                        range: [1204 18 1204 34]
                                         upper: [1202 35 1205 9]
                                       ]
                                     ]

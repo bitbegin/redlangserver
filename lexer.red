@@ -507,7 +507,6 @@ lexer: context [
 				s: [
 					integer-number-rule			(store stack make-number s e type)
 					| begin-symbol-rule			(to-word stack copy/part s e word!)
-					| paren-rule
 					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
 					| (push-invalid type s)
 				]
