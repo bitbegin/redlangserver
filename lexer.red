@@ -532,9 +532,15 @@ lexer: context [
 					| (push-invalid type s)
 				]
 			]
-			opt [#":" (type: set-path! set-path back tail stack)][
-				ahead [path-end | ws-no-count | end] | epos: (push-invalid type epos)
+			[
+				#":"
+				[
+					if (wtype = word!) (type: set-path! set-path back tail stack)
+					| epos: (push-invalid type epos)
+				]
+				| break
 			]
+			[ahead [path-end | ws-no-count | end] | epos: (push-miss type "separator" epos)]
 			(pop stack)
 		]
 
@@ -549,7 +555,7 @@ lexer: context [
 		]
 
 		word-rule: 	[
-			(type: word!) special-words	opt [#":" (type: set-word!)]
+			(type: wtype: word!) special-words	opt [#":" (type: set-word!)]
 			(to-word stack value type)				;-- special case for / and // as words
 			| path: s: begin-symbol-rule (type: word!) [
 				url-rule
@@ -560,13 +566,13 @@ lexer: context [
 		]
 
 		get-word-rule: [
-			#":" (type: get-word!) epos: [
+			#":" (type: wtype: get-word!) [
 				special-words (to-word stack value type)
 				| s: begin-symbol-rule [
 					path-rule (type: get-path!)
 					| (to-word stack copy/part s e type)	;-- get-word matched
 				]
-				| (
+				| epos: (
 					to-word stack "" type
 					push-invalid type epos
 				)
@@ -574,7 +580,7 @@ lexer: context [
 		]
 
 		lit-word-rule: [
-			#"'" (type: lit-word!) epos: [
+			#"'" (type: wtype: lit-word!) [
 				special-words (to-word stack value type)
 				| [
 					s: begin-symbol-rule [
@@ -582,7 +588,7 @@ lexer: context [
 						| (to-word stack copy/part s e type) ;-- lit-word matched
 					]
 				]
-				| (
+				| epos: (
 					to-word stack "" type
 					push-invalid type epos
 				)
