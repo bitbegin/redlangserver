@@ -1234,12 +1234,13 @@ completion: context [
 		collect* pc
 	]
 
-	collect-path*: function [pc [block!] path [path!] slash-end? [logic!] result [block!]][
+	collect-path*: function [pc [block!] path [string!] result [block!]][
 		specs: make block! 16
+		path: split path "/"
 		unless type: find-set?/*func?/*context? pc path/1 specs true [
 			exit
 		]
-		if empty? to string! path/2 [
+		if empty? path/2 [
 			switch type [
 				context		[collect-context-set-word* specs result]
 				func		[collect-func-refinement* specs result]
@@ -1249,9 +1250,10 @@ completion: context [
 		path: next path
 		until [
 			tops: specs
-			slash?: slash-end?
-			if empty? to string! path/2 [
+			either path/2 [
 				slash?: yes
+			][
+				slash?: no
 			]
 			forall tops [
 				either any [
@@ -1262,32 +1264,36 @@ completion: context [
 					]
 				][
 					collect-slash-func* tops/1 path/1 nspecs: make block! 4 slash?
-					unless path/2 [
+					if any [
+						none? path/2
+						empty? path/2
+					][
 						append result nspecs
 					]
 				][
 					collect-slash-context* tops/1 path/1 specs: make block! 4 slash?
-					unless path/2 [
+					if any [
+						none? path/2
+						empty? path/2
+					][
 						append result specs
 					]
 				]
 			]
 			any [
 				tail? path: next path
-				empty? to string! path/1
+				empty? path/1
 			]
 		]
 	]
 
-	collect-path: function [top [block!] pc [block!] result [block!]][
-		path: to path! pc/1/expr/1
-		slash-end?: not none? pc/1/err
-		collect-path* pc path slash-end? result
+	collect-path: function [top [block!] pc [block!] pure-path [string!] result [block!]][
+		collect-path* pc pure-path result
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-path* back tail sources/1/1/nested path slash-end? result
+				collect-path* back tail sources/1/1/nested path result
 				if 0 < length? result [exit]
 			]
 		]
@@ -1295,15 +1301,10 @@ completion: context [
 
 	complete-path: function [top [block!] pc [block!] comps [block!]][
 		complete-sys-path: function [][
-			words: system-words/system-words
-			cstr: to string! path
-			if slash-end? [
-				append cstr "/"
-			]
-			tstr: find/tail/last cstr "/"
-			tstr: copy/part cstr tstr
-			unless find words fword [exit]
-			if error? result: try [red-complete-ctx/red-complete-path cstr no][
+			tstr: find/tail/last pure-path "/"
+			tstr: copy/part pure-path tstr
+			unless system-words/system? fword [exit]
+			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
 			forall result [
@@ -1327,14 +1328,21 @@ completion: context [
 				]
 			]
 		]
-		path: copy pc/1/expr/1
-		fword: pc/1/expr/1/1
-		fstring: to string! fword
-		filter: to string! last pc/1/expr/1
+		spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
+		epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
+		path-str: copy/part spos epos
+		fword: copy/part path-str find path-str "/"
+		filter: find/last/tail path-str "/"
+		pure-path: path-str
+		if any [
+			pure-path/1 = #"'"
+			pure-path/1 = #":"
+		][
+			pure-path: next pure-path
+		]
 		slash-end?: no
-		if pc/1/err [
+		if empty? filter [
 			slash-end?: yes
-			filter: ""
 		]
 		range: lexer/form-range pc/1/range
 		either slash-end? [
@@ -1343,7 +1351,7 @@ completion: context [
 			range/start/character: range/end/character - length? filter
 		]
 		pcs: clear []
-		collect-path top pc pcs
+		collect-path top pc pure-path pcs
 		forall pcs [
 			rpc: pcs/1
 			ntop: rpc
@@ -1393,13 +1401,35 @@ completion: context [
 			last	[]
 			mid		[
 				type: type?/word pc/1/expr/1
-				unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
+				lstr: pick lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4 - 1 1
+				unless any [
+					find [word! lit-word! get-word! path! lit-path! get-path! file!] type
+					all [
+						any [
+							pc/1/expr/1 = path!
+							pc/1/expr/1 = lit-path!
+							pc/1/expr/1 = get-path!
+						]
+						#"/" = lstr
+					]
+				][
 					pc: next pc
 				]
 			]
 		][return none]
 		type: type?/word pc/1/expr/1
-		unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
+		lstr: pick lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4 - 1 1
+		unless any [
+			find [word! lit-word! get-word! path! lit-path! get-path! file!] type
+			all [
+				any [
+					pc/1/expr/1 = path!
+					pc/1/expr/1 = lit-path!
+					pc/1/expr/1 = get-path!
+				]
+				#"/" = lstr
+			]
+		][
 			return none
 		]
 		comps: clear last-comps
@@ -1411,7 +1441,17 @@ completion: context [
 			complete-word top pc comps
 			return comps
 		]
-		if find [path! lit-path! get-path!] type [
+		if any [
+			find [path! lit-path! get-path!] type
+			all [
+				any [
+					pc/1/expr/1 = path!
+					pc/1/expr/1 = lit-path!
+					pc/1/expr/1 = get-path!
+				]
+				#"/" = lstr
+			]
+		][
 			complete-path top pc comps
 			return comps
 		]
@@ -1437,7 +1477,7 @@ completion: context [
 		ret: make block! 4
 		forall pc [
 			if find reduce [block! map! paren!] pc/1/expr/1 [
-				append/only ret make pc/1/expr/1 
+				append/only ret make pc/1/expr/1
 					either pc/1/nested [
 						get-block pc/1/nested
 					][[]]

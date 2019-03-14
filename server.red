@@ -19,10 +19,6 @@ auto-complete?: false
 open-logger?: false
 debug-on?: false
 
-last-uri: none
-last-diagnostics: none
-last-line: none
-last-column: none
 client-caps: none
 shutdown?: no
 
@@ -223,6 +219,18 @@ clear-diag: function [uri [string!]][
 	response
 ]
 
+resp-diags: function [diags [block!] uri [string!]][
+	if empty? diags [
+		clear-diag uri
+		exit
+	]
+	forall diags [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: diags/1
+		response
+	]
+]
+
 find-uri: function [uri [string!]][
 	vs: versions
 	forall vs [
@@ -243,21 +251,12 @@ on-textDocument-didOpen: function [params [map!]][
 		repend/only versions ['uri uri 'version version]
 	]
 
-	set 'last-uri uri
-	either not empty? diags: semantic/add-source uri source [
-		forall diags [
-			json-body/method: "textDocument/publishDiagnostics"
-			json-body/params: diags/1
-			response
-		]
-	][
-		clear-diag uri
-	]
+	diags: semantic/add-source uri source
+	resp-diags diags uri
 ]
 
 on-textDocument-didClose: function [params [map!]][
 	uri: params/textDocument/uri
-	set 'last-uri none
 	if vs: find-uri uri [
 		remove vs
 	]
@@ -280,17 +279,11 @@ on-textDocument-didChange: function [params [map!]][
 		unless diags: semantic/update-source uri contentChanges [
 			json-body/error: make map! reduce [
 				'code -32002
-				'message "lost some text changes, please reopen this file!"
+				'message "create ast error, please reopen this file!"
 			]
 			response exit
 		]
-		if not empty? diags [
-			forall diags [
-				json-body/method: "textDocument/publishDiagnostics"
-				json-body/params: diags/1
-				response exit
-			]
-		]
+		resp-diags diags uri
 		vs/1/version: version
 		exit
 	]
@@ -326,9 +319,6 @@ on-textDocument-completion: function [params [map!]][
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character
-	set 'last-uri uri
-	set 'last-line line
-	set 'last-column column
 	comps: completion/complete uri line + 1 column + 1
 	json-body/result: make map! reduce [
 		;'isIncomplete true
