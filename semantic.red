@@ -482,8 +482,8 @@ semantic: context [
 		if pc/1/range/3 = s-line [
 			pc/1/range/4: pc/1/range/4 + end-chars
 		]
-		spos: lexer/line-pos? ncode pc/1/range/1 pc/1/range/2
-		epos: lexer/line-pos? ncode pc/1/range/3 pc/1/range/4
+		spos: lexer/line-pos? line-stack pc/1/range/1 pc/1/range/2
+		epos: lexer/line-pos? line-stack pc/1/range/3 pc/1/range/4
 		if empty? str: copy/part spos epos [
 			remove pc
 			write-log "update-one: remove"
@@ -533,7 +533,7 @@ semantic: context [
 			append code2 text
 			append code2 epos
 			line-stack: make block! 1000
-			parse-line line-stack code2
+			lexer/parse-line line-stack code2
 			ss/1/1/source: code2
 			ss/1/1/lines: line-stack
 			otext-ws?: parse otext [some ws]
@@ -620,7 +620,7 @@ semantic: context [
 						not find not-trigger-charset otext
 					]
 				][
-					unless update-one ss/1/1/uri epcs s-line s-column e-line e-column (length? text) - (length? otext) line-stack [
+					unless update-one epcs s-line s-column e-line e-column (length? text) - (length? otext) line-stack [
 						write-log "add-source 4"
 						add-source* ss/1/1/uri code2
 					]
@@ -660,7 +660,7 @@ semantic: context [
 						write-log "insert pc: "
 						write-log mold range
 						if any [
-							not top: lexer/transcode str
+							not top: lexer/transcode text
 							none? nested: top/1/nested
 							1 < length? nested
 						][
