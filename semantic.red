@@ -194,16 +194,16 @@ semantic: context [
 				if errors: pc/1/error [
 					forall errors [
 						if all [
-							pc/1/expr/1 = paren!
-							pc/-1
-							pc/-1/expr/1 = path!
+							pc/1/expr/1 = path!
+							pc/2
+							pc/2/expr/1 = paren!
 						][continue]
 						append ret make map! reduce [
 							'severity DiagnosticSeverity/(errors/1/level)
 							'code mold errors/1/type
 							'source "Syntax"
 							'message errors/1/msg
-							'range lexer/form-range reduce [pc/1/range/1 pc/1/range/2 errors/1/range/1 errors/1/range/2]
+							'range lexer/form-range reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
 						]
 					]
 				]
@@ -337,9 +337,8 @@ semantic: context [
 	]
 
 	update-ws: function [
-			uri [string!] pcs [block!]
-			s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
-			text [string!] ncode [string!] forward? [logic!]
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] text [string!] line-stack [block!] forward? [logic!]
 	][
 		update-pc: function [npc* [block!] lines [integer!] end-chars [integer!]][
 			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
@@ -426,63 +425,25 @@ semantic: context [
 					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
 				]
 			]
-			spos: lexer/line-pos? ncode npc/1/range/1 npc/1/range/2
-			epos: lexer/line-pos? ncode npc/1/range/3 npc/1/range/4
+			spos: lexer/line-pos? line-stack npc/1/range/1 npc/1/range/2
+			epos: lexer/line-pos? line-stack npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
-			res: lexer/transcode/ast str none yes out: clear []
-			either error? res/3 [
-				range: lexer/form-range npc/1/range
-				line-cs: charset [#"^M" #"^/"]
-				info: res/3/arg2
-				if part: find info line-cs [info: copy/part info part]
-				message: rejoin [res/3/id " ^"" res/3/arg1 "^" at: ^"" info "^""]
-				append diagnostics make map! reduce [
-					'uri uri
-					'diagnostics reduce [
-						make map! reduce [
-							'range range
-							'severity 1
-							'code 1
-							'source "lexer"
-							'message message
-						]
-					]
-				]
-				npc/1/expr/1: str
-				either find pc/1 'err [
-					npc/1/err: yes
-				][
-					repend npc/1 ['err yes]
-				]
+			if any [
+				not top: lexer/transcode str
+				none? nested: top/1/nested
+				1 < length? nested
 			][
-				either 1 < length? (expr: res/1) [
-					write-log "update-ws: add-source"
-					add-source* uri ncode
-					continue
-				][
-					npc/1/expr: expr
-					either all [
-						out/1
-						out2: out/1/nested
-						out2/1/err
-					][
-						either find pc/1 'err [
-							npc/1/err: yes
-						][
-							repend npc/1 ['err yes]
-						]
-					][
-						if npc/1/err [npc/1/err: none]
-					]
-				]
+				return false
 			]
+			pc/1/expr: nested/1/expr
+			pc/1/error: nested/1/error
 		]
+		true
 	]
 
 	update-one: function [
-			uri [string!] pcs [block!]
-			s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
-			end-chars [integer!] ncode [string!]
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] end-chars [integer!] line-stack [block!]
 	][
 		update-pc: function [npc* [block!] end-chars [integer!]][
 			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
@@ -526,57 +487,20 @@ semantic: context [
 		if empty? str: copy/part spos epos [
 			remove pc
 			write-log "update-one: remove"
-			exit
+			return true
 		]
 		write-log mold pc/1/range
 		write-log mold str
-		res: lexer/transcode/ast str none yes out: clear []
-		either error? res/3 [
-			range: lexer/form-range pc/1/range
-			line-cs: charset [#"^M" #"^/"]
-			info: res/3/arg2
-			if part: find info line-cs [info: copy/part info part]
-			message: rejoin [res/3/id " ^"" res/3/arg1 "^" at: ^"" info "^""]
-			append diagnostics make map! reduce [
-				'uri uri
-				'diagnostics reduce [
-					make map! reduce [
-						'range range
-						'severity 1
-						'code 1
-						'source "lexer"
-						'message message
-					]
-				]
-			]
-			pc/1/expr/1: str
-			either find pc/1 'err [
-				pc/1/err: yes
-			][
-				repend pc/1 ['err yes]
-			]
+		if any [
+			not top: lexer/transcode str
+			none? nested: top/1/nested
+			1 < length? nested
 		][
-			either 1 < length? (expr: res/1) [
-				write-log "update-one: add-source"
-				add-source* uri ncode
-				continue
-			][
-				pc/1/expr: expr
-				either all [
-					out/1
-					out2: out/1/nested
-					out2/1/err
-				][
-					either find pc/1 'err [
-						pc/1/err: yes
-					][
-						repend pc/1 ['err yes]
-					]
-				][
-					if pc/1/err [pc/1/err: none]
-				]
-			]
+			return false
 		]
+		pc/1/expr: nested/1/expr
+		pc/1/error: nested/1/error
+		true
 	]
 
 	ws: charset " ^M^/^-"
@@ -587,12 +511,13 @@ semantic: context [
 		unless ss: find-source uri [
 			return false
 		]
-		write %f-log1.txt format ss/1
+		write %f-log1.txt ss/1/1/source
 		write/append %f-log1.txt "^/"
-		write/append %f-log1.txt ss/1/1/source
+		write/append %f-log1.txt format ss/1
 		;write-log format ss/1
 		code: ss/1/1/source
 		ncode: code
+		line-stack: ss/1/1/lines
 		forall changes [
 			range: changes/1/range
 			text: changes/1/text
@@ -601,13 +526,16 @@ semantic: context [
 			s-column: range/start/character + 1
 			e-line: range/end/line + 1
 			e-column: range/end/character + 1
-			spos: lexer/line-pos? ncode s-line s-column
-			epos: lexer/line-pos? ncode e-line e-column
+			spos: lexer/line-pos? line-stack s-line s-column
+			epos: lexer/line-pos? line-stack e-line e-column
 			otext: copy/part spos epos
 			code2: copy/part ncode spos
 			append code2 text
 			append code2 epos
-			ncode: code2
+			line-stack: make block! 1000
+			parse-line line-stack code2
+			ss/1/1/source: code2
+			ss/1/1/lines: line-stack
 			otext-ws?: parse otext [some ws]
 			text-ws?: parse text [some ws]
 			if ss/1/1/nested [
@@ -623,18 +551,17 @@ semantic: context [
 					none? epcs
 				][
 					write-log "add-source 1"
-					add-source* uri ncode
+					add-source* uri code2
+					ncode: code2
 					continue
 				]
 				pc: spcs/2
 				epc: epcs/2
+				;-- insert spaces in spaces or string!
 				if all [
 					any [
 						epcs/1 <> 'one
-						all [
-							not none? epc/1/err
-							string? epc/1/expr/1
-						]
+						string? epc/1/expr/1
 					]
 					all [
 						any [
@@ -648,14 +575,21 @@ semantic: context [
 					]
 				][
 					unless empty? text [
-						update-ws ss/1/1/uri epcs s-line s-column e-line e-column text ncode no
+						unless update-ws epcs s-line s-column e-line e-column text line-stack no [
+							write-log "add-source 2"
+							add-source* ss/1/1/uri code2
+						]
 					]
 					unless empty? otext [
-						update-ws ss/1/1/uri epcs s-line s-column e-line e-column otext ncode yes
+						unless update-ws epcs s-line s-column e-line e-column otext line-stack yes [
+							write-log "add-source 3"
+							add-source* ss/1/1/uri code2
+						]
 					]
-					ss/1/1/source: ncode
+					ncode: code2
 					continue
 				]
+				;-- token internal
 				if all [
 					any [
 						all [
@@ -686,10 +620,14 @@ semantic: context [
 						not find not-trigger-charset otext
 					]
 				][
-					update-one ss/1/1/uri epcs s-line s-column e-line e-column (length? text) - (length? otext) ncode
-					ss/1/1/source: ncode
+					unless update-one ss/1/1/uri epcs s-line s-column e-line e-column (length? text) - (length? otext) line-stack [
+						write-log "add-source 4"
+						add-source* ss/1/1/uri code2
+					]
+					ncode: code2
 					continue
 				]
+				;-- insert a new token
 				if all [
 					spcs = epcs
 					empty? otext
@@ -721,49 +659,35 @@ semantic: context [
 						range: reduce [s-line s-column e-line e-column + length? text]
 						write-log "insert pc: "
 						write-log mold range
-						res: lexer/transcode text none yes
-						if error? res/3 [
-							nrange: lexer/form-range range
-							line-cs: charset [#"^M" #"^/"]
-							info: res/3/arg2
-							if part: find info line-cs [info: copy/part info part]
-							message: rejoin [res/3/id " ^"" res/3/arg1 "^" at: ^"" info "^""]
-							append diagnostics make map! reduce [
-								'uri uri
-								'diagnostics reduce [
-									make map! reduce [
-										'range nrange
-										'severity 1
-										'code 1
-										'source "lexer"
-										'message message
-									]
-								]
-							]
-							write-log "update-more: error"
-							expr: reduce [text ""]
-							insert/only pc reduce ['expr text 'err yes 'range range 'upper epc/1/upper]
-							ss/1/1/source: ncode
+						if any [
+							not top: lexer/transcode str
+							none? nested: top/1/nested
+							1 < length? nested
+						][
+							write-log "update-insert: add-source"
+							add-source* uri code2
+							ncode: code2
 							continue
 						]
-						if 1 < length? (expr: res/1) [
-							write-log "update-more: add-source"
-							add-source* uri ncode
-							continue
-						]
-						write-log "update-more"
-						insert/only pc reduce ['expr expr 'range range 'upper epc/1/upper]
-						ss/1/1/source: ncode
+						insert/only pc reduce ['expr nested/1/expr 'range range 'upper epc/1/upper 'error nested/1/error]
+						ncode: code2
 						continue
 					]
 				]
 			]
-			write-log "add-source 2"
-			add-source* uri ncode
+			write-log "add-source end"
+			add-source* uri code2
+			ncode: code2
 		]
-		write %f-log2.txt format ss/1
+		write %f-log2.txt ss/1/1/source
 		write/append %f-log2.txt "^/"
-		write/append %f-log2.txt ss/1/1/source
+		write/append %f-log2.txt format ss/1
+		unless empty? errors: collect-errors ss/1 [
+			append diagnostics make map! reduce [
+				'uri ss/1/1/uri
+				'diagnostics errors
+			]
+		]
 		diagnostics
 	]
 ]
