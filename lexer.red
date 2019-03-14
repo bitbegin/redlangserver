@@ -125,7 +125,7 @@ lexer: context [
 		return:		[block!]
 		/local
 			rs re epos ast-nested ast-block ast-upper
-			new s e c pos value cnt type process path
+			new s e c pos value cnt type wtype process path
 			digit hexa-upper hexa-lower hexa hexa-char not-word-char not-word-1st
 			not-file-char not-str-char not-mstr-char caret-char
 			non-printable-char integer-end ws-ASCII ws-U+2k control-char
@@ -532,13 +532,12 @@ lexer: context [
 					| (push-invalid type s)
 				]
 			]
-			[
+			opt [
 				#":"
 				[
 					if (wtype = word!) (type: set-path! set-path back tail stack)
 					| epos: (push-invalid type epos)
 				]
-				| break
 			]
 			[ahead [path-end | ws-no-count | end] | epos: (push-miss type "separator" epos)]
 			(pop stack)
