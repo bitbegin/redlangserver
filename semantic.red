@@ -203,7 +203,7 @@ semantic: context [
 							'code mold errors/1/type
 							'source "Syntax"
 							'message errors/1/msg
-							'range lexer/form-range reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
+							'range lexer/form-range pc/1/range ;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
 						]
 					]
 				]
@@ -1158,10 +1158,9 @@ completion: context [
 		collect* pc
 	]
 
-	collect-path*: function [pc [block!] path [string!] result [block!]][
+	collect-path*: function [pc [block!] path [block!] result [block!]][
 		specs: make block! 16
-		path: split path "/"
-		unless type: find-set?/*func?/*context? pc path/1 specs true [
+		unless type: find-set?/*func?/*context? pc to word! path/1 specs true [
 			exit
 		]
 		if empty? path/2 [
@@ -1187,7 +1186,7 @@ completion: context [
 						find [func function] par/-1/expr/1
 					]
 				][
-					collect-slash-func* tops/1 path/1 nspecs: make block! 4 slash?
+					collect-slash-func* tops/1 to word! path/1 nspecs: make block! 4 slash?
 					if any [
 						none? path/2
 						empty? path/2
@@ -1195,7 +1194,7 @@ completion: context [
 						append result nspecs
 					]
 				][
-					collect-slash-context* tops/1 path/1 specs: make block! 4 slash?
+					collect-slash-context* tops/1 to word! path/1 specs: make block! 4 slash?
 					if any [
 						none? path/2
 						empty? path/2
@@ -1211,8 +1210,8 @@ completion: context [
 		]
 	]
 
-	collect-path: function [top [block!] pc [block!] pure-path [string!] result [block!]][
-		collect-path* pc pure-path result
+	collect-path: function [top [block!] pc [block!] path [block!] result [block!]][
+		collect-path* pc path result
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
@@ -1255,8 +1254,9 @@ completion: context [
 		spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
 		epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
 		path-str: copy/part spos epos
-		fword: copy/part path-str find path-str "/"
-		filter: find/last/tail path-str "/"
+		paths: split path-str "/"
+		fword: to word! paths/1
+		filter: last paths
 		pure-path: path-str
 		if any [
 			pure-path/1 = #"'"
@@ -1275,7 +1275,7 @@ completion: context [
 			range/start/character: range/end/character - length? filter
 		]
 		pcs: clear []
-		collect-path top pc pure-path pcs
+		collect-path top pc paths pcs
 		forall pcs [
 			rpc: pcs/1
 			ntop: rpc
@@ -1534,6 +1534,7 @@ completion: context [
 		pc: pcs/2
 		switch/default pcs/1 [
 			one		[]
+			first	[]
 			last	[]
 			mid		[
 				type: type?/word pc/1/expr/1
