@@ -327,7 +327,7 @@ semantic: context [
 				if npc/1/range/3 = e-line [
 					npc/1/range/4: npc/1/range/4 - e-column + end-chars + 1
 				]
-				npc/1/range/1: npc/1/range/1 + lines
+				npc/1/range/3: npc/1/range/3 + lines
 			]
 		]
 
@@ -340,7 +340,7 @@ semantic: context [
 			]
 		]
 		if only [
-			update-pc npc* yes
+			update-pc npc* no
 			exit
 		]
 		update-pc-nested npc* yes
@@ -357,15 +357,17 @@ semantic: context [
 
 	update-ws: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] text [string!] line-stack [block!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
 		write-log "update-ws"
+		olines: new-lines? otext
 		lines: new-lines? text
 		either lines = 0 [
 			end-chars: length? text
 		][
 			end-chars: length? find/last/tail text "^/"
 		]
+		lines: lines - olines
 		pc: pcs/2
 		switch/default pcs/1 [
 			head empty first [npc: pc]
@@ -401,15 +403,17 @@ semantic: context [
 
 	update-one: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] text [string!] line-stack [block!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
 		write-log "update-one"
+		olines: new-lines? otext
 		lines: new-lines? text
 		either lines = 0 [
 			end-chars: length? text
 		][
 			end-chars: length? find/last/tail text "^/"
 		]
+		lines: lines - olines
 		pc: pcs/2
 		update-range next pc lines end-chars s-line s-column e-line e-column
 		update-range/only pc lines end-chars s-line s-column e-line e-column
@@ -509,7 +513,7 @@ semantic: context [
 						]
 					]
 				][
-					unless update-ws epcs s-line s-column e-line e-column text line-stack [
+					unless update-ws epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-ws failed"
 						add-source* uri ncode
 					]
@@ -556,7 +560,7 @@ semantic: context [
 						not find not-trigger-charset otext
 					]
 				][
-					unless update-one epcs s-line s-column e-line e-column text line-stack [
+					unless update-one epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-one failed"
 						add-source* uri ncode
 					]
