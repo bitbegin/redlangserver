@@ -152,41 +152,6 @@ semantic: context [
 		]
 	]
 
-	format: function [top [block!] /semantic][
-		buffer: make string! 1000
-		newline: function [cnt [integer!]] [
-			append buffer lf
-			append/dup buffer " " cnt
-		]
-
-		format*: function [pc [block!] depth [integer!]][
-			pad: depth * 4
-			newline pad
-			append buffer "["
-			forall pc [
-				newline pad + 2
-				append buffer "["
-				newline pad + 4
-				append buffer "expr: "
-				append buffer mold/flat/part pc/1/expr/1 20
-				newline pad + 4
-				append buffer "range: "
-				append buffer mold/flat pc/1/range
-				if pc/1/nested [
-					newline pad + 4
-					append buffer "nested: "
-					format* pc/1/nested depth + 1
-				]
-				newline pad + 2
-				append buffer "]"
-			]
-			newline pad
-			append buffer "]"
-		]
-		format* top 0
-		buffer
-	]
-
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
@@ -336,63 +301,64 @@ semantic: context [
 		n
 	]
 
-	update-ws: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] text [string!] line-stack [block!] forward? [logic!]
+	update-range: function [
+		npc* [block!] lines [integer!] end-chars [integer!]
+		s-line [integer!] s-column [integer!]
+		e-line [integer!] e-column [integer!] /only
 	][
-		update-pc: function [npc* [block!] lines [integer!] end-chars [integer!]][
-			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
-			update*: function [npc [block!] first* [logic!]][
-				if first* [
-					npc/1/range/1: npc/1/range/1 + lines
-					if npc/1/range/1 = s-line [
-						npc/1/range/2: npc/1/range/2 - s-column + end-chars + 1
-					]
-				]
-				npc/1/range/3: npc/1/range/3 + lines
-				if npc/1/range/3 = s-line [
-					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
-				]
-			]
-			update*-sub: function [npc [block!] first* [logic!]][
-				if first* [
-					npc/1/range/1: npc/1/range/1 - lines
+		update-pc: function [npc [block!] first* [logic!]][
+			if first* [
+				either lines = 0 [
 					if npc/1/range/1 = e-line [
-						npc/1/range/2: npc/1/range/2 - e-column + s-column
+						npc/1/range/2: npc/1/range/2 - e-column + s-column + end-chars
 					]
-				]
-				npc/1/range/3: npc/1/range/3 - lines
-				if npc/1/range/3 = s-line [
-					npc/1/range/4: npc/1/range/4 - e-column + s-column
-				]
-			]
-			update-pc-nested: function [npc [block!] first* [logic!]][
-				forall npc [
-					either forward? [
-						update*-sub npc first*
-					][
-						update* npc first*
-					]
-					if npc/1/nested [
-						update-pc-nested npc/1/nested first*
-					]
-				]
-			]
-			update-pc-nested npc* yes
-			either tail? npc* [
-				par: back npc*
-			][
-				par: npc*
-			]
-			while [par: par/1/upper][
-				either forward? [
-					update*-sub par no
 				][
-					update* par no
+					if npc/1/range/1 = e-line [
+						npc/1/range/2: npc/1/range/2 - e-column + end-chars + 1
+					]
+					npc/1/range/1: npc/1/range/1 + lines
 				]
-				update-pc-nested next par no
+			]
+			either lines = 0 [
+				if npc/1/range/3 = e-line [
+					npc/1/range/4: npc/1/range/4 - e-column + s-column + end-chars
+				]
+			][
+				if npc/1/range/3 = e-line [
+					npc/1/range/4: npc/1/range/4 - e-column + end-chars + 1
+				]
+				npc/1/range/1: npc/1/range/1 + lines
 			]
 		]
+
+		update-pc-nested: function [npc [block!] first* [logic!]][
+			forall npc [
+				update-pc npc first*
+				if npc/1/nested [
+					update-pc-nested npc/1/nested first*
+				]
+			]
+		]
+		if only [
+			update-pc npc* yes
+			exit
+		]
+		update-pc-nested npc* yes
+		either tail? npc* [
+			par: back npc*
+		][
+			par: npc*
+		]
+		while [par: par/1/upper][
+			update-pc par no
+			update-pc-nested next par no
+		]
+	]
+
+	update-ws: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] text [string!] line-stack [block!]
+	][
 		write-log "update-ws"
 		lines: new-lines? text
 		either lines = 0 [
@@ -402,29 +368,17 @@ semantic: context [
 		]
 		pc: pcs/2
 		switch/default pcs/1 [
-			head empty		[]
+			head empty first [npc: pc]
 			tail insert last mid one [
-				pc: next pc
+				npc: next pc
 			]
-		][exit]
-		either pcs/1 = 'one [
-			update-pc next pc lines end-chars
-		][
-			update-pc pc lines end-chars
+		][return false]
+		update-range npc lines end-chars s-line s-column e-line e-column
+		if npc <> pc [
+			update-range/only pc lines end-chars s-line s-column e-line e-column
 		]
 		if pcs/1 = 'one [
 			npc: pcs/2
-			either forward? [
-				npc/1/range/3: npc/1/range/3 - lines
-				if npc/1/range/3 = e-line [
-					npc/1/range/4: npc/1/range/4 - e-column + s-column
-				]
-			][
-				npc/1/range/3: npc/1/range/3 + lines
-				if npc/1/range/3 = s-line [
-					npc/1/range/4: npc/1/range/4 - s-column + end-chars + 1
-				]
-			]
 			spos: lexer/line-pos? line-stack npc/1/range/1 npc/1/range/2
 			epos: lexer/line-pos? line-stack npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
@@ -447,45 +401,18 @@ semantic: context [
 
 	update-one: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] end-chars [integer!] line-stack [block!]
+			e-column [integer!] text [string!] line-stack [block!]
 	][
-		update-pc: function [npc* [block!] end-chars [integer!]][
-			;-- head [tail next] [insert next] [last next] [mid next][empty] [one next, before]
-			update*: function [npc [block!] first* [logic!]][
-				if first* [
-					if npc/1/range/1 = s-line [
-						npc/1/range/2: npc/1/range/2 + end-chars
-					]
-				]
-				if npc/1/range/3 = s-line [
-					npc/1/range/4: npc/1/range/4 + end-chars
-				]
-			]
-			update-pc-nested: function [npc [block!] first* [logic!]][
-				forall npc [
-					update* npc first*
-					if npc/1/nested [
-						update-pc-nested npc/1/nested first*
-					]
-				]
-			]
-			update-pc-nested npc* yes
-			either tail? npc* [
-				par: back npc*
-			][
-				par: npc*
-			]
-			while [par: par/1/upper][
-				update* par no
-				update-pc-nested next par no
-			]
-		]
 		write-log "update-one"
-		pc: pcs/2
-		update-pc next pc end-chars
-		if pc/1/range/3 = s-line [
-			pc/1/range/4: pc/1/range/4 + end-chars
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
 		]
+		pc: pcs/2
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		update-range/only pc lines end-chars s-line s-column e-line e-column
 		spos: lexer/line-pos? line-stack pc/1/range/1 pc/1/range/2
 		epos: lexer/line-pos? line-stack pc/1/range/3 pc/1/range/4
 		if empty? str: copy/part spos epos [
@@ -516,17 +443,18 @@ semantic: context [
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
 		;write-log mold changes
-		unless ss: find-source uri [
+		unless top: find-top uri [
 			return false
 		]
-		;write %f-log1.txt ss/1/1/source
+		;write %f-log1.txt top/1/source
 		;write/append %f-log1.txt "^/"
-		;write/append %f-log1.txt format ss/1
-		;write-log format ss/1
-		code: ss/1/1/source
-		ncode: code
-		line-stack: ss/1/1/lines
+		;write/append %f-log1.txt lexer/format top
 		forall changes [
+			unless top: find-top uri [
+				return false
+			]
+			code: top/1/source
+			line-stack: top/1/lines
 			range: changes/1/range
 			text: changes/1/text
 			rangeLength: changes/1/rangeLength
@@ -537,35 +465,34 @@ semantic: context [
 			spos: lexer/line-pos? line-stack s-line s-column
 			epos: lexer/line-pos? line-stack e-line e-column
 			otext: copy/part spos epos
-			code2: copy/part ncode spos
-			append code2 text
-			append code2 epos
+			ncode: copy/part code spos
+			append ncode text
+			append ncode epos
 			line-stack: make block! 1000
-			lexer/parse-line line-stack code2
-			ss/1/1/source: code2
-			ss/1/1/lines: line-stack
+			lexer/parse-line line-stack ncode
+			top/1/source: ncode
+			top/1/lines: line-stack
 			otext-ws?: parse otext [some ws]
 			text-ws?: parse text [some ws]
-			if ss/1/1/nested [
-				spcs: epcs: position? ss/1 s-line s-column
+			if top/1/nested [
+				spcs: epcs: position? top s-line s-column
 				if all [
 					s-line <> e-line
 					s-column <> e-column
 				][
-					epcs: position? ss/1 e-line e-column
+					epcs: position? top e-line e-column
 				]
 				if any [
 					none? spcs
 					none? epcs
 				][
-					write-log "add-source 1"
-					add-source* uri code2
-					ncode: code2
+					write-log "position failed"
+					add-source* uri ncode
 					continue
 				]
 				pc: spcs/2
 				epc: epcs/2
-				;-- insert spaces in spaces or string!
+				;-- insert/remove spaces in spaces or string!
 				if all [
 					any [
 						epcs/1 <> 'one
@@ -582,19 +509,10 @@ semantic: context [
 						]
 					]
 				][
-					unless empty? text [
-						unless update-ws epcs s-line s-column e-line e-column text line-stack no [
-							write-log "add-source 2"
-							add-source* ss/1/1/uri code2
-						]
+					unless update-ws epcs s-line s-column e-line e-column text line-stack [
+						write-log "update-ws failed"
+						add-source* uri ncode
 					]
-					unless empty? otext [
-						unless update-ws epcs s-line s-column e-line e-column otext line-stack yes [
-							write-log "add-source 3"
-							add-source* ss/1/1/uri code2
-						]
-					]
-					ncode: code2
 					continue
 				]
 				;-- token internal
@@ -607,16 +525,26 @@ semantic: context [
 							not find reduce [block! map! paren!] pc/1/expr/1
 						]
 						all [
+							spcs <> epcs
 							spcs/1 = 'mid
-							find [last one mid] epcs/1
+							epcs/1 = 'mid
 							epcs/2 = next spcs/2
 							not find reduce [block! map! paren!] epc/1/expr/1
 						]
 						all [
-							epcs/1 = 'mid
-							find [last one] spcs/1
+							spcs <> epcs
+							spcs/1 = 'mid
+							find [last one] epcs/1
 							epcs/2 = next spcs/2
 							not find reduce [block! map! paren!] epc/1/expr/1
+						]
+						all [
+							spcs <> epcs
+							epcs/1 = 'mid
+							find [first one] spcs/1
+							epcs/2 = next spcs/2
+							not find reduce [block! map! paren!] pc/1/expr/1
+							epcs: spcs
 						]
 					]
 					any [
@@ -628,11 +556,10 @@ semantic: context [
 						not find not-trigger-charset otext
 					]
 				][
-					unless update-one epcs s-line s-column e-line e-column (length? text) - (length? otext) line-stack [
-						write-log "add-source 4"
-						add-source* ss/1/1/uri code2
+					unless update-one epcs s-line s-column e-line e-column text line-stack [
+						write-log "update-one failed"
+						add-source* uri ncode
 					]
-					ncode: code2
 					continue
 				]
 				;-- insert a new token
@@ -643,8 +570,13 @@ semantic: context [
 						not find not-trigger-charset text
 						text = "[]"
 						text = "()"
+						text = "{}"
+						text = {""}
 					]
 				][
+					;write-log text
+					;write-log mold spcs/1
+					;write-log mold spcs/2/1/range
 					if any [
 						spcs/1 = 'head
 						all [
@@ -667,8 +599,31 @@ semantic: context [
 							pc: next pc
 							find reduce [block! paren!] pc/1/expr/1
 						]
+						spcs/1 = 'empty
 					][
-						range: reduce [s-line s-column e-line e-column + length? text]
+						end-chars: length? text
+						update-range next pc 0 end-chars s-line s-column e-line e-column
+						if spcs/1 = 'empty [
+							update-range/only pc 0 end-chars s-line s-column e-line e-column
+							repend pc/1 ['nested make block! 1]
+							npc: pc/1/nested
+							range: reduce [s-line s-column e-line e-column + end-chars]
+							write-log "empty insert npc: "
+							write-log mold range
+							if any [
+								not top: lexer/transcode text
+								none? nested: top/1/nested
+								1 < length? nested
+							][
+								write-log "empty insert failed"
+								add-source* uri ncode
+								ncode: ncode
+								continue
+							]
+							append/only npc reduce ['expr nested/1/expr 'range range 'upper pc 'error nested/1/error]
+							continue
+						]
+						range: reduce [s-line s-column e-line e-column + end-chars]
 						write-log "insert pc: "
 						write-log mold range
 						if any [
@@ -676,27 +631,28 @@ semantic: context [
 							none? nested: top/1/nested
 							1 < length? nested
 						][
-							write-log "update-insert: add-source"
-							add-source* uri code2
-							ncode: code2
+							write-log "insert failed"
+							add-source* uri ncode
 							continue
 						]
-						insert/only pc reduce ['expr nested/1/expr 'range range 'upper epc/1/upper 'error nested/1/error]
-						ncode: code2
+						insert/only pc reduce ['expr nested/1/expr 'range range 'upper pc/1/upper 'error nested/1/error]
+						ncode: ncode
 						continue
 					]
 				]
 			]
-			write-log "add-source end"
-			add-source* uri code2
-			ncode: code2
+			write-log "diff failed"
+			add-source* uri ncode
 		]
-		;write %f-log2.txt ss/1/1/source
+		unless top: find-top uri [
+			return false
+		]
+		;write %f-log2.txt top/1/source
 		;write/append %f-log2.txt "^/"
-		;write/append %f-log2.txt format ss/1
-		unless empty? errors: collect-errors ss/1 [
+		;write/append %f-log2.txt lexer/format top
+		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
-				'uri ss/1/1/uri
+				'uri uri
 				'diagnostics errors
 			]
 		]
@@ -1521,10 +1477,13 @@ completion: context [
 				upper/-1
 				find [func function has] upper/-1/expr/1
 			][
+				if upper/-1/expr/1 = 'has [
+					return rejoin [string " is a local variable."]
+				]
 				if refinement? pc/1/expr/1 [
 					return rejoin [string " is a function refinement!"]
 				]
-				ret: rejoin [string " is a function argument!"]
+				ret: rejoin [string " is a function argument or local variable!"]
 				if all [
 					pc/2
 					block! = pc/2/expr/1
@@ -1633,6 +1592,7 @@ completion: context [
 			return none
 		]
 		pc: pcs/2
+		write-log mold pcs/1
 		switch/default pcs/1 [
 			one		[]
 			first	[]
