@@ -761,17 +761,30 @@ completion: context [
 		true
 	]
 
-	collect-word*: function [pc [block!] word [word!] result [block!]][
+	collect-word*: function [pc [block!] word [word!] result [block!] /match][
 		string: to string! word
 		collect*: function [npc [block!] type [block!] /back?][
+			if empty? npc [
+				either back? [npc: back npc][exit]
+			]
 			until [
 				if find type type?/word npc/1/expr/1 [
 					nword: to word! npc/1/expr/1
 					nstring: to string! nword
-					if find/match nstring string [
-						;if unique? result nword [
+					either match [
+						if all [
+							nstring = string
+							unique? result nword
+						][
 							append/only result npc
-						;]
+						]
+					][
+						if all [
+							find/match nstring string
+							unique? result nword
+						][
+							append/only result npc
+						]
 					]
 				]
 				either back? [
@@ -789,9 +802,6 @@ completion: context [
 		]
 		npc: npc2: pc
 		forever [
-			npc: back npc
-			collect*/back? npc [set-word!]
-			collect* npc [set-word!]
 			either all [
 				not tail? npc2
 				par: npc2/1/upper
@@ -807,18 +817,25 @@ completion: context [
 					collect* spec [word! lit-word! refinement!]
 				]
 				npc2: par
+				collect*/back? npc [set-word!]
+				collect* npc [set-word!]
 				npc: tail par
-			][break]
+			][
+				collect*/back? npc [set-word!]
+				collect* npc [set-word!]
+				break
+			]
 		]
 	]
 
 	collect-word: function [top [block!] pc [block!] result [block!]][
+		word: to word! pc/1/expr/1
 		sources: semantic/sources
 		forall sources [
 			either sources/1 = top [
-				collect-word* pc to word! pc/1/expr/1 result
+				collect-word* pc word result
 			][
-				collect-word* tail sources/1/1/nested to word! pc/1/expr/1 result
+				collect-word* back tail sources/1/1/nested word result
 			]
 		]
 	]
@@ -1446,52 +1463,66 @@ completion: context [
 		ret
 	]
 
-	resolve-word: function [top [block!] pc [block!] string [string!]][
-		if all [
-			set-word? pc/1/expr/1
-			pc/2
-		][
-			specs: clear []
-			switch ret: find-set?/*all? pc to word! pc/1/expr/1 specs no [
-				context		[return rejoin [string " is a context!"]]
-				func		[
-					if all [
-						not empty? specs
-						upper: specs/1/1/upper
-						upper/-1
-						word? upper/-1/expr/1
-					][
-						return func-info upper/-1/expr/1 get-func-spec upper/1/nested to string! pc/1/expr/1
-					]
-					return func-info 'func [] to string! pc/1/expr/1
-				]
-				value		[
-					if word? expr: specs/1/1/expr/1 [
-						return rejoin [string ": " mold expr]
-					]
-					return rejoin [string " is a " mold type?/word expr " variable."]
-				]
-			]
+	get-top: function [pc [block!]][
+		while [par: pc/1/upper][
+			pc: par
 		]
-		if all [
-			upper: pc/1/upper
-			upper/-1
-			find [func function has] upper/-1/expr/1
-		][
-			if refinement? pc/1/expr/1 [
-				return rejoin [string " is a function refinement!"]
-			]
-			ret: rejoin [string " is a function argument!"]
+		pc
+	]
+
+	resolve-word: function [pc [block!] string [string!]][
+		top: get-top pc
+		resolve-word*: function [][
 			if all [
+				set-word? pc/1/expr/1
 				pc/2
-				block! = pc/2/expr/1
-				pc/2/nested
 			][
-				return rejoin [ret "^/type: " mold get-block pc/2/nested]
+				specs: clear []
+				switch ret: find-set?/*all? pc to word! pc/1/expr/1 specs no [
+					context		[return rejoin [string " is a context!"]]
+					func		[
+						if all [
+							not empty? specs
+							upper: specs/1/1/upper
+							upper/-1
+							word? upper/-1/expr/1
+						][
+							return func-info upper/-1/expr/1 get-func-spec upper/1/nested to string! pc/1/expr/1
+						]
+						return func-info 'func [] to string! pc/1/expr/1
+					]
+					value		[
+						if word? expr: specs/1/1/expr/1 [
+							return rejoin [string ": " mold expr]
+						]
+						return rejoin [string " is a " mold type?/word expr " variable."]
+					]
+				]
 			]
-			return ret
+			if all [
+				upper: pc/1/upper
+				upper/-1
+				find [func function has] upper/-1/expr/1
+			][
+				if refinement? pc/1/expr/1 [
+					return rejoin [string " is a function refinement!"]
+				]
+				ret: rejoin [string " is a function argument!"]
+				if all [
+					pc/2
+					block! = pc/2/expr/1
+					pc/2/nested
+				][
+					return rejoin [ret "^/type: " mold get-block pc/2/nested]
+				]
+				return ret
+			]
+			none
 		]
-		none
+		if str: resolve-word* [
+			append str rejoin ["^/^/FILE: " mold lexer/uri-to-file top/1/uri]
+		]
+		str
 	]
 
 	resolve: function [params [map!]][
@@ -1534,12 +1565,38 @@ completion: context [
 			unless pc: semantic/find-expr top range [
 				return none
 			]
-			if str: resolve-word top pc params/label [
-				append str rejoin ["^/^/FILE: " mold lexer/uri-to-file uri]
-			]
-			return str
+			return resolve-word pc params/label
 		]
 		none
+	]
+
+	hover-word*: function [top [block!] pc [block!] result [block!]][
+		word: to word! pc/1/expr/1
+		collect-word*/match pc word result
+		if 0 < length? result [exit]
+		sources: semantic/sources
+		forall sources [
+			if sources/1 <> top [
+				collect-word*/match back tail sources/1/1/nested word result
+				if 0 < length? result [exit]
+			]
+		]
+	]
+
+	hover-word: function [top [block!] pc [block!]][
+		result: make block! 1
+		hover-word* top pc result
+		if 0 = length? result [return none]
+		forall result [
+			unless set-word? result/1/1/expr/1 [
+				pc: result/1
+				top: get-top pc
+				return resolve-word pc to string! pc/1/expr/1
+			]
+		]
+		pc: result/1
+		top: get-top pc
+		resolve-word pc to string! pc/1/expr/1
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
@@ -1554,19 +1611,20 @@ completion: context [
 			last	[]
 			mid		[
 				type: type?/word pc/1/expr/1
-				unless find [word! lit-word! get-word! path! lit-path! get-path! file!] type [
+				unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! file!] type [
 					pc: next pc
 				]
 			]
 		][return none]
 		type: type?/word pc/1/expr/1
-		unless find [word! lit-word! get-word! path! lit-path! get-path!] type [
+		unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
 			return none
 		]
 		either any-path? expr: pc/1/expr/1 [
 			word: expr/1
 		][
 			word: to word! expr
+			if ret: hover-word top pc [return ret]
 		]
 		if system-words/system? word [
 			if all[
