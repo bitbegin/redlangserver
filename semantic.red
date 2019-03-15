@@ -791,6 +791,7 @@ completion: context [
 		forever [
 			npc: back npc
 			collect*/back? npc [set-word!]
+			collect* npc [set-word!]
 			either all [
 				not tail? npc2
 				par: npc2/1/upper
@@ -896,44 +897,51 @@ completion: context [
 	]
 
 	find-set?: function [pc* [block!] word [word!] specs [block! none!] upper [logic!] /*func? /*context? /*all?][
+		check-set?: function [npc [block!]][
+			if all [
+				set-word? npc/1/expr/1
+				word = to word! npc/1/expr/1
+			][
+				npc2: npc
+				while [
+					all [
+						not tail? npc2: next npc2
+						set-word? npc2/1/expr/1
+					]
+				][]
+				unless tail? npc2 [
+					if all [
+						any [*context? *all?]
+						next-context? npc npc2 specs upper
+					][
+						return 'context
+					]
+					if all [
+						any [*func? *all?]
+						next-func? npc2 specs
+					][
+						return 'func
+					]
+					if *all? [
+						if specs [
+							append/only specs npc2
+						]
+						return 'value
+					]
+				]
+			]
+		]
 		find-set?*: function [pc [block!]][
 			npc: pc
 			until [
-				if all [
-					set-word? npc/1/expr/1
-					word = to word! npc/1/expr/1
-				][
-					npc2: npc
-					while [
-						all [
-							not tail? npc2: next npc2
-							set-word? npc2/1/expr/1
-						]
-					][]
-					unless tail? npc2 [
-						if all [
-							any [*context? *all?]
-							next-context? npc npc2 specs upper
-						][
-							return 'context
-						]
-						if all [
-							any [*func? *all?]
-							next-func? npc2 specs
-						][
-							return 'func
-						]
-						if *all? [
-							if specs [
-								append/only specs npc2
-							]
-							return 'value
-						]
-					]
-				]
+				if ret: check-set? npc [return ret]
 				npc2: npc
 				npc: back npc
 				head? npc2
+			]
+			npc: next pc
+			forall npc [
+				if ret: check-set? npc [return ret]
 			]
 			none
 		]
