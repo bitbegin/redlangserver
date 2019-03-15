@@ -769,9 +769,9 @@ completion: context [
 					nword: to word! npc/1/expr/1
 					nstring: to string! nword
 					if find/match nstring string [
-						if unique? result nword [
+						;if unique? result nword [
 							append/only result npc
-						]
+						;]
 					]
 				]
 				either back? [
