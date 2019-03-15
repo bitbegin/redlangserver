@@ -121,6 +121,7 @@ dispatch-method: function [method [string!] params][
 		"completionItem/resolve"			[on-completionItem-resolve params]
 		;"textDocument/documentSymbol"		[on-textDocument-symbol params]
 		"textDocument/hover"				[on-textDocument-hover params]
+		"textDocument/definition"			[on-textDocument-definition params]
 	]
 ]
 
@@ -147,6 +148,7 @@ on-initialize: function [params [map!]][
 			'resolveProvider true
 			'triggerCharacters trigger-string
 		]
+	put caps 'definitionProvider true
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -343,6 +345,15 @@ on-textDocument-hover: function [params [map!]][
 		'contents either result [rejoin ["```^/" result "^/```"]][""]
 		'range none
 	]
+	response
+]
+
+on-textDocument-definition: function [params [map!]][
+	uri: params/textDocument/uri
+	line: params/position/line
+	column: params/position/character
+	unless result: completion/definition uri line + 1 column + 1 [result: []]
+	json-body/result: result
 	response
 ]
 

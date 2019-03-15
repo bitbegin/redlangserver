@@ -1505,6 +1505,9 @@ completion: context [
 						if word? expr: specs/1/1/expr/1 [
 							return rejoin [string ": " mold expr]
 						]
+						if datatype? expr [
+							return rejoin [string " is a " mold expr " variable."]
+						]
 						return rejoin [string " is a " mold type?/word expr " variable."]
 					]
 				]
@@ -1658,5 +1661,65 @@ completion: context [
 			return system-words/get-word-info word
 		]
 		none
+	]
+
+	definition-word: function [top [block!] pc [block!]][
+		result: make block! 4
+		hover-word* top pc result
+		if 0 = length? result [return none]
+		ret: make block! 4
+		forall result [
+			top: get-top pc: result/1
+			append ret make map! reduce [
+				'uri top/1/uri
+				'range lexer/form-range pc/1/range
+			]
+		]
+		ret
+	]
+
+	definition-path: function [top [block!] pc [block!]][
+		path: to string! pc/1/expr/1
+		paths: split path "/"
+		result: make block! 4
+		collect-path top pc paths result yes
+		if 0 = length? result [return none]
+		ret: make block! 4
+		forall result [
+			top: get-top pc: result/1
+			append ret make map! reduce [
+				'uri top/1/uri
+				'range lexer/form-range pc/1/range
+			]
+		]
+		ret
+	]
+
+	definition: function [uri [string!] line [integer!] column [integer!]][
+		unless top: semantic/find-top uri [return none]
+		unless pcs: semantic/position? top line column [
+			return none
+		]
+		pc: pcs/2
+		switch/default pcs/1 [
+			one		[]
+			first	[]
+			last	[]
+			mid		[
+				type: type?/word pc/1/expr/1
+				unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! file!] type [
+					pc: next pc
+				]
+			]
+		][return none]
+		type: type?/word pc/1/expr/1
+		unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
+			return none
+		]
+		either any-path? expr: pc/1/expr/1 [
+			return definition-path top pc
+		][
+			return definition-word top pc
+		]
 	]
 ]
