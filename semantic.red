@@ -519,9 +519,9 @@ semantic: context [
 		unless ss: find-source uri [
 			return false
 		]
-		write %f-log1.txt ss/1/1/source
-		write/append %f-log1.txt "^/"
-		write/append %f-log1.txt format ss/1
+		;write %f-log1.txt ss/1/1/source
+		;write/append %f-log1.txt "^/"
+		;write/append %f-log1.txt format ss/1
 		;write-log format ss/1
 		code: ss/1/1/source
 		ncode: code
@@ -639,7 +639,11 @@ semantic: context [
 				if all [
 					spcs = epcs
 					empty? otext
-					not find not-trigger-charset text
+					any [
+						not find not-trigger-charset text
+						text = "[]"
+						text = "()"
+					]
 				][
 					if any [
 						spcs/1 = 'head
@@ -687,9 +691,9 @@ semantic: context [
 			add-source* uri code2
 			ncode: code2
 		]
-		write %f-log2.txt ss/1/1/source
-		write/append %f-log2.txt "^/"
-		write/append %f-log2.txt format ss/1
+		;write %f-log2.txt ss/1/1/source
+		;write/append %f-log2.txt "^/"
+		;write/append %f-log2.txt format ss/1
 		unless empty? errors: collect-errors ss/1 [
 			append diagnostics make map! reduce [
 				'uri ss/1/1/uri
