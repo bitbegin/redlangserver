@@ -1139,14 +1139,20 @@ completion: context [
 		]
 	]
 
-	collect-slash-context*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
+	collect-slash-context*: function [pc [block!] word [word!] result [block!] slash-end? [logic!] match? [logic!]][
 		string: to string! word
 		collect*: function [npc [block!]][
 			until [
 				if all [
 					not slash-end?
 					set-word? npc/1/expr/1
-					find/match to string! npc/1/expr/1 string
+					any [
+						all [
+							not match?
+							find/match to string! npc/1/expr/1 string
+						]
+						string = to string! npc/1/expr/1
+					]
 				][
 					if unique? result to word! npc/1/expr/1 [
 						append/only result npc
@@ -1170,7 +1176,7 @@ completion: context [
 		collect* back tail pc
 	]
 
-	collect-slash-func*: function [pc [block!] word [word!] result [block!] slash-end? [logic!]][
+	collect-slash-func*: function [pc [block!] word [word!] result [block!] slash-end? [logic!] match? [logic!]][
 		string: to string! word
 		collect*: function [npc [block!]][
 			forall npc [
@@ -1178,7 +1184,11 @@ completion: context [
 					refinement? npc/1/expr/1
 					any [
 						slash-end?
-						find/match to string! npc/1/expr/1 string
+						all [
+							not match?
+							find/match to string! npc/1/expr/1 string
+						]
+						string = to string! npc/1/expr/1
 					]
 				][
 					if npc/1/expr = [/local][break]
@@ -1191,7 +1201,7 @@ completion: context [
 		collect* pc
 	]
 
-	collect-path*: function [pc [block!] path [block!] result [block!]][
+	collect-path*: function [pc [block!] path [block!] result [block!] match? [logic!]][
 		specs: make block! 16
 		unless type: find-set?/*func?/*context? pc to word! path/1 specs true [
 			exit
@@ -1219,7 +1229,7 @@ completion: context [
 						find [func function] par/-1/expr/1
 					]
 				][
-					collect-slash-func* tops/1 to word! path/1 nspecs: make block! 4 slash?
+					collect-slash-func* tops/1 to word! path/1 nspecs: make block! 4 slash? match?
 					if any [
 						none? path/2
 						empty? path/2
@@ -1227,7 +1237,7 @@ completion: context [
 						append result nspecs
 					]
 				][
-					collect-slash-context* tops/1 to word! path/1 specs: make block! 4 slash?
+					collect-slash-context* tops/1 to word! path/1 specs: make block! 4 slash? match?
 					if any [
 						none? path/2
 						empty? path/2
@@ -1243,13 +1253,13 @@ completion: context [
 		]
 	]
 
-	collect-path: function [top [block!] pc [block!] path [block!] result [block!]][
-		collect-path* pc path result
+	collect-path: function [top [block!] pc [block!] path [block!] result [block!] match? [logic!]][
+		collect-path* pc path result match?
 		if 0 < length? result [exit]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-path* back tail sources/1/1/nested path result
+				collect-path* back tail sources/1/1/nested path result match?
 				if 0 < length? result [exit]
 			]
 		]
@@ -1308,7 +1318,7 @@ completion: context [
 			range/start/character: range/end/character - length? filter
 		]
 		pcs: clear []
-		collect-path top pc paths pcs
+		collect-path top pc paths pcs no
 		forall pcs [
 			rpc: pcs/1
 			ntop: rpc
@@ -1584,7 +1594,7 @@ completion: context [
 	]
 
 	hover-word: function [top [block!] pc [block!]][
-		result: make block! 1
+		result: make block! 4
 		hover-word* top pc result
 		if 0 = length? result [return none]
 		forall result [
@@ -1594,6 +1604,17 @@ completion: context [
 				return resolve-word pc to string! pc/1/expr/1
 			]
 		]
+		pc: result/1
+		top: get-top pc
+		resolve-word pc to string! pc/1/expr/1
+	]
+
+	hover-path: function [top [block!] pc [block!]][
+		path: to string! pc/1/expr/1
+		paths: split path "/"
+		result: make block! 4
+		collect-path top pc paths result yes
+		if 0 = length? result [return none]
 		pc: result/1
 		top: get-top pc
 		resolve-word pc to string! pc/1/expr/1
@@ -1622,6 +1643,7 @@ completion: context [
 		]
 		either any-path? expr: pc/1/expr/1 [
 			word: expr/1
+			if ret: hover-path top pc [return ret]
 		][
 			word: to word! expr
 			if ret: hover-word top pc [return ret]
