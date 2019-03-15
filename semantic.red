@@ -447,16 +447,13 @@ semantic: context [
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
 		;write-log mold changes
-		unless top: find-top uri [
-			return false
-		]
-		;write %f-log1.txt top/1/source
-		;write/append %f-log1.txt "^/"
-		;write/append %f-log1.txt lexer/format top
 		forall changes [
 			unless top: find-top uri [
 				return false
 			]
+			;write %f-log1.txt top/1/source
+			;write/append %f-log1.txt "^/"
+			;write/append %f-log1.txt lexer/format top
 			code: top/1/source
 			line-stack: top/1/lines
 			range: changes/1/range
@@ -1596,7 +1593,6 @@ completion: context [
 			return none
 		]
 		pc: pcs/2
-		write-log mold pcs/1
 		switch/default pcs/1 [
 			one		[]
 			first	[]
