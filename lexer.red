@@ -146,7 +146,7 @@ lexer: context [
 		append/only ast-stack make block! 100
 		append line-stack src
 		append line-stack index? src
-		append/only rs-stack [1 1]
+		append/only rs-stack rs: [1 1]
 		store-ast: [
 			either 1 = length? ast-stack [
 				ast-upper: none
@@ -172,17 +172,20 @@ lexer: context [
 			do store-ast
 		]
 		push-error: function [type [datatype!] message [string!] level [word!] pos [string!]][
-			offset: now-line? pos
-			repend/only ast-error ['type type 'msg message 'level level 'at offset]
+			rpos: line-pos? line-stack rs/1 rs/2
+			offset: offset? rpos pos
+			repend/only ast-error ['type type 'msg message 'level level 'off offset]
 		]
 		push-invalid: function [type [datatype!] pos [string!]][
-			offset: now-line? pos
-			repend/only ast-error ['type type 'msg "invalid" 'level 'Error 'at offset]
+			rpos: line-pos? line-stack rs/1 rs/2
+			offset: offset? rpos pos
+			repend/only ast-error ['type type 'msg "invalid" 'level 'Error 'off offset]
 		]
 		push-miss: function [type [datatype!] miss pos [string!]][
-			offset: now-line? pos
+			rpos: line-pos? line-stack rs/1 rs/2
+			offset: offset? rpos pos
 			repend/only ast-error ['type type 'msg 
-				rejoin ["missing: " mold miss] 'level 'Error 'at offset]
+				rejoin ["missing: " mold miss] 'level 'Error 'off offset]
 		]
 		have-error?: function [][
 			errors: ast-error
@@ -382,7 +385,6 @@ lexer: context [
 				 escaped-char
 				| ahead [non-printable-char | not-str-char]
 				  epos: (push-invalid type back epos)
-				  break
 				| skip (value: s/1)
 			][
 				e: #"^""
@@ -490,7 +492,7 @@ lexer: context [
 
 		file-rule: [
 			s: #"%" [
-				epos: #"{" any [#"}" | ws | skip] (push-invalid file! epos) break
+				epos: #"{" any [#"}" break | ws | skip] (push-invalid file! epos)
 				| line-string (process: make-string type: file!)
 				| s: any [ahead [not-file-char | ws-no-count] break | skip] e:
 				  (process: make-file type: file!)
@@ -725,8 +727,8 @@ lexer: context [
 			  sticky-word-rule
 			  (value: make-number s e type)
 			  opt [
-				[#"x" | #"X"] [s: integer-number-rule | (type: pair! push-invalid type s) break]
-				ahead [pair-end | ws-no-count | end | (type: pair! push-invalid type s) break]
+				[#"x" | #"X"] [s: integer-number-rule | (type: pair! push-invalid type s)]
+				ahead [pair-end | ws-no-count | end | (type: pair! push-invalid type s)]
 				(value: as-pair value make-number s e type type: pair!)
 			  ]
 			  epos: opt [#":" (if type = pair! [push-invalid type epos]) if (type <> pair!) time-rule]

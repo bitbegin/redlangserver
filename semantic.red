@@ -436,12 +436,10 @@ semantic: context [
 				return false
 			]
 			pc/1/expr: nested/1/expr
-			if nested/1/error [
-				either pc/1/error [
-					pc/1/error: nested/1/error
-				][
-					repend pc/1 ['error nested/1/error]
-				]
+			either pc/1/error [
+				pc/1/error: nested/1/error
+			][
+				repend pc/1 ['error nested/1/error]
 			]
 		]
 		true
@@ -505,12 +503,10 @@ semantic: context [
 			return false
 		]
 		pc/1/expr: nested/1/expr
-		if nested/1/error [
-			either pc/1/error [
-				pc/1/error: nested/1/error
-			][
-				repend pc/1 ['error nested/1/error]
-			]
+		either pc/1/error [
+			pc/1/error: nested/1/error
+		][
+			repend pc/1 ['error nested/1/error]
 		]
 		true
 	]
@@ -681,10 +677,7 @@ semantic: context [
 							ncode: code2
 							continue
 						]
-						insert/only pc reduce ['expr nested/1/expr 'range range 'upper epc/1/upper]
-						if nested/1/error [
-							repend pc/-1 ['error nested/1/error]
-						]
+						insert/only pc reduce ['expr nested/1/expr 'range range 'upper epc/1/upper 'error nested/1/error]
 						ncode: code2
 						continue
 					]
