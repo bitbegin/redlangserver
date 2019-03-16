@@ -19,9 +19,14 @@ lexer: context [
 	]
 	file-to-uri: function [file [file!]][
 		src: mold file
-		src: copy skip src 2
-		insert next src "%3A"
-		insert src "file:///"
+		either system/platform = 'Windows [
+			src: copy skip src 2
+			insert next src "%3A"
+			insert src "file:///"
+		][
+			src: copy skip src 1
+			insert src "file://"
+		]
 		src
 	]
 	semicolon?: function [pc [block!] pos [string!] column [integer!]][
