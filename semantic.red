@@ -1440,7 +1440,22 @@ completion: context [
 	]
 
 	get-func-spec: function [pc [block!]][
-		ret: get-block pc
+		get-func-block: function [pc [block!]][
+			ret: make block! 4
+			forall pc [
+				if pc/1/expr = [/local][return ret]
+				if find reduce [block! map! paren!] pc/1/expr/1 [
+					append/only ret make pc/1/expr/1
+						either pc/1/nested [
+							get-func-block pc/1/nested
+						][[]]
+					continue
+				]
+				append ret pc/1/expr/1
+			]
+			ret
+		]
+		ret: get-func-block pc
 		until [
 			if all [
 				reduce [ret/1] = [return:]
@@ -1454,7 +1469,7 @@ completion: context [
 			]
 			tail? ret: next ret
 		]
-		ret
+		head ret
 	]
 
 	get-top: function [pc [block!]][
@@ -1480,6 +1495,7 @@ completion: context [
 							upper: specs/1/1/upper
 							upper/-1
 							word? upper/-1/expr/1
+							find [func function] upper/-1/expr/1
 						][
 							return func-info upper/-1/expr/1 get-func-spec upper/1/nested to string! pc/1/expr/1
 						]
