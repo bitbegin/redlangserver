@@ -355,6 +355,19 @@ semantic: context [
 		]
 	]
 
+	update-upper: function [pc [block!] /remove?][
+		forall pc [
+			if all [
+				find reduce [block! paren! map!] pc/1/expr/1
+				npc: pc/1/nested
+			][
+				forall npc [
+					npc/1/upper: either remove? [back npc/1/upper][next npc/1/upper]
+				]
+			]
+		]
+	]
+
 	update-ws: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
@@ -392,7 +405,7 @@ semantic: context [
 				return false
 			]
 			pc/1/expr: nested/1/expr
-			either pc/1/error [
+			either find pc/1 'error [
 				pc/1/error: nested/1/error
 			][
 				repend pc/1 ['error nested/1/error]
@@ -421,6 +434,7 @@ semantic: context [
 		epos: lexer/line-pos? line-stack pc/1/range/3 pc/1/range/4
 		if empty? str: copy/part spos epos [
 			remove pc
+			update-upper/remove? pc
 			write-log "update-one: remove"
 			return true
 		]
@@ -434,7 +448,7 @@ semantic: context [
 			return false
 		]
 		pc/1/expr: nested/1/expr
-		either pc/1/error [
+		either find pc/1 'error [
 			pc/1/error: nested/1/error
 		][
 			repend pc/1 ['error nested/1/error]
@@ -584,7 +598,10 @@ semantic: context [
 							spcs/1 = 'tail
 							(pc: next pc true)
 						]
-						spcs/1 = 'insert
+						all [
+							spcs/1 = 'insert
+							(pc: next pc true)
+						]
 						all [
 							spcs/1 = 'first
 							find reduce [block! paren!] pc/1/expr/1
@@ -603,8 +620,8 @@ semantic: context [
 						spcs/1 = 'empty
 					][
 						end-chars: length? text
-						update-range next pc 0 end-chars s-line s-column e-line e-column
 						if spcs/1 = 'empty [
+							update-range next pc 0 end-chars s-line s-column e-line e-column
 							update-range/only pc 0 end-chars s-line s-column e-line e-column
 							repend pc/1 ['nested make block! 1]
 							npc: pc/1/nested
@@ -624,6 +641,8 @@ semantic: context [
 							append/only npc reduce ['expr nested/1/expr 'range range 'upper pc 'error nested/1/error]
 							continue
 						]
+						update-range pc 0 end-chars s-line s-column e-line e-column
+						update-upper pc
 						range: reduce [s-line s-column e-line e-column + end-chars]
 						write-log "insert pc: "
 						write-log mold range
@@ -908,6 +927,7 @@ completion: context [
 					]
 				]
 			]
+			none
 		]
 		find-set?*: function [pc [block!]][
 			npc: pc
