@@ -655,7 +655,10 @@ semantic: context [
 							add-source* uri ncode
 							continue
 						]
-						insert/only pc reduce ['expr nested/1/expr 'range range 'upper pc/1/upper 'error nested/1/error]
+						either pc/1 [upper: pc/1/upper][
+							upper: pc/-1/upper
+						]
+						insert/only pc reduce ['expr nested/1/expr 'range range 'upper upper 'error nested/1/error]
 						ncode: ncode
 						continue
 					]
