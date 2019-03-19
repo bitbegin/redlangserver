@@ -564,11 +564,11 @@ semantic: context [
 					]
 					any [
 						empty? text
-						not find not-trigger-charset text
+						not find text not-trigger-charset
 					]
 					any [
 						empty? otext
-						not find not-trigger-charset otext
+						not find otext not-trigger-charset
 					]
 				][
 					unless update-one epcs s-line s-column e-line e-column otext text line-stack [
@@ -582,7 +582,7 @@ semantic: context [
 					spcs = epcs
 					empty? otext
 					any [
-						not find not-trigger-charset text
+						not find text not-trigger-charset
 						text = "[]"
 						text = "()"
 						text = "{}"
