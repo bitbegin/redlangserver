@@ -752,7 +752,7 @@ completion: context [
 		true
 	]
 
-	collect-word*: function [pc [block!] word [word!] result [block!] /match? /*all?][
+	collect-word*: function [pc [block!] word [word!] result [block!] *all? [logic!] /match?][
 		string: to string! word
 		collect*: function [npc [block!] type [block!] /back?][
 			if empty? npc [
@@ -822,12 +822,11 @@ completion: context [
 	collect-word: function [top [block!] pc [block!]][
 		result: make block! 4
 		word: to word! pc/1/expr/1
+		collect-word* pc word result no
 		sources: semantic/sources
 		forall sources [
-			either sources/1 = top [
-				collect-word* pc word result
-			][
-				collect-word* back tail sources/1/1/nested word result
+			if sources/1 <> top [
+				collect-word* back tail sources/1/1/nested word result no
 			]
 		]
 		result
@@ -1838,41 +1837,48 @@ completion: context [
 		none
 	]
 
-	hover-word*: function [top [block!] pc [block!] word [word!] result [block!]][
-		collect-word*/match pc word result
-		if 0 < length? result [exit]
+	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
+		result: make block! 4
+		collect-word*/match? pc word result *all?
+		if all [
+			not *all?
+			0 < length? result
+		][return result]
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-word*/match back tail sources/1/1/nested word result
-				if 0 < length? result [exit]
+				npc: back tail sources/1/1/nested
+				collect-word*/match? npc word result *all?
+				if all [
+					not *all?
+					0 < length? result
+				][return result]
 			]
 		]
+		result
 	]
 
 	hover-word: function [top [block!] pc [block!] word [word!]][
-		result: make block! 4
-		hover-word* top pc word result
+		result: hover-word* top pc word no
 		if 0 = length? result [return none]
 		forall result [
 			unless set-word? result/1/1/expr/1 [
 				pc: result/1
 				top: get-top pc
-				return resolve-word pc to string! pc/1/expr/1
+				return resolve-word top pc to string! pc/1/expr/1 none
 			]
 		]
 		pc: result/1
 		top: get-top pc
-		resolve-word pc to string! pc/1/expr/1
+		resolve-word top pc to string! pc/1/expr/1 none
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		result: make block! 4
-		collect-path top pc path result yes
+		result: collect-path top pc path no
 		if 0 = length? result [return none]
-		pc: result/1
+		pc: result/2
 		top: get-top pc
-		resolve-word pc to string! pc/1/expr/1
+		resolve-word top pc to string! pc/1/expr/1 none
 	]
 
 	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
