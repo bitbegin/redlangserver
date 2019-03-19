@@ -623,7 +623,7 @@ lexer: context [
 		]
 
 		sticky-word-rule: [								;-- protect from sticky words typos
-			ahead [integer-end | ws-no-count | end | epos: (push-invalid type epos)]
+			ahead [integer-end | ws-no-count | end] | epos: (push-invalid type epos) any [ahead [integer-end | ws-no-count | end] break | skip]
 		]
 		hexa-rule: [2 8 hexa e: #"h" ahead [integer-end | ws-no-count | end]]
 
@@ -725,25 +725,35 @@ lexer: context [
 		]
 
 		integer-rule: [
-			float-special (value: make-number s e type)	;-- escape path for NaN, INFs
+			float-special		;-- escape path for NaN, INFs
 			| (neg?: no) integer-number-rule
 			  opt [float-number-rule | float-exp-rule e: (type: float!)]
 			  opt [#"%" (type: percent!)]
+			  opt [[#"." | #"e"] epos: (type: float! push-invalid type epos)]
 			  sticky-word-rule
 			  (value: make-number s e type)
 			  opt [
-				[#"x" | #"X"] [s: integer-number-rule | (type: pair! push-invalid type s)]
-				ahead [pair-end | ws-no-count | end | (type: pair! push-invalid type s)]
-				(value: as-pair value make-number s e type type: pair!)
+				[#"x" | #"X"] [
+					s: integer-number-rule ahead [pair-end | ws-no-count | end] (value: as-pair value make-number s e type type: pair!)
+					| epos: (type: pair! push-invalid type epos) any [ahead [integer-end | ws-no-count | end] break | skip]
+				]
 			  ]
-			  epos: opt [#":" (if type = pair! [push-invalid type epos]) if (type <> pair!) time-rule]
+			  opt [
+				#":" [
+					if (type <> pair!) time-rule
+					| epos: (push-invalid type epos) any [ahead [integer-end | ws-no-count | end] break | skip]
+				]
+			  ]
 		]
 
 		float-special: [
 			s: opt #"-" "1.#" [
-				[[#"N" | #"n"] [#"a" | #"A"] [#"N" | #"n"]]
-				| [[#"I" | #"i"] [#"N" | #"n"] [#"F" | #"f"]]
-			] e: (type: float!)
+				[
+					[[#"N" | #"n"] [#"a" | #"A"] [#"N" | #"n"]]
+					| [[#"I" | #"i"] [#"N" | #"n"] [#"F" | #"f"]]
+				] e: (type: float! value: make-number s e type)
+				| e: (type: float! push-invalid type e) any [ahead [integer-end | ws-no-count | end] break | skip]
+			]
 		]
 
 		float-exp-rule: [[#"e" | #"E"] opt [#"-" | #"+"] 1 3 digit]
@@ -756,6 +766,7 @@ lexer: context [
 		float-rule: [
 			opt [#"-" | #"+"] float-number-rule
 			opt [#"%" (type: percent!)]
+			opt [[#"x" | #"X"] epos: (type: float! push-invalid type epos)]
 			sticky-word-rule
 		]
 
@@ -871,8 +882,8 @@ lexer: context [
 				| (remove-lines rs/1) hexa-rule epos: (re: now-line? epos)			(value: make-hexa s e do store-ast)
 				| (remove-lines rs/1) binary-rule epos: (re: now-line? epos)		(either have-error? [value: type][unless value: make-binary s e base [value: binary!]] do store-ast)
 				| (remove-lines rs/1) email-rule epos: (re: now-line? epos)			(value: do make-file do store-ast)
-				| (remove-lines rs/1) date-rule epos: (re: now-line? epos)			(unless value [value: type] do store-ast)
-				| (remove-lines rs/1) integer-rule epos: (re: now-line? epos)		(unless value [value: type] do store-ast)
+				| (remove-lines rs/1) date-rule epos: (re: now-line? epos)			(if have-error? [value: type] do store-ast)
+				| (remove-lines rs/1) integer-rule epos: (re: now-line? epos)		(if have-error? [value: type] do store-ast)
 				| (remove-lines rs/1) float-rule epos: (re: now-line? epos)			(either have-error? [value: type][unless value: make-float s e type [value: type]] do store-ast)
 				| (remove-lines rs/1) tag-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do make-string] do store-ast)
 				| (remove-lines rs/1) word-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
