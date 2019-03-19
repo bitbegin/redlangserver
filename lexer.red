@@ -902,8 +902,8 @@ lexer: context [
 
 		nested-block: [pos: some [[ahead #"]" | end] break | some ws | literal-value]]
 		nested-paren: [pos: some [[ahead #")" | end] break | some ws | literal-value]]
-		some-value: [pos: some [some ws | literal-value]]
-		red-rules: some-value
+		any-value: [pos: any [some ws | literal-value]]
+		red-rules: any-value
 
 		unless parse/case src red-rules [return false]
 		value: block!
