@@ -389,14 +389,14 @@ semantic: context [
 			]
 		][return false]
 		update-range npc lines end-chars s-line s-column e-line e-column
-		if npc <> pc [
-			update-range/only pc lines end-chars s-line s-column e-line e-column
-		]
 		if pcs/1 = 'one [
 			npc: pcs/2
+			update-range/only npc lines end-chars s-line s-column e-line e-column
 			spos: lexer/line-pos? line-stack npc/1/range/1 npc/1/range/2
 			epos: lexer/line-pos? line-stack npc/1/range/3 npc/1/range/4
 			str: copy/part spos epos
+			write-log mold npc/1/range
+			write-log mold str
 			if any [
 				not top: lexer/transcode str
 				none? nested: top/1/nested
@@ -404,11 +404,11 @@ semantic: context [
 			][
 				return false
 			]
-			pc/1/expr: nested/1/expr
-			either find pc/1 'error [
-				pc/1/error: nested/1/error
+			npc/1/expr: nested/1/expr
+			either find npc/1 'error [
+				npc/1/error: nested/1/error
 			][
-				repend pc/1 ['error nested/1/error]
+				repend npc/1 ['error nested/1/error]
 			]
 		]
 		true
