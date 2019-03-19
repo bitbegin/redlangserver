@@ -1015,7 +1015,7 @@ completion: context [
 					find-set?* back tail npc
 					not *all?
 				][
-					return ret
+					return result
 				]
 			]
 		]
@@ -1221,50 +1221,63 @@ completion: context [
 		result
 	]
 
-	collect-slash-context*: function [specs [block!] word [word!] slash-end? [logic!] *all? [block!]][
+	collect-slash-context*: function [specs [block!] word [word!] slash-end? [logic!] *all? [logic!] match? [logic!]][
 		result: make block! 4
 		string: to string! word
 		collect*: function [npc [block!]][
 			until [
 				if all [
-					not slash-end?
 					set-word? npc/1/expr/1
-					find/match to string! npc/1/expr/1 string
 					any [
 						*all?
 						unique2? result to word! npc/1/expr/1
 					]
 				][
-					unless empty? specs: find-set?/*any? npc word false no [
-						append result specs
-					]
-				]
-				if all [
-					slash-end?
-					set-word? npc/1/expr/1
-					word = to word! npc/1/expr/1
-				][
-					unless empty? specs: find-set?/*any? npc word false no [
-						forall specs [
-							switch specs/1/1 [
-								context [
-									unless empty? ret: collect-context-set-word* specs/1/3 *all? [
-										append result ret
+					either match? [
+						if word = to word! npc/1/expr/1 [
+							unless empty? specs: find-set?/*any? npc word false no [
+								append result specs
+								unless *all? [return result]
+							]
+						]
+					][
+						if all [
+							not slash-end?
+							find/match to string! npc/1/expr/1 string
+						][
+							unless empty? specs: find-set?/*any? npc word false no [
+								append result specs
+							]
+						]
+						if all [
+							slash-end?
+							word = to word! npc/1/expr/1
+						][
+							unless empty? specs: find-set?/*any? npc word false no [
+								forall specs [
+									switch specs/1/1 [
+										context [
+											unless empty? ret: collect-context-set-word* specs/1/3 *all? [
+												append result ret
+											]
+										]
+										func [
+											unless empty? ret: collect-func-refinement* specs/1/3 *all? [
+												append result ret
+											]
+										]
+										block [
+											unless empty? ret: collect-block-word* specs/1/3 *all? [
+												append result ret
+											]
+										]
 									]
 								]
-								func [
-									unless empty? ret: collect-func-refinement* specs/1/3 *all? [
-										append result ret
-									]
-								]
-								block [
-									unless empty? ret: collect-block-word* specs/1/3 *all? [
-										append result ret
-									]
+								unless empty? result [
+									unless *all? [return result]
 								]
 							]
 						]
-						unless *all? [return result]
 					]
 				]
 				npc2: npc
@@ -1278,7 +1291,7 @@ completion: context [
 		result
 	]
 
-	collect-slash-block*: function [specs [block!] word [word! integer!] slash-end? [logic!] *all? [block!]][
+	collect-slash-block*: function [specs [block!] word [word! integer!] slash-end? [logic!] *all? [logic!] match? [logic!]][
 		result: make block! 4
 		if word? word [
 			string: to string! word
@@ -1287,10 +1300,20 @@ completion: context [
 			forall npc [
 				either integer? word [
 					if word = index? npc [
+						if match? [
+							either all [
+								block! = npc/1/expr/1
+								spec: npc/1/nested
+							][
+								repend/only result ['block npc reduce [spec]]
+							][
+								repend/only result ['field npc make block! 1]
+							]
+							return result
+						]
 						either all [
-							npc/2
-							block! = npc/2/expr/1
-							spec: npc/2/nested
+							block! = npc/1/expr/1
+							spec: npc/1/nested
 						][
 							either slash-end? [
 								unless empty? ret: collect-block-word* reduce [spec] *all? [
@@ -1307,34 +1330,82 @@ completion: context [
 					]
 				][
 					if all [
-						not slash-end?
 						any-word? npc/1/expr/1
-						find/match to string! npc/1/expr/1 string
 						any [
 							*all?
 							unique2? result to word! npc/1/expr/1
 						]
 					][
-						either all [
+						if match? [
+							if word = to word! npc/1/expr/1 [
+								repend/only result ['field npc make block! 1]
+								unless *all? [return result]
+							]
+							continue
+						]
+						if all [
+							not slash-end?
+							find/match to string! npc/1/expr/1 string
+						][
+							either all [
+								npc/2
+								block! = npc/2/expr/1
+								spec: npc/2/nested
+							][
+								repend/only result ['field npc reduce [spec]]
+							][
+								repend/only result ['field npc []]
+							]
+						]
+						if all [
+							slash-end?
+							word = to word! npc/1/expr/1
 							npc/2
 							block! = npc/2/expr/1
 							spec: npc/2/nested
 						][
-							repend/only result ['field npc reduce [spec]]
-						][
-							repend/only result ['field npc []]
+							unless empty? ret: collect-block-word* reduce [spec] *all? [
+								append result ret
+								unless *all? [return result]
+							]
 						]
 					]
-					if all [
+				]
+			]
+		]
+		forall specs [
+			collect* specs/1
+		]
+		result
+	]
+
+	collect-slash-func*: function [specs [block!] word [word!] slash-end? [logic!] *all? [logic!] match? [logic!]][
+		result: make block! 4
+		string: to string! word
+		collect*: function [npc [block!]][
+			forall npc [
+				if all [
+					refinement? npc/1/expr/1
+					any [
+						*all?
+						unique2? result to word! npc/1/expr/1
+					]
+				][
+					if match? [
+						if word = to word! npc/1/expr/1 [
+							if npc/1/expr = [/local][exit]
+							repend/only result ['ref npc make block! 1]
+							unless *all? [return result]
+						]
+						continue
+					]
+					if any [
 						slash-end?
-						any-word? npc/1/expr/1
-						word = to word! npc/1/expr/1
-						npc/2
-						block! = npc/2/expr/1
-						spec: npc/2/nested
+						find/match to string! npc/1/expr/1 string
 					][
-						unless empty? ret: collect-block-word* reduce [spec] *all? [
-							append result ret
+						if npc/1/expr = [/local][exit]
+						repend/only result ['ref npc make block! 1]
+						if slash-end? [
 							unless *all? [return result]
 						]
 					]
@@ -1347,36 +1418,11 @@ completion: context [
 		result
 	]
 
-	collect-slash-func*: function [specs [block!] word [word!] slash-end? [logic!] *all? [block!]][
-		result: make block! 4
-		string: to string! word
-		collect*: function [npc [block!]][
-			forall npc [
-				if all [
-					refinement? npc/1/expr/1
-					find/match to string! npc/1/expr/1 string
-					any [
-						*all?
-						unique2? result to word! npc/1/expr/1
-					]
-				][
-					if npc/1/expr = [/local][exit]
-					repend/only result ['ref npc make block! 1]
-				]
-			]
+	collect-path*: function [pc [block!] path [block!] *all? [logic!] match? [logic!]][
+		unless specs: find-set?/*func?/*context?/*block? pc to word! path/1 true *all? [
+			return make block! 1
 		]
-		if slash-end? [
-			return collect-func-refinement* specs *all?
-		]
-		forall specs [
-			collect* specs/1
-		]
-		result
-	]
-
-	collect-path*: function [pc [block!] path [block!] *all? [logic!]][
-		specs: find-set?/*func?/*context?/*block? pc to word! path/1 true *all?
-		unless empty? specs [return specs]
+		if empty? specs [return specs]
 		nspecs: make block! 4
 		if empty? path/2 [
 			forall specs [
@@ -1408,11 +1454,18 @@ completion: context [
 			][
 				slash?: no
 			]
+			match2?: no
+			if all [
+				none? path/2
+				match?
+			][
+				match2?: yes
+			]
 			forall specs [
 				switch specs/1/1 [
 					context [
 						if error? word: try [to word! path/1][return make block! 1]
-						unless empty? ret: collect-slash-context* specs/1/3 word slash? *all? [
+						unless empty? ret: collect-slash-context* specs/1/3 word slash? *all? match2? [
 							append nspecs ret
 						]
 					]
@@ -1425,7 +1478,7 @@ completion: context [
 							]
 							not empty? specs/1/3
 						][
-							unless empty? ret: collect-slash-func* specs/1/3 word slash? *all? [
+							unless empty? ret: collect-slash-func* specs/1/3 word slash? *all? match2? [
 								append nspecs ret
 							]
 						][
@@ -1438,7 +1491,7 @@ completion: context [
 								return make block! 1
 							]
 						]
-						unless empty? ret: collect-slash-block* specs/1/3 word slash? *all? [
+						unless empty? ret: collect-slash-block* specs/1/3 word slash? *all? match2? [
 							append nspecs ret
 						]
 					]
@@ -1453,9 +1506,9 @@ completion: context [
 		specs
 	]
 
-	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!]][
+	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!]][
 		specs: make block! 8
-		ret: collect-path* pc path *all?
+		ret: collect-path* pc path *all? match?
 		if 0 < length? ret [
 			append specs ret
 			unless *all? [return specs]
@@ -1463,7 +1516,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				ret: collect-path* back tail sources/1/1/nested path *all?
+				ret: collect-path* back tail sources/1/1/nested path *all? match?
 				if 0 < length? ret [
 					append specs ret
 					unless *all? [return specs]
@@ -1525,7 +1578,7 @@ completion: context [
 		][
 			range/start/character: range/end/character - length? filter
 		]
-		pcs: collect-path top pc paths no
+		pcs: collect-path top pc paths no no
 		forall pcs [
 			type: pcs/1/1
 			npc: pcs/1/2
@@ -1716,8 +1769,11 @@ completion: context [
 				set-word? pc/1/expr/1
 				pc/2
 			][
-				specs: clear []
-				switch ret: find-set?/*any? pc to word! pc/1/expr/1 specs no [
+				unless ret: find-set?/*any? pc to word! pc/1/expr/1 no no [
+					return none
+				]
+				specs: ret/1/3
+				switch ret/1/1 [
 					context		[return rejoin [string " is a context!"]]
 					func		[
 						if all [
@@ -1874,11 +1930,11 @@ completion: context [
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		result: collect-path top pc path no
+		result: collect-path top pc path no yes
 		if 0 = length? result [return none]
-		pc: result/2
+		pc: result/1/2
 		top: get-top pc
-		resolve-word top pc to string! pc/1/expr/1 none
+		resolve-word top pc to string! pc/1/expr/1 result/1/1
 	]
 
 	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
@@ -1954,7 +2010,10 @@ completion: context [
 
 	hover-keypath: function [path [block!]][
 		forall path [
-			path/1: to word! path/1
+			if error? word: try [to word! path/1][
+				return none
+			]
+			path/1: word
 		]
 		system-words/get-path-info to path! path
 	]
@@ -1962,6 +2021,10 @@ completion: context [
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2 path: ret/3
+		if 1 = length? path [
+			if ret: hover-word top pc word: to word! path/1 [return ret]
+			return hover-keyword word
+		]
 		if any-path? pc/1/expr/1 [
 			if ret: hover-path top pc path [return ret]
 			return hover-keypath path
@@ -1971,8 +2034,7 @@ completion: context [
 	]
 
 	definition-word: function [top [block!] pc [block!] word [word!]][
-		result: make block! 4
-		hover-word* top pc word result
+		result: hover-word* top pc word yes
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
@@ -1986,12 +2048,11 @@ completion: context [
 	]
 
 	definition-path: function [top [block!] pc [block!] path [block!]][
-		result: make block! 4
-		collect-path top pc path result yes
+		result: collect-path top pc path yes yes
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
-			top: get-top pc: result/1
+			top: get-top pc: result/1/2
 			append ret make map! reduce [
 				'uri top/1/uri
 				'range lexer/form-range pc/1/range
@@ -2003,6 +2064,9 @@ completion: context [
 	definition: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2 path: ret/3
+		if 1 = length? path [
+			return definition-word top pc to word! path/1
+		]
 		if any-path? pc/1/expr/1 [
 			return definition-path top pc path
 		]
