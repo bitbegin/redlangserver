@@ -1937,6 +1937,8 @@ completion: context [
 		resolve-word top pc to string! pc/1/expr/1 result/1/1
 	]
 
+	hover-types: [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! integer! float! pair! binary! char! email! logic! percent! tuple! time! date! file! url! string! refinement! issue!]
+	literal-disp: skip hover-types 8
 	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
 		unless pcs: semantic/position? top line column [
@@ -1946,7 +1948,7 @@ completion: context [
 		unless find [one first last mid] pcs/1 [return none]
 		if find [one first last] pcs/1 [
 			type: type?/word pc/1/expr/1
-			unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
+			unless find hover-types type [
 				return none
 			]
 		]
@@ -1977,10 +1979,10 @@ completion: context [
 			last	[]
 			mid		[
 				type: type?/word pc/1/expr/1
-				unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! file!] type [
+				unless find hover-types type [
 					pc: next pc
 					type: type?/word pc/1/expr/1
-					unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
+					unless find hover-types type [
 						return none
 					]
 					if any-path? pc/1/expr/1 [
@@ -2021,6 +2023,12 @@ completion: context [
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2 path: ret/3
+		if find literal-disp type: type?/word pc/1/expr/1 [
+			if file? pc/1/expr/1 [
+				return rejoin [mold type " : " form/part pc/1/expr/1 60]
+			]
+			return rejoin [mold type " : " mold/part pc/1/expr/1 60]
+		]
 		if 1 = length? path [
 			if ret: hover-word top pc word: to word! path/1 [return ret]
 			return hover-keyword word
@@ -2064,6 +2072,9 @@ completion: context [
 	definition: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2 path: ret/3
+		if find literal-disp type: type?/word pc/1/expr/1 [
+			return none
+		]
 		if 1 = length? path [
 			return definition-word top pc to word! path/1
 		]
