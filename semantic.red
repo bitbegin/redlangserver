@@ -819,7 +819,8 @@ completion: context [
 		]
 	]
 
-	collect-word: function [top [block!] pc [block!] result [block!]][
+	collect-word: function [top [block!] pc [block!]][
+		result: make block! 4
 		word: to word! pc/1/expr/1
 		sources: semantic/sources
 		forall sources [
@@ -829,6 +830,7 @@ completion: context [
 				collect-word* back tail sources/1/1/nested word result
 			]
 		]
+		result
 	]
 
 	next-context?: function [opc [block!] pc [block!] specs [block! none!] upper [logic!]][
@@ -1090,7 +1092,7 @@ completion: context [
 		if empty? string: to string! to word! pc/1/expr/1 [
 			exit
 		]
-		collect-word top pc result: clear []
+		result: collect-word top pc
 		forall result [
 			rpc: result/1
 			top: rpc
@@ -1100,7 +1102,7 @@ completion: context [
 			rstring: to string! to word! rpc/1/expr/1
 			case [
 				find [word! lit-word! refinement!] type [
-					kind: CompletionItemKind/TypeParameter
+					kind: CompletionItemKind/Field
 				]
 				type = 'set-word! [
 					ret: find-set?/*any? rpc to word! rpc/1/expr/1 no no
@@ -1486,7 +1488,7 @@ completion: context [
 				]
 				append comps make map! reduce [
 					'label nstring
-					'kind CompletionItemKind/Field
+					'kind CompletionItemKind/Property
 					'filterText? filter
 					'insertTextFormat 1
 					'preselect true
@@ -1709,8 +1711,7 @@ completion: context [
 		pc
 	]
 
-	resolve-word: function [pc [block!] string [string!]][
-		top: get-top pc
+	resolve-word: function [top [block!] pc [block!] string [string!] itype [word! none!]][
 		resolve-word*: function [][
 			if all [
 				set-word? pc/1/expr/1
@@ -1731,6 +1732,9 @@ completion: context [
 						]
 						return func-info 'func [] to string! pc/1/expr/1
 					]
+					block		[
+						return rejoin [string " is a block! variable."]
+					]
 					value		[
 						if word? expr: specs/1/1/expr/1 [
 							return rejoin [string ": " mold expr]
@@ -1743,6 +1747,7 @@ completion: context [
 				]
 			]
 			if all [
+				none? itype
 				upper: pc/1/upper
 				upper/-1
 				find [func function has] upper/-1/expr/1
@@ -1762,6 +1767,19 @@ completion: context [
 					return rejoin [ret "^/type: " mold get-block pc/2/nested]
 				]
 				return ret
+			]
+			if itype [
+				switch itype [
+					ref [
+						return rejoin [string " is a function refinement!"]
+					]
+					field [
+						return rejoin [string " is a block item!"]
+					]
+					block [
+						return rejoin [string " is a block!"]
+					]
+				]
 			]
 			none
 		]
@@ -1811,7 +1829,11 @@ completion: context [
 			unless pc: semantic/find-expr top range [
 				return none
 			]
-			return resolve-word pc params/label
+			itype: none
+			if params/data/itype [
+				itype: to word! params/data/itype
+			]
+			return resolve-word top pc params/label itype
 		]
 		none
 	]
