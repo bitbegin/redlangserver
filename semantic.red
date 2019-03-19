@@ -1586,8 +1586,7 @@ completion: context [
 		none
 	]
 
-	hover-word*: function [top [block!] pc [block!] result [block!]][
-		word: to word! pc/1/expr/1
+	hover-word*: function [top [block!] pc [block!] word [word!] result [block!]][
 		collect-word*/match pc word result
 		if 0 < length? result [exit]
 		sources: semantic/sources
@@ -1599,9 +1598,9 @@ completion: context [
 		]
 	]
 
-	hover-word: function [top [block!] pc [block!]][
+	hover-word: function [top [block!] pc [block!] word [word!]][
 		result: make block! 4
-		hover-word* top pc result
+		hover-word* top pc word result
 		if 0 = length? result [return none]
 		forall result [
 			unless set-word? result/1/1/expr/1 [
@@ -1615,50 +1614,79 @@ completion: context [
 		resolve-word pc to string! pc/1/expr/1
 	]
 
-	hover-path: function [top [block!] pc [block!]][
-		path: to string! pc/1/expr/1
-		paths: split path "/"
+	hover-path: function [top [block!] pc [block!] path [block!]][
 		result: make block! 4
-		collect-path top pc paths result yes
+		collect-path top pc path result yes
 		if 0 = length? result [return none]
 		pc: result/1
 		top: get-top pc
 		resolve-word pc to string! pc/1/expr/1
 	]
 
-	hover: function [uri [string!] line [integer!] column [integer!]][
+	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
 		unless pcs: semantic/position? top line column [
 			return none
 		]
 		pc: pcs/2
-		switch/default pcs/1 [
-			one		[]
-			first	[]
+		unless find [one first last mid] pcs/1 [return none]
+		if find [one first last] pcs/1 [
+			type: type?/word pc/1/expr/1
+			unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
+				return none
+			]
+		]
+		path: none
+		if any-path? pc/1/expr/1 [
+			pos: lexer/line-pos? top/1/lines line column
+			spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
+			epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
+			path: copy/part spos epos
+		]
+		switch pcs/1 [
+			one		[
+				if all [
+					any-path? pc/1/expr/1
+					npos: find/part pos "/" pc/1/range/4 - column
+				][
+					path: copy/part spos npos
+				]
+			]
+			first	[
+				if all [
+					any-path? pc/1/expr/1
+					npos: find path "/"
+				][
+					path: copy/part path npos
+				]
+			]
 			last	[]
 			mid		[
 				type: type?/word pc/1/expr/1
 				unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! file!] type [
 					pc: next pc
+					type: type?/word pc/1/expr/1
+					unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
+						return none
+					]
+					if any-path? pc/1/expr/1 [
+						spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
+						epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
+						path: copy/part spos epos
+						if npos: find path "/" [
+							path: copy/part path npos
+						]
+					]
 				]
 			]
-		][return none]
-		type: type?/word pc/1/expr/1
-		unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
-			return none
 		]
-		either any-path? expr: pc/1/expr/1 [
-			word: expr/1
-			if ret: hover-path top pc [return ret]
-		][
-			word: to word! expr
-			if ret: hover-word top pc [return ret]
-		]
+		if path [path: split path "/"]
+		return reduce [top pc path]
+	]
+
+	hover-keyword: function [word [word!]][
 		if system-words/system? word [
-			if all[
-				any-word? expr
-				datatype? get word
-			][
+			if datatype? get word [
 				return rejoin [mold word " is a base datatype!"]
 			]
 			return system-words/get-word-info word
@@ -1666,9 +1694,27 @@ completion: context [
 		none
 	]
 
-	definition-word: function [top [block!] pc [block!]][
+	hover-keypath: function [path [block!]][
+		forall path [
+			path/1: to word! path/1
+		]
+		system-words/get-path-info to path! path
+	]
+
+	hover: function [uri [string!] line [integer!] column [integer!]][
+		unless ret: get-pos-info uri line column [return none]
+		top: ret/1 pc: ret/2 path: ret/3
+		if any-path? pc/1/expr/1 [
+			if ret: hover-path top pc path [return ret]
+			return hover-keypath path
+		]
+		if ret: hover-word top pc word: to word! pc/1/expr/1 [return ret]
+		hover-keyword word
+	]
+
+	definition-word: function [top [block!] pc [block!] word [word!]][
 		result: make block! 4
-		hover-word* top pc result
+		hover-word* top pc word result
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
@@ -1681,11 +1727,9 @@ completion: context [
 		ret
 	]
 
-	definition-path: function [top [block!] pc [block!]][
-		path: to string! pc/1/expr/1
-		paths: split path "/"
+	definition-path: function [top [block!] pc [block!] path [block!]][
 		result: make block! 4
-		collect-path top pc paths result yes
+		collect-path top pc path result yes
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
@@ -1699,30 +1743,11 @@ completion: context [
 	]
 
 	definition: function [uri [string!] line [integer!] column [integer!]][
-		unless top: semantic/find-top uri [return none]
-		unless pcs: semantic/position? top line column [
-			return none
+		unless ret: get-pos-info uri line column [return none]
+		top: ret/1 pc: ret/2 path: ret/3
+		if any-path? pc/1/expr/1 [
+			return definition-path top pc path
 		]
-		pc: pcs/2
-		switch/default pcs/1 [
-			one		[]
-			first	[]
-			last	[]
-			mid		[
-				type: type?/word pc/1/expr/1
-				unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! file!] type [
-					pc: next pc
-				]
-			]
-		][return none]
-		type: type?/word pc/1/expr/1
-		unless find [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path!] type [
-			return none
-		]
-		either any-path? expr: pc/1/expr/1 [
-			return definition-path top pc
-		][
-			return definition-word top pc
-		]
+		definition-word top pc to word! pc/1/expr/1
 	]
 ]
