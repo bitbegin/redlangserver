@@ -1165,6 +1165,7 @@ completion: context [
 						unique2? result to word! npc/1/expr/1
 					]
 				][
+					if npc/1/expr = [/local][break]
 					repend/only result ['ref npc make block! 1]
 				]
 			]
