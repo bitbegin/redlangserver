@@ -2126,4 +2126,88 @@ completion: context [
 		]
 		definition-word top pc to word! pc/1/expr/1
 	]
+
+	unique3?: function [specs [block!] str [string!]][
+		forall specs [
+			if str = specs/1/name [return false]
+		]
+		true
+	]
+
+	symbols: function [uri [string!]][
+		unless top: semantic/find-top uri [return none]
+		unless pc: top/1/nested [return none]
+		symbols*: function [npc [block!] depth [integer!]][
+			result: make block! 4
+			until [
+				if all [
+					set-word? npc/1/expr/1
+					specs: find-set?/*any? npc to word! npc/1/expr/1 no no
+					not empty? specs
+					unique3? result to string! npc/1/expr/1
+				][
+					forall specs [
+						type: specs/1/1
+						pc: specs/1/2
+						spec: specs/1/3
+						first-spec: spec/1
+						switch/default type [
+							context [
+								either empty? first-spec [
+									range: pc/1/range
+								][
+									range: reduce [pc/1/range/1 pc/1/range/2 first-spec/1/range/3 first-spec/1/range/4]
+								]
+								append result last-symbol: make map! reduce [
+									'name		to string! pc/1/expr/1
+									'detail		rejoin [mold pc/1/expr/1 " is a context"]
+									'kind		SymbolKind/Namespace
+									'range		lexer/form-range range
+									'selectionRange		lexer/form-range pc/1/range
+								]
+								if all [
+									depth < 3
+									not empty? first-spec
+								][
+									last-symbol/children: symbols* back tail first-spec depth + 1
+								]
+							]
+							func [
+								either empty? first-spec [
+									range: pc/1/range
+								][
+									range: reduce [pc/1/range/1 pc/1/range/2 first-spec/2/range/3 first-spec/2/range/4]
+								]
+								append result last-symbol: make map! reduce [
+									'name		to string! pc/1/expr/1
+									'detail		rejoin [mold pc/1/expr/1 " is a function"]
+									'kind		SymbolKind/Function
+									'range		lexer/form-range range
+									'selectionRange		lexer/form-range pc/1/range
+								]
+							]
+						][
+							either empty? first-spec [
+								range: pc/1/range
+							][
+								range: reduce [pc/1/range/1 pc/1/range/2 first-spec/1/range/3 first-spec/1/range/4]
+							]
+							append result last-symbol: make map! reduce [
+								'name		to string! pc/1/expr/1
+								'detail		rejoin [mold pc/1/expr/1 " is a value"]
+								'kind		SymbolKind/Variable
+								'range		lexer/form-range range
+								'selectionRange		lexer/form-range pc/1/range
+							]
+						]
+					]
+				]
+				npc2: npc
+				npc: back npc
+				head? npc2
+			]
+			result
+		]
+		symbols* back tail top/1/nested 0
+	]
 ]

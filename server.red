@@ -119,7 +119,7 @@ dispatch-method: function [method [string!] params][
 		"textDocument/didSave"				[on-textDocument-didSave params]
 		"textDocument/completion"			[on-textDocument-completion params]
 		"completionItem/resolve"			[on-completionItem-resolve params]
-		;"textDocument/documentSymbol"		[on-textDocument-symbol params]
+		"textDocument/documentSymbol"		[on-textDocument-symbol params]
 		"textDocument/hover"				[on-textDocument-hover params]
 		"textDocument/definition"			[on-textDocument-definition params]
 	]
@@ -149,6 +149,7 @@ on-initialize: function [params [map!]][
 			'triggerCharacters trigger-string
 		]
 	put caps 'definitionProvider true
+	put caps 'documentSymbolProvider true
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -358,6 +359,13 @@ on-textDocument-definition: function [params [map!]][
 	line: params/position/line
 	column: params/position/character
 	unless result: completion/definition uri line + 1 column + 1 [result: []]
+	json-body/result: result
+	response
+]
+
+on-textDocument-symbol: function [params [map!]][
+	uri: params/textDocument/uri
+	unless result: completion/symbols uri [result: []]
 	json-body/result: result
 	response
 ]
