@@ -1245,7 +1245,7 @@ completion: context [
 							not slash-end?
 							find/match to string! npc/1/expr/1 string
 						][
-							unless empty? specs: find-set?/*any? npc word false no [
+							unless empty? specs: find-set?/*any? npc to word! npc/1/expr/1 false no [
 								append result specs
 							]
 						]
