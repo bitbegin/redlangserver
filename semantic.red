@@ -1867,11 +1867,11 @@ completion: context [
 					ref [
 						return rejoin [string " is a function refinement!"]
 					]
-					field [
+					field block [
+						if pc/2 [
+							return rejoin [string " is a block item!^/next value: " mold pc/2/expr/1]
+						]
 						return rejoin [string " is a block item!"]
-					]
-					block [
-						return rejoin [string " is a block!"]
 					]
 				]
 			]
