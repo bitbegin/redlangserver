@@ -1443,11 +1443,14 @@ completion: context [
 						]
 						continue
 					]
-					if find/match to string! npc/1/expr/1 string [
+					if slash-end? [
 						if npc/1/expr = [/local][exit]
 						repend/only result ['ref npc make block! 1]
-						if slash-end? [
-							unless *all? [return result]
+					]
+					if end? [
+						if find/match to string! npc/1/expr/1 string [
+							if npc/1/expr = [/local][exit]
+							repend/only result ['ref npc make block! 1]
 						]
 					]
 				]
