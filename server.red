@@ -283,23 +283,28 @@ on-textDocument-didChange: function [params [map!]][
 				'code -32002
 				'message "create ast error, please reopen this file!"
 			]
-			response exit
+			write-log "** unknown lexer bug **"
+			response
+			exit
 		]
 		resp-diags diags uri
 		vs/1/version: version
 		exit
 	]
-	json-body/error: make map! reduce [
-		'code -32002
-		'message "lost some text changes, please reopen this file!"
-	]
+	write-log "** lost some text **"
 	response
 ]
 
 on-textDocument-didSave: function [params [map!]][
 	uri: params/textDocument/uri
+	unless exists? file: lexer/uri-to-file uri [
+		write-log "** can't find file: **"
+		write-log mold file
+		exit
+	]
+	source: read file
 	if top: semantic/find-top uri [
-		source: top/1/source
+		;source: top/1/source
 		either not empty? diags: semantic/add-source uri source [
 			forall diags [
 				json-body/method: "textDocument/publishDiagnostics"
