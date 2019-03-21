@@ -536,7 +536,14 @@ lexer: context [
 					integer-number-rule			(store stack make-number s e type)
 					| begin-symbol-rule			(to-word stack copy/part s e word!)
 					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
-					| (push-invalid type s)
+					| (
+						type: case [
+							wtype = word! [path!]
+							wtype = get-word! [get-path!]
+							wtype = lit-word! [lit-path!]
+						]
+						push-invalid type s
+					)
 				]
 			]
 			opt [
