@@ -139,7 +139,11 @@ forall trigger-string [
 ]
 on-initialize: function [params [map!]][
 	set 'client-caps params
-	set 'auto-complete? params/initializationOptions/autoComplete
+	either params/initializationOptions [
+		set 'auto-complete? params/initializationOptions/autoComplete
+	][
+		set 'auto-complete? true
+	]
 	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Incremental
 	put caps 'hoverProvider true
@@ -271,8 +275,13 @@ on-textDocument-didClose: function [params [map!]][
 ]
 
 on-textDocument-didChange: function [params [map!]][
-	source: params/contentChanges/1/text
 	uri: params/textDocument/uri
+	unless params/contentChanges/1/range [
+		source: params/contentChanges/1/text
+		diags: semantic/add-source uri source
+		resp-diags diags uri
+		exit
+	]
 	version: params/textDocument/version
 	contentChanges: params/contentChanges
 	if all [
