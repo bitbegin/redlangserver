@@ -13,20 +13,12 @@ Red [
 lexer: context [
 	uri-to-file: function [uri [string!]][
 		src: copy find/tail uri "file:///"
-		replace src "%3A" ""
-		insert src "%/"
-		load src
+		to-red-file dehex src
 	]
 	file-to-uri: function [file [file!]][
-		src: mold file
-		either system/platform = 'Windows [
-			src: copy skip src 2
-			insert next src "%3A"
-			insert src "file:///"
-		][
-			src: copy skip src 1
-			insert src "file://"
-		]
+		src: to-local-file file
+		replace/all src "\" "/"
+		insert src "file:///"
 		src
 	]
 	semicolon?: function [pc [block!] pos [string!] column [integer!]][
