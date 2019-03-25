@@ -2176,7 +2176,8 @@ completion: context [
 								either empty? first-spec [
 									range: pc/1/range
 								][
-									range: reduce [pc/1/range/1 pc/1/range/2 first-spec/2/range/3 first-spec/2/range/4]
+									upper: first-spec/1/upper
+									range: reduce [pc/1/range/1 pc/1/range/2 upper/1/range/3 upper/1/range/4]
 								]
 								append result last-symbol: make map! reduce [
 									'name		to string! pc/1/expr/1
