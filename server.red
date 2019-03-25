@@ -150,7 +150,7 @@ on-initialize: function [params [map!]][
 	put caps 'completionProvider
 		make map! reduce [
 			'resolveProvider true
-			'triggerCharacters trigger-string
+			'triggerCharacters trigger-chars
 		]
 	put caps 'definitionProvider true
 	put caps 'documentSymbolProvider true
