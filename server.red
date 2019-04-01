@@ -23,6 +23,7 @@ client-caps: none
 shutdown?: no
 
 versions: []
+workspace-folder: []
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -144,6 +145,11 @@ on-initialize: function [params [map!]][
 	][
 		set 'auto-complete? true
 	]
+	if ws: params/workspaceFolders [
+		forall ws [
+			append workspace-folder ws/1/uri
+		]
+	]
 	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Incremental
 	put caps 'hoverProvider true
@@ -197,6 +203,15 @@ on-initialized: function [params [map! none!]][
 	;	'scopeUri "red"
 	;]
 	;json-body/params: items
+	diags: semantic/add-folder workspace-folder
+	if empty? diags [
+		exit
+	]
+	forall diags [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: diags/1
+		response
+	]
 ]
 
 on-didChangeConfiguration: function [params [map! none!]][

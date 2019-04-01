@@ -126,7 +126,10 @@ semantic: context [
 	find-top: function [uri [string!]][
 		ss: sources
 		forall ss [
-			if ss/1/1/uri = uri [
+			if any [
+				uri = nuri: ss/1/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
 				return ss/1
 			]
 		]
@@ -136,7 +139,10 @@ semantic: context [
 	find-source: function [uri [string!]][
 		ss: sources
 		forall ss [
-			if ss/1/1/uri = uri [
+			if any [
+				uri = nuri: ss/1/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
 				return ss
 			]
 		]
@@ -289,6 +295,34 @@ semantic: context [
 	add-source: function [uri [string!] code [string!]][
 		clear diagnostics
 		add-source* uri code
+		diagnostics
+	]
+
+	add-folder*: function [folder [file!]][
+		if error? files: try [read folder][exit]
+		forall files [
+			if dir? file: rejoin [folder files/1] [
+				add-folder* file
+				continue
+			]
+			if %.red = find/last file "." [
+				add-source* lexer/file-to-uri file read file
+			]
+		]
+	]
+
+	add-folder: function [folders [block!]][
+		clear diagnostics
+		files: make block! 4
+		forall folders [
+			unless exists? folder: dirize lexer/uri-to-file folders/1 [
+				continue
+			]
+			append files folder
+		]
+		forall files [
+			add-folder* files/1
+		]
 		diagnostics
 	]
 
