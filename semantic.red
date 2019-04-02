@@ -799,16 +799,20 @@ completion: context [
 		true
 	]
 
-	collect-word*: function [pc [block!] word [word!] result [block!] *all? [logic!] /match?][
+	collect-word*: function [pc [block!] word [word!] result [block!] *all? [logic!] system? [logic!] /match?][
 		string: to string! word
-		collect*: function [npc [block!] type [block!] /back?][
+		collect*-set: function [npc [block!] /back?][
 			if empty? npc [
 				either back? [npc: back npc][exit]
 			]
 			until [
-				if all [
-					find type type?/word npc/1/expr/1
-					npc/1/expr <> [/local]
+				if any [
+					set-word? npc/1/expr/1
+					all [
+						system?
+						npc/-1
+						npc/-1/expr = [#define]
+					]
 				][
 					nword: to word! npc/1/expr/1
 					nstring: to string! nword
@@ -841,6 +845,32 @@ completion: context [
 				none? npc
 			]
 		]
+		collect*-func: function [npc [block!]][
+			forall npc [
+				if all [
+					find [word! lit-word! refinement!] type?/word npc/1/expr/1
+					npc/1/expr <> [/local]
+				][
+					nword: to word! npc/1/expr/1
+					nstring: to string! nword
+					either match? [
+						if nstring = string [
+							append/only result npc
+						]
+					][
+						if all [
+							find/match nstring string
+							any [
+								*all?
+								unique? result nword
+							]
+						][
+							append/only result npc
+						]
+					]
+				]
+			]
+		]
 		npc: npc2: pc
 		forever [
 			either all [
@@ -855,28 +885,34 @@ completion: context [
 					par/-2
 					find [func function has] par/-2/expr/1
 				][
-					collect* spec [word! lit-word! refinement!]
+					collect*-func spec
 				]
 				npc2: par
-				collect*/back? npc [set-word!]
-				collect* npc [set-word!]
+				collect*-set/back? npc
+				collect*-set npc
 				npc: tail par
 			][
-				collect*/back? npc [set-word!]
-				collect* npc [set-word!]
+				collect*-set/back? npc
+				collect*-set npc
 				break
 			]
 		]
 	]
 
-	collect-word: function [top [block!] pc [block!]][
+	collect-word: function [top [block!] pc [block!] system? [logic!]][
 		result: make block! 4
 		word: to word! pc/1/expr/1
-		collect-word* pc word result no
+		collect-word* pc word result no system?
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-word* back tail sources/1/1/nested word result no
+				switch/default ext: find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
+				if nsystem? = system? [
+					collect-word* back tail sources/1/1/nested word result no system?
+				]
 			]
 		]
 		result
@@ -1084,6 +1120,10 @@ completion: context [
 	]
 
 	complete-word: function [top [block!] pc [block!] comps [block!]][
+		switch/default ext: find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][exit]
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -1141,7 +1181,7 @@ completion: context [
 		if empty? string: to string! to word! pc/1/expr/1 [
 			exit
 		]
-		result: collect-word top pc
+		result: collect-word top pc system?
 		forall result [
 			rpc: result/1
 			top: rpc
@@ -1163,6 +1203,9 @@ completion: context [
 						]
 					]
 				]
+				type = 'word! [
+					kind: CompletionItemKind/Constant
+				]
 			]
 			append comps make map! reduce [
 				'label rstring
@@ -1181,26 +1224,33 @@ completion: context [
 				]
 			]
 		]
-		words: system-words/system-words
+		either system? [
+			words: [?? as assert size? if either case switch until while loop any all exit return break continue catch declare use null context with comment true false func function alias]
+		][
+			words: system-words/system-words
+		]
 		forall words [
 			sys-string: to string! words/1
 			if find/match sys-string string [
 				append comps make map! reduce [
 					'label sys-string
-					'kind system-completion-kind words/1
+					'kind either system? [CompletionItemKind/Keyword][system-completion-kind words/1]
 					'filterText? string
 					'insertTextFormat 1
 					'textEdit make map! reduce [
 						'range range
 						'newText sys-string
 					]
+
 					'data make map! reduce [
-						'type "system"
+						'type either system? ["system-s"]["system"]
 					]
 				]
 			]
 		]
-		complete-snippet
+		unless system? [
+			complete-snippet
+		]
 	]
 
 	collect-func-refinement*: function [specs [block!] *all? [logic!]][
@@ -1895,6 +1945,13 @@ completion: context [
 				]
 			]
 			if all [
+				word? pc/1/expr/1
+				pc/-1
+				pc/-1/expr = [#define]
+			][
+				return rejoin [string " is a #define macro."]
+			]
+			if all [
 				none? itype
 				upper: pc/1/upper
 				upper/-1
@@ -1951,6 +2008,13 @@ completion: context [
 		]
 		if all [
 			params/data
+			params/data/type = "system-s"
+		][
+			word: to word! params/label
+			return rejoin [params/label " is a keyword!"]
+		]
+		if all [
+			params/data
 			params/data/type = "snippet"
 			index: params/data/index
 		][
@@ -1987,8 +2051,12 @@ completion: context [
 	]
 
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
+		switch/default ext: find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return make block! 1]
 		result: make block! 4
-		collect-word*/match? pc word result *all?
+		collect-word*/match? pc word result *all? system?
 		if all [
 			not *all?
 			0 < length? result
@@ -1996,12 +2064,18 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				npc: back tail sources/1/1/nested
-				collect-word*/match? npc word result *all?
-				if all [
-					not *all?
-					0 < length? result
-				][return result]
+				switch/default ext: find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
+				if nsystem? = system? [
+					npc: back tail sources/1/1/nested
+					collect-word*/match? npc word result *all? system?
+					if all [
+						not *all?
+						0 < length? result
+					][return result]
+				]
 			]
 		]
 		result
