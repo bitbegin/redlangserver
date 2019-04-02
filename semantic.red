@@ -814,9 +814,9 @@ completion: context [
 						system?
 						npc/-1
 						any [
-							npc/-1/expr = [#define]
+							npc/-1/expr/1 = to issue! 'define
 							all [
-								npc/-1/expr = [#enum]
+								npc/-1/expr/1 = to issue! 'enum
 								npc/2
 								npc/2/expr/1 = block!
 								epc: npc/2/nested
@@ -1043,7 +1043,10 @@ completion: context [
 		false
 	]
 
-	find-set?: function [pc* [block!] word [word!] upper [logic!] *all? [logic!] /*func? /*context? /*block? /*any?][
+	find-set?: function [
+		pc* [block!] word [word!] upper [logic!] *all? [logic!]
+		/*func? /*context? /*block? /*define? /*enum? /*any?
+	][
 		result: make block! 4
 		check-set?: function [npc [block!]][
 			if all [
@@ -1094,6 +1097,41 @@ completion: context [
 						repend/only result ['value npc reduce [npc2]]
 						unless *all? [
 							return true
+						]
+					]
+				]
+			]
+			if all [
+				word? npc/1/expr/1
+				word = npc/1/expr/1
+				npc/-1
+				npc/-1/expr/1 = to issue! 'define
+			][
+				if any [*define? *any?][
+					repend/only result ['define npc make block! 1]
+					unless *all? [
+						return true
+					]
+				]
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'enum
+				npc/2
+				word? npc/2/expr/1
+				npc/3
+				npc/3/expr/1 = block!
+				nested: npc/3/nested
+			][
+				forall nested [
+					if all [
+						word? nested/1/expr/1
+						word = nested/1/expr/1
+					][
+						if any [*enum? *any?][
+							repend/only result ['enum npc make block! 1]
+							unless *all? [
+								return true
+							]
 						]
 					]
 				]
@@ -1979,7 +2017,7 @@ completion: context [
 			if all [
 				word? pc/1/expr/1
 				pc/-1
-				pc/-1/expr = [#define]
+				pc/-1/expr/1 = to issue! 'define
 			][
 				return rejoin [string " is a #define macro."]
 			]
@@ -1987,7 +2025,7 @@ completion: context [
 				word? pc/1/expr/1
 				upper: pc/1/upper
 				upper/-2
-				upper/-2/expr = [#enum]
+				upper/-2/expr/1 = to issue! 'enum
 			][
 				return rejoin [string " is a #enum value: " mold index? pc]
 			]
