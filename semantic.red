@@ -806,29 +806,60 @@ completion: context [
 				either back? [npc: back npc][exit]
 			]
 			until [
+				epc: none
 				if any [
 					set-word? npc/1/expr/1
 					all [
 						system?
 						npc/-1
-						npc/-1/expr = [#define]
+						any [
+							npc/-1/expr = [#define]
+							all [
+								npc/-1/expr = [#enum]
+								npc/2
+								npc/2/expr/1 = block!
+								epc: npc/2/nested
+							]
+						]
 					]
 				][
-					nword: to word! npc/1/expr/1
-					nstring: to string! nword
-					either match? [
-						if nstring = string [
-							append/only result npc
+					either epc [
+						forall epc [
+							nword: to word! epc/1/expr/1
+							nstring: to string! nword
+							either match? [
+								if nstring = string [
+									append/only result epc
+								]
+							][
+								if all [
+									find/match nstring string
+									any [
+										*all?
+										unique? result nword
+									]
+								][
+									append/only result epc
+								]
+							]
 						]
 					][
-						if all [
-							find/match nstring string
-							any [
-								*all?
-								unique? result nword
+						nword: to word! npc/1/expr/1
+						nstring: to string! nword
+						either match? [
+							if nstring = string [
+								append/only result npc
 							]
 						][
-							append/only result npc
+							if all [
+								find/match nstring string
+								any [
+									*all?
+									unique? result nword
+								]
+							][
+								append/only result npc
+							]
 						]
 					]
 				]
@@ -1950,6 +1981,14 @@ completion: context [
 				pc/-1/expr = [#define]
 			][
 				return rejoin [string " is a #define macro."]
+			]
+			if all [
+				word? pc/1/expr/1
+				upper: pc/1/upper
+				upper/-2
+				upper/-2/expr = [#enum]
+			][
+				return rejoin [string " is a #enum value: " mold index? pc]
 			]
 			if all [
 				none? itype
