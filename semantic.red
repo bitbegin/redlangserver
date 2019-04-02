@@ -806,7 +806,10 @@ completion: context [
 				either back? [npc: back npc][exit]
 			]
 			until [
-				if find type type?/word npc/1/expr/1 [
+				if all [
+					find type type?/word npc/1/expr/1
+					npc/1/expr <> [/local]
+				][
 					nword: to word! npc/1/expr/1
 					nstring: to string! nword
 					either match? [
