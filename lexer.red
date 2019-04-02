@@ -119,6 +119,7 @@ lexer: context [
 
 	transcode: function [
 		src			[string!]
+		system?		[logic!]
 		return:		[block!]
 		/local
 			rs re epos ast-nested ast-block ast-upper
@@ -872,7 +873,7 @@ lexer: context [
 			| skip (type: error! push-invalid type epos)
 		]
 
-		literal-value: [
+		literal-value-red: [
 			pos: (e: none rs: now-line? pos) s: [
 									  string-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: do make-string] do store-ast)
 				| (remove-lines rs/1) block-rule ;epos: (re: now-line? epos)
@@ -898,6 +899,35 @@ lexer: context [
 				| (remove-lines rs/1) invalid-rule epos: (re: now-line? epos)		(value: type do store-ast)
 			]
 		]
+
+		literal-value-system: [
+			pos: (e: none rs: now-line? pos) s: [
+									  string-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: do make-string] do store-ast)
+				| (remove-lines rs/1) block-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) comment-rule ;epos: (re: now-line? epos)
+				;| (remove-lines rs/1) tuple-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: make-tuple s e] do store-ast)
+				| (remove-lines rs/1) hexa-rule epos: (re: now-line? epos)			(value: make-hexa s e do store-ast)
+				;| (remove-lines rs/1) binary-rule epos: (re: now-line? epos)		(either have-error? [value: type][unless value: make-binary s e base [value: binary!]] do store-ast)
+				;| (remove-lines rs/1) email-rule epos: (re: now-line? epos)			(value: do make-file do store-ast)
+				;| (remove-lines rs/1) date-rule epos: (re: now-line? epos)			(if have-error? [value: type] do store-ast)
+				| (remove-lines rs/1) integer-rule epos: (re: now-line? epos)		(if have-error? [value: type] do store-ast)
+				| (remove-lines rs/1) float-rule epos: (re: now-line? epos)			(either have-error? [value: type][unless value: make-float s e type [value: type]] do store-ast)
+				;| (remove-lines rs/1) tag-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do make-string] do store-ast)
+				| (remove-lines rs/1) word-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				;| (remove-lines rs/1) lit-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) get-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) refinement-rule epos: (re: now-line? epos)	(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) file-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do process] do store-ast)
+				| (remove-lines rs/1) char-rule epos: (re: now-line? epos)			(either have-error? [value: type][if value > 10FFFFh [push-invalid type s value: type]] do store-ast)
+				;| (remove-lines rs/1) map-rule ;epos: (re: now-line? epos)
+				| (remove-lines rs/1) paren-rule ;epos: (re: now-line? epos)
+				;| (remove-lines rs/1) escaped-rule epos: (re: now-line? epos)		(do store-ast)
+				| (remove-lines rs/1) issue-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) invalid-rule epos: (re: now-line? epos)		(value: type do store-ast)
+			]
+		]
+
+		literal-value: either system? [literal-value-system][literal-value-red]
 
 		nested-block: [pos: some [[ahead #"]" | end] break | some ws | literal-value]]
 		nested-paren: [pos: some [[ahead #")" | end] break | some ws | literal-value]]

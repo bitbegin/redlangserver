@@ -281,7 +281,11 @@ semantic: context [
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		top: lexer/transcode code
+		write-log rejoin ["add uri: " uri]
+		switch/default ext: find/last uri "." [
+			".red"	[top: lexer/transcode code no]
+			".reds"	[top: lexer/transcode code yes]
+		][exit]
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
@@ -305,7 +309,10 @@ semantic: context [
 				add-folder* file
 				continue
 			]
-			if %.red = find/last file "." [
+			if any [
+				%.red = find/last file "."
+				%.reds = find/last file "."
+			][
 				add-source* lexer/file-to-uri file read file
 			]
 		]
@@ -403,6 +410,7 @@ semantic: context [
 	]
 
 	update-ws: function [
+			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -432,7 +440,7 @@ semantic: context [
 			write-log mold npc/1/range
 			write-log mold str
 			if any [
-				not top: lexer/transcode str
+				not top: lexer/transcode str system?
 				none? nested: top/1/nested
 				1 < length? nested
 			][
@@ -449,6 +457,7 @@ semantic: context [
 	]
 
 	update-one: function [
+			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -475,7 +484,7 @@ semantic: context [
 		write-log mold pc/1/range
 		write-log mold str
 		if any [
-			not top: lexer/transcode str
+			not top: lexer/transcode str system?
 			none? nested: top/1/nested
 			1 < length? nested
 		][
@@ -492,6 +501,10 @@ semantic: context [
 
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
+		switch/default ext: find/last uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return false]
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
 		;write-log mold changes
@@ -558,7 +571,7 @@ semantic: context [
 						]
 					]
 				][
-					unless update-ws epcs s-line s-column e-line e-column otext text line-stack [
+					unless update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-ws failed"
 						add-source* uri ncode
 					]
@@ -605,7 +618,7 @@ semantic: context [
 						not find otext not-trigger-charset
 					]
 				][
-					unless update-one epcs s-line s-column e-line e-column otext text line-stack [
+					unless update-one system? epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-one failed"
 						add-source* uri ncode
 					]
@@ -663,7 +676,7 @@ semantic: context [
 							write-log "empty insert npc: "
 							write-log mold range
 							if any [
-								not top: lexer/transcode text
+								not top: lexer/transcode text system?
 								none? nested: top/1/nested
 								1 < length? nested
 							][
@@ -681,7 +694,7 @@ semantic: context [
 						write-log "insert pc: "
 						write-log mold range
 						if any [
-							not top: lexer/transcode text
+							not top: lexer/transcode text system?
 							none? nested: top/1/nested
 							1 < length? nested
 						][
