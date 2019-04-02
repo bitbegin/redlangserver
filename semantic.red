@@ -309,9 +309,10 @@ semantic: context [
 				add-folder* file
 				continue
 			]
+			ext: find/last file "."
 			if any [
-				%.red = find/last file "."
-				%.reds = find/last file "."
+				%.red = ext
+				%.reds = ext
 			][
 				add-source* lexer/file-to-uri file read file
 			]
