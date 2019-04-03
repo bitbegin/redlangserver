@@ -914,7 +914,7 @@ lexer: context [
 				| (remove-lines rs/1) float-rule epos: (re: now-line? epos)			(either have-error? [value: type][unless value: make-float s e type [value: type]] do store-ast)
 				;| (remove-lines rs/1) tag-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do make-string] do store-ast)
 				| (remove-lines rs/1) word-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
-				;| (remove-lines rs/1) lit-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
+				| (remove-lines rs/1) lit-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
 				| (remove-lines rs/1) get-word-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
 				| (remove-lines rs/1) refinement-rule epos: (re: now-line? epos)	(either have-error? [value: type][value: last last stack] remove back tail last stack do store-ast)
 				| (remove-lines rs/1) file-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: do process] do store-ast)

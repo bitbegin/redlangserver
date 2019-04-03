@@ -822,32 +822,125 @@ completion: context [
 		]
 		collect*-set: function [npc [block!] /back?][
 			if empty? npc [
-				either back? [npc: back npc][exit]
+				either back? [
+					if empty? npc: back npc [exit]
+				][exit]
 			]
 			until [
-				epc: none
-				if any [
-					set-word? npc/1/expr/1
+				case [
+					set-word? npc/1/expr/1 [
+						collect* to word! npc/1/expr/1 npc
+					]
 					all [
 						system?
-						npc/-1
-						any [
-							npc/-1/expr/1 = to issue! 'define
-							all [
-								npc/-1/expr/1 = to issue! 'enum
-								npc/2
-								npc/2/expr/1 = block!
-								epc: npc/2/nested
+						npc/1/expr/1 = to issue! 'define
+						npc/2
+						word? npc/2/expr/1
+					][
+						collect* npc/2/expr/1 next npc
+					]
+					all [
+						system?
+						npc/1/expr/1 = to issue! 'enum
+						npc/2
+						word? npc/2/expr/1
+						npc/3
+						npc/3/expr/1 = block!
+						epc: npc/3/nested
+					][
+						forall epc [
+							if word? epc/1/expr/1 [
+								collect* epc/1/expr/1 epc
 							]
 						]
 					]
-				][
-					either epc [
-						forall epc [
-							collect* to word! epc/1/expr/1 epc
+					all [
+						system?
+						npc/1/expr/1 = to issue! 'if
+					][
+						npc2: npc
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
+						][
+							either back? [
+								collect*-set/back? tail nested
+							][
+								collect*-set nested
+							]
+						]
+					]
+					all [
+						system?
+						npc/1/expr/1 = to issue! 'either
+					][
+						npc2: npc
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
+						][
+							either back? [
+								collect*-set/back? tail nested
+							][
+								collect*-set nested
+							]
+						]
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
+						][
+							either back? [
+								collect*-set/back? tail nested
+							][
+								collect*-set nested
+							]
+						]
+					]
+					all [
+						system?
+						any [
+							npc/1/expr/1 = to issue! 'switch
+							npc/1/expr/1 = to issue! 'import
 						]
 					][
-						collect* to word! npc/1/expr/1 npc
+						npc2: npc
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
+						][
+							forall nested [
+								if all [
+									nested/1/expr/1 = block!
+									n2: nested/1/nested
+								][
+									collect*-set/back? back tail n2
+								]
+							]
+						]
 					]
 				]
 				either back? [
@@ -891,11 +984,11 @@ completion: context [
 				]
 				npc2: par
 				collect*-set/back? npc
-				collect*-set npc
+				collect*-set next npc
 				npc: tail par
 			][
 				collect*-set/back? npc
-				collect*-set npc
+				collect*-set next npc
 				break
 			]
 		]
