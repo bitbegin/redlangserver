@@ -1252,6 +1252,10 @@ completion: context [
 		"foreach.snippet"		"foreach iteration series [ ]"	"foreach ${1:iteration} ${2:series} [^/^-${3:exp}^/]^/"
 	]
 
+	snippets-sys: [
+		"reds.title.snippet"	"Red/System [ Title ]"			"Red/System [^/^-Title: ^"${2:title}^"^/]^/"
+	]
+
 	complete-word: function [top [block!] pc [block!] comps [block!]][
 		switch/default ext: find/last top/1/uri "." [
 			".red"	[system?: no]
@@ -1280,22 +1284,23 @@ completion: context [
 				]
 			]
 		]
-		complete-snippet: function [][
+		complete-snippet: function [system? [logic!]][
+			nsnippets: either system? [snippets-sys][snippets]
 			if word? pc/1/expr/1 [
-				len: (length? snippets) / 3
+				len: (length? nsnippets) / 3
 				repeat i len [
-					if find/match snippets/(i * 3 - 2) string [
+					if find/match nsnippets/(i * 3 - 2) string [
 						append comps make map! reduce [
-							'label snippets/(i * 3 - 2)
+							'label nsnippets/(i * 3 - 2)
 							'kind CompletionItemKind/Keyword
 							'filterText? string
 							'insertTextFormat 2
 							'textEdit make map! reduce [
 								'range range
-								'newText snippets/(i * 3)
+								'newText nsnippets/(i * 3)
 							]
 							'data make map! reduce [
-								'type "snippet"
+								'type either system? ["snippet-sys"]["snippet"]
 								'index (i * 3 - 1)
 							]
 						]
@@ -1333,6 +1338,19 @@ completion: context [
 							context		[kind: CompletionItemKind/Struct]
 							func		[kind: CompletionItemKind/Function]
 							block		[kind: CompletionItemKind/Array]
+							value		[
+								npc: ret/1/2
+								if all [
+									npc/2
+									string? npc/2/expr/1
+									par1: npc/1/upper
+									par2: par1/1/upper
+									par2/-1
+									par2/-1/expr/1 = to issue! 'import
+								][
+									kind: CompletionItemKind/Module
+								]
+							]
 						]
 					]
 				]
@@ -1376,14 +1394,12 @@ completion: context [
 					]
 
 					'data make map! reduce [
-						'type either system? ["system-s"]["system"]
+						'type either system? ["keyword-sys"]["keyword"]
 					]
 				]
 			]
 		]
-		unless system? [
-			complete-snippet
-		]
+		complete-snippet system?
 	]
 
 	collect-func-refinement*: function [specs [block!] *all? [logic!]][
@@ -2067,6 +2083,17 @@ completion: context [
 						return rejoin [string " is a block! variable."]
 					]
 					value		[
+						npc: ret/1/2
+						if all [
+							npc/2
+							string? npc/2/expr/1
+							par1: npc/1/upper
+							par2: par1/1/upper
+							par2/-1
+							par2/-1/expr/1 = to issue! 'import
+						][
+							return rejoin [string " is import form " to string! par1/-2/expr/1]
+						]
 						if word? expr: specs/1/1/expr/1 [
 							return rejoin [string ": " mold expr]
 						]
@@ -2139,7 +2166,7 @@ completion: context [
 		if params/kind = CompletionItemKind/File [return none]
 		if all [
 			params/data
-			params/data/type = "system"
+			params/data/type = "keyword"
 		][
 			word: to word! params/label
 			if datatype? get word [
@@ -2149,7 +2176,7 @@ completion: context [
 		]
 		if all [
 			params/data
-			params/data/type = "system-s"
+			params/data/type = "keyword-sys"
 		][
 			word: to word! params/label
 			return rejoin [params/label " is a keyword!"]
@@ -2160,6 +2187,13 @@ completion: context [
 			index: params/data/index
 		][
 			return snippets/:index
+		]
+		if all [
+			params/data
+			params/data/type = "snippet-sys"
+			index: params/data/index
+		][
+			return snippets-sys/:index
 		]
 		if all [
 			params/data
