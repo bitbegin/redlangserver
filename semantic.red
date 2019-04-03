@@ -802,6 +802,24 @@ completion: context [
 
 	collect-word*: function [pc [block!] word [word!] result [block!] *all? [logic!] system? [logic!] /match?][
 		string: to string! word
+		collect*: function [word* [word!] pc* [block!]][
+			string*: to string! word*
+			either match? [
+				if string = string* [
+					append/only result pc*
+				]
+			][
+				if all [
+					find/match string* string
+					any [
+						*all?
+						unique? result word*
+					]
+				][
+					append/only result pc*
+				]
+			]
+		]
 		collect*-set: function [npc [block!] /back?][
 			if empty? npc [
 				either back? [npc: back npc][exit]
@@ -826,42 +844,10 @@ completion: context [
 				][
 					either epc [
 						forall epc [
-							nword: to word! epc/1/expr/1
-							nstring: to string! nword
-							either match? [
-								if nstring = string [
-									append/only result epc
-								]
-							][
-								if all [
-									find/match nstring string
-									any [
-										*all?
-										unique? result nword
-									]
-								][
-									append/only result epc
-								]
-							]
+							collect* to word! epc/1/expr/1 epc
 						]
 					][
-						nword: to word! npc/1/expr/1
-						nstring: to string! nword
-						either match? [
-							if nstring = string [
-								append/only result npc
-							]
-						][
-							if all [
-								find/match nstring string
-								any [
-									*all?
-									unique? result nword
-								]
-							][
-								append/only result npc
-							]
-						]
+						collect* to word! npc/1/expr/1 npc
 					]
 				]
 				either back? [
@@ -883,23 +869,7 @@ completion: context [
 					find [word! lit-word! refinement!] type?/word npc/1/expr/1
 					npc/1/expr <> [/local]
 				][
-					nword: to word! npc/1/expr/1
-					nstring: to string! nword
-					either match? [
-						if nstring = string [
-							append/only result npc
-						]
-					][
-						if all [
-							find/match nstring string
-							any [
-								*all?
-								unique? result nword
-							]
-						][
-							append/only result npc
-						]
-					]
+					collect* to word! npc/1/expr/1 npc
 				]
 			]
 		]
