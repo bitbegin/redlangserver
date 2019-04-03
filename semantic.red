@@ -1842,7 +1842,7 @@ completion: context [
 					]
 					'data make map! reduce [
 						'path append copy tstr nstring
-						'type "system-path"
+						'type "keypath"
 					]
 				]
 			]
@@ -2092,7 +2092,22 @@ completion: context [
 							par2/-1
 							par2/-1/expr/1 = to issue! 'import
 						][
-							return rejoin [string " is import form " to string! par1/-2/expr/1]
+							desc: none
+							if all [
+								npc/3
+								npc/3/expr/1 = block!
+								nested: npc/3/nested
+							][
+								desc: get-block nested
+							]
+							ret: rejoin [
+								string " is import form " to string! par1/-2/expr/1
+								"^/prototype: " npc/2/expr/1
+							]
+							if desc [
+								append ret rejoin ["^/" mold desc]
+							]
+							return ret
 						]
 						if word? expr: specs/1/1/expr/1 [
 							return rejoin [string ": " mold expr]
@@ -2197,7 +2212,7 @@ completion: context [
 		]
 		if all [
 			params/data
-			params/data/type = "system-path"
+			params/data/type = "keypath"
 			params/data/path
 		][
 			path: load params/data/path

@@ -151,13 +151,4 @@ system-words: context [
 		][none]
 	]
 
-	form-completion: function [completions [block!]][
-		either 1 = length? completions [
-			comp: either #"/" = last completions/1 [
-				copy/part completions/1 (length? completions/1) - 1
-			][completions/1]
-			unless res: find/last/tail comp #"/" [res: comp]
-			res
-		][completions]
-	]
 ]
