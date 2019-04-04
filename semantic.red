@@ -11,6 +11,7 @@ semantic: context [
 	sources: []
 	diagnostics: []
 	write-log: :probe
+	excluded-folders: []
 
 	find-expr: function [top [block!] range [block!]][
 		find-expr*: function [pc [block!]][
@@ -305,7 +306,10 @@ semantic: context [
 	add-folder*: function [folder [file!]][
 		if error? files: try [read folder][exit]
 		forall files [
-			if dir? file: rejoin [folder files/1] [
+			if all [
+				dir? file: rejoin [folder files/1]
+				not find excluded-folders file
+			][
 				add-folder* file
 				continue
 			]
@@ -319,7 +323,7 @@ semantic: context [
 		]
 	]
 
-	add-folder: function [folders [block!]][
+	add-folder: function [folders [block!] excluded [string!]][
 		clear diagnostics
 		files: make block! 4
 		forall folders [
@@ -327,6 +331,15 @@ semantic: context [
 				continue
 			]
 			append files folder
+		]
+		ex: split excluded ";"
+		clear excluded-folders
+		forall files [
+			forall ex [
+				unless empty? ex/1 [
+					append excluded-folders rejoin [files/1 to file! ex/1]
+				]
+			]
 		]
 		forall files [
 			add-folder* files/1

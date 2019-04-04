@@ -24,6 +24,7 @@ shutdown?: no
 
 versions: []
 workspace-folder: []
+excluded-folder: ""
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -142,6 +143,7 @@ on-initialize: function [params [map!]][
 	set 'client-caps params
 	either params/initializationOptions [
 		set 'auto-complete? params/initializationOptions/autoComplete
+		set 'excluded-folder params/initializationOptions/excludedPath
 	][
 		set 'auto-complete? true
 	]
@@ -203,7 +205,7 @@ on-initialized: function [params [map! none!]][
 	;	'scopeUri "red"
 	;]
 	;json-body/params: items
-	diags: semantic/add-folder workspace-folder
+	diags: semantic/add-folder workspace-folder excluded-folder
 	if empty? diags [
 		exit
 	]
