@@ -8,7 +8,7 @@ Red [
 ]
 
 system-words: context [
-	get-words: has [sys words] [
+	get-red-words: has [sys words] [
 		sys: words-of system/words
 		words: make block! length? sys
 		forall sys [
@@ -18,19 +18,25 @@ system-words: context [
 		]
 		words
 	]
-	system-words: get-words
-	system?: func [word [word!]][
-		to logic! find system-words word
+	red-words: get-red-words
+	reds-words: [?? as assert size? if either case switch until while loop any all exit return break continue catch declare use null context with comment true false func function alias]
+	get-words: func [system? [logic!]][
+		either system? [reds-words][red-words]
+	]
+	keyword?: func [system? [logic!] word [word!]][
+		to logic! find either system? [reds-words][red-words] word
 	]
 
-	get-word-info: func [word [word!]][
-		either find system-words word [
+	get-word-info: func [system? [logic!] word [word!]][
+		if system? [return none]
+		either find red-words word [
 			help-string :word
 		][none]
 	]
 
-	get-path-info: func [path [path!]][
-		either find system-words path/1 [
+	get-path-info: func [system? [logic!] path [path!]][
+		if system? [return none]
+		either find red-words path/1 [
 			n: copy path
 			while [
 				all [

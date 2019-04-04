@@ -1375,11 +1375,8 @@ completion: context [
 				]
 			]
 		]
-		either system? [
-			words: [?? as assert size? if either case switch until while loop any all exit return break continue catch declare use null context with comment true false func function alias]
-		][
-			words: system-words/system-words
-		]
+
+		words: system-words/get-words system?
 		forall words [
 			sys-string: to string! words/1
 			if find/match sys-string string [
@@ -1822,7 +1819,7 @@ completion: context [
 		complete-sys-path: function [][
 			tstr: find/tail/last pure-path "/"
 			tstr: copy/part pure-path tstr
-			unless system-words/system? fword [exit]
+			unless system-words/keyword? no fword [exit]
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
@@ -2187,7 +2184,7 @@ completion: context [
 			if datatype? get word [
 				return rejoin [params/label " is a base datatype!"]
 			]
-			return system-words/get-word-info word
+			return system-words/get-word-info no word
 		]
 		if all [
 			params/data
@@ -2216,7 +2213,7 @@ completion: context [
 			params/data/path
 		][
 			path: load params/data/path
-			return system-words/get-path-info path
+			return system-words/get-path-info no path
 		]
 		if all [
 			params/data
@@ -2358,11 +2355,11 @@ completion: context [
 	]
 
 	hover-keyword: function [word [word!]][
-		if system-words/system? word [
+		if system-words/keyword? no word [
 			if datatype? get word [
 				return rejoin [mold word " is a base datatype!"]
 			]
-			return system-words/get-word-info word
+			return system-words/get-word-info no word
 		]
 		none
 	]
@@ -2374,7 +2371,7 @@ completion: context [
 			]
 			path/1: word
 		]
-		system-words/get-path-info to path! path
+		system-words/get-path-info no to path! path
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
