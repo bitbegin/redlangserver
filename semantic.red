@@ -12,6 +12,7 @@ semantic: context [
 	diagnostics: []
 	write-log: :probe
 	excluded-folders: []
+	root-folders: []
 
 	find-expr: function [top [block!] range [block!]][
 		find-expr*: function [pc [block!]][
@@ -325,26 +326,36 @@ semantic: context [
 
 	add-folder: function [folders [block!] excluded [string!]][
 		clear diagnostics
-		files: make block! 4
+		clear root-folders
 		forall folders [
 			unless exists? folder: dirize lexer/uri-to-file folders/1 [
 				continue
 			]
-			append files folder
+			append root-folders folder
 		]
 		ex: split excluded ";"
 		clear excluded-folders
-		forall files [
+		forall root-folders [
 			forall ex [
 				unless empty? ex/1 [
-					append excluded-folders rejoin [files/1 to file! ex/1]
+					append excluded-folders rejoin [root-folders/1 to file! ex/1]
 				]
 			]
 		]
-		forall files [
-			add-folder* files/1
+		forall root-folders [
+			add-folder* root-folders/1
 		]
 		diagnostics
+	]
+
+	workspace-file?: function [uri [string!]][
+		file: lexer/uri-to-file uri
+		forall root-folders [
+			if find/match file root-folders/1 [
+				return true
+			]
+		]
+		false
 	]
 
 	new-lines?: function [text [string!]][

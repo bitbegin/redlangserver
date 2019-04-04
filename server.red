@@ -284,11 +284,14 @@ on-textDocument-didClose: function [params [map!]][
 	if vs: find-uri uri [
 		remove vs
 	]
-	if item: semantic/find-source uri [
+	if all [
+		not semantic/workspace-file? uri
+		item: semantic/find-source uri
+	][
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
-		clear-diag uri
 	]
+	clear-diag uri
 ]
 
 on-textDocument-didChange: function [params [map!]][
