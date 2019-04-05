@@ -888,8 +888,11 @@ completion: context [
 					][
 						collect* to word! npc/2/expr/1 next npc
 						forall epc [
-							if word? epc/1/expr/1 [
-								collect* epc/1/expr/1 epc
+							if any [
+								word? epc/1/expr/1
+								set-word? epc/1/expr/1
+							][
+								collect* to word! epc/1/expr/1 epc
 							]
 						]
 					]
@@ -1351,9 +1354,15 @@ completion: context [
 					return none
 				]
 				forall nested [
-					if all [
-						word? nested/1/expr/1
-						word = nested/1/expr/1
+					if any [
+						all [
+							word? nested/1/expr/1
+							word = nested/1/expr/1
+						]
+						all [
+							set-word? nested/1/expr/1
+							word = to word! nested/1/expr/1
+						]
 					][
 						if any [*enum? *any?][
 							repend/only result ['enum nested make block! 1]
