@@ -1300,7 +1300,6 @@ completion: context [
 				return none
 			]
 			if all [
-				system?
 				npc/1/expr/1 = to issue! 'import
 				npc/2
 				npc/2/expr/1 = block!
