@@ -905,7 +905,7 @@ lexer: context [
 									  string-rule epos: (re: now-line? epos)		(either have-error? [value: type][value: do make-string] do store-ast)
 				| (remove-lines rs/1) block-rule ;epos: (re: now-line? epos)
 				| (remove-lines rs/1) comment-rule ;epos: (re: now-line? epos)
-				;| (remove-lines rs/1) tuple-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: make-tuple s e] do store-ast)
+				| (remove-lines rs/1) tuple-rule epos: (re: now-line? epos)			(either have-error? [value: type][value: make-tuple s e] do store-ast)
 				| (remove-lines rs/1) hexa-rule epos: (re: now-line? epos)			(value: make-hexa s e do store-ast)
 				;| (remove-lines rs/1) binary-rule epos: (re: now-line? epos)		(either have-error? [value: type][unless value: make-binary s e base [value: binary!]] do store-ast)
 				;| (remove-lines rs/1) email-rule epos: (re: now-line? epos)			(value: do make-file do store-ast)

@@ -163,14 +163,29 @@ semantic: context [
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
-			forall pc [
+			while [not tail? pc] [
 				if errors: pc/1/error [
+					if all [
+						pc/1/expr/1 = path!
+						pc/2
+						pc/2/expr/1 = paren!
+					][
+						if nested: pc/2/nested [
+							collect-errors* nested
+						]
+						either all [
+							pc/3
+							pc/3/expr/1 = issue!
+							pc/3/range/1 = pc/3/range/3
+							(pc/3/range/2 + 1) = pc/3/range/4
+						][
+							pc: skip pc 3
+						][
+							pc: skip pc 2
+						]
+						continue
+					]
 					forall errors [
-						if all [
-							pc/1/expr/1 = path!
-							pc/2
-							pc/2/expr/1 = paren!
-						][continue]
 						append ret make map! reduce [
 							'severity DiagnosticSeverity/(errors/1/level)
 							'code mold errors/1/type
@@ -180,9 +195,10 @@ semantic: context [
 						]
 					]
 				]
-				if pc/1/nested [
-					collect-errors* pc/1/nested
+				if nested: pc/1/nested [
+					collect-errors* nested
 				]
+				pc: next pc
 			]
 		]
 		collect-errors* top
@@ -284,7 +300,7 @@ semantic: context [
 
 	add-source*: function [uri [string!] code [string!]][
 		write-log rejoin ["add uri: " uri]
-		switch/default ext: find/last uri "." [
+		switch/default find/last uri "." [
 			".red"	[top: lexer/transcode code no]
 			".reds"	[top: lexer/transcode code yes]
 		][exit]
@@ -526,7 +542,7 @@ semantic: context [
 
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
-		switch/default ext: find/last uri "." [
+		switch/default find/last uri "." [
 			".red"	[system?: no]
 			".reds"	[system?: yes]
 		][return false]
@@ -1025,7 +1041,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				switch/default ext: find/last sources/1/1/uri "." [
+				switch/default find/last sources/1/1/uri "." [
 					".red"	[nsystem?: no]
 					".reds"	[nsystem?: yes]
 				][continue]
@@ -1281,7 +1297,7 @@ completion: context [
 	]
 
 	complete-word: function [top [block!] pc [block!] comps [block!]][
-		switch/default ext: find/last top/1/uri "." [
+		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
 			".reds"	[system?: yes]
 		][exit]
@@ -2262,7 +2278,7 @@ completion: context [
 	]
 
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
-		switch/default ext: find/last top/1/uri "." [
+		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
 			".reds"	[system?: yes]
 		][return make block! 1]
@@ -2275,7 +2291,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				switch/default ext: find/last sources/1/1/uri "." [
+				switch/default find/last sources/1/1/uri "." [
 					".red"	[nsystem?: no]
 					".reds"	[nsystem?: yes]
 				][continue]
