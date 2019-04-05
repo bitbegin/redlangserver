@@ -886,6 +886,7 @@ completion: context [
 						npc/3/expr/1 = block!
 						epc: npc/3/nested
 					][
+						collect* to word! npc/2/expr/1 next npc
 						forall epc [
 							if word? epc/1/expr/1 [
 								collect* epc/1/expr/1 epc
@@ -1340,13 +1341,22 @@ completion: context [
 				npc/3/expr/1 = block!
 				nested: npc/3/nested
 			][
+				if word = npc/2/expr/1 [
+					if any [*enum? *any?][
+						repend/only result ['enum next npc make block! 1]
+						unless *all? [
+							return true
+						]
+					]
+					return none
+				]
 				forall nested [
 					if all [
 						word? nested/1/expr/1
 						word = nested/1/expr/1
 					][
 						if any [*enum? *any?][
-							repend/only result ['enum npc make block! 1]
+							repend/only result ['enum nested make block! 1]
 							unless *all? [
 								return true
 							]
@@ -2285,6 +2295,13 @@ completion: context [
 				pc/-1/expr/1 = to issue! 'define
 			][
 				return rejoin [string " is a #define macro."]
+			]
+			if all [
+				word? pc/1/expr/1
+				pc/-1
+				pc/-1/expr/1 = to issue! 'enum
+			][
+				return rejoin [string " is a #enum type."]
 			]
 			if all [
 				word? pc/1/expr/1
