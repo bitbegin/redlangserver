@@ -364,6 +364,40 @@ semantic: context [
 		diagnostics
 	]
 
+	remove-folder*: function [folder [file!]][
+		if error? files: try [read folder][exit]
+		forall files [
+			if dir? file: rejoin [folder files/1][
+				remove-folder* file
+				continue
+			]
+			uri: lexer/file-to-uri file
+			if ss: find-source uri [
+				remove ss
+				append diagnostics make map! reduce [
+					'uri uri
+					'diagnostics make block! 1
+				]
+			]
+		]
+	]
+
+	remove-folder: function [folders [block!]][
+		clear diagnostics
+		clear root-folders
+		forall folders [
+			unless exists? folder: dirize lexer/uri-to-file folders/1 [
+				continue
+			]
+			append root-folders folder
+		]
+
+		forall root-folders [
+			remove-folder* root-folders/1
+		]
+		diagnostics
+	]
+
 	workspace-file?: function [uri [string!]][
 		file: lexer/uri-to-file uri
 		forall root-folders [

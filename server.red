@@ -111,19 +111,21 @@ lsp-read: function [][
 
 dispatch-method: function [method [string!] params][
 	switch method [
-		"initialize"						[on-initialize params]
-		"initialized"						[on-initialized params]
-		"workspace/didChangeConfiguration"	[on-didChangeConfiguration params]
-		"shutdown"							[on-shutdown params]
-		"textDocument/didOpen"				[on-textDocument-didOpen params]
-		"textDocument/didClose"				[on-textDocument-didClose params]
-		"textDocument/didChange"			[on-textDocument-didChange params]
-		"textDocument/didSave"				[on-textDocument-didSave params]
-		"textDocument/completion"			[on-textDocument-completion params]
-		"completionItem/resolve"			[on-completionItem-resolve params]
-		"textDocument/documentSymbol"		[on-textDocument-symbol params]
-		"textDocument/hover"				[on-textDocument-hover params]
-		"textDocument/definition"			[on-textDocument-definition params]
+		"initialize"							[on-initialize params]
+		"initialized"							[on-initialized params]
+		"workspace/didChangeConfiguration"		[on-didChangeConfiguration params]
+		"workspace/didChangeWorkspaceFolders"	[on-didChangeWorkspaceFolders params]
+		"workspace/didChangeWatchedFiles"		[on-didChangeWatchedFiles params]
+		"shutdown"								[on-shutdown params]
+		"textDocument/didOpen"					[on-textDocument-didOpen params]
+		"textDocument/didClose"					[on-textDocument-didClose params]
+		"textDocument/didChange"				[on-textDocument-didChange params]
+		"textDocument/didSave"					[on-textDocument-didSave params]
+		"textDocument/completion"				[on-textDocument-completion params]
+		"completionItem/resolve"				[on-completionItem-resolve params]
+		"textDocument/documentSymbol"			[on-textDocument-symbol params]
+		"textDocument/hover"					[on-textDocument-hover params]
+		"textDocument/definition"				[on-textDocument-definition params]
 	]
 ]
 
@@ -162,6 +164,12 @@ on-initialize: function [params [map!]][
 		]
 	put caps 'definitionProvider true
 	put caps 'documentSymbolProvider true
+	put caps 'workspace make map! reduce [
+		'workspaceFolders make map! reduce [
+			'supported true
+			'changeNotifications true
+		]
+	]
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -228,6 +236,45 @@ on-didChangeConfiguration: function [params [map! none!]][
 			]
 		]
 	]
+]
+
+on-didChangeWorkspaceFolders: function [params [map! none!]][
+	added: params/event/added
+	removed: params/event/removed
+	unless empty? added [
+		added-folder: make block! 4
+		forall added [
+			append added-folder added/1/uri
+		]
+		diags: semantic/add-folder added-folder excluded-folder
+		if empty? diags [
+			exit
+		]
+		forall diags [
+			json-body/method: "textDocument/publishDiagnostics"
+			json-body/params: diags/1
+			response
+		]
+	]
+	unless empty? removed [
+		removed-folder: make block! 4
+		forall removed [
+			append removed-folder removed/1/uri
+		]
+		diags: semantic/remove-folder removed-folder
+		if empty? diags [
+			exit
+		]
+		forall diags [
+			json-body/method: "textDocument/publishDiagnostics"
+			json-body/params: diags/1
+			response
+		]
+	]
+]
+
+on-didChangeWatchedFiles: function [params [map! none!]][
+
 ]
 
 on-shutdown: function [params [map! none!]][
