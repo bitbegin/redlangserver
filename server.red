@@ -294,7 +294,26 @@ on-didChangeWorkspaceFolders: function [params [map! none!]][
 ]
 
 on-didChangeWatchedFiles: function [params [map! none!]][
-
+	changes: params/changes
+	forall changes [
+		uri: changes/1/uri
+		either changes/1/type = 3 [
+			if vs: find-uri uri [
+				remove vs
+			]
+			if item: semantic/find-source uri [
+				write-log rejoin ["[INFO]: remove " uri]
+				remove item
+			]
+			clear-diag uri
+		][
+			if exists? file: lexer/uri-to-file uri [
+				source: read file
+				diags: semantic/add-source uri source
+				resp-diags diags uri
+			]
+		]
+	]
 ]
 
 on-shutdown: function [params [map! none!]][
