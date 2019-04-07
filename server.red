@@ -76,7 +76,9 @@ process: function [data [string!]][
 	json-body/method: none
 	json-body/params: none
 	json-body/error: none
-	dispatch-method script/method script/params
+	if script/method [
+		dispatch-method script/method script/params
+	]
 	true
 ]
 
@@ -206,13 +208,30 @@ on-initialize: function [params [map!]][
 	response
 ]
 
+register-watched-files: function [][
+	json-body/id: "didChangeWatchedFiles"
+	json-body/result: none
+	json-body/method: "client/registerCapability"
+	json-body/params: make map! reduce [
+		'registrations	reduce [
+			make map! reduce [
+				'id		"didChangeWatchedFiles"
+				'method	"workspace/didChangeWatchedFiles"
+				'registerOptions make map! reduce [
+					'watchers reduce [
+						make map! reduce [
+							'globPattern	"**/*.{red,reds}"
+							'kind 7
+						]
+					]
+				]
+			]
+		]
+	]
+	response
+]
+
 on-initialized: function [params [map! none!]][
-	;json-body/method: "workspace/configuration"
-	;items: clear []
-	;append items make map! reduce [
-	;	'scopeUri "red"
-	;]
-	;json-body/params: items
 	diags: semantic/add-folder workspace-folder excluded-folder
 	if empty? diags [
 		exit
@@ -236,6 +255,7 @@ on-didChangeConfiguration: function [params [map! none!]][
 			]
 		]
 	]
+	register-watched-files
 ]
 
 on-didChangeWorkspaceFolders: function [params [map! none!]][
