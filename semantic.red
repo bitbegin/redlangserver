@@ -2494,8 +2494,11 @@ completion: context [
 					".red"	[nsystem?: no]
 					".reds"	[nsystem?: yes]
 				][continue]
-				if nsystem? = system? [
-					npc: back tail sources/1/1/nested
+				if all [
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					npc: back tail nested
 					collect-word*/match? npc word result *all?
 					if all [
 						not *all?
