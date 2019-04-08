@@ -1083,8 +1083,11 @@ completion: context [
 					".red"	[nsystem?: no]
 					".reds"	[nsystem?: yes]
 				][continue]
-				if nsystem? = system? [
-					collect-word* back tail sources/1/1/nested word result no
+				if all [
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					collect-word* back tail nested word result no
 				]
 			]
 		]
@@ -2004,7 +2007,7 @@ completion: context [
 		specs
 	]
 
-	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!]][
+	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!] system? [logic!]][
 		specs: make block! 8
 		ret: collect-path* pc path *all? match?
 		if 0 < length? ret [
@@ -2014,10 +2017,19 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				ret: collect-path* back tail sources/1/1/nested path *all? match?
-				if 0 < length? ret [
-					append specs ret
-					unless *all? [return specs]
+				switch/default find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
+				if all [
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					ret: collect-path* back tail nested path *all? match?
+					if 0 < length? ret [
+						append specs ret
+						unless *all? [return specs]
+					]
 				]
 			]
 		]
@@ -2025,6 +2037,10 @@ completion: context [
 	]
 
 	complete-path: function [top [block!] pc [block!] comps [block!]][
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][exit]
 		complete-sys-path: function [][
 			tstr: find/tail/last pure-path "/"
 			tstr: copy/part pure-path tstr
@@ -2076,7 +2092,7 @@ completion: context [
 		][
 			range/start/character: range/end/character - length? filter
 		]
-		pcs: collect-path top pc paths no no
+		pcs: collect-path top pc paths no no system?
 		forall pcs [
 			type: pcs/1/1
 			npc: pcs/1/2
@@ -2265,7 +2281,7 @@ completion: context [
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
 			".reds"	[system?: yes]
-		][return make block! 1]
+		][return none]
 		resolve-word*: function [][
 			if all [
 				set-word? pc/1/expr/1
@@ -2507,7 +2523,11 @@ completion: context [
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		result: collect-path top pc path no yes
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return none]
+		result: collect-path top pc path no yes system?
 		if 0 = length? result [return none]
 		pc: result/1/2
 		top: get-top pc
@@ -2633,7 +2653,11 @@ completion: context [
 	]
 
 	definition-path: function [top [block!] pc [block!] path [block!]][
-		result: collect-path top pc path yes yes
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return make block! 1]
+		result: collect-path top pc path yes yes system?
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
