@@ -2223,7 +2223,7 @@ completion: context [
 			][
 				append str lf
 			][
-				either 0 < len: 16 - length? nstr [
+				either 0 < len: 24 - length? nstr [
 					append/dup str " " len
 					append str "^-"
 				][
@@ -2376,7 +2376,7 @@ completion: context [
 								"^/prototype: " npc/2/expr/1
 							]
 							if desc [
-								append ret rejoin ["^/" mold desc]
+								append ret rejoin ["^/" form-func-spec desc]
 							]
 							return ret
 						]
