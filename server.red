@@ -9,7 +9,6 @@ Red [
 
 #include %error.red
 #include %lsp-const.red
-#include %json.red
 #include %system-words.red
 #include %lexer.red
 #include %semantic.red
@@ -68,18 +67,20 @@ json-body: #(
 )
 
 process: function [data [string!]][
-	script: first json/decode data
+	script: load-json data
 	json-body/id: script/id
 	json-body/result: none
 	json-body/method: none
 	json-body/params: none
 	json-body/error: none
-	dispatch-method script/method script/params
+	if script/method [
+		dispatch-method script/method script/params
+	]
 	true
 ]
 
 response: function [][
-	resp: json/encode json-body
+	resp: to-json json-body
 	write-response resp
 	write-log rejoin ["[NOW] " mold now/precise]
 	write-log rejoin ["[OUTPUT] Content-Length: " length? resp]
