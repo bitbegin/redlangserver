@@ -42,13 +42,13 @@ write-newline: does [
 	]
 ]
 
-write-response: function [response][
+write-response: function [resp][
 	write-stdout "Content-Length: "
-	write-stdout to string! length? to binary! response
+	write-stdout to string! length? nresp: to binary! resp
 	write-newline
 	write-stdout {Content-Type: application/vscode-jsonrpc; charset=utf-8}
 	write-newline write-newline
-	write-stdout response
+	write-stdout nresp
 ]
 
 write-log: function [str [string!]][
