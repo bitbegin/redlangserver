@@ -58,21 +58,15 @@ write-log: function [str [string!]][
 	]
 ]
 
-json-body: #(
-	jsonrpc: "2.0"
-	id: 0
-	result: none
-	method: none
-	error: none
-)
+json-body: none
 
 process: function [data [string!]][
 	script: load-json data
-	json-body/id: script/id
-	json-body/result: none
-	json-body/method: none
-	json-body/params: none
-	json-body/error: none
+	set 'json-body copy #()
+	json-body/jsonrpc: "2.0"
+	if script/id [
+		json-body/id: script/id
+	]
 	if script/method [
 		dispatch-method script/method script/params
 	]
