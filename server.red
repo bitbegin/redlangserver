@@ -12,7 +12,7 @@ Red [
 #include %system-words.red
 #include %lexer.red
 #include %semantic.red
-recycle/off
+
 logger: none
 auto-complete?: false
 open-logger?: false
