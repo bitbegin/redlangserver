@@ -11,6 +11,8 @@ semantic: context [
 	sources: []
 	diagnostics: []
 	write-log: :probe
+	excluded-folders: []
+	root-folders: []
 
 	find-expr: function [top [block!] range [block!]][
 		find-expr*: function [pc [block!]][
@@ -126,7 +128,10 @@ semantic: context [
 	find-top: function [uri [string!]][
 		ss: sources
 		forall ss [
-			if ss/1/1/uri = uri [
+			if any [
+				uri = nuri: ss/1/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
 				return ss/1
 			]
 		]
@@ -136,7 +141,10 @@ semantic: context [
 	find-source: function [uri [string!]][
 		ss: sources
 		forall ss [
-			if ss/1/1/uri = uri [
+			if any [
+				uri = nuri: ss/1/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
 				return ss
 			]
 		]
@@ -155,14 +163,29 @@ semantic: context [
 	collect-errors: function [top [block!]][
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
-			forall pc [
+			while [not tail? pc] [
 				if errors: pc/1/error [
+					if all [
+						pc/1/expr/1 = path!
+						pc/2
+						pc/2/expr/1 = paren!
+					][
+						if nested: pc/2/nested [
+							collect-errors* nested
+						]
+						either all [
+							pc/3
+							pc/3/expr/1 = issue!
+							pc/3/range/1 = pc/3/range/3
+							(pc/3/range/2 + 1) = pc/3/range/4
+						][
+							pc: skip pc 3
+						][
+							pc: skip pc 2
+						]
+						continue
+					]
 					forall errors [
-						if all [
-							pc/1/expr/1 = path!
-							pc/2
-							pc/2/expr/1 = paren!
-						][continue]
 						append ret make map! reduce [
 							'severity DiagnosticSeverity/(errors/1/level)
 							'code mold errors/1/type
@@ -172,9 +195,10 @@ semantic: context [
 						]
 					]
 				]
-				if pc/1/nested [
-					collect-errors* pc/1/nested
+				if nested: pc/1/nested [
+					collect-errors* nested
 				]
+				pc: next pc
 			]
 		]
 		collect-errors* top
@@ -275,7 +299,11 @@ semantic: context [
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		top: lexer/transcode code
+		write-log rejoin ["add uri: " uri]
+		switch/default find/last uri "." [
+			".red"	[top: lexer/transcode code no]
+			".reds"	[top: lexer/transcode code yes]
+		][exit]
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
@@ -290,6 +318,94 @@ semantic: context [
 		clear diagnostics
 		add-source* uri code
 		diagnostics
+	]
+
+	add-folder*: function [folder [file!]][
+		if error? files: try [read folder][exit]
+		forall files [
+			if all [
+				dir? file: rejoin [folder files/1]
+				not find excluded-folders file
+			][
+				add-folder* file
+				continue
+			]
+			ext: find/last file "."
+			if any [
+				%.red = ext
+				%.reds = ext
+			][
+				add-source* lexer/file-to-uri file read file
+			]
+		]
+	]
+
+	add-folder: function [folders [block!] excluded [string!]][
+		clear diagnostics
+		clear root-folders
+		forall folders [
+			unless exists? folder: dirize lexer/uri-to-file folders/1 [
+				continue
+			]
+			append root-folders folder
+		]
+		ex: split excluded ";"
+		clear excluded-folders
+		forall root-folders [
+			forall ex [
+				unless empty? ex/1 [
+					append excluded-folders rejoin [root-folders/1 to file! ex/1]
+				]
+			]
+		]
+		forall root-folders [
+			add-folder* root-folders/1
+		]
+		diagnostics
+	]
+
+	remove-folder*: function [folder [file!]][
+		if error? files: try [read folder][exit]
+		forall files [
+			if dir? file: rejoin [folder files/1][
+				remove-folder* file
+				continue
+			]
+			uri: lexer/file-to-uri file
+			if ss: find-source uri [
+				remove ss
+				append diagnostics make map! reduce [
+					'uri uri
+					'diagnostics make block! 1
+				]
+			]
+		]
+	]
+
+	remove-folder: function [folders [block!]][
+		clear diagnostics
+		clear root-folders
+		forall folders [
+			unless exists? folder: dirize lexer/uri-to-file folders/1 [
+				continue
+			]
+			append root-folders folder
+		]
+
+		forall root-folders [
+			remove-folder* root-folders/1
+		]
+		diagnostics
+	]
+
+	workspace-file?: function [uri [string!]][
+		file: lexer/uri-to-file uri
+		forall root-folders [
+			if find/match file root-folders/1 [
+				return true
+			]
+		]
+		false
 	]
 
 	new-lines?: function [text [string!]][
@@ -369,6 +485,7 @@ semantic: context [
 	]
 
 	update-ws: function [
+			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -398,7 +515,7 @@ semantic: context [
 			write-log mold npc/1/range
 			write-log mold str
 			if any [
-				not top: lexer/transcode str
+				not top: lexer/transcode str system?
 				none? nested: top/1/nested
 				1 < length? nested
 			][
@@ -415,6 +532,7 @@ semantic: context [
 	]
 
 	update-one: function [
+			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -441,7 +559,7 @@ semantic: context [
 		write-log mold pc/1/range
 		write-log mold str
 		if any [
-			not top: lexer/transcode str
+			not top: lexer/transcode str system?
 			none? nested: top/1/nested
 			1 < length? nested
 		][
@@ -458,6 +576,10 @@ semantic: context [
 
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
+		switch/default find/last uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return false]
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
 		;write-log mold changes
@@ -524,7 +646,7 @@ semantic: context [
 						]
 					]
 				][
-					unless update-ws epcs s-line s-column e-line e-column otext text line-stack [
+					unless update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-ws failed"
 						add-source* uri ncode
 					]
@@ -571,7 +693,7 @@ semantic: context [
 						not find otext not-trigger-charset
 					]
 				][
-					unless update-one epcs s-line s-column e-line e-column otext text line-stack [
+					unless update-one system? epcs s-line s-column e-line e-column otext text line-stack [
 						write-log "update-one failed"
 						add-source* uri ncode
 					]
@@ -629,7 +751,7 @@ semantic: context [
 							write-log "empty insert npc: "
 							write-log mold range
 							if any [
-								not top: lexer/transcode text
+								not top: lexer/transcode text system?
 								none? nested: top/1/nested
 								1 < length? nested
 							][
@@ -647,7 +769,7 @@ semantic: context [
 						write-log "insert pc: "
 						write-log mold range
 						if any [
-							not top: lexer/transcode text
+							not top: lexer/transcode text system?
 							none? nested: top/1/nested
 							1 < length? nested
 						][
@@ -754,27 +876,148 @@ completion: context [
 
 	collect-word*: function [pc [block!] word [word!] result [block!] *all? [logic!] /match?][
 		string: to string! word
-		collect*: function [npc [block!] type [block!] /back?][
+		collect*: function [word* [word!] pc* [block!]][
+			string*: to string! word*
+			either match? [
+				if string = string* [
+					append/only result pc*
+				]
+			][
+				if all [
+					find/match string* string
+					any [
+						*all?
+						unique? result word*
+					]
+				][
+					append/only result pc*
+				]
+			]
+		]
+		collect*-set: function [npc [block!] /back?][
 			if empty? npc [
-				either back? [npc: back npc][exit]
+				either back? [
+					if empty? npc: back npc [exit]
+				][exit]
 			]
 			until [
-				if find type type?/word npc/1/expr/1 [
-					nword: to word! npc/1/expr/1
-					nstring: to string! nword
-					either match? [
-						if nstring = string [
-							append/only result npc
-						]
+				case [
+					set-word? npc/1/expr/1 [
+						collect* to word! npc/1/expr/1 npc
+					]
+					all [
+						npc/1/expr/1 = to issue! 'define
+						npc/2
+						word? npc/2/expr/1
 					][
-						if all [
-							find/match nstring string
-							any [
-								*all?
-								unique? result nword
+						collect* npc/2/expr/1 next npc
+					]
+					all [
+						npc/1/expr/1 = to issue! 'enum
+						npc/2
+						word? npc/2/expr/1
+						npc/3
+						npc/3/expr/1 = block!
+						epc: npc/3/nested
+					][
+						collect* to word! npc/2/expr/1 next npc
+						forall epc [
+							if any [
+								word? epc/1/expr/1
+								set-word? epc/1/expr/1
+							][
+								collect* to word! epc/1/expr/1 epc
 							]
+						]
+					]
+					all [
+						npc/1/expr/1 = to issue! 'if
+						npc/2
+						npc/3
+					][
+						npc2: npc
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
 						][
-							append/only result npc
+							either back? [
+								collect*-set/back? tail nested
+							][
+								collect*-set nested
+							]
+						]
+					]
+					all [
+						npc/1/expr/1 = to issue! 'either
+						npc/2
+						npc/3
+						npc/4
+					][
+						npc2: npc
+						loop 2 [
+							while [
+								all [
+									not tail? npc2: next npc2
+									npc2/1/expr/1 <> block!
+								]
+							][]
+							if all [
+								not tail? npc2
+								nested: npc2/1/nested
+							][
+								either back? [
+									collect*-set/back? tail nested
+								][
+									collect*-set nested
+								]
+							]
+						]
+					]
+					all [
+						npc/1/expr/1 = to issue! 'switch
+						npc/2
+						npc/3
+					][
+						npc2: npc
+						while [
+							all [
+								not tail? npc2: next npc2
+								npc2/1/expr/1 <> block!
+							]
+						][]
+						if all [
+							not tail? npc2
+							nested: npc2/1/nested
+						][
+							forall nested [
+								if all [
+									nested/1/expr/1 = block!
+									n2: nested/1/nested
+								][
+									collect*-set/back? back tail n2
+								]
+							]
+						]
+					]
+					all [
+						npc/1/expr/1 = to issue! 'import
+						npc/2
+						npc/2/expr/1 = block!
+						nested: npc/2/nested
+					][
+						forall nested [
+							if all [
+								nested/1/expr/1 = block!
+								n2: nested/1/nested
+							][
+								collect*-set/back? back tail n2
+							]
 						]
 					]
 				]
@@ -791,6 +1034,16 @@ completion: context [
 				none? npc
 			]
 		]
+		collect*-func: function [npc [block!]][
+			forall npc [
+				if all [
+					find [word! lit-word! refinement!] type?/word npc/1/expr/1
+					npc/1/expr <> [/local]
+				][
+					collect* to word! npc/1/expr/1 npc
+				]
+			]
+		]
 		npc: npc2: pc
 		forever [
 			either all [
@@ -805,28 +1058,37 @@ completion: context [
 					par/-2
 					find [func function has] par/-2/expr/1
 				][
-					collect* spec [word! lit-word! refinement!]
+					collect*-func spec
 				]
 				npc2: par
-				collect*/back? npc [set-word!]
-				collect* npc [set-word!]
+				collect*-set/back? npc
+				collect*-set next npc
 				npc: tail par
 			][
-				collect*/back? npc [set-word!]
-				collect* npc [set-word!]
+				collect*-set/back? npc
+				collect*-set next npc
 				break
 			]
 		]
 	]
 
-	collect-word: function [top [block!] pc [block!]][
+	collect-word: function [top [block!] pc [block!] system? [logic!]][
 		result: make block! 4
 		word: to word! pc/1/expr/1
 		collect-word* pc word result no
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				collect-word* back tail sources/1/1/nested word result no
+				switch/default find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
+				if all [
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					collect-word* back tail nested word result no
+				]
 			]
 		]
 		result
@@ -925,7 +1187,10 @@ completion: context [
 		false
 	]
 
-	find-set?: function [pc* [block!] word [word!] upper [logic!] *all? [logic!] /*func? /*context? /*block? /*any?][
+	find-set?: function [
+		pc* [block!] word [word!] upper [logic!] *all? [logic!]
+		/*func? /*context? /*block? /*define? /*enum? /*any?
+	][
 		result: make block! 4
 		check-set?: function [npc [block!]][
 			if all [
@@ -953,6 +1218,7 @@ completion: context [
 						unless *all? [
 							return true
 						]
+						return none
 					]
 					if all [
 						any [*block? *any?]
@@ -962,6 +1228,7 @@ completion: context [
 						unless *all? [
 							return true
 						]
+						return none
 					]
 					if all [
 						any [*func? *any?]
@@ -971,14 +1238,178 @@ completion: context [
 						unless *all? [
 							return true
 						]
+						return none
 					]
 					if *any? [
 						repend/only result ['value npc reduce [npc2]]
 						unless *all? [
 							return true
 						]
+						return none
 					]
 				]
+				return none
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'if
+				npc/2
+				npc/3
+			][
+				npc2: npc
+				while [
+					all [
+						not tail? npc2: next npc2
+						npc2/1/expr/1 <> block!
+					]
+				][]
+				if all [
+					not tail? npc2
+					nested: npc2/1/nested
+				][
+					if ret: find-set?* back tail nested [
+						return ret
+					]
+				]
+				return none
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'either
+				npc/2
+				npc/3
+				npc/4
+			][
+				npc2: npc
+				ret: none
+				ret2: none
+				while [
+					all [
+						not tail? npc2: next npc2
+						npc2/1/expr/1 <> block!
+					]
+				][]
+				if all [
+					not tail? npc2
+					nested: npc2/1/nested
+				][
+					ret: find-set?* back tail nested
+				]
+				while [
+					all [
+						not tail? npc2: next npc2
+						npc2/1/expr/1 <> block!
+					]
+				][]
+				if all [
+					not tail? npc2
+					nested: npc2/1/nested
+				][
+					ret2: find-set?* back tail nested
+				]
+				if ret [return ret]
+				if ret2 [return ret2]
+				return none
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'switch
+				npc/2
+				npc/3
+			][
+				npc2: npc
+				while [
+					all [
+						not tail? npc2: next npc2
+						npc2/1/expr/1 <> block!
+					]
+				][]
+				if all [
+					not tail? npc2
+					nested: npc2/1/nested
+				][
+					ret: none
+					ret2: none
+					forall nested [
+						if all [
+							nested/1/expr/1 = block!
+							n2: nested/1/nested
+						][
+							ret2: find-set?* back tail n2
+							unless ret [ret: ret2]
+						]
+					]
+					return ret
+				]
+				return none
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'import
+				npc/2
+				npc/2/expr/1 = block!
+				nested: npc/2/nested
+			][
+				ret: none
+				ret2: none
+				forall nested [
+					if all [
+						nested/1/expr/1 = block!
+						n2: nested/1/nested
+					][
+						ret2: find-set?* back tail n2
+						unless ret [ret: ret2]
+					]
+				]
+				return ret
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'define
+				npc/2
+				word? npc/2/expr/1
+				word = npc/2/expr/1
+			][
+				if any [*define? *any?][
+					repend/only result ['define next npc make block! 1]
+					unless *all? [
+						return true
+					]
+				]
+				return none
+			]
+			if all [
+				npc/1/expr/1 = to issue! 'enum
+				npc/2
+				word? npc/2/expr/1
+				npc/3
+				npc/3/expr/1 = block!
+				nested: npc/3/nested
+			][
+				if word = npc/2/expr/1 [
+					if any [*enum? *any?][
+						repend/only result ['enum next npc make block! 1]
+						unless *all? [
+							return true
+						]
+					]
+					return none
+				]
+				forall nested [
+					if any [
+						all [
+							word? nested/1/expr/1
+							word = nested/1/expr/1
+						]
+						all [
+							set-word? nested/1/expr/1
+							word = to word! nested/1/expr/1
+						]
+					][
+						if any [*enum? *any?][
+							repend/only result ['enum nested make block! 1]
+							unless *all? [
+								return true
+							]
+						]
+					]
+				]
+				return none
 			]
 			none
 		]
@@ -1033,7 +1464,15 @@ completion: context [
 		"foreach.snippet"		"foreach iteration series [ ]"	"foreach ${1:iteration} ${2:series} [^/^-${3:exp}^/]^/"
 	]
 
+	snippets-sys: [
+		"reds.title.snippet"	"Red/System [ Title ]"			"Red/System [^/^-Title: ^"${2:title}^"^/]^/"
+	]
+
 	complete-word: function [top [block!] pc [block!] comps [block!]][
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][exit]
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -1057,22 +1496,23 @@ completion: context [
 				]
 			]
 		]
-		complete-snippet: function [][
+		complete-snippet: function [system? [logic!]][
+			nsnippets: either system? [snippets-sys][snippets]
 			if word? pc/1/expr/1 [
-				len: (length? snippets) / 3
+				len: (length? nsnippets) / 3
 				repeat i len [
-					if find/match snippets/(i * 3 - 2) string [
+					if find/match nsnippets/(i * 3 - 2) string [
 						append comps make map! reduce [
-							'label snippets/(i * 3 - 2)
+							'label nsnippets/(i * 3 - 2)
 							'kind CompletionItemKind/Keyword
 							'filterText? string
 							'insertTextFormat 2
 							'textEdit make map! reduce [
 								'range range
-								'newText snippets/(i * 3)
+								'newText nsnippets/(i * 3)
 							]
 							'data make map! reduce [
-								'type "snippet"
+								'type either system? ["snippet-sys"]["snippet"]
 								'index (i * 3 - 1)
 							]
 						]
@@ -1091,7 +1531,7 @@ completion: context [
 		if empty? string: to string! to word! pc/1/expr/1 [
 			exit
 		]
-		result: collect-word top pc
+		result: collect-word top pc system?
 		forall result [
 			rpc: result/1
 			top: rpc
@@ -1110,8 +1550,24 @@ completion: context [
 							context		[kind: CompletionItemKind/Struct]
 							func		[kind: CompletionItemKind/Function]
 							block		[kind: CompletionItemKind/Array]
+							value		[
+								npc: ret/1/2
+								if all [
+									npc/2
+									string? npc/2/expr/1
+									par1: npc/1/upper
+									par2: par1/1/upper
+									par2/-1
+									par2/-1/expr/1 = to issue! 'import
+								][
+									kind: CompletionItemKind/Module
+								]
+							]
 						]
 					]
+				]
+				type = 'word! [
+					kind: CompletionItemKind/Constant
 				]
 			]
 			append comps make map! reduce [
@@ -1131,26 +1587,28 @@ completion: context [
 				]
 			]
 		]
-		words: system-words/system-words
+
+		words: system-words/get-words system?
 		forall words [
 			sys-string: to string! words/1
 			if find/match sys-string string [
 				append comps make map! reduce [
 					'label sys-string
-					'kind system-completion-kind words/1
+					'kind either system? [CompletionItemKind/Keyword][system-completion-kind words/1]
 					'filterText? string
 					'insertTextFormat 1
 					'textEdit make map! reduce [
 						'range range
 						'newText sys-string
 					]
+
 					'data make map! reduce [
-						'type "system"
+						'type either system? ["keyword-sys"]["keyword"]
 					]
 				]
 			]
 		]
-		complete-snippet
+		complete-snippet system?
 	]
 
 	collect-func-refinement*: function [specs [block!] *all? [logic!]][
@@ -1549,7 +2007,7 @@ completion: context [
 		specs
 	]
 
-	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!]][
+	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!] system? [logic!]][
 		specs: make block! 8
 		ret: collect-path* pc path *all? match?
 		if 0 < length? ret [
@@ -1559,10 +2017,19 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				ret: collect-path* back tail sources/1/1/nested path *all? match?
-				if 0 < length? ret [
-					append specs ret
-					unless *all? [return specs]
+				switch/default find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
+				if all [
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					ret: collect-path* back tail nested path *all? match?
+					if 0 < length? ret [
+						append specs ret
+						unless *all? [return specs]
+					]
 				]
 			]
 		]
@@ -1570,10 +2037,14 @@ completion: context [
 	]
 
 	complete-path: function [top [block!] pc [block!] comps [block!]][
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][exit]
 		complete-sys-path: function [][
 			tstr: find/tail/last pure-path "/"
 			tstr: copy/part pure-path tstr
-			unless system-words/system? fword [exit]
+			unless system-words/keyword? no fword [exit]
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
@@ -1593,7 +2064,7 @@ completion: context [
 					]
 					'data make map! reduce [
 						'path append copy tstr nstring
-						'type "system-path"
+						'type "keypath"
 					]
 				]
 			]
@@ -1621,7 +2092,7 @@ completion: context [
 		][
 			range/start/character: range/end/character - length? filter
 		]
-		pcs: collect-path top pc paths no no
+		pcs: collect-path top pc paths no no system?
 		forall pcs [
 			type: pcs/1/1
 			npc: pcs/1/2
@@ -1736,6 +2207,34 @@ completion: context [
 		none
 	]
 
+	form-func-spec: function [spec [block! none!]][
+		str: make string! 40
+		append str "[^/"
+		forall spec [
+			nstr: mold spec/1
+			append str rejoin ["^-" nstr]
+			either any [
+				block? spec/1
+				all [
+					not block? spec/1
+					spec/2
+					not block? spec/2
+				]
+			][
+				append str lf
+			][
+				either 0 < len: 24 - length? nstr [
+					append/dup str " " len
+					append str "^-"
+				][
+					append str "^-^-"
+				]
+			]
+		]
+		append str "]"
+		str
+	]
+
 	func-info: function [fn [word!] spec [block! none!] name [string!]][
 		if error? *-*spec*-*: try [
 			either spec [
@@ -1744,7 +2243,9 @@ completion: context [
 				do reduce [fn []]
 			]
 		][
-			return rejoin [name " is a funtion with invalid spec"]
+			ret: rejoin [name " is a funtion with invalid spec^/" to string! fn " "]
+			append ret form-func-spec spec
+			return ret
 		]
 		str: help-string *-*spec*-*
 		replace/all str "*-*spec*-*" name
@@ -1771,21 +2272,22 @@ completion: context [
 			ret: make block! 4
 			forall pc [
 				if pc/1/expr = [/local][return ret]
-				if find reduce [block! map! paren!] pc/1/expr/1 [
-					append/only ret make pc/1/expr/1
+				expr: pc/1/expr/1
+				if find reduce [block! map! paren!] expr [
+					append/only ret make expr
 						either pc/1/nested [
 							get-func-block pc/1/nested
 						][[]]
 					continue
 				]
-				append ret pc/1/expr/1
+				append ret expr
 			]
 			ret
 		]
 		ret: get-func-block pc
 		until [
 			if all [
-				reduce [ret/1] = [return:]
+				ret/1 = to set-word! 'return
 				ret/2
 				block? ret/2
 				ret/3
@@ -1807,6 +2309,10 @@ completion: context [
 	]
 
 	resolve-word: function [top [block!] pc [block!] string [string!] itype [word! none!]][
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return none]
 		resolve-word*: function [][
 			if all [
 				set-word? pc/1/expr/1
@@ -1819,14 +2325,28 @@ completion: context [
 				switch ret/1/1 [
 					context		[return rejoin [string " is a context!"]]
 					func		[
+						if system? [
+							if all [
+								not empty? specs
+								upper: specs/1/1/upper
+								upper/-1
+								word? fn: upper/-1/expr/1
+								find [func function] fn
+							][
+								ret: rejoin [string " is a function!^/" to string! fn " "]
+								append ret form-func-spec get-func-spec upper/1/nested
+								return ret
+							]
+							return rejoin [string " is a function!"]
+						]
 						if all [
 							not empty? specs
 							upper: specs/1/1/upper
 							upper/-1
-							word? upper/-1/expr/1
-							find [func function] upper/-1/expr/1
+							word? fn: upper/-1/expr/1
+							find [func function] fn
 						][
-							return func-info upper/-1/expr/1 get-func-spec upper/1/nested to string! pc/1/expr/1
+							return func-info fn get-func-spec upper/1/nested to string! pc/1/expr/1
 						]
 						return func-info 'func [] to string! pc/1/expr/1
 					]
@@ -1834,6 +2354,32 @@ completion: context [
 						return rejoin [string " is a block! variable."]
 					]
 					value		[
+						npc: ret/1/2
+						if all [
+							npc/2
+							string? npc/2/expr/1
+							par1: npc/1/upper
+							par2: par1/1/upper
+							par2/-1
+							par2/-1/expr/1 = to issue! 'import
+						][
+							desc: none
+							if all [
+								npc/3
+								npc/3/expr/1 = block!
+								nested: npc/3/nested
+							][
+								desc: get-block nested
+							]
+							ret: rejoin [
+								string " is import form " to string! par1/-2/expr/1
+								"^/prototype: " npc/2/expr/1
+							]
+							if desc [
+								append ret rejoin ["^/" form-func-spec desc]
+							]
+							return ret
+						]
 						if word? expr: specs/1/1/expr/1 [
 							return rejoin [string ": " mold expr]
 						]
@@ -1843,6 +2389,28 @@ completion: context [
 						return rejoin [string " is a " mold type?/word expr " variable."]
 					]
 				]
+			]
+			if all [
+				word? pc/1/expr/1
+				pc/-1
+				pc/-1/expr/1 = to issue! 'define
+			][
+				return rejoin [string " is a #define macro."]
+			]
+			if all [
+				word? pc/1/expr/1
+				pc/-1
+				pc/-1/expr/1 = to issue! 'enum
+			][
+				return rejoin [string " is a #enum type."]
+			]
+			if all [
+				word? pc/1/expr/1
+				upper: pc/1/upper
+				upper/-2
+				upper/-2/expr/1 = to issue! 'enum
+			][
+				return rejoin [string " is a #enum value: " mold index? pc]
 			]
 			if all [
 				none? itype
@@ -1891,13 +2459,20 @@ completion: context [
 		if params/kind = CompletionItemKind/File [return none]
 		if all [
 			params/data
-			params/data/type = "system"
+			params/data/type = "keyword"
 		][
 			word: to word! params/label
 			if datatype? get word [
 				return rejoin [params/label " is a base datatype!"]
 			]
-			return system-words/get-word-info word
+			return system-words/get-word-info no word
+		]
+		if all [
+			params/data
+			params/data/type = "keyword-sys"
+		][
+			word: to word! params/label
+			return rejoin [params/label " is a keyword!"]
 		]
 		if all [
 			params/data
@@ -1908,11 +2483,18 @@ completion: context [
 		]
 		if all [
 			params/data
-			params/data/type = "system-path"
+			params/data/type = "snippet-sys"
+			index: params/data/index
+		][
+			return snippets-sys/:index
+		]
+		if all [
+			params/data
+			params/data/type = "keypath"
 			params/data/path
 		][
 			path: load params/data/path
-			return system-words/get-path-info path
+			return system-words/get-path-info no path
 		]
 		if all [
 			params/data
@@ -1937,6 +2519,10 @@ completion: context [
 	]
 
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return make block! 1]
 		result: make block! 4
 		collect-word*/match? pc word result *all?
 		if all [
@@ -1946,12 +2532,21 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				npc: back tail sources/1/1/nested
-				collect-word*/match? npc word result *all?
+				switch/default find/last sources/1/1/uri "." [
+					".red"	[nsystem?: no]
+					".reds"	[nsystem?: yes]
+				][continue]
 				if all [
-					not *all?
-					0 < length? result
-				][return result]
+					nsystem? = system?
+					nested: sources/1/1/nested
+				][
+					npc: back tail nested
+					collect-word*/match? npc word result *all?
+					if all [
+						not *all?
+						0 < length? result
+					][return result]
+				]
 			]
 		]
 		result
@@ -1973,7 +2568,11 @@ completion: context [
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		result: collect-path top pc path no yes
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return none]
+		result: collect-path top pc path no yes system?
 		if 0 = length? result [return none]
 		pc: result/1/2
 		top: get-top pc
@@ -2044,11 +2643,11 @@ completion: context [
 	]
 
 	hover-keyword: function [word [word!]][
-		if system-words/system? word [
+		if system-words/keyword? no word [
 			if datatype? get word [
 				return rejoin [mold word " is a base datatype!"]
 			]
-			return system-words/get-word-info word
+			return system-words/get-word-info no word
 		]
 		none
 	]
@@ -2060,7 +2659,7 @@ completion: context [
 			]
 			path/1: word
 		]
-		system-words/get-path-info to path! path
+		system-words/get-path-info no to path! path
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
@@ -2099,7 +2698,11 @@ completion: context [
 	]
 
 	definition-path: function [top [block!] pc [block!] path [block!]][
-		result: collect-path top pc path yes yes
+		switch/default find/last top/1/uri "." [
+			".red"	[system?: no]
+			".reds"	[system?: yes]
+		][return make block! 1]
+		result: collect-path top pc path yes yes system?
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [

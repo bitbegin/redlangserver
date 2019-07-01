@@ -12,7 +12,7 @@ Red [
 #include %system-words.red
 #include %lexer.red
 #include %semantic.red
-
+recycle/off
 logger: none
 auto-complete?: false
 open-logger?: false
@@ -22,6 +22,8 @@ client-caps: none
 shutdown?: no
 
 versions: []
+workspace-folder: []
+excluded-folder: ""
 
 init-logger: func [_logger [file! none!]][
 	logger: _logger
@@ -104,19 +106,21 @@ lsp-read: function [][
 
 dispatch-method: function [method [string!] params][
 	switch method [
-		"initialize"						[on-initialize params]
-		"initialized"						[on-initialized params]
-		"workspace/didChangeConfiguration"	[on-didChangeConfiguration params]
-		"shutdown"							[on-shutdown params]
-		"textDocument/didOpen"				[on-textDocument-didOpen params]
-		"textDocument/didClose"				[on-textDocument-didClose params]
-		"textDocument/didChange"			[on-textDocument-didChange params]
-		"textDocument/didSave"				[on-textDocument-didSave params]
-		"textDocument/completion"			[on-textDocument-completion params]
-		"completionItem/resolve"			[on-completionItem-resolve params]
-		"textDocument/documentSymbol"		[on-textDocument-symbol params]
-		"textDocument/hover"				[on-textDocument-hover params]
-		"textDocument/definition"			[on-textDocument-definition params]
+		"initialize"							[on-initialize params]
+		"initialized"							[on-initialized params]
+		"workspace/didChangeConfiguration"		[on-didChangeConfiguration params]
+		"workspace/didChangeWorkspaceFolders"	[on-didChangeWorkspaceFolders params]
+		"workspace/didChangeWatchedFiles"		[on-didChangeWatchedFiles params]
+		"shutdown"								[on-shutdown params]
+		"textDocument/didOpen"					[on-textDocument-didOpen params]
+		"textDocument/didClose"					[on-textDocument-didClose params]
+		"textDocument/didChange"				[on-textDocument-didChange params]
+		"textDocument/didSave"					[on-textDocument-didSave params]
+		"textDocument/completion"				[on-textDocument-completion params]
+		"completionItem/resolve"				[on-completionItem-resolve params]
+		"textDocument/documentSymbol"			[on-textDocument-symbol params]
+		"textDocument/hover"					[on-textDocument-hover params]
+		"textDocument/definition"				[on-textDocument-definition params]
 	]
 ]
 
@@ -136,8 +140,14 @@ on-initialize: function [params [map!]][
 	set 'client-caps params
 	either params/initializationOptions [
 		set 'auto-complete? params/initializationOptions/autoComplete
+		set 'excluded-folder params/initializationOptions/excludedPath
 	][
 		set 'auto-complete? true
+	]
+	if ws: params/workspaceFolders [
+		forall ws [
+			append workspace-folder ws/1/uri
+		]
 	]
 	caps: copy #()
 	put caps 'textDocumentSync TextDocumentSyncKind/Incremental
@@ -149,6 +159,12 @@ on-initialize: function [params [map!]][
 		]
 	put caps 'definitionProvider true
 	put caps 'documentSymbolProvider true
+	put caps 'workspace make map! reduce [
+		'workspaceFolders make map! reduce [
+			'supported true
+			'changeNotifications true
+		]
+	]
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -185,13 +201,39 @@ on-initialize: function [params [map!]][
 	response
 ]
 
+register-watched-files: function [][
+	json-body/id: "didChangeWatchedFiles"
+	json-body/result: none
+	json-body/method: "client/registerCapability"
+	json-body/params: make map! reduce [
+		'registrations	reduce [
+			make map! reduce [
+				'id		"didChangeWatchedFiles"
+				'method	"workspace/didChangeWatchedFiles"
+				'registerOptions make map! reduce [
+					'watchers reduce [
+						make map! reduce [
+							'globPattern	"**/*.{red,reds}"
+							'kind 7
+						]
+					]
+				]
+			]
+		]
+	]
+	response
+]
+
 on-initialized: function [params [map! none!]][
-	;json-body/method: "workspace/configuration"
-	;items: clear []
-	;append items make map! reduce [
-	;	'scopeUri "red"
-	;]
-	;json-body/params: items
+	diags: semantic/add-folder workspace-folder excluded-folder
+	if empty? diags [
+		exit
+	]
+	forall diags [
+		json-body/method: "textDocument/publishDiagnostics"
+		json-body/params: diags/1
+		response
+	]
 ]
 
 on-didChangeConfiguration: function [params [map! none!]][
@@ -203,6 +245,65 @@ on-didChangeConfiguration: function [params [map! none!]][
 				init-logger %logger.txt
 			][
 				init-logger none
+			]
+		]
+	]
+	register-watched-files
+]
+
+on-didChangeWorkspaceFolders: function [params [map! none!]][
+	added: params/event/added
+	removed: params/event/removed
+	unless empty? added [
+		added-folder: make block! 4
+		forall added [
+			append added-folder added/1/uri
+		]
+		diags: semantic/add-folder added-folder excluded-folder
+		if empty? diags [
+			exit
+		]
+		forall diags [
+			json-body/method: "textDocument/publishDiagnostics"
+			json-body/params: diags/1
+			response
+		]
+	]
+	unless empty? removed [
+		removed-folder: make block! 4
+		forall removed [
+			append removed-folder removed/1/uri
+		]
+		diags: semantic/remove-folder removed-folder
+		if empty? diags [
+			exit
+		]
+		forall diags [
+			json-body/method: "textDocument/publishDiagnostics"
+			json-body/params: diags/1
+			response
+		]
+	]
+]
+
+on-didChangeWatchedFiles: function [params [map! none!]][
+	changes: params/changes
+	forall changes [
+		uri: changes/1/uri
+		either changes/1/type = 3 [
+			if vs: find-uri uri [
+				remove vs
+			]
+			if item: semantic/find-source uri [
+				write-log rejoin ["[INFO]: remove " uri]
+				remove item
+			]
+			clear-diag uri
+		][
+			if exists? file: lexer/uri-to-file uri [
+				source: read file
+				diags: semantic/add-source uri source
+				resp-diags diags uri
 			]
 		]
 	]
@@ -262,11 +363,14 @@ on-textDocument-didClose: function [params [map!]][
 	if vs: find-uri uri [
 		remove vs
 	]
-	if item: semantic/find-source uri [
+	if all [
+		not semantic/workspace-file? uri
+		item: semantic/find-source uri
+	][
 		write-log rejoin ["[INFO]: remove " uri]
 		remove item
-		clear-diag uri
 	]
+	clear-diag uri
 ]
 
 on-textDocument-didChange: function [params [map!]][
