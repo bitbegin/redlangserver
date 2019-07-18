@@ -32,6 +32,7 @@ init-logger: func [_logger [file! none!]][
 			txt: read _logger
 			write %logger.bak txt
 		]
+		delete logger	;-- in case, the file not deleted
 		write logger "^/"
 	]
 ]
