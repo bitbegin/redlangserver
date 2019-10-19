@@ -105,6 +105,40 @@ lexer: context [
 
 	to-word: :system/lexer/to-word
 
+	empty-string: ""
+
+	digit:			:system/lexer/digit
+	hexa-upper:		:system/lexer/hexa-upper
+	hexa-lower:		:system/lexer/hexa-lower
+	hexa:			:system/lexer/hexa
+	hexa-char:		:system/lexer/hexa-char
+	not-word-char:	:system/lexer/not-word-char
+	not-word-1st:	:system/lexer/not-word-1st
+	not-file-char:	:system/lexer/not-file-char
+	not-str-char:	:system/lexer/not-str-char
+	not-mstr-char:	:system/lexer/not-mstr-char
+	caret-char:		:system/lexer/caret-char
+	non-printable-char:	:system/lexer/non-printable-char
+	integer-end:	:system/lexer/integer-end
+	ws-ASCII:		:system/lexer/ws-ASCII
+	ws-U+2k:		:system/lexer/ws-U+2k
+	control-char:	:system/lexer/control-char
+	four:			:system/lexer/four
+	half:			:system/lexer/half
+	non-zero:		:system/lexer/non-zero
+	path-end:		:system/lexer/path-end
+	base64-char:	:system/lexer/base64-char
+	slash-end:		:system/lexer/slash-end
+	not-url-char:	:system/lexer/not-url-char
+	email-end:		:system/lexer/email-end
+	pair-end:		:system/lexer/pair-end
+	file-end:		:system/lexer/file-end
+	date-sep:		:system/lexer/date-sep
+	time-sep:		:system/lexer/time-sep
+	not-tag-1st:	:system/lexer/not-tag-1st
+	month-rule:		:system/lexer/month-rule
+	mon-rule:		:system/lexer/mon-rule
+
 	pop: function [stack [block!] /only][
 		value: last stack
 		remove back tail stack
@@ -124,11 +158,6 @@ lexer: context [
 		/local
 			rs re epos ast-nested ast-block ast-upper
 			new s e c pos value cnt type wtype process path
-			digit hexa-upper hexa-lower hexa hexa-char not-word-char not-word-1st
-			not-file-char not-str-char not-mstr-char caret-char
-			non-printable-char integer-end ws-ASCII ws-U+2k control-char
-			four half non-zero path-end base base64-char slash-end not-url-char
-			email-end pair-end file-end err date-sep time-sep not-tag-1st
 	][
 		cs:		[- - - - - - - - - - - - - - - - - - - - - - - - - - - - -] ;-- memoized bitsets
 		stack:	clear []
@@ -234,70 +263,6 @@ lexer: context [
 				new
 			][type]
 		]
-
-		month-rule: [(m: none)]							;-- dynamically filled
-		mon-rule:   [(m: none)]							;-- dynamically filled
-
-		if cs/1 = '- [
-			do [
-				cs/1:  charset "0123465798"					;-- digit
-				cs/2:  charset "ABCDEF"						;-- hexa-upper
-				cs/3:  charset "abcdef"						;-- hexa-lower
-				cs/4:  union cs/1 cs/2						;-- hexa
-				cs/5:  union cs/4 cs/3						;-- hexa-char
-				cs/6:  charset {/\^^,[](){}"#%$@:;}			;-- not-word-char
-				cs/7:  union union cs/6 cs/1 charset {'}	;-- not-word-1st
-				cs/8:  charset {[](){}"@:;}					;-- not-file-char
-				cs/9:  #"^""								;-- not-str-char
-				cs/10: #"}"									;-- not-mstr-char
-				cs/11: charset [#"^(40)" - #"^(5F)"]		;-- caret-char
-				cs/12: charset [							;-- non-printable-char
-					#"^(00)" - #"^(08)"						;-- (exclude TAB)
-					#"^(0A)" - #"^(1F)"
-				]
-				cs/13: charset {^{"[]();:xX}				;-- integer-end
-				cs/14: charset " ^-^M"						;-- ws-ASCII, ASCII common whitespaces
-				cs/15: charset [#"^(2000)" - #"^(200A)"]	;-- ws-U+2k, Unicode spaces in the U+2000-U+200A range
-				cs/16: charset [ 							;-- Control characters
-					#"^(00)" - #"^(1F)"						;-- C0 control codes
-					#"^(80)" - #"^(9F)"						;-- C1 control codes
-				]
-				cs/17: charset "01234"						;-- four
-				cs/18: charset "012345"						;-- half
-				cs/19: charset "123456789"					;-- non-zero
-				cs/20: charset {^{"[]();}					;-- path-end
-				cs/21: union cs/1 charset [					;-- base64-char
-					#"A" - #"Z" #"a" - #"z" #"+" #"/" #"="
-				]
-				cs/22: charset {[](){}":;}					;-- slash-end
-				cs/23: charset {[](){}";}					;-- not-url-char
-				cs/24: union cs/8 union cs/14 charset "<^/" ;-- email-end
-				cs/25: charset {^{"[]();:}					;-- pair-end
-				cs/26: charset {^{[]();:}					;-- file-end
-				cs/27: charset "/-"							;-- date-sep
-				cs/28: charset "/T"							;-- time-sep
-				cs/29: charset "=><[](){};^""				;-- not-tag-1st
-
-				list: system/locale/months
-				while [not tail? list][
-					append month-rule list/1
-					append/only month-rule p: copy quote (m: ?)
-					unless tail? next list [append month-rule '|]
-					p/2: index? list
-					append mon-rule copy/part list/1 3
-					append/only mon-rule p
-					unless tail? next list [append mon-rule '|]
-					list: next list
-				]
-			]
-		]
-		set [
-			digit hexa-upper hexa-lower hexa hexa-char not-word-char not-word-1st
-			not-file-char not-str-char not-mstr-char caret-char
-			non-printable-char integer-end ws-ASCII ws-U+2k control-char
-			four half non-zero path-end base64-char slash-end not-url-char email-end
-			pair-end file-end date-sep time-sep not-tag-1st
-		] cs
 
 		byte: [
 			"25" half
@@ -520,15 +485,15 @@ lexer: context [
 		path-rule: [
 			ahead #"/" (								;-- path detection barrier
 				push-path stack type					;-- create empty path
-				to-word stack copy/part s e word!		;-- push 1st path element
+				to-word stack s e word!		;-- push 1st path element
 				type: path!
 			)
 			some [
 				#"/"
 				s: [
 					integer-number-rule			(store stack make-number s e type)
-					| begin-symbol-rule			(to-word stack copy/part s e word!)
-					| #":" s: begin-symbol-rule	(to-word stack copy/part s e get-word!)
+					| begin-symbol-rule			(to-word stack s e word!)
+					| #":" s: begin-symbol-rule	(to-word stack s e get-word!)
 					| (
 						type: case [
 							wtype = word! [path!]
@@ -562,24 +527,24 @@ lexer: context [
 
 		word-rule: 	[
 			(type: wtype: word!) special-words	opt [#":" (type: set-word!)]
-			(to-word stack value type)				;-- special case for / and // as words
+			(to-word stack value tail value type)				;-- special case for / and // as words
 			| path: s: begin-symbol-rule (type: word!) [
 				url-rule
 				| path-rule							;-- path matched
 				| opt [#":" (type: set-word!)]
-				  (if type [to-word stack copy/part s e type])	;-- word or set-word matched
+				  (if type [to-word stack s e type])	;-- word or set-word matched
 			]
 		]
 
 		get-word-rule: [
 			#":" (type: wtype: get-word!) [
-				special-words (to-word stack value type)
+				special-words (to-word stack value tail value type)
 				| s: begin-symbol-rule [
 					path-rule (type: get-path!)
-					| (to-word stack copy/part s e type)	;-- get-word matched
+					| (to-word stack s e type)	;-- get-word matched
 				]
 				| epos: (
-					to-word stack "" type
+					to-word stack empty-string tail empty-string type
 					push-invalid type epos
 				)
 			]
@@ -587,15 +552,15 @@ lexer: context [
 
 		lit-word-rule: [
 			#"'" (type: wtype: lit-word!) [
-				special-words (to-word stack value type)
+				special-words (to-word stack value tail value type)
 				| [
 					s: begin-symbol-rule [
 						path-rule (type: lit-path!)			 ;-- path matched
-						| (to-word stack copy/part s e type) ;-- lit-word matched
+						| (to-word stack s e type) ;-- lit-word matched
 					]
 				]
 				| epos: (
-					to-word stack "" type
+					to-word stack empty-string tail empty-string type
 					push-invalid type epos
 				)
 			]
@@ -605,10 +570,10 @@ lexer: context [
 		issue-rule: [
 			#"#" (type: issue!) s: symbol-rule (
 				either (index? s) = index? e [
-					to-word stack "" type
+					to-word stack empty-string tail empty-string type
 					push-invalid type e
 				][
-					to-word stack copy/part s e type
+					to-word stack s e type
 				]
 			)
 		]
@@ -619,7 +584,7 @@ lexer: context [
 				| ahead [not-word-char | ws-no-count | control-char] (type: word!) e: ;-- / case
 				| symbol-rule (type: refinement! s: next s)
 			]
-			(to-word stack copy/part s e type)
+			(to-word stack s e type)
 		]
 
 		sticky-word-rule: [								;-- protect from sticky words typos
