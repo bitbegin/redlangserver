@@ -302,7 +302,7 @@ semantic: context [
 		write-log rejoin ["add uri: " uri]
 		switch/default find/last uri "." [
 			".red"	[top: lexer/transcode code no]
-			".reds"	[top: lexer/transcode code yes]
+			;".reds"	[top: lexer/transcode code yes]
 		][exit]
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
@@ -333,7 +333,7 @@ semantic: context [
 			ext: find/last file "."
 			if any [
 				%.red = ext
-				%.reds = ext
+				;%.reds = ext
 			][
 				add-source* lexer/file-to-uri file read file
 			]
@@ -578,7 +578,7 @@ semantic: context [
 	update-source: function [uri [string!] changes [block!]][
 		switch/default find/last uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][return false]
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
@@ -1081,7 +1081,7 @@ completion: context [
 			if sources/1 <> top [
 				switch/default find/last sources/1/1/uri "." [
 					".red"	[nsystem?: no]
-					".reds"	[nsystem?: yes]
+					;".reds"	[nsystem?: yes]
 				][continue]
 				if all [
 					nsystem? = system?
@@ -1471,7 +1471,7 @@ completion: context [
 	complete-word: function [top [block!] pc [block!] comps [block!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][exit]
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
@@ -2019,7 +2019,7 @@ completion: context [
 			if sources/1 <> top [
 				switch/default find/last sources/1/1/uri "." [
 					".red"	[nsystem?: no]
-					".reds"	[nsystem?: yes]
+					;".reds"	[nsystem?: yes]
 				][continue]
 				if all [
 					nsystem? = system?
@@ -2039,7 +2039,7 @@ completion: context [
 	complete-path: function [top [block!] pc [block!] comps [block!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][exit]
 		complete-sys-path: function [][
 			tstr: find/tail/last pure-path "/"
@@ -2311,7 +2311,7 @@ completion: context [
 	resolve-word: function [top [block!] pc [block!] string [string!] itype [word! none!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][return none]
 		resolve-word*: function [][
 			if all [
@@ -2521,7 +2521,7 @@ completion: context [
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][return make block! 1]
 		result: make block! 4
 		collect-word*/match? pc word result *all?
@@ -2534,7 +2534,7 @@ completion: context [
 			if sources/1 <> top [
 				switch/default find/last sources/1/1/uri "." [
 					".red"	[nsystem?: no]
-					".reds"	[nsystem?: yes]
+					;".reds"	[nsystem?: yes]
 				][continue]
 				if all [
 					nsystem? = system?
@@ -2570,7 +2570,7 @@ completion: context [
 	hover-path: function [top [block!] pc [block!] path [block!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][return none]
 		result: collect-path top pc path no yes system?
 		if 0 = length? result [return none]
@@ -2700,7 +2700,7 @@ completion: context [
 	definition-path: function [top [block!] pc [block!] path [block!]][
 		switch/default find/last top/1/uri "." [
 			".red"	[system?: no]
-			".reds"	[system?: yes]
+			;".reds"	[system?: yes]
 		][return make block! 1]
 		result: collect-path top pc path yes yes system?
 		if 0 = length? result [return none]
