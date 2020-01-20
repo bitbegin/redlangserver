@@ -152,27 +152,23 @@ lexer: context [
 							append value/range stop
 						]
 					][
+						str: copy/part input token/y - token/x + 1
 						start: index-line? lines token/x
 						stop: index-line? lines token/y
 						repend/only last stack [
 							'range reduce [start stop]
-							'error reduce ['unknown type]
+							'error reduce ['unknown str]
 						]
 					]
 					false
 				]
 				error [
+					str: copy/part input token/y - token/x + 1
 					start: index-line? lines token/x
 					stop: index-line? lines token/y
 					repend/only last stack [
 						'range reduce [start stop]
-						'error reduce ['unknown type]
-					]
-					if 1 <> length? stack [
-						value: last stack
-						remove back tail stack
-						p: last stack
-						append/only p/nested value
+						'error reduce ['unknown str]
 					]
 					input: next input
 					false
@@ -182,15 +178,17 @@ lexer: context [
 		]
 		transcode/trace src :red-lex
 		while [1 <> length? stack][
-			value: last stack
+			v: last stack
+			remove back tail stack
+			value: last last stack
+			repend value ['nested v]
 			either none? value/error [
-				repend/only value [
+				repend value [
 					'error reduce ['unclose 0]
 				]
 			][
 				repend/only value/error ['unclose 0]
 			]
-			remove back tail stack
 		]
 		last stack
 	]
@@ -218,6 +216,11 @@ lexer: context [
 					newline pad + 4
 					append buffer "range: "
 					append buffer mold/flat pc/1/range
+				]
+				if pc/1/type [
+					newline pad + 4
+					append buffer "type: "
+					append buffer mold/flat pc/1/type
 				]
 				if pc/1/nested [
 					newline pad + 4
