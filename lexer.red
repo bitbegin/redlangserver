@@ -71,8 +71,9 @@ lexer: context [
 		]
 	]
 
-	get-token: function [
+	transcode: function [
 		src			[string!]
+		system?		[logic!]
 		return:		[block!]
 	][
 		top: make block! 1
@@ -82,14 +83,14 @@ lexer: context [
 		range: make block! 1
 		append range 1x1
 		append range pos-line? lines tail src
-		top: get-token* src lines
+		top: get-token src lines
 		stack: make block! 1
 		append/only stack make block! 4
 		repend stack/1 ['source src 'lines lines 'range range 'nested top]
 		stack
 	]
 
-	get-token*: function [
+	get-token: function [
 		src			[string!]
 		lines		[block!]
 		return:		[block!]
@@ -119,7 +120,7 @@ lexer: context [
 				]
 				load [
 					repend last last stack [
-						'token token
+						'expr token
 					]
 					false
 				]
@@ -142,10 +143,10 @@ lexer: context [
 						either value/type <> type [
 							either none? value/error [
 								repend value [
-									'error reduce ['close type]
+									'error reduce ['level 'Error 'type type]
 								]
 							][
-								repend/only value/error ['close type]
+								repend/only value/error ['level 'Error 'type type]
 							]
 						][
 							stop: index-line? lines token/x
@@ -157,7 +158,7 @@ lexer: context [
 						stop: index-line? lines token/y
 						repend/only last stack [
 							'range reduce [start stop]
-							'error reduce ['unknown str]
+							'error reduce ['level 'Error 'type type]
 						]
 					]
 					false
@@ -168,7 +169,7 @@ lexer: context [
 					stop: index-line? lines token/y
 					repend/only last stack [
 						'range reduce [start stop]
-						'error reduce ['unknown str]
+						'error reduce ['level 'Error 'type str]
 					]
 					input: next input
 					false
@@ -176,7 +177,7 @@ lexer: context [
 			]
 			;probe stack
 		]
-		transcode/trace src :red-lex
+		try [transcode/trace src :red-lex]
 		while [1 <> length? stack][
 			v: last stack
 			remove back tail stack
@@ -184,10 +185,10 @@ lexer: context [
 			repend value ['nested v]
 			either none? value/error [
 				repend value [
-					'error reduce ['unclose 0]
+					'error reduce ['level 'Error 'type 'unclose]
 				]
 			][
-				repend/only value/error ['unclose 0]
+				repend/only value/error ['level 'Error 'type 'unclose]
 			]
 		]
 		last stack
@@ -208,9 +209,9 @@ lexer: context [
 				newline pad + 2
 				append buffer "["
 				newline pad + 4
-				if pc/1/token [
-					append buffer "token: "
-					append buffer mold/flat/part pc/1/token 20
+				if pc/1/expr [
+					append buffer "expr: "
+					append buffer mold/flat/part pc/1/expr 20
 				]
 				if pc/1/range [
 					newline pad + 4
