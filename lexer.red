@@ -171,10 +171,12 @@ lexer: context [
 			either event = 'error [false][true]
 		]
 		try [system/words/transcode/trace src :red-lex]
+		end: index-line? lines index? tail src
 		while [1 <> length? stack][
 			v: last stack
 			remove back tail stack
 			value: last last stack
+			append value/range end
 			repend value ['nested v]
 			if none? value/error [
 				repend value ['error make block! 1]
