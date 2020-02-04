@@ -112,7 +112,7 @@ semantic: context [
 						return reduce ['last pc]
 					]
 					unless pc/1/nested [
-						if find reduce [block! map! paren!] pc/1/expr/1 [
+						if find reduce [block! map! paren!] pc/1/type [
 							return reduce ['empty pc]
 						]
 						return reduce ['one pc]
@@ -270,7 +270,7 @@ semantic: context [
 		include-each: function [pc [block!]][
 			if all [
 				issue! = pc/1/type
-				"include" = to string! pc/1/expr/1
+				"include" = to string! pc/1/expr
 				pc/2
 				file! = pc/2/type
 				file: pc/2/expr
@@ -475,7 +475,7 @@ semantic: context [
 	update-upper: function [pc [block!] /remove?][
 		forall pc [
 			if all [
-				find reduce [block! paren! map!] pc/1/expr/1
+				find reduce [block! paren! map!] pc/1/type
 				npc: pc/1/nested
 			][
 				forall npc [
@@ -811,8 +811,8 @@ completion: context [
 
 	complete-file: function [top [block!] pc [block!] comps [block!]][
 		range: lexer/form-range pc/1/range
-		str: to string! pc/1/expr/1
-		insert str: to string! file: pc/1/expr/1 "%"
+		str: to string! pc/1/expr
+		insert str: to string! file: pc/1/expr "%"
 		if error? result: try [red-complete-ctx/red-complete-file str no][
 			exit
 		]
@@ -1172,7 +1172,7 @@ completion: context [
 			pc/2
 			word! = pc/1/type
 			find [func function has does] pc/1/expr
-			block! = pc/2/expr/1
+			block! = pc/2/type
 			any [
 				all [
 					find [func function] pc/1/expr
@@ -2122,7 +2122,7 @@ completion: context [
 			words: pcs/1/3
 			ntop: npc
 			while [par: ntop/1/upper][ntop: par]
-			nstring: to string! npc/1/expr/1
+			nstring: to string! npc/1/expr
 			kind: CompletionItemKind/Variable
 			switch type [
 				context [
@@ -2300,15 +2300,14 @@ completion: context [
 					refinement! = pc/1/type
 					'local = to word! pc/1/expr
 				][return ret]
-				expr: pc/1/expr/1
-				if find reduce [block! map! paren!] expr [
-					append/only ret make expr
+				if find reduce [block! map! paren!] pc/1/type [
+					append/only ret make pc/1/expr
 						either pc/1/nested [
 							get-func-block pc/1/nested
 						][[]]
 					continue
 				]
-				append ret expr
+				append ret pc/1/expr
 			]
 			ret
 		]
@@ -2602,7 +2601,7 @@ completion: context [
 		if 0 = length? result [return none]
 		pc: result/1/2
 		top: get-top pc
-		resolve-word top pc to string! pc/1/expr/1 result/1/1
+		resolve-word top pc to string! pc/1/expr result/1/1
 	]
 
 	hover-types: reduce [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! integer! float! pair! binary! char! email! logic! percent! tuple! time! date! file! url! string! refinement! issue!]
