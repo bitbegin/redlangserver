@@ -107,7 +107,7 @@ lexer: context [
 			token
 			return:	[logic!]
 		][
-			;print event
+			;print [event type token]
 			switch event [
 				scan [
 					start: index-line? lines token/x
@@ -116,13 +116,11 @@ lexer: context [
 						'range reduce [start stop]
 						'type  type
 					]
-					true
 				]
 				load [
 					repend last last stack [
 						'expr token
 					]
-					false
 				]
 				open [
 					start: index-line? lines token/x
@@ -132,7 +130,6 @@ lexer: context [
 						'upper :p
 					]
 					repend/only stack make block! 4
-					false
 				]
 				close [
 					either 1 <> length? stack [
@@ -141,13 +138,10 @@ lexer: context [
 						value: last last stack
 						repend value ['nested v]
 						either value/type <> type [
-							either none? value/error [
-								repend value [
-									'error reduce ['level 'Error 'type type]
-								]
-							][
-								repend/only value/error ['level 'Error 'type type]
+							if none? value/error [
+								repend value ['error make block! 1]
 							]
+							repend/only value/error ['level 'Error 'type type]
 						][
 							stop: index-line? lines token/x
 							append value/range stop
@@ -156,40 +150,36 @@ lexer: context [
 						str: copy/part input token/y - token/x + 1
 						start: index-line? lines token/x
 						stop: index-line? lines token/y
-						repend/only last stack [
+						repend/only i: last stack [
 							'range reduce [start stop]
 							'error reduce ['level 'Error 'type type]
 						]
 					]
-					false
 				]
 				error [
 					str: copy/part input token/y - token/x + 1
 					start: index-line? lines token/x
 					stop: index-line? lines token/y
-					repend/only last stack [
+					repend/only i: last stack [
 						'range reduce [start stop]
 						'error reduce ['level 'Error 'type str]
 					]
 					input: next input
-					false
 				]
 			]
 			;probe stack
+			either event = 'error [false][true]
 		]
-		try [transcode/trace src :red-lex]
+		try [system/words/transcode/trace src :red-lex]
 		while [1 <> length? stack][
 			v: last stack
 			remove back tail stack
 			value: last last stack
 			repend value ['nested v]
-			either none? value/error [
-				repend value [
-					'error reduce ['level 'Error 'type 'unclose]
-				]
-			][
-				repend/only value/error ['level 'Error 'type 'unclose]
+			if none? value/error [
+				repend value ['error make block! 1]
 			]
+			repend/only value/error ['level 'Error 'type 'unclose]
 		]
 		last stack
 	]
@@ -255,7 +245,7 @@ lexer: context [
 					newline pad + 4
 					append buffer "error: ["
 					newline pad + 6
-					append buffer mold/flat/part error 20
+					append buffer mold/flat/part error 30
 					newline pad + 4
 					append buffer "]"
 				]
