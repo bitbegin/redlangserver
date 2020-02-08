@@ -150,20 +150,26 @@ lexer: context [
 						str: copy/part input token/y - token/x + 1
 						start: index-line? lines token/x
 						stop: index-line? lines token/y
-						repend/only i: last stack [
+						repend/only value: last stack [
 							'range reduce [start stop]
-							'error reduce ['level 'Error 'type type]
 						]
+						if none? value/error [
+							repend value ['error make block! 1]
+						]
+						repend/only value/error ['level 'Error 'type type]
 					]
 				]
 				error [
 					str: copy/part input token/y - token/x + 1
 					start: index-line? lines token/x
 					stop: index-line? lines token/y
-					repend/only i: last stack [
+					repend/only value: last stack [
 						'range reduce [start stop]
-						'error reduce ['level 'Error 'type str]
 					]
+					if none? value/error [
+						repend value ['error make block! 1]
+					]
+					repend/only value/error ['level 'Error 'type str]
 					input: next input
 				]
 			]
@@ -181,7 +187,7 @@ lexer: context [
 			if none? value/error [
 				repend value ['error make block! 1]
 			]
-			repend/only value/error ['level 'Error 'type 'unclose]
+			repend/only value/error ['level 'Error 'type value/type 'msg 'unclose]
 		]
 		last stack
 	]
