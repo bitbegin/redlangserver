@@ -129,7 +129,7 @@ lexer: context [
 						'type  type
 						'upper :p
 					]
-					repend/only stack make block! 4
+					repend/only stack reduce [reduce []]
 				]
 				close [
 					either 1 <> length? stack [
