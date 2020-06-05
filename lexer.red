@@ -7,34 +7,29 @@ Red [
 ]
 
 lexer: context [
-	uri-to-file: function [uri [string!]][
+	uri-to-file: function [uri [string!] return: [file!]][
 		src: copy find/tail uri "file:///"
 		to-red-file dehex src
 	]
-	file-to-uri: function [file [file!]][
+	file-to-uri: function [file [file!] return: [string!]][
 		src: to-local-file file
 		replace/all src "\" "/"
 		insert src "file:///"
 		src
 	]
-	semicolon?: function [pc [block!] pos [string!] column [integer!]][
-		if pos/1 = #";" [return true]
-		repeat count column [
-			if pos/(0 - count) = #";" [return true]
-		]
-		false
-	]
 	parse-line: function [stack [block!] src [string!]][
+		append stack src
 		append stack index? src
 		while [src: find/tail src #"^/"][
 			append stack index? src
 		]
 	]
-	line-pos?: function [stack [block!] line [pair!]][
+	line-pos?: function [stack [block!] line [pair!] return: [string!]][
 		pos: pick stack line/x + 1
 		skip at stack/1 pos line/y - 1
 	]
-	index-line?: function [stack [block!] pos [integer!]][
+	index-line?: function [stack [block!] pos [integer!] return: [pair!]][
+		stack: next stack
 		forall stack [
 			if all [
 				stack/1 <= pos
@@ -44,21 +39,21 @@ lexer: context [
 				]
 			][
 				column: pos - stack/1
-				return as-pair index? stack column + 1
+				return as-pair (index? stack) - 1 column + 1
 			]
 		]
 		none
 	]
-	pos-line?: function [stack [block!] pos [string!]][
+	pos-line?: function [stack [block!] pos [string!] return: [pair!]][
 		index-line? stack index? pos
 	]
-	pos-range?: function [stack [block!] s [string!] e [string!]][
+	pos-range?: function [stack [block!] s [string!] e [string!] return: [block!]][
 		range: make block! 4
 		append range pos-line? stack s
 		append range pos-line? stack e
 		range
 	]
-	form-range: function [range [block!] /keep][
+	form-range: function [range [block!] return: [map!] /keep][
 		make map! reduce [
 			'start make map! reduce [
 				'line either keep [range/1/x][range/1/x - 1]
@@ -70,33 +65,25 @@ lexer: context [
 			]
 		]
 	]
+	load-range: function [stack [block!] range [block!]][
+		start: line-pos? stack range/1
+		stop: line-pos? stack range/2
+		try [load copy/part start stop]
+	]
 
 	transcode: function [
 		src			[string!]
 		system?		[logic!]
 		return:		[block!]
 	][
-		top: make block! 1
-		append/only top make block! 1
 		lines: make block! 64
 		parse-line lines src
 		range: make block! 1
-		append range 1x1
+		append range 0x0
 		append range pos-line? lines tail src
-		top: get-token src lines
-		stack: make block! 1
-		append/only stack make block! 4
-		repend stack/1 ['source src 'lines lines 'range range 'nested top]
-		stack
-	]
+		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
+		top: stack
 
-	get-token: function [
-		src			[string!]
-		lines		[block!]
-		return:		[block!]
-	][
-		stack: make block! 4
-		append/only stack make block! 4
 		start: none
 		stop: none
 		red-lex: func [
@@ -107,89 +94,117 @@ lexer: context [
 			token
 			return:	[logic!]
 		][
-			;print [event type token]
+			[scan load open close error]
+			print [event type token]
 			switch event [
 				scan [
 					start: index-line? lines token/x
 					stop: index-line? lines token/y
-					repend/only last stack [
-						'range reduce [start stop]
-						'type  type
+					if nested: select last stack 'nested [
+						repend/only nested [
+							'range reduce [start stop]
+							'type  type
+							'upper back tail stack
+						]
 					]
+					true
 				]
 				load [
-					repend last last stack [
-						'expr token
+					if nested: select last stack 'nested [
+						repend last nested [
+							'expr token
+						]
 					]
+					true
 				]
 				open [
 					start: index-line? lines token/x
-					repend/only p: last stack [
+					nested: select last stack 'nested
+					repend/only nested [
 						'range reduce [start]
 						'type  type
-						'upper :p
+						'upper back tail stack
 					]
-					repend/only stack reduce [reduce []]
+					if find reduce [block! paren! map!] type [
+						repend last nested ['nested reduce []]
+						stack: nested
+					]
+					true
 				]
 				close [
-					either 1 <> length? stack [
-						v: last stack
-						remove back tail stack
-						value: last last stack
-						repend value ['nested v]
-						either value/type <> type [
-							if none? value/error [
-								repend value ['error make block! 1]
-							]
-							repend/only value/error ['level 'Error 'type type]
-						][
-							stop: index-line? lines token/x
-							append value/range stop
-						]
+					stop: index-line? lines token/y + 1
+					either find reduce [block! paren! map!] type [
+						range: select last stack 'range
+						append range stop
+						upper: select last stack 'upper
+						stack: upper
 					][
-						str: copy/part input token/y - token/x + 1
-						start: index-line? lines token/x
-						stop: index-line? lines token/y
-						repend/only value: last stack [
-							'range reduce [start stop]
+						nested: select last stack 'nested
+						range: select last nested 'range
+						append range stop
+						p: last nested
+						probe range
+						either error? value: load-range lines range [
+							if none? p/error [
+								repend p ['error make block! 1]
+							]
+							repend p/error ['level 'Error 'type 'load]
+						][
+							repend p ['expr value]
 						]
-						if none? value/error [
-							repend value ['error make block! 1]
-						]
-						repend/only value/error ['level 'Error 'type type]
 					]
+					true
 				]
 				error [
-					str: copy/part input token/y - token/x + 1
 					start: index-line? lines token/x
-					stop: index-line? lines token/y
-					repend/only value: last stack [
+					either token/x = token/y [
+						str: copy/part input 1
+						stop: index-line? lines token/x + 1
+					][
+						str: skip input token/x - token/y
+						str: copy/part str input
+						stop: index-line? lines token/y
+					]
+					;-- unclosed [block! paren! map!]
+					if all [
+						upper: select last stack 'upper
+						upper/1/range/1 = start
+					][
+						append upper/1/range stop
+						if none? upper/1/error [
+							repend upper/1 ['error make block! 1]
+						]
+						repend upper/1/error ['level 'Error 'type 'unclose]
+						stack: upper
+						input: next input
+						return false
+					]
+					;-- unclosed like string! path!
+					if all [
+						p: last stack
+						p/range/1 = start
+					][
+						append p/range stop
+						if none? p/error [
+							repend p ['error make block! 1]
+						]
+						repend p/error ['level 'Error 'type 'unclose]
+						input: next input
+						return false
+					]
+					nested: select last stack 'nested
+					repend/only nested [
 						'range reduce [start stop]
+						'error [level Error type unknown]
 					]
-					if none? value/error [
-						repend value ['error make block! 1]
-					]
-					repend/only value/error ['level 'Error 'type str]
 					input: next input
+					false
 				]
 			]
-			;probe stack
-			either event = 'error [false][true]
 		]
-		try [system/words/transcode/trace src :red-lex]
-		end: index-line? lines index? tail src
-		while [1 <> length? stack][
-			v: last stack
-			remove back tail stack
-			value: last last stack
-			append value/range end
-			repend value ['nested v]
-			if none? value/error [
-				repend value ['error make block! 1]
-			]
-			repend/only value/error ['level 'Error 'type value/type 'msg 'unclose]
-		]
-		last stack
+		system/words/transcode/trace src :red-lex
+		;probe stack
+		top
 	]
 
 	format: function [top [block!]][
@@ -206,8 +221,8 @@ lexer: context [
 			forall pc [
 				newline pad + 2
 				append buffer "["
-				newline pad + 4
 				if pc/1/expr [
+					newline pad + 4
 					append buffer "expr: "
 					append buffer mold/flat/part pc/1/expr 20
 				]
