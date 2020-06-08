@@ -95,25 +95,23 @@ lexer: context [
 			return:	[logic!]
 		][
 			[scan load open close error]
-			print [event type token]
+			;print [event mold type token]
 			switch event [
 				scan [
 					start: index-line? lines token/x
 					stop: index-line? lines token/y
-					if nested: select last stack 'nested [
-						repend/only nested [
-							'range reduce [start stop]
-							'type  type
-							'upper back tail stack
-						]
+					nested: select last stack 'nested
+					repend/only nested [
+						'range reduce [start stop]
+						'type  type
+						'upper back tail stack
 					]
 					true
 				]
 				load [
-					if nested: select last stack 'nested [
-						repend last nested [
-							'expr token
-						]
+					nested: select last stack 'nested
+					repend last nested [
+						'expr token
 					]
 					true
 				]
@@ -125,7 +123,7 @@ lexer: context [
 						'type  type
 						'upper back tail stack
 					]
-					if find reduce [block! paren! map!] type [
+					if find reduce [block! paren! map! path! lit-path! get-path!] type [
 						repend last nested ['nested reduce []]
 						stack: nested
 					]
@@ -133,11 +131,10 @@ lexer: context [
 				]
 				close [
 					stop: index-line? lines token/y + 1
-					either find reduce [block! paren! map!] type [
+					either find reduce [block! paren! map! path! lit-path! get-path!] type [
 						range: select last stack 'range
 						append range stop
-						upper: select last stack 'upper
-						stack: upper
+						stack: select last stack 'upper
 					][
 						nested: select last stack 'nested
 						range: select last nested 'range
@@ -165,23 +162,24 @@ lexer: context [
 						str: copy/part str input
 						stop: index-line? lines token/y
 					]
-					;-- unclosed [block! paren! map!]
+					;-- unclosed [block! paren! map! path! lit-path! get-path!]
 					if all [
-						upper: select last stack 'upper
-						upper/1/range/1 = start
+						p: last stack
+						p/range/1 = start
 					][
-						append upper/1/range stop
-						if none? upper/1/error [
-							repend upper/1 ['error make block! 1]
+						append p/range stop
+						if none? p/error [
+							repend p ['error make block! 1]
 						]
-						repend upper/1/error ['level 'Error 'type 'unclose]
-						stack: upper
+						repend p/error ['level 'Error 'type 'unclose]
+						stack: select last stack 'upper
 						input: next input
 						return false
 					]
-					;-- unclosed like string! path!
+					nested: select last stack 'nested
+					;-- unclosed like string!
 					if all [
-						p: last stack
+						p: last nested
 						p/range/1 = start
 					][
 						append p/range stop
@@ -192,7 +190,6 @@ lexer: context [
 						input: next input
 						return false
 					]
-					nested: select last stack 'nested
 					repend/only nested [
 						'range reduce [start stop]
 						'error [level Error type unknown]
