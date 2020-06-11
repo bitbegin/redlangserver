@@ -73,7 +73,6 @@ lexer: context [
 
 	transcode: function [
 		src			[string!]
-		system?		[logic!]
 		return:		[block!]
 	][
 		lines: make block! 64
