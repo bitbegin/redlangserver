@@ -2,6 +2,8 @@
 	this is a block!
 ]
 
+[#(]
+
 [match [[a]] block!]
 [
 	match 1
