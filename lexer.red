@@ -127,11 +127,6 @@ lexer: context [
 					node*/event: event
 					node*/type: type
 					node*/token: token
-					node*/stop: index-line? lines either token/y = token/x [
-						token/y + 1
-					][
-						token/y
-					]
 					node*/next: next input
 					if type = error! [						;-- unmatched "}"
 						node*/type: string!
