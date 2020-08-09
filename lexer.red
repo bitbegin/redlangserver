@@ -79,7 +79,7 @@ lexer: context [
 		parse-line lines src
 		range: make block! 1
 		append range 0x0
-		append range pos-line? lines tail src
+		append range top-stop: pos-line? lines tail src
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack
 
@@ -150,7 +150,7 @@ lexer: context [
 				;-- src tail
 				break
 			]
-			probe node
+			;probe node
 			case [
 				node/event = 'open [
 					;-- ignore open/close string!
@@ -168,23 +168,48 @@ lexer: context [
 				node/event = 'close [
 					if find [block! paren! map! path! lit-path! get-path!] to word! node/type [
 						stop: index-line? lines node/token/x + index + 1
-						if node/type <> select last stack 'type [
+						forever [
+							;-- top ast
+							if none? ntype: select last stack 'type [
+								nested: select last stack 'nested
+								repend/only nested [
+									'range reduce [stop stop]
+									'type  node/type
+									'upper back tail stack
+									'error 'only-closed
+								]
+								break
+							]
+							;-- matched open/close
+							if any [
+								all [
+									ntype = path!
+									find [path! lit-path! get-path!] type
+								]
+								all [
+									ntype <> path!
+									ntype = node/type
+								]
+							][
+								;-- just close the event
+								range: select last stack 'range
+								append range stop
+								item: last stack
+								item/type: node/type
+								stack: select last stack 'upper
+								break
+							]
+							;-- not matched close, need mark error tag
 							range: select last stack 'range
+							append range stop
 							item: last stack
-							probe item
 							either none? item/error [
 								repend item ['error node/type]
 							][
 								item/error: node/type
 							]
-							append range stop
 							stack: select last stack 'upper
 						]
-						range: select last stack 'range
-						item: last stack
-						item/type: node/type
-						append range stop
-						stack: select last stack 'upper
 					]
 				]
 				node/event = 'error [
@@ -193,7 +218,7 @@ lexer: context [
 						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
 						'type  node/type
 						'upper back tail stack
-						'error yes
+						'error 'error
 					]
 				]
 				true [
@@ -208,7 +233,20 @@ lexer: context [
 			]
 			src: node/next
 		]
-		;probe stack
+		;-- unclose event
+		while [stack <> top][
+			range: select last stack 'range
+			if none? range/2 [
+				append range top-stop
+				item: last stack
+				either none? item/error [
+					repend item ['error 'only-opend]
+				][
+					item/error: 'only-opend
+				]
+			]
+			stack: select last stack 'upper
+		]
 		top
 	]
 
