@@ -98,8 +98,7 @@ lexer: context [
 				scan [
 					node*: make map! []
 					node*/type: type
-					node*/start: index-line? lines token/x
-					node*/stop: index-line? lines token/y
+					node*/token: token
 					node*/next: input
 					true
 				]
@@ -111,7 +110,7 @@ lexer: context [
 					node*: make map! []
 					node*/event: event
 					node*/type: type
-					node*/start: index-line? lines token/x
+					node*/token: token
 					node*/next: skip input 1 + token/y - token/x
 					throw node*
 				]
@@ -119,7 +118,7 @@ lexer: context [
 					node*: make map! []
 					node*/event: event
 					node*/type: type
-					node*/stop: index-line? lines token/y + 1
+					node*/token: token
 					node*/next: skip input 1 + token/y - token/x
 					throw node*
 				]
@@ -127,7 +126,7 @@ lexer: context [
 					node*: make map! []
 					node*/event: event
 					node*/type: type
-					node*/start: index-line? lines token/x
+					node*/token: token
 					node*/stop: index-line? lines either token/y = token/x [
 						token/y + 1
 					][
@@ -146,6 +145,7 @@ lexer: context [
 		]
 
 		forever [
+			index: (index? src) - 1
 			if block? node: catch [system/words/transcode/trace src :red-lex][
 				;-- src tail
 				break
@@ -153,11 +153,12 @@ lexer: context [
 			probe node
 			case [
 				node/event = 'open [
-					if find [block! paren! map! path! lit-path! get-path!] to word! type [
+					;-- ignore open/close string!
+					if find [block! paren! map! path! lit-path! get-path!] to word! node/type [
 						nested: select last stack 'nested
 						repend/only nested [
-							'range reduce [node/start]
-							'type  type
+							'range reduce [index-line? lines node/token/x + index]
+							'type  node/type
 							'upper back tail stack
 						]
 						repend last nested ['nested reduce []]
@@ -165,18 +166,31 @@ lexer: context [
 					]
 				]
 				node/event = 'close [
-					if find [block! paren! map! path! lit-path! get-path!] to word! type [
+					if find [block! paren! map! path! lit-path! get-path!] to word! node/type [
+						stop: index-line? lines node/token/x + index + 1
+						if node/type <> select last stack 'type [
+							range: select last stack 'range
+							item: last stack
+							probe item
+							either none? item/error [
+								repend item ['error node/type]
+							][
+								item/error: node/type
+							]
+							append range stop
+							stack: select last stack 'upper
+						]
 						range: select last stack 'range
 						item: last stack
-						item/type: type
-						append range node/stop
+						item/type: node/type
+						append range stop
 						stack: select last stack 'upper
 					]
 				]
 				node/event = 'error [
 					nested: select last stack 'nested
 					repend/only nested [
-						'range reduce [node/start node/stop]
+						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
 						'type  node/type
 						'upper back tail stack
 						'error yes
@@ -185,8 +199,9 @@ lexer: context [
 				true [
 					nested: select last stack 'nested
 					repend/only nested [
-						'range reduce [node/start node/stop]
+						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
 						'type  node/type
+						'expr  node/expr
 						'upper back tail stack
 					]
 				]
@@ -262,9 +277,10 @@ lexer: context [
 				;	newline pad + 4
 				;	append buffer "]"
 				;]
-				if pc/1/error [
+				if error: pc/1/error [
 					newline pad + 4
-					append buffer "error!"
+					append buffer "error!: "
+					append buffer mold/flat/part error 30
 				]
 				newline pad + 2
 				append buffer "]"
