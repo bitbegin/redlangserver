@@ -84,6 +84,7 @@ lexer: context [
 		top: stack
 
 		node*: none
+		match-stack: []
 		red-lex: func [
 			event	[word!]
 			input	[string! binary!]
@@ -93,13 +94,18 @@ lexer: context [
 			return:	[logic!]
 		][
 			[scan load open close error]
-			;print [event mold type token]
+			;print [event mold type token mold input]
 			switch event [
 				scan [
 					node*: make map! []
 					node*/type: type
-					node*/token: token
-					node*/next: input
+					either empty? match-stack [
+						node*/token: token
+						node*/next: input
+					][
+						node*/token: as-pair match-stack/1/3/x token/y + 1
+						node*/next: next input
+					]
 					true
 				]
 				load [
@@ -107,33 +113,53 @@ lexer: context [
 					throw node*
 				]
 				open [
-					node*: make map! []
-					node*/event: event
-					node*/type: type
-					node*/token: token
-					node*/next: skip input 1 + token/y - token/x
-					throw node*
+					if find [block! paren! map! path!] to word! type [	;-- ignore open/close string!
+						node*: make map! []
+						node*/event: event
+						node*/type: type
+						node*/token: token
+						node*/next: skip input 1 + token/y - token/x
+						throw node*
+					]
+					repend/only match-stack ['open type token]
+					true
 				]
 				close [
-					node*: make map! []
-					node*/event: event
-					node*/type: type
-					node*/token: token
-					node*/next: skip input 1 + token/y - token/x
-					throw node*
+					if find [block! paren! map! path! lit-path! get-path!] to word! type [	;-- ignore open/close event like string!
+						node*: make map! []
+						node*/event: event
+						node*/type: type
+						node*/token: token
+						node*/next: skip input 1 + token/y - token/x
+						throw node*
+					]
+					repend/only match-stack ['close type token]
+					true
 				]
 				error [
 					node*: make map! []
 					node*/event: event
 					node*/type: type
-					node*/token: token
-					node*/next: next input
-					if type = error! [						;-- unmatched "}"
+					either all [
+						type = error!
+						input/1 = #"}"
+					][
 						node*/type: string!
+						node*/token: token + 0x1
+						node*/next: next input
+						node*/error: 'only-close
+					][
+						if type = string! [
+							node*/error: 'only-open
+						]
+						either 1 >= length? match-stack [
+							node*/token: token
+							node*/next: input
+						][
+							node*/token: as-pair match-stack/1/3/x token/y + 1
+							node*/next: next input
+						]
 					]
-					;if find [block! paren! map!] to-word type [
-					;	node*/next: next input
-					;]
 					throw node*
 				]
 			]
@@ -141,6 +167,7 @@ lexer: context [
 
 		forever [
 			index: (index? src) - 1
+			clear match-stack
 			if block? node: catch [system/words/transcode/trace src :red-lex][
 				;-- src tail
 				break
@@ -148,63 +175,58 @@ lexer: context [
 			;probe node
 			case [
 				node/event = 'open [
-					;-- ignore open/close string!
-					if find [block! paren! map! path! lit-path! get-path!] to word! node/type [
-						nested: select last stack 'nested
-						repend/only nested [
-							'range reduce [index-line? lines node/token/x + index]
-							'type  node/type
-							'upper back tail stack
-						]
-						repend last nested ['nested reduce []]
-						stack: nested
+					nested: select last stack 'nested
+					repend/only nested [
+						'range reduce [index-line? lines node/token/x + index]
+						'type  node/type
+						'upper back tail stack
 					]
+					repend last nested ['nested reduce []]
+					stack: nested
 				]
 				node/event = 'close [
-					if find [block! paren! map! path! lit-path! get-path!] to word! node/type [
-						stop: index-line? lines node/token/x + index + 1
-						forever [
-							;-- top ast
-							if none? ntype: select last stack 'type [
-								nested: select last stack 'nested
-								repend/only nested [
-									'range reduce [stop stop]
-									'type  node/type
-									'upper back tail stack
-									'error 'only-closed
-								]
-								break
+					stop: index-line? lines node/token/x + index + 1
+					forever [
+						;-- top ast
+						if none? ntype: select last stack 'type [
+							nested: select last stack 'nested
+							repend/only nested [
+								'range reduce [stop stop]
+								'type  node/type
+								'upper back tail stack
+								'error 'only-closed
 							]
-							;-- matched open/close
-							if any [
-								all [
-									ntype = path!
-									find [path! lit-path! get-path!] type
-								]
-								all [
-									ntype <> path!
-									ntype = node/type
-								]
-							][
-								;-- just close the event
-								range: select last stack 'range
-								append range stop
-								item: last stack
-								item/type: node/type
-								stack: select last stack 'upper
-								break
+							break
+						]
+						;-- matched open/close
+						if any [
+							all [
+								ntype = path!
+								find [path! lit-path! get-path!] type
 							]
-							;-- not matched close, need mark error tag
+							all [
+								ntype <> path!
+								ntype = node/type
+							]
+						][
+							;-- just close the event
 							range: select last stack 'range
 							append range stop
 							item: last stack
-							either none? item/error [
-								repend item ['error node/type]
-							][
-								item/error: node/type
-							]
+							item/type: node/type
 							stack: select last stack 'upper
+							break
 						]
+						;-- not matched close, need mark error tag
+						range: select last stack 'range
+						append range stop
+						item: last stack
+						either none? item/error [
+							repend item ['error node/type]
+						][
+							item/error: node/type
+						]
+						stack: select last stack 'upper
 					]
 				]
 				node/event = 'error [
@@ -213,7 +235,7 @@ lexer: context [
 						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
 						'type  node/type
 						'upper back tail stack
-						'error 'error
+						'error either node/error [node/error]['unknown]
 					]
 				]
 				true [
@@ -312,7 +334,7 @@ lexer: context [
 				;]
 				if error: pc/1/error [
 					newline pad + 4
-					append buffer "error!: "
+					append buffer "error: "
 					append buffer mold/flat/part error 30
 				]
 				newline pad + 2
