@@ -1,0 +1,756 @@
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: string!
+        upper: [0x0 1x2]
+        error: only-open
+      ]
+    ]
+    source: {"}
+    lines: [
+      {"}
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x9]
+    nested:
+    [
+      [
+        expr: #"^@"
+        range: [1x1 1x9]
+        type: char!
+        upper: [0x0 1x9]
+      ]
+    ]
+    source: {#"^^(00)"}
+    lines: [
+      {#"^^(00)"}
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x8]
+    nested:
+    [
+      [
+        range: [1x1 1x8]
+        type: char!
+        upper: [0x0 1x8]
+        error: unknown
+      ]
+    ]
+    source: {#"^^(00)}
+    lines: [
+      {#"^^(00)}
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x11]
+    nested:
+    [
+      [
+        range: [1x1 1x10]
+        type: char!
+        upper: [0x0 1x11]
+        error: unknown
+      ]
+      [
+        range: [1x10 1x11]
+        type: string!
+        upper: [0x0 1x11]
+        error: only-open
+      ]
+    ]
+    source: {#"^^(00) a
+    lines: [
+      {#"^^(00) a
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x6]
+    nested:
+    [
+      [
+        expr: "abc"
+        range: [1x1 1x6]
+        type: string!
+        upper: [0x0 1x6]
+      ]
+    ]
+    source: {"abc"}
+    lines: [
+      {"abc"}
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x5]
+    nested:
+    [
+      [
+        range: [1x1 1x5]
+        type: string!
+        upper: [0x0 1x5]
+        error: only-open
+      ]
+    ]
+    source: {"abc}
+    lines: [
+      {"abc}
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 2x2]
+    nested:
+    [
+      [
+        range: [1x1 1x5]
+        type: string!
+        upper: [0x0 2x2]
+        error: only-open
+      ]
+      [
+        range: [2x1 2x2]
+        type: string!
+        upper: [0x0 2x2]
+        error: only-open
+      ]
+    ]
+    source: {"abc^/"}
+    lines: [
+      {"abc^/"}
+      1
+      6
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x3]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x3]
+      ]
+    ]
+    source: "[]"
+    lines: [
+      "[]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x2]
+        error: only-opend
+      ]
+    ]
+    source: "["
+    lines: [
+      "["
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x2 1x2]
+        type: block!
+        upper: [0x0 1x2]
+        error: only-closed
+      ]
+    ]
+    source: "]"
+    lines: [
+      "]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x3 1x4]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+        error: only-opend
+      ]
+    ]
+    source: "[]["
+    lines: [
+      "[]["
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x4 1x4]
+        type: block!
+        upper: [0x0 1x4]
+        error: only-closed
+      ]
+    ]
+    source: "[]]"
+    lines: [
+      "[]]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x4]
+        type: block!
+        nested:
+        [
+          [
+            range: [1x2 1x4]
+            type: block!
+            nested:
+            [
+            ]
+            upper: [1x1 1x4]
+          ]
+        ]
+        upper: [0x0 1x4]
+        error: only-opend
+      ]
+    ]
+    source: "[[]"
+    lines: [
+      "[[]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x2 1x2]
+        type: block!
+        upper: [0x0 1x4]
+        error: only-closed
+      ]
+      [
+        range: [1x2 1x4]
+        type: block!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+    ]
+    source: "][]"
+    lines: [
+      "][]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x5]
+    nested:
+    [
+      [
+        range: [1x1 1x5]
+        type: block!
+        nested:
+        [
+          [
+            range: [1x2 1x4]
+            type: block!
+            nested:
+            [
+            ]
+            upper: [1x1 1x5]
+          ]
+        ]
+        upper: [0x0 1x5]
+      ]
+    ]
+    source: "[[]]"
+    lines: [
+      "[[]]"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x3]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x3]
+      ]
+    ]
+    source: "()"
+    lines: [
+      "()"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x2]
+        error: only-opend
+      ]
+    ]
+    source: "("
+    lines: [
+      "("
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x2 1x2]
+        type: paren!
+        upper: [0x0 1x2]
+        error: only-closed
+      ]
+    ]
+    source: ")"
+    lines: [
+      ")"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x3 1x4]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+        error: only-opend
+      ]
+    ]
+    source: "()("
+    lines: [
+      "()("
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x3]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x4 1x4]
+        type: paren!
+        upper: [0x0 1x4]
+        error: only-closed
+      ]
+    ]
+    source: "())"
+    lines: [
+      "())"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x4]
+        type: paren!
+        nested:
+        [
+          [
+            range: [1x2 1x4]
+            type: paren!
+            nested:
+            [
+            ]
+            upper: [1x1 1x4]
+          ]
+        ]
+        upper: [0x0 1x4]
+        error: only-opend
+      ]
+    ]
+    source: "(()"
+    lines: [
+      "(()"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x2 1x2]
+        type: paren!
+        upper: [0x0 1x4]
+        error: only-closed
+      ]
+      [
+        range: [1x2 1x4]
+        type: paren!
+        nested:
+        [
+        ]
+        upper: [0x0 1x4]
+      ]
+    ]
+    source: ")()"
+    lines: [
+      ")()"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x5]
+    nested:
+    [
+      [
+        range: [1x1 1x5]
+        type: paren!
+        nested:
+        [
+          [
+            range: [1x2 1x4]
+            type: paren!
+            nested:
+            [
+            ]
+            upper: [1x1 1x5]
+          ]
+        ]
+        upper: [0x0 1x5]
+      ]
+    ]
+    source: "(())"
+    lines: [
+      "(())"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x3]
+    nested:
+    [
+      [
+        expr: ""
+        range: [1x1 1x3]
+        type: string!
+        upper: [0x0 1x3]
+      ]
+    ]
+    source: "{}"
+    lines: [
+      "{}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: string!
+        upper: [0x0 1x2]
+        error: only-open
+      ]
+    ]
+    source: "{"
+    lines: [
+      "{"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x2]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: string!
+        upper: [0x0 1x2]
+        error: only-close
+      ]
+    ]
+    source: "}"
+    lines: [
+      "}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        expr: ""
+        range: [1x1 1x3]
+        type: string!
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x3 1x4]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-open
+      ]
+    ]
+    source: "{}{"
+    lines: [
+      "{}{"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        expr: ""
+        range: [1x1 1x3]
+        type: string!
+        upper: [0x0 1x4]
+      ]
+      [
+        range: [1x3 1x4]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-close
+      ]
+    ]
+    source: "{}}"
+    lines: [
+      "{}}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x4]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-open
+      ]
+    ]
+    source: "{{}"
+    lines: [
+      "{{}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested:
+    [
+      [
+        range: [1x1 1x2]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-close
+      ]
+      [
+        expr: ""
+        range: [1x2 1x4]
+        type: string!
+        upper: [0x0 1x4]
+      ]
+    ]
+    source: "}{}"
+    lines: [
+      "}{}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x5]
+    nested:
+    [
+      [
+        expr: "{}"
+        range: [1x1 1x5]
+        type: string!
+        upper: [0x0 1x5]
+      ]
+    ]
+    source: "{{}}"
+    lines: [
+      "{{}}"
+      1
+    ]
+  ]
+]
