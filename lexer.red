@@ -152,12 +152,22 @@ lexer: context [
 						if type = string! [
 							node*/error: 'only-open
 						]
-						either 1 >= length? match-stack [
-							node*/token: token
-							node*/next: input
+						either empty? match-stack [
+							either tail? input [
+								node*/token: token
+								node*/next: input
+							][
+								node*/token: token + 0x1
+								node*/next: next input
+							]
 						][
-							node*/token: as-pair match-stack/1/3/x token/y + 1
-							node*/next: next input
+							either tail? input [
+								node*/token: as-pair match-stack/1/3/x token/y
+								node*/next: input
+							][
+								node*/token: as-pair match-stack/1/3/x token/y + 1
+								node*/next: next input
+							]
 						]
 					]
 					throw node*

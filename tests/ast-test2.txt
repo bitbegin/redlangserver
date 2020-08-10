@@ -1,7 +1,8 @@
+
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
@@ -21,7 +22,7 @@
 [
   [
     range: [0x0 1x9]
-    nested:
+    nested: 
     [
       [
         expr: #"^@"
@@ -41,7 +42,7 @@
 [
   [
     range: [0x0 1x8]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x8]
@@ -61,7 +62,7 @@
 [
   [
     range: [0x0 1x11]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x10]
@@ -87,7 +88,7 @@
 [
   [
     range: [0x0 1x6]
-    nested:
+    nested: 
     [
       [
         expr: "abc"
@@ -107,7 +108,7 @@
 [
   [
     range: [0x0 1x5]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x5]
@@ -127,7 +128,7 @@
 [
   [
     range: [0x0 2x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x5]
@@ -154,12 +155,12 @@
 [
   [
     range: [0x0 1x3]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x3]
@@ -176,12 +177,12 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x2]
@@ -199,7 +200,7 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x2 1x2]
@@ -219,12 +220,12 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -232,7 +233,7 @@
       [
         range: [1x3 1x4]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -250,12 +251,12 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -278,17 +279,17 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x4]
         type: block!
-        nested:
+        nested: 
         [
           [
             range: [1x2 1x4]
             type: block!
-            nested:
+            nested: 
             [
             ]
             upper: [1x1 1x4]
@@ -309,7 +310,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x2 1x2]
@@ -320,7 +321,7 @@
       [
         range: [1x2 1x4]
         type: block!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -337,17 +338,17 @@
 [
   [
     range: [0x0 1x5]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x5]
         type: block!
-        nested:
+        nested: 
         [
           [
             range: [1x2 1x4]
             type: block!
-            nested:
+            nested: 
             [
             ]
             upper: [1x1 1x5]
@@ -367,12 +368,12 @@
 [
   [
     range: [0x0 1x3]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x3]
@@ -389,12 +390,12 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x2]
@@ -412,7 +413,7 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x2 1x2]
@@ -432,12 +433,12 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -445,7 +446,7 @@
       [
         range: [1x3 1x4]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -463,12 +464,12 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x3]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -491,17 +492,17 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x4]
         type: paren!
-        nested:
+        nested: 
         [
           [
             range: [1x2 1x4]
             type: paren!
-            nested:
+            nested: 
             [
             ]
             upper: [1x1 1x4]
@@ -522,7 +523,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x2 1x2]
@@ -533,7 +534,7 @@
       [
         range: [1x2 1x4]
         type: paren!
-        nested:
+        nested: 
         [
         ]
         upper: [0x0 1x4]
@@ -550,17 +551,17 @@
 [
   [
     range: [0x0 1x5]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x5]
         type: paren!
-        nested:
+        nested: 
         [
           [
             range: [1x2 1x4]
             type: paren!
-            nested:
+            nested: 
             [
             ]
             upper: [1x1 1x5]
@@ -580,7 +581,7 @@
 [
   [
     range: [0x0 1x3]
-    nested:
+    nested: 
     [
       [
         expr: ""
@@ -600,7 +601,7 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
@@ -620,7 +621,7 @@
 [
   [
     range: [0x0 1x2]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
@@ -640,7 +641,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         expr: ""
@@ -666,7 +667,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         expr: ""
@@ -692,7 +693,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x4]
@@ -712,7 +713,7 @@
 [
   [
     range: [0x0 1x4]
-    nested:
+    nested: 
     [
       [
         range: [1x1 1x2]
@@ -738,7 +739,7 @@
 [
   [
     range: [0x0 1x5]
-    nested:
+    nested: 
     [
       [
         expr: "{}"
@@ -750,6 +751,46 @@
     source: "{{}}"
     lines: [
       "{{}}"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x3]
+    nested: 
+    [
+      [
+        range: [1x1 1x4]
+        type: string!
+        upper: [0x0 1x3]
+        error: only-open
+      ]
+    ]
+    source: "{{"
+    lines: [
+      "{{"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [0x0 1x4]
+    nested: 
+    [
+      [
+        range: [1x1 1x5]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-open
+      ]
+    ]
+    source: "{{{"
+    lines: [
+      "{{{"
       1
     ]
   ]
