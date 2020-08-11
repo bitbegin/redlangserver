@@ -231,7 +231,7 @@ begin string-cases.txt
         upper: [0x0 10x1]
       ]
       [
-        range: [7x9 7x18]
+        range: [7x8 7x18]
         type: string!
         upper: [0x0 10x1]
         error: only-open
