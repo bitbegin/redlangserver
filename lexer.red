@@ -92,28 +92,57 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
+			/local t
 		][
 			[scan load open close error]
 			;print [event mold type token mold input]
 			switch event [
 				scan [
-					node*: make map! []
-					node*/type: type
-					either empty? match-stack [
-						node*/token: token
-						node*/next: input
+					unless all [
+						not empty? match-stack
+						find [path! lit-path! get-path!] to word! match-stack/1/2
 					][
-						node*/token: as-pair match-stack/1/3/x token/y + 1
-						node*/next: next input
+						node*: make map! []
+						node*/type: type
+						either empty? match-stack [
+							node*/token: token
+							node*/next: input
+						][
+							node*/token: as-pair match-stack/1/3/x token/y + 1
+							node*/next: next input
+						]
 					]
 					true
 				]
 				load [
-					node*/expr: token
-					throw node*
+					either all [
+						not empty? match-stack
+						find [path! lit-path! get-path!] to word! match-stack/1/2
+					][
+						append node*/expr token
+					][
+						node*/expr: token
+						throw node*
+					]
+					true
 				]
 				open [
-					if find [block! paren! map! path!] to word! type [	;-- ignore open/close string!
+					if find [block! paren! map! path! lit-path! get-path!] t: to word! type [	;-- ignore open/close string!
+						node*: make map! []
+						node*/type: type
+						node*/token: token
+						if find [block! paren! map!] t [
+							node*/event: event
+							node*/next: skip input 1 + token/y - token/x
+							throw node*
+						]
+						node*/expr: make block! 4
+					]
+					repend/only match-stack ['open type token]
+					true
+				]
+				close [
+					if find [block! paren! map!] t: to word! type [	;-- ignore open/close event like string!
 						node*: make map! []
 						node*/event: event
 						node*/type: type
@@ -121,16 +150,14 @@ lexer: context [
 						node*/next: skip input 1 + token/y - token/x
 						throw node*
 					]
-					repend/only match-stack ['open type token]
-					true
-				]
-				close [
-					if find [block! paren! map! path! lit-path! get-path!] to word! type [	;-- ignore open/close event like string!
-						node*: make map! []
-						node*/event: event
+					if find [path! lit-path! get-path! set-path!] t [
+						node*/token/y: token/y
 						node*/type: type
-						node*/token: token
-						node*/next: skip input 1 + token/y - token/x
+						node*/next: either t = 'set-path! [
+							next input
+						][
+							input
+						]
 						throw node*
 					]
 					repend/only match-stack ['close type token]

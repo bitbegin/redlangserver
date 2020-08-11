@@ -795,633 +795,232 @@ begin path-cases.txt
     nested: 
     [
       [
-        range: [1x1 21x1]
+        expr: [a b c]
+        range: [1x1 1x6]
         type: path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [a bc def]
+        range: [2x1 2x10]
+        type: lit-path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [abc de f]
+        range: [3x1 3x10]
+        type: get-path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [abc def ghi]
+        range: [4x1 4x12]
+        type: set-path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [a^b c^^d e^^^f]
+        range: [5x1 5x15]
+        type: path!
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [6x5 6x10]
+        type: paren!
         nested: 
         [
           [
-            expr: /b
-            range: [1x2 1x4]
-            type: refinement!
-            upper: [1x1 21x1]
-          ]
-          [
-            expr: /c
-            range: [1x4 1x6]
-            type: refinement!
-            upper: [1x1 21x1]
-          ]
-          [
-            expr: a
-            range: [2x1 2x4]
+            expr: var
+            range: [6x6 6x9]
             type: word!
-            upper: [1x1 21x1]
-          ]
-          [
-            range: [2x4 21x1]
-            type: path!
-            nested: 
-            [
-              [
-                range: [2x5 21x1]
-                type: path!
-                nested: 
-                [
-                  [
-                    expr: /def
-                    range: [2x6 2x10]
-                    type: refinement!
-                    upper: [2x5 21x1]
-                  ]
-                  [
-                    expr: abc
-                    range: [3x1 3x6]
-                    type: word!
-                    upper: [2x5 21x1]
-                  ]
-                  [
-                    range: [3x6 21x1]
-                    type: path!
-                    nested: 
-                    [
-                      [
-                        range: [3x7 21x1]
-                        type: path!
-                        nested: 
-                        [
-                          [
-                            expr: /f
-                            range: [3x8 3x10]
-                            type: refinement!
-                            upper: [3x7 21x1]
-                          ]
-                          [
-                            range: [4x1 21x1]
-                            type: path!
-                            nested: 
-                            [
-                              [
-                                range: [4x2 21x1]
-                                type: path!
-                                nested: 
-                                [
-                                  [
-                                    range: [4x3 21x1]
-                                    type: path!
-                                    nested: 
-                                    [
-                                      [
-                                        expr: /def
-                                        range: [4x4 4x8]
-                                        type: refinement!
-                                        upper: [4x3 21x1]
-                                      ]
-                                      [
-                                        range: [4x8 4x13]
-                                        type: refinement!
-                                        upper: [4x3 21x1]
-                                        error: unknown
-                                      ]
-                                      [
-                                        range: [5x1 21x1]
-                                        type: path!
-                                        nested: 
-                                        [
-                                          [
-                                            range: [5x2 21x1]
-                                            type: path!
-                                            nested: 
-                                            [
-                                              [
-                                                range: [5x3 21x1]
-                                                type: path!
-                                                nested: 
-                                                [
-                                                  [
-                                                    expr: /c^^d
-                                                    range: [5x4 5x9]
-                                                    type: refinement!
-                                                    upper: [5x3 21x1]
-                                                  ]
-                                                  [
-                                                    expr: /e^^^f
-                                                    range: [5x9 5x15]
-                                                    type: refinement!
-                                                    upper: [5x3 21x1]
-                                                  ]
-                                                  [
-                                                    range: [6x1 21x1]
-                                                    type: path!
-                                                    nested: 
-                                                    [
-                                                      [
-                                                        expr: /b
-                                                        range: [6x2 6x4]
-                                                        type: refinement!
-                                                        upper: [6x1 21x1]
-                                                      ]
-                                                      [
-                                                        expr: /
-                                                        range: [6x4 6x5]
-                                                        type: word!
-                                                        upper: [6x1 21x1]
-                                                      ]
-                                                      [
-                                                        range: [6x5 6x10]
-                                                        type: paren!
-                                                        nested: 
-                                                        [
-                                                          [
-                                                            expr: var
-                                                            range: [6x6 6x9]
-                                                            type: word!
-                                                            upper: [6x5 6x10]
-                                                          ]
-                                                        ]
-                                                        upper: [6x1 21x1]
-                                                      ]
-                                                      [
-                                                        range: [7x1 21x1]
-                                                        type: path!
-                                                        nested: 
-                                                        [
-                                                          [
-                                                            expr: /b
-                                                            range: [7x2 7x4]
-                                                            type: refinement!
-                                                            upper: [7x1 21x1]
-                                                          ]
-                                                          [
-                                                            expr: /
-                                                            range: [7x4 7x5]
-                                                            type: word!
-                                                            upper: [7x1 21x1]
-                                                          ]
-                                                          [
-                                                            range: [7x5 7x12]
-                                                            type: paren!
-                                                            nested: 
-                                                            [
-                                                              [
-                                                                expr: 1
-                                                                range: [7x6 7x7]
-                                                                type: integer!
-                                                                upper: [7x5 7x12]
-                                                              ]
-                                                              [
-                                                                expr: +
-                                                                range: [7x8 7x9]
-                                                                type: word!
-                                                                upper: [7x5 7x12]
-                                                              ]
-                                                              [
-                                                                expr: 2
-                                                                range: [7x10 7x11]
-                                                                type: integer!
-                                                                upper: [7x5 7x12]
-                                                              ]
-                                                            ]
-                                                            upper: [7x1 21x1]
-                                                          ]
-                                                          [
-                                                            range: [8x1 21x1]
-                                                            type: path!
-                                                            nested: 
-                                                            [
-                                                              [
-                                                                expr: /b
-                                                                range: [8x2 8x4]
-                                                                type: refinement!
-                                                                upper: [8x1 21x1]
-                                                              ]
-                                                              [
-                                                                expr: /
-                                                                range: [8x4 8x5]
-                                                                type: word!
-                                                                upper: [8x1 21x1]
-                                                              ]
-                                                              [
-                                                                range: [8x5 8x12]
-                                                                type: paren!
-                                                                nested: 
-                                                                [
-                                                                  [
-                                                                    expr: 1
-                                                                    range: [8x6 8x7]
-                                                                    type: integer!
-                                                                    upper: [8x5 8x12]
-                                                                  ]
-                                                                  [
-                                                                    expr: +
-                                                                    range: [8x8 8x9]
-                                                                    type: word!
-                                                                    upper: [8x5 8x12]
-                                                                  ]
-                                                                  [
-                                                                    expr: 2
-                                                                    range: [8x10 8x11]
-                                                                    type: integer!
-                                                                    upper: [8x5 8x12]
-                                                                  ]
-                                                                ]
-                                                                upper: [8x1 21x1]
-                                                              ]
-                                                              [
-                                                                range: [8x12 9x1]
-                                                                type: word!
-                                                                upper: [8x1 21x1]
-                                                                error: unknown
-                                                              ]
-                                                              [
-                                                                expr: a
-                                                                range: [9x1 9x4]
-                                                                type: word!
-                                                                upper: [8x1 21x1]
-                                                              ]
-                                                              [
-                                                                range: [9x4 21x1]
-                                                                type: path!
-                                                                nested: 
-                                                                [
-                                                                  [
-                                                                    expr: /
-                                                                    range: [9x5 9x6]
-                                                                    type: word!
-                                                                    upper: [9x4 21x1]
-                                                                  ]
-                                                                  [
-                                                                    range: [9x6 9x13]
-                                                                    type: paren!
-                                                                    nested: 
-                                                                    [
-                                                                      [
-                                                                        expr: 1
-                                                                        range: [9x7 9x8]
-                                                                        type: integer!
-                                                                        upper: [9x6 9x13]
-                                                                      ]
-                                                                      [
-                                                                        expr: +
-                                                                        range: [9x9 9x10]
-                                                                        type: word!
-                                                                        upper: [9x6 9x13]
-                                                                      ]
-                                                                      [
-                                                                        expr: 2
-                                                                        range: [9x11 9x12]
-                                                                        type: integer!
-                                                                        upper: [9x6 9x13]
-                                                                      ]
-                                                                    ]
-                                                                    upper: [9x4 21x1]
-                                                                  ]
-                                                                  [
-                                                                    expr: a
-                                                                    range: [10x1 10x4]
-                                                                    type: word!
-                                                                    upper: [9x4 21x1]
-                                                                  ]
-                                                                  [
-                                                                    range: [10x4 21x1]
-                                                                    type: path!
-                                                                    nested: 
-                                                                    [
-                                                                      [
-                                                                        expr: /
-                                                                        range: [10x5 10x6]
-                                                                        type: word!
-                                                                        upper: [10x4 21x1]
-                                                                      ]
-                                                                      [
-                                                                        range: [10x6 10x13]
-                                                                        type: paren!
-                                                                        nested: 
-                                                                        [
-                                                                          [
-                                                                            expr: 1
-                                                                            range: [10x7 10x8]
-                                                                            type: integer!
-                                                                            upper: [10x6 10x13]
-                                                                          ]
-                                                                          [
-                                                                            expr: +
-                                                                            range: [10x9 10x10]
-                                                                            type: word!
-                                                                            upper: [10x6 10x13]
-                                                                          ]
-                                                                          [
-                                                                            expr: 2
-                                                                            range: [10x11 10x12]
-                                                                            type: integer!
-                                                                            upper: [10x6 10x13]
-                                                                          ]
-                                                                        ]
-                                                                        upper: [10x4 21x1]
-                                                                      ]
-                                                                      [
-                                                                        range: [11x1 21x1]
-                                                                        type: path!
-                                                                        nested: 
-                                                                        [
-                                                                          [
-                                                                            expr: /b
-                                                                            range: [11x2 11x4]
-                                                                            type: refinement!
-                                                                            upper: [11x1 21x1]
-                                                                          ]
-                                                                          [
-                                                                            expr: /
-                                                                            range: [11x4 11x5]
-                                                                            type: word!
-                                                                            upper: [11x1 21x1]
-                                                                          ]
-                                                                          [
-                                                                            range: [11x5 11x10]
-                                                                            type: paren!
-                                                                            nested: 
-                                                                            [
-                                                                              [
-                                                                                expr: var
-                                                                                range: [11x6 11x9]
-                                                                                type: word!
-                                                                                upper: [11x5 11x10]
-                                                                              ]
-                                                                            ]
-                                                                            upper: [11x1 21x1]
-                                                                          ]
-                                                                          [
-                                                                            expr: /1
-                                                                            range: [11x10 11x12]
-                                                                            type: refinement!
-                                                                            upper: [11x1 21x1]
-                                                                          ]
-                                                                          [
-                                                                            range: [12x1 21x1]
-                                                                            type: path!
-                                                                            nested: 
-                                                                            [
-                                                                              [
-                                                                                expr: /b
-                                                                                range: [12x2 12x4]
-                                                                                type: refinement!
-                                                                                upper: [12x1 21x1]
-                                                                              ]
-                                                                              [
-                                                                                expr: /2.34
-                                                                                range: [12x4 12x9]
-                                                                                type: refinement!
-                                                                                upper: [12x1 21x1]
-                                                                              ]
-                                                                              [
-                                                                                range: [13x1 21x1]
-                                                                                type: path!
-                                                                                nested: 
-                                                                                [
-                                                                                  [
-                                                                                    expr: /'b
-                                                                                    range: [13x2 13x5]
-                                                                                    type: refinement!
-                                                                                    upper: [13x1 21x1]
-                                                                                  ]
-                                                                                  [
-                                                                                    range: [14x1 21x1]
-                                                                                    type: path!
-                                                                                    nested: 
-                                                                                    [
-                                                                                      [
-                                                                                        expr: /:b
-                                                                                        range: [14x2 15x1]
-                                                                                        type: url!
-                                                                                        upper: [14x1 21x1]
-                                                                                      ]
-                                                                                      [
-                                                                                        range: [16x1 21x1]
-                                                                                        type: path!
-                                                                                        nested: 
-                                                                                        [
-                                                                                          [
-                                                                                            expr: /b
-                                                                                            range: [16x2 16x4]
-                                                                                            type: refinement!
-                                                                                            upper: [16x1 21x1]
-                                                                                          ]
-                                                                                          [
-                                                                                            expr: /
-                                                                                            range: [16x4 16x5]
-                                                                                            type: word!
-                                                                                            upper: [16x1 21x1]
-                                                                                          ]
-                                                                                          [
-                                                                                            range: [16x5 16x7]
-                                                                                            type: block!
-                                                                                            nested: 
-                                                                                            [
-                                                                                            ]
-                                                                                            upper: [16x1 21x1]
-                                                                                          ]
-                                                                                          [
-                                                                                            range: [17x1 21x1]
-                                                                                            type: path!
-                                                                                            nested: 
-                                                                                            [
-                                                                                              [
-                                                                                                expr: /b
-                                                                                                range: [17x2 17x4]
-                                                                                                type: refinement!
-                                                                                                upper: [17x1 21x1]
-                                                                                              ]
-                                                                                              [
-                                                                                                expr: /
-                                                                                                range: [17x4 17x5]
-                                                                                                type: word!
-                                                                                                upper: [17x1 21x1]
-                                                                                              ]
-                                                                                              [
-                                                                                                expr: a
-                                                                                                range: [18x1 18x4]
-                                                                                                type: word!
-                                                                                                upper: [17x1 21x1]
-                                                                                              ]
-                                                                                              [
-                                                                                                range: [18x4 21x1]
-                                                                                                type: path!
-                                                                                                nested: 
-                                                                                                [
-                                                                                                  [
-                                                                                                    range: [18x5 21x1]
-                                                                                                    type: path!
-                                                                                                    nested: 
-                                                                                                    [
-                                                                                                      [
-                                                                                                        expr: /
-                                                                                                        range: [18x6 18x7]
-                                                                                                        type: word!
-                                                                                                        upper: [18x5 21x1]
-                                                                                                      ]
-                                                                                                      [
-                                                                                                        expr: abc
-                                                                                                        range: [19x1 19x6]
-                                                                                                        type: word!
-                                                                                                        upper: [18x5 21x1]
-                                                                                                      ]
-                                                                                                      [
-                                                                                                        range: [19x6 21x1]
-                                                                                                        type: path!
-                                                                                                        nested: 
-                                                                                                        [
-                                                                                                          [
-                                                                                                            range: [19x7 21x1]
-                                                                                                            type: path!
-                                                                                                            nested: 
-                                                                                                            [
-                                                                                                              [
-                                                                                                                expr: /
-                                                                                                                range: [19x8 19x9]
-                                                                                                                type: word!
-                                                                                                                upper: [19x7 21x1]
-                                                                                                              ]
-                                                                                                              [
-                                                                                                                range: [20x1 21x1]
-                                                                                                                type: path!
-                                                                                                                nested: 
-                                                                                                                [
-                                                                                                                  [
-                                                                                                                    range: [20x2 21x1]
-                                                                                                                    type: path!
-                                                                                                                    nested: 
-                                                                                                                    [
-                                                                                                                      [
-                                                                                                                        range: [20x3 21x1]
-                                                                                                                        type: path!
-                                                                                                                        nested: 
-                                                                                                                        [
-                                                                                                                          [
-                                                                                                                            expr: /def
-                                                                                                                            range: [20x4 20x8]
-                                                                                                                            type: refinement!
-                                                                                                                            upper: [20x3 21x1]
-                                                                                                                          ]
-                                                                                                                          [
-                                                                                                                            expr: /:
-                                                                                                                            range: [20x8 20x10]
-                                                                                                                            type: set-word!
-                                                                                                                            upper: [20x3 21x1]
-                                                                                                                          ]
-                                                                                                                        ]
-                                                                                                                        upper: [20x2 21x1]
-                                                                                                                        error: only-opend
-                                                                                                                      ]
-                                                                                                                    ]
-                                                                                                                    upper: [20x1 21x1]
-                                                                                                                    error: only-opend
-                                                                                                                  ]
-                                                                                                                ]
-                                                                                                                upper: [19x7 21x1]
-                                                                                                                error: only-opend
-                                                                                                              ]
-                                                                                                            ]
-                                                                                                            upper: [19x6 21x1]
-                                                                                                            error: only-opend
-                                                                                                          ]
-                                                                                                        ]
-                                                                                                        upper: [18x5 21x1]
-                                                                                                        error: only-opend
-                                                                                                      ]
-                                                                                                    ]
-                                                                                                    upper: [18x4 21x1]
-                                                                                                    error: only-opend
-                                                                                                  ]
-                                                                                                ]
-                                                                                                upper: [17x1 21x1]
-                                                                                                error: only-opend
-                                                                                              ]
-                                                                                            ]
-                                                                                            upper: [16x1 21x1]
-                                                                                            error: only-opend
-                                                                                          ]
-                                                                                        ]
-                                                                                        upper: [14x1 21x1]
-                                                                                        error: only-opend
-                                                                                      ]
-                                                                                    ]
-                                                                                    upper: [13x1 21x1]
-                                                                                    error: only-opend
-                                                                                  ]
-                                                                                ]
-                                                                                upper: [12x1 21x1]
-                                                                                error: only-opend
-                                                                              ]
-                                                                            ]
-                                                                            upper: [11x1 21x1]
-                                                                            error: only-opend
-                                                                          ]
-                                                                        ]
-                                                                        upper: [10x4 21x1]
-                                                                        error: only-opend
-                                                                      ]
-                                                                    ]
-                                                                    upper: [9x4 21x1]
-                                                                    error: only-opend
-                                                                  ]
-                                                                ]
-                                                                upper: [8x1 21x1]
-                                                                error: only-opend
-                                                              ]
-                                                            ]
-                                                            upper: [7x1 21x1]
-                                                            error: only-opend
-                                                          ]
-                                                        ]
-                                                        upper: [6x1 21x1]
-                                                        error: only-opend
-                                                      ]
-                                                    ]
-                                                    upper: [5x3 21x1]
-                                                    error: only-opend
-                                                  ]
-                                                ]
-                                                upper: [5x2 21x1]
-                                                error: only-opend
-                                              ]
-                                            ]
-                                            upper: [5x1 21x1]
-                                            error: only-opend
-                                          ]
-                                        ]
-                                        upper: [4x3 21x1]
-                                        error: only-opend
-                                      ]
-                                    ]
-                                    upper: [4x2 21x1]
-                                    error: only-opend
-                                  ]
-                                ]
-                                upper: [4x1 21x1]
-                                error: only-opend
-                              ]
-                            ]
-                            upper: [3x7 21x1]
-                            error: only-opend
-                          ]
-                        ]
-                        upper: [3x6 21x1]
-                        error: only-opend
-                      ]
-                    ]
-                    upper: [2x5 21x1]
-                    error: only-opend
-                  ]
-                ]
-                upper: [2x4 21x1]
-                error: only-opend
-              ]
-            ]
-            upper: [1x1 21x1]
-            error: only-opend
+            upper: [6x5 6x10]
           ]
         ]
         upper: [0x0 21x1]
-        error: only-opend
+      ]
+      [
+        range: [7x5 7x12]
+        type: paren!
+        nested: 
+        [
+          [
+            expr: 1
+            range: [7x6 7x7]
+            type: integer!
+            upper: [7x5 7x12]
+          ]
+          [
+            expr: +
+            range: [7x8 7x9]
+            type: word!
+            upper: [7x5 7x12]
+          ]
+          [
+            expr: 2
+            range: [7x10 7x11]
+            type: integer!
+            upper: [7x5 7x12]
+          ]
+        ]
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [8x5 8x12]
+        type: paren!
+        nested: 
+        [
+          [
+            expr: 1
+            range: [8x6 8x7]
+            type: integer!
+            upper: [8x5 8x12]
+          ]
+          [
+            expr: +
+            range: [8x8 8x9]
+            type: word!
+            upper: [8x5 8x12]
+          ]
+          [
+            expr: 2
+            range: [8x10 8x11]
+            type: integer!
+            upper: [8x5 8x12]
+          ]
+        ]
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [8x12 9x1]
+        type: word!
+        upper: [0x0 21x1]
+        error: unknown
+      ]
+      [
+        range: [9x6 9x13]
+        type: paren!
+        nested: 
+        [
+          [
+            expr: 1
+            range: [9x7 9x8]
+            type: integer!
+            upper: [9x6 9x13]
+          ]
+          [
+            expr: +
+            range: [9x9 9x10]
+            type: word!
+            upper: [9x6 9x13]
+          ]
+          [
+            expr: 2
+            range: [9x11 9x12]
+            type: integer!
+            upper: [9x6 9x13]
+          ]
+        ]
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [10x6 10x13]
+        type: paren!
+        nested: 
+        [
+          [
+            expr: 1
+            range: [10x7 10x8]
+            type: integer!
+            upper: [10x6 10x13]
+          ]
+          [
+            expr: +
+            range: [10x9 10x10]
+            type: word!
+            upper: [10x6 10x13]
+          ]
+          [
+            expr: 2
+            range: [10x11 10x12]
+            type: integer!
+            upper: [10x6 10x13]
+          ]
+        ]
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [11x5 11x10]
+        type: paren!
+        nested: 
+        [
+          [
+            expr: var
+            range: [11x6 11x9]
+            type: word!
+            upper: [11x5 11x10]
+          ]
+        ]
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: /1
+        range: [11x10 11x12]
+        type: refinement!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [a b 2.34]
+        range: [12x1 12x9]
+        type: path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [a 'b]
+        range: [13x1 13x5]
+        type: path!
+        upper: [0x0 21x1]
+      ]
+      [
+        expr: [a :b]
+        range: [14x1 14x5]
+        type: path!
+        upper: [0x0 21x1]
+      ]
+      [
+        range: [16x1 16x6]
+        type: path!
+        upper: [0x0 21x1]
+        error: unknown
+      ]
+      [
+        range: [16x7 16x7]
+        type: block!
+        upper: [0x0 21x1]
+        error: only-closed
+      ]
+      [
+        range: [17x1 18x1]
+        type: path!
+        upper: [0x0 21x1]
+        error: unknown
+      ]
+      [
+        range: [18x1 19x1]
+        type: path!
+        upper: [0x0 21x1]
+        error: unknown
+      ]
+      [
+        range: [19x1 20x1]
+        type: path!
+        upper: [0x0 21x1]
+        error: unknown
+      ]
+      [
+        range: [20x1 21x1]
+        type: word!
+        upper: [0x0 21x1]
+        error: unknown
       ]
     ]
     source: {a/b/c^/'a/
