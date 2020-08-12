@@ -96,7 +96,7 @@ lexer: context [
 					node/token: either all [start stop][
 						as-pair start stop
 					][token]
-					node/type:  type
+					node/type: type
 					true
 				]
 				load [
@@ -150,11 +150,12 @@ lexer: context [
 							node/event: event
 							either input/1 = #"}" [
 								node/type: string!
+								node/error: 'only-closed
 							][
 								node/type: type
+								node/error: 'only-opened
 							]
 							node/token: token + 0x1
-							node/error: 'unknown
 							throw node
 						]
 						true [
@@ -196,8 +197,10 @@ lexer: context [
 			repend/only nested [
 				'range reduce [index-line? lines base + x index-line? lines base + y]
 				'type  type
-				'expr expr
 				'upper back tail stack
+			]
+			if expr [
+				repend last nested ['expr expr]
 			]
 			if error [
 				repend last nested ['error error]
@@ -235,14 +238,29 @@ lexer: context [
 					continue
 				]
 				node/event = 'close [
-					if node/type <> select last stack 'type [
-						add-node base node/token/x node/token/y node/type node/expr 'only-close
-						src: skip src node/token/y - 1
-						continue
+					stop: index-line? lines base + node/token/y
+					forever [
+						unless type: select last stack 'type [
+							add-node base node/token/x node/token/y node/type none 'only-closed
+							break
+						]
+						if type <> node/type [
+							range: select last stack 'range
+							append range stop
+							item: last stack
+							either none? item/error [
+								repend item ['error 'only-opened]
+							][
+								item/error: 'only-opened
+							]
+							stack: select last stack 'upper
+							continue
+						]
+						range: select last stack 'range
+						append range index-line? lines base + node/token/y
+						stack: select last stack 'upper
+						break
 					]
-					range: select last stack 'range
-					append range index-line? lines base + node/token/y
-					stack: select last stack 'upper
 					src: skip src node/token/y - 1
 					continue
 				]
@@ -259,20 +277,19 @@ lexer: context [
 			]
 		]
 		;-- close pair
-		top-stop: index-line? lines index + index? tail src
+		stop: index-line? lines index + index? tail src
 		while [stack <> top][
 			range: select last stack 'range
-			if none? range/2 [
-				append range top-stop
-				item: last stack
-				either none? item/error [
-					repend item ['error 'only-opend]
-				][
-					item/error: 'only-opend
-				]
+			append range stop
+			item: last stack
+			either none? item/error [
+				repend item ['error 'only-opened]
+			][
+				item/error: 'only-opened
 			]
 			stack: select last stack 'upper
 		]
+		top
 	]
 
 	transcode: function [
