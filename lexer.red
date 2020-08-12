@@ -71,6 +71,28 @@ lexer: context [
 		try [load copy/part start stop]
 	]
 
+	skip-space: function [
+		src			[string!]
+		return:		[string!]
+	][
+		lex: func [
+			event	[word!]
+			input	[string! binary!]
+			type	[datatype! word! none!]
+			line	[integer!]
+			token
+			return:	[logic!]
+		][
+			[prescan]
+			;print [event mold type token mold input]
+			throw token/x
+		]
+		if block? pos: catch [system/words/transcode/trace src :lex][
+			return tail src
+		]
+		skip src pos - 1
+	]
+
 	transcode: function [
 		src			[string!]
 		return:		[block!]
@@ -83,223 +105,59 @@ lexer: context [
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack
 
-		node*: none
-		match-stack: []
-		red-lex: func [
-			event	[word!]
-			input	[string! binary!]
-			type	[datatype! word! none!]
-			line	[integer!]
-			token
-			return:	[logic!]
-			/local t
+		add-node: func [
+			x		[integer!]
+			y		[integer!]
+			type	[datatype!]
+			expr
+			/local nested
 		][
-			[scan load open close error]
-			;print [event mold type token mold input]
-			switch event [
-				scan [
-					unless all [
-						not empty? match-stack
-						find [path! lit-path! get-path!] to word! match-stack/1/2
-					][
-						node*: make map! []
-						node*/type: type
-						either empty? match-stack [
-							node*/token: token
-							node*/next: input
-						][
-							node*/token: as-pair match-stack/1/3/x token/y + 1
-							node*/next: next input
-						]
-					]
-					true
-				]
-				load [
-					either all [
-						not empty? match-stack
-						find [path! lit-path! get-path!] to word! match-stack/1/2
-					][
-						append node*/expr token
-					][
-						node*/expr: token
-						throw node*
-					]
-					true
-				]
-				open [
-					if find [block! paren! map! path! lit-path! get-path!] t: to word! type [	;-- ignore open/close string!
-						node*: make map! []
-						node*/type: type
-						node*/token: token
-						if find [block! paren! map!] t [
-							node*/event: event
-							node*/next: skip input 1 + token/y - token/x
-							throw node*
-						]
-						node*/expr: make block! 4
-					]
-					repend/only match-stack ['open type token]
-					true
-				]
-				close [
-					if find [block! paren! map!] t: to word! type [	;-- ignore open/close event like string!
-						node*: make map! []
-						node*/event: event
-						node*/type: type
-						node*/token: token
-						node*/next: skip input 1 + token/y - token/x
-						throw node*
-					]
-					if find [path! lit-path! get-path! set-path!] t [
-						node*/token/y: token/y
-						node*/type: type
-						node*/next: either t = 'set-path! [
-							next input
-						][
-							input
-						]
-						throw node*
-					]
-					repend/only match-stack ['close type token]
-					true
-				]
-				error [
-					node*: make map! []
-					node*/event: event
-					node*/type: type
-					either all [
-						type = error!
-						input/1 = #"}"
-					][
-						node*/type: string!
-						node*/token: token + 0x1
-						node*/next: next input
-						node*/error: 'only-close
-					][
-						if type = string! [
-							node*/error: 'only-open
-						]
-						either empty? match-stack [
-							either tail? input [
-								node*/token: token
-								node*/next: input
-							][
-								node*/token: token + 0x1
-								node*/next: next input
-							]
-						][
-							either tail? input [
-								node*/token: as-pair match-stack/1/3/x token/y
-								node*/next: input
-							][
-								node*/token: as-pair match-stack/1/3/x token/y + 1
-								node*/next: next input
-							]
-						]
-					]
-					throw node*
-				]
+			nested: select last stack 'nested
+			repend/only nested [
+				'range reduce [index-line? lines x index-line? lines y]
+				'type  type
+				'expr  expr
+				'upper back tail stack
 			]
 		]
 
+		push: func [
+			/local nested
+		][
+			nested: select last stack 'nested
+			repend last nested ['nested reduce []]
+			stack: nested
+		]
+
+		pop: does [stack: select last stack 'upper]
+
+		s: 0 e: 0
+		start: src
+		end: tail src
 		forever [
-			index: (index? src) - 1
-			clear match-stack
-			if block? node: catch [system/words/transcode/trace src :red-lex][
-				;-- src tail
-				break
-			]
-			;probe node
+			src: skip-space src
+			start: index? src
+			input
+			if none? pre: scan/next src [break]
+			print [pre/1 mold/flat/part pre/2 20]
+			type: to word! pre/1
+			next: pre/2
 			case [
-				node/event = 'open [
-					nested: select last stack 'nested
-					repend/only nested [
-						'range reduce [index-line? lines node/token/x + index]
-						'type  node/type
-						'upper back tail stack
-					]
-					repend last nested ['nested reduce []]
-					stack: nested
+				find [block! paren! map!] type [
+					src: next
 				]
-				node/event = 'close [
-					stop: index-line? lines node/token/x + index + 1
-					forever [
-						;-- top ast
-						if none? ntype: select last stack 'type [
-							nested: select last stack 'nested
-							repend/only nested [
-								'range reduce [stop stop]
-								'type  node/type
-								'upper back tail stack
-								'error 'only-closed
-							]
-							break
-						]
-						;-- matched open/close
-						if any [
-							all [
-								ntype = path!
-								find [path! lit-path! get-path!] type
-							]
-							all [
-								ntype <> path!
-								ntype = node/type
-							]
-						][
-							;-- just close the event
-							range: select last stack 'range
-							append range stop
-							item: last stack
-							item/type: node/type
-							stack: select last stack 'upper
-							break
-						]
-						;-- not matched close, need mark error tag
-						range: select last stack 'range
-						append range stop
-						item: last stack
-						either none? item/error [
-							repend item ['error node/type]
-						][
-							item/error: node/type
-						]
-						stack: select last stack 'upper
-					]
+				find [path! lit-path! get-path! set-path!] type [
+					src: next
 				]
-				node/event = 'error [
-					nested: select last stack 'nested
-					repend/only nested [
-						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
-						'type  node/type
-						'upper back tail stack
-						'error either node/error [node/error]['unknown]
-					]
+				type = 'error! [
+					src: next
 				]
 				true [
-					nested: select last stack 'nested
-					repend/only nested [
-						'range reduce [index-line? lines node/token/x + index index-line? lines node/token/y + index]
-						'type  node/type
-						'expr  node/expr
-						'upper back tail stack
-					]
+					input: copy/part src next
+					add-node start index? next pre/1 load input
+					src: next
 				]
 			]
-			src: node/next
-		]
-		;-- unclose event
-		while [stack <> top][
-			range: select last stack 'range
-			if none? range/2 [
-				append range top-stop
-				item: last stack
-				either none? item/error [
-					repend item ['error 'only-opend]
-				][
-					item/error: 'only-opend
-				]
-			]
-			stack: select last stack 'upper
 		]
 		top
 	]
