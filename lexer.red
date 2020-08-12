@@ -154,14 +154,14 @@ lexer: context [
 								node/type: type
 							]
 							node/token: token + 0x1
-							node/error: [type unknown]
+							node/error: 'unknown
 							throw node
 						]
 						true [
 							node/event: event
 							node/type: type
 							node/token: token
-							node/error: [type unknown]
+							node/error: 'unknown
 							throw node
 						]
 					]
@@ -182,6 +182,7 @@ lexer: context [
 		index		[integer!]
 		return:		[block!]
 	][
+		top: stack
 		add-node: func [
 			base	[integer!]
 			x		[integer!]
@@ -205,13 +206,12 @@ lexer: context [
 		push-node: func [
 			base	[integer!]
 			x		[integer!]
-			y		[integer!]
 			type	[datatype!]
 			/local nested
 		][
 			nested: select last stack 'nested
 			repend/only nested [
-				'range reduce [index-line? lines base + x index-line? lines base + y]
+				'range reduce [index-line? lines base + x]
 				'type  type
 				'upper back tail stack
 			]
@@ -230,21 +230,19 @@ lexer: context [
 			]
 			case [
 				node/event = 'open [
-					push-node base node/token/x node/token/y node/type
+					push-node base node/token/x node/type
 					src: skip src node/token/y - 1
 					continue
 				]
 				node/event = 'close [
-					upper: select last stack 'upper
-					type: select last upper 'type
-					if type <> node/type [
-						add-node base node/token/x node/token/y node/type node/expr [type only-close]
+					if node/type <> select last stack 'type [
+						add-node base node/token/x node/token/y node/type node/expr 'only-close
 						src: skip src node/token/y - 1
 						continue
 					]
 					range: select last stack 'range
-					range/2: index-line? lines base + node/token/y
-					stack: upper
+					append range index-line? lines base + node/token/y
+					stack: select last stack 'upper
 					src: skip src node/token/y - 1
 					continue
 				]
@@ -260,6 +258,21 @@ lexer: context [
 				]
 			]
 		]
+		;-- close pair
+		top-stop: index-line? lines index + index? tail src
+		while [stack <> top][
+			range: select last stack 'range
+			if none? range/2 [
+				append range top-stop
+				item: last stack
+				either none? item/error [
+					repend item ['error 'only-opend]
+				][
+					item/error: 'only-opend
+				]
+			]
+			stack: select last stack 'upper
+		]
 	]
 
 	transcode: function [
@@ -273,7 +286,7 @@ lexer: context [
 		append range pos-line? lines tail src
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack
-		insert-node stack lines src index? src
+		insert-node stack lines src 0
 		top
 	]
 
