@@ -104,28 +104,30 @@ lexer: context [
 					throw node
 				]
 				open [
-					if type = string! [
+					either type = string! [
 						if none? start [
 							start: token/x
 						]
-						return true
+						true
+					][
+						node/event: event
+						node/type:  type
+						node/token: token + 0x1
+						throw node
 					]
-					node/event: event
-					node/type:  type
-					node/token: token + 0x1
-					throw node
 				]
 				close [
-					if type = string! [
+					either type = string! [
 						if none? stop [
 							stop: token/y + 1
 						]
-						return true
+						true
+					][
+						node/event: event
+						node/type:  type
+						node/token: token + 0x1
+						throw node
 					]
-					node/event: event
-					node/type:  type
-					node/token: token + 0x1
-					throw node
 				]
 				error [
 					case [
@@ -156,6 +158,17 @@ lexer: context [
 								node/error: 'only-opened
 							]
 							node/token: token + 0x1
+							throw node
+						]
+						type = char! [
+							node/event: event
+							node/type: type
+							either input/1 = #"^"" [
+								node/token: token + 0x1
+							][
+								node/token: token
+							]
+							node/error: 'unknown
 							throw node
 						]
 						true [
@@ -291,6 +304,14 @@ lexer: context [
 		]
 		top
 	]
+
+	insert-path: function [
+		stack		[block!]
+		lines		[block!]
+		src			[string!]
+		index		[integer!]
+		return:		[block!]
+	][]
 
 	transcode: function [
 		src			[string!]
