@@ -71,10 +71,13 @@ lexer: context [
 		try [load copy/part start stop]
 	]
 
-	skip-space: function [
+	prescan: function [
 		src			[string!]
-		return:		[string!]
 	][
+		node: make map! 4
+		pre: none
+		start: none
+		stop: none
 		lex: func [
 			event	[word!]
 			input	[string! binary!]
@@ -83,14 +86,93 @@ lexer: context [
 			token
 			return:	[logic!]
 		][
-			[prescan]
+			[prescan scan load open close error]
 			;print [event mold type token mold input]
-			throw token/x
+			switch event [
+				prescan [
+					pre: token
+				]
+				scan [
+					node/token: either all [start stop][
+						as-pair start stop
+					][token]
+					node/type:  type
+					true
+				]
+				load [
+					node/expr: token
+					throw node
+				]
+				open [
+					if type = string! [
+						if none? start [
+							start: token/x
+						]
+						return true
+					]
+					node/event: event
+					node/type:  type
+					node/token: token + 0x1
+					throw node
+				]
+				close [
+					if type = string! [
+						if none? stop [
+							stop: token/y + 1
+						]
+						return true
+					]
+					node/event: event
+					node/type:  type
+					node/token: token + 0x1
+					throw node
+				]
+				error [
+					case [
+						type = string! [
+							;-- multiline
+							either start [
+								node/token: as-pair! start token/y
+							][
+								;-- have scaned
+								either node/token [
+									node/token: pre + 0x1
+								][
+									node/token: token + 0x1
+								]
+							]
+							node/event: event
+							node/type:  type
+							node/error: reduce ['type 'only-open 'at token]
+							throw node
+						]
+						type = error! [
+							node/event: event
+							either input/1 = #"}" [
+								node/type: string!
+							][
+								node/type: type
+							]
+							node/token: token + 0x1
+							node/error: [type unknown]
+							throw node
+						]
+						true [
+							node/event: event
+							node/type: type
+							node/token: token
+							node/error: [type unknown]
+							throw node
+						]
+					]
+				]
+			]
 		]
-		if block? pos: catch [system/words/transcode/trace src :lex][
-			return tail src
+		either block? pos: catch [system/words/transcode/trace src :lex][
+			none
+		][
+			node
 		]
-		skip src pos - 1
 	]
 
 	transcode: function [
@@ -106,56 +188,82 @@ lexer: context [
 		top: stack
 
 		add-node: func [
+			base	[integer!]
 			x		[integer!]
 			y		[integer!]
 			type	[datatype!]
 			expr
+			error
 			/local nested
 		][
 			nested: select last stack 'nested
 			repend/only nested [
-				'range reduce [index-line? lines x index-line? lines y]
+				'range reduce [index-line? lines base + x index-line? lines base + y]
 				'type  type
-				'expr  expr
+				'expr expr
 				'upper back tail stack
+			]
+			if error [
+				repend last nested ['error error]
 			]
 		]
 
-		push: func [
+		push-node: func [
+			base	[integer!]
+			x		[integer!]
+			y		[integer!]
+			type	[datatype!]
 			/local nested
 		][
 			nested: select last stack 'nested
+			repend/only nested [
+				'range reduce [index-line? lines base + x index-line? lines base + y]
+				'type  type
+				'upper back tail stack
+			]
 			repend last nested ['nested reduce []]
 			stack: nested
 		]
 
-		pop: does [stack: select last stack 'upper]
-
-		s: 0 e: 0
-		start: src
-		end: tail src
 		forever [
-			src: skip-space src
-			start: index? src
-			input
-			if none? pre: scan/next src [break]
-			print [pre/1 mold/flat/part pre/2 20]
-			type: to word! pre/1
-			next: pre/2
+			base: (index? src) - 1
+			node: prescan src
+			;probe node
+			unless node [break]
+			unless node/event [
+				add-node base node/token/x node/token/y node/type node/expr none
+				src: skip src node/token/y - 1
+				continue
+			]
 			case [
-				find [block! paren! map!] type [
-					src: next
+				node/event = 'open [
+					push-node base node/token/x node/token/y node/type
+					src: skip src node/token/y - 1
+					continue
 				]
-				find [path! lit-path! get-path! set-path!] type [
-					src: next
+				node/event = 'close [
+					upper: select last stack 'upper
+					type: select last upper 'type
+					if type <> node/type [
+						add-node base node/token/x node/token/y node/type node/expr [type only-close]
+						src: skip src node/token/y - 1
+						continue
+					]
+					range: select last stack 'range
+					range/2: index-line? lines base + node/token/y
+					stack: upper
+					src: skip src node/token/y - 1
+					continue
 				]
-				type = 'error! [
-					src: next
+				node/event = 'error [
+					add-node base node/token/x node/token/y node/type node/expr node/error
+					src: skip src node/token/y - 1
+					continue
 				]
 				true [
-					input: copy/part src next
-					add-node start index? next pre/1 load input
-					src: next
+					probe "unknown"
+					src: skip src node/token/y - 1
+					continue
 				]
 			]
 		]
