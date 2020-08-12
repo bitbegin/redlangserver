@@ -13,14 +13,14 @@ begin number-cases.txt
         upper: [0x0 7x1]
       ]
       [
-        range: [2x1 2x5]
+        range: [2x1 2x4]
         type: integer!
         upper: [0x0 7x1]
         error: unknown
       ]
       [
-        expr: bc
-        range: [2x5 2x7]
+        expr: abc
+        range: [2x4 2x7]
         type: word!
         upper: [0x0 7x1]
       ]
@@ -234,13 +234,13 @@ begin string-cases.txt
         range: [7x8 7x18]
         type: string!
         upper: [0x0 10x1]
-        error: only-open
+        error: [type only-opened at 9x18]
       ]
       [
         range: [8x1 9x1]
         type: string!
         upper: [0x0 10x1]
-        error: only-open
+        error: [type only-opened at 2x8]
       ]
       [
         expr: newline
@@ -252,7 +252,7 @@ begin string-cases.txt
         range: [9x8 10x1]
         type: string!
         upper: [0x0 10x1]
-        error: only-open
+        error: [type only-opened at 1x2]
       ]
     ]
     source: {"this is 
@@ -317,13 +317,13 @@ begin mstring-cases.txt
         range: [9x20 9x21]
         type: string!
         upper: [0x0 11x1]
-        error: only-close
+        error: only-closed
       ]
       [
         range: [10x1 11x1]
         type: string!
         upper: [0x0 11x1]
-        error: only-open
+        error: [type only-opened at 2x21]
       ]
     ]
     source: {^{^/^-this i
@@ -371,13 +371,13 @@ begin rstring-cases.txt
         range: [5x1 8x1]
         type: string!
         upper: [0x0 12x1]
-        error: only-open
+        error: [type only-opened at 2x19]
       ]
       [
         range: [9x1 12x1]
         type: string!
         upper: [0x0 12x1]
-        error: only-open
+        error: [type only-opened at 2x17]
       ]
     ]
     source: {%^{^/^-^{^^any
@@ -459,11 +459,11 @@ begin block-cases.txt
                 [
                 ]
                 upper: [5x2 5x6]
-                error: block!
+                error: only-opened
               ]
             ]
             upper: [5x1 5x6]
-            error: block!
+            error: only-opened
           ]
         ]
         upper: [0x0 16x1]
@@ -477,7 +477,7 @@ begin block-cases.txt
             range: [6x2 6x3]
             type: string!
             upper: [6x1 6x4]
-            error: only-close
+            error: only-closed
           ]
         ]
         upper: [0x0 16x1]
@@ -545,7 +545,7 @@ begin block-cases.txt
         upper: [0x0 16x1]
       ]
       [
-        range: [11x3 11x3]
+        range: [11x2 11x3]
         type: block!
         upper: [0x0 16x1]
         error: only-closed
@@ -577,7 +577,7 @@ begin block-cases.txt
           ]
         ]
         upper: [0x0 16x1]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: {[^/^-this i
@@ -690,7 +690,7 @@ begin binary-cases.txt
         range: [13x8 13x9]
         type: string!
         upper: [0x0 15x1]
-        error: only-close
+        error: only-closed
       ]
       [
         range: [14x1 15x1]
@@ -784,273 +784,5 @@ begin tag-cases.txt
 ]
 ================================================
 end tag-cases.txt
-
-
-begin path-cases.txt
-================================================
-
-[
-  [
-    range: [0x0 21x1]
-    nested: 
-    [
-      [
-        expr: [a b c]
-        range: [1x1 1x6]
-        type: path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [a bc def]
-        range: [2x1 2x10]
-        type: lit-path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [abc de f]
-        range: [3x1 3x10]
-        type: get-path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [abc def ghi]
-        range: [4x1 4x12]
-        type: set-path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [a^b c^^d e^^^f]
-        range: [5x1 5x15]
-        type: path!
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [6x5 6x10]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: var
-            range: [6x6 6x9]
-            type: word!
-            upper: [6x5 6x10]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [7x5 7x12]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: 1
-            range: [7x6 7x7]
-            type: integer!
-            upper: [7x5 7x12]
-          ]
-          [
-            expr: +
-            range: [7x8 7x9]
-            type: word!
-            upper: [7x5 7x12]
-          ]
-          [
-            expr: 2
-            range: [7x10 7x11]
-            type: integer!
-            upper: [7x5 7x12]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [8x5 8x12]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: 1
-            range: [8x6 8x7]
-            type: integer!
-            upper: [8x5 8x12]
-          ]
-          [
-            expr: +
-            range: [8x8 8x9]
-            type: word!
-            upper: [8x5 8x12]
-          ]
-          [
-            expr: 2
-            range: [8x10 8x11]
-            type: integer!
-            upper: [8x5 8x12]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [8x12 9x1]
-        type: word!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-      [
-        range: [9x6 9x13]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: 1
-            range: [9x7 9x8]
-            type: integer!
-            upper: [9x6 9x13]
-          ]
-          [
-            expr: +
-            range: [9x9 9x10]
-            type: word!
-            upper: [9x6 9x13]
-          ]
-          [
-            expr: 2
-            range: [9x11 9x12]
-            type: integer!
-            upper: [9x6 9x13]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [10x6 10x13]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: 1
-            range: [10x7 10x8]
-            type: integer!
-            upper: [10x6 10x13]
-          ]
-          [
-            expr: +
-            range: [10x9 10x10]
-            type: word!
-            upper: [10x6 10x13]
-          ]
-          [
-            expr: 2
-            range: [10x11 10x12]
-            type: integer!
-            upper: [10x6 10x13]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [11x5 11x10]
-        type: paren!
-        nested: 
-        [
-          [
-            expr: var
-            range: [11x6 11x9]
-            type: word!
-            upper: [11x5 11x10]
-          ]
-        ]
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: /1
-        range: [11x10 11x12]
-        type: refinement!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [a b 2.34]
-        range: [12x1 12x9]
-        type: path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [a 'b]
-        range: [13x1 13x5]
-        type: path!
-        upper: [0x0 21x1]
-      ]
-      [
-        expr: [a :b]
-        range: [14x1 14x5]
-        type: path!
-        upper: [0x0 21x1]
-      ]
-      [
-        range: [16x1 16x6]
-        type: path!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-      [
-        range: [16x7 16x7]
-        type: block!
-        upper: [0x0 21x1]
-        error: only-closed
-      ]
-      [
-        range: [17x1 18x1]
-        type: path!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-      [
-        range: [18x1 19x1]
-        type: path!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-      [
-        range: [19x1 20x1]
-        type: path!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-      [
-        range: [20x1 21x1]
-        type: word!
-        upper: [0x0 21x1]
-        error: unknown
-      ]
-    ]
-    source: {a/b/c^/'a/
-    lines: [
-      {a/b/c^/'a/
-      1
-      7
-      17
-      27
-      40
-      55
-      65
-      77
-      90
-      103
-      116
-      128
-      137
-      142
-      147
-      148
-      155
-      160
-      167
-      176
-      186
-    ]
-  ]
-]
-================================================
-end path-cases.txt
 
 
