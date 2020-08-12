@@ -118,9 +118,7 @@ lexer: context [
 				]
 				close [
 					either type = string! [
-						if none? stop [
-							stop: token/y + 1
-						]
+						stop: token/y + 1
 						true
 					][
 						node/event: event
@@ -134,7 +132,7 @@ lexer: context [
 						type = string! [
 							;-- multiline
 							either start [
-								node/token: as-pair! start token/y
+								node/token: as-pair start token/y
 							][
 								;-- have scaned
 								either node/token [
@@ -145,7 +143,7 @@ lexer: context [
 							]
 							node/event: event
 							node/type:  type
-							node/error: reduce ['type 'only-open 'at token]
+							node/error: reduce ['type 'only-opened 'at token]
 							throw node
 						]
 						type = error! [
@@ -164,6 +162,17 @@ lexer: context [
 							node/event: event
 							node/type: type
 							either input/1 = #"^"" [
+								node/token: token + 0x1
+							][
+								node/token: token
+							]
+							node/error: 'unknown
+							throw node
+						]
+						type = binary! [
+							node/event: event
+							node/type: type
+							either input/1 = #"}" [
 								node/token: token + 0x1
 							][
 								node/token: token
