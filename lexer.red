@@ -71,7 +71,7 @@ lexer: context [
 		try [load copy/part start stop]
 	]
 
-	prescan: function [
+	fetch-token: function [
 		src			[string!]
 	][
 		node: make map! 4
@@ -175,18 +175,13 @@ lexer: context [
 		]
 	]
 
-	transcode: function [
+	insert-node: function [
+		stack		[block!]
+		lines		[block!]
 		src			[string!]
+		index		[integer!]
 		return:		[block!]
 	][
-		lines: make block! 64
-		parse-line lines src
-		range: make block! 1
-		append range 0x0
-		append range top-stop: pos-line? lines tail src
-		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
-		top: stack
-
 		add-node: func [
 			base	[integer!]
 			x		[integer!]
@@ -207,7 +202,6 @@ lexer: context [
 				repend last nested ['error error]
 			]
 		]
-
 		push-node: func [
 			base	[integer!]
 			x		[integer!]
@@ -224,10 +218,9 @@ lexer: context [
 			repend last nested ['nested reduce []]
 			stack: nested
 		]
-
 		forever [
-			base: (index? src) - 1
-			node: prescan src
+			base: index + (index? src) - 1
+			node: fetch-token src
 			;probe node
 			unless node [break]
 			unless node/event [
@@ -267,6 +260,20 @@ lexer: context [
 				]
 			]
 		]
+	]
+
+	transcode: function [
+		src			[string!]
+		return:		[block!]
+	][
+		lines: make block! 64
+		parse-line lines src
+		range: make block! 1
+		append range 0x0
+		append range pos-line? lines tail src
+		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
+		top: stack
+		insert-node stack lines src index? src
 		top
 	]
 
