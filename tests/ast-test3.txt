@@ -96,31 +96,31 @@ begin char-cases.txt
         range: [4x1 4x13]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [5x1 5x15]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [6x1 6x17]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [7x1 7x19]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [8x1 8x21]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #"^/"
@@ -132,31 +132,31 @@ begin char-cases.txt
         range: [10x1 10x14]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [11x1 11x7]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [12x1 12x12]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [13x1 14x3]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: invalid
       ]
       [
         range: [15x1 17x1]
         type: char!
         upper: [0x0 17x1]
-        error: unknown
+        error: not-closed
       ]
     ]
     source: {#""^/#"^^(3
@@ -630,7 +630,7 @@ begin binary-cases.txt
         range: [4x8 4x13]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #{01020304}
@@ -642,7 +642,7 @@ begin binary-cases.txt
         range: [6x6 6x7]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #{55}
@@ -654,7 +654,7 @@ begin binary-cases.txt
         range: [8x7 8x9]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #{CDEF}
@@ -666,7 +666,7 @@ begin binary-cases.txt
         range: [10x7 10x10]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #{61}
@@ -678,7 +678,7 @@ begin binary-cases.txt
         range: [12x7 12x8]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: invalid
       ]
       [
         expr: #{01FF}
@@ -696,7 +696,7 @@ begin binary-cases.txt
         range: [14x1 15x1]
         type: binary!
         upper: [0x0 15x1]
-        error: unknown
+        error: not-closed
       ]
     ]
     source: {#^{1234 56

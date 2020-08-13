@@ -163,10 +163,11 @@ lexer: context [
 							node/type: type
 							either input/1 = #"^"" [
 								node/token: token + 0x1
+								node/error: 'invalid
 							][
 								node/token: token
+								node/error: 'not-closed
 							]
-							node/error: 'unknown
 							throw node
 						]
 						type = binary! [
@@ -174,10 +175,11 @@ lexer: context [
 							node/type: type
 							either input/1 = #"}" [
 								node/token: token + 0x1
+								node/error: 'invalid
 							][
 								node/token: token
+								node/error: 'not-closed
 							]
-							node/error: 'unknown
 							throw node
 						]
 						true [
