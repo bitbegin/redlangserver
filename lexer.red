@@ -277,22 +277,21 @@ lexer: context [
 							add-node stack lines base node/token/x node/token/y node/type none 'only-closed
 							break
 						]
-						if type <> node/type [
+						if type = node/type [
 							range: select last stack 'range
-							append range stop
-							item: last stack
-							either none? item/error [
-								repend item ['error 'only-opened]
-							][
-								item/error: 'only-opened
-							]
+							append range index-line? lines base + node/token/y
 							stack: select last stack 'upper
-							continue
+							break
 						]
 						range: select last stack 'range
-						append range index-line? lines base + node/token/y
+						append range stop
+						item: last stack
+						either none? item/error [
+							repend item ['error 'only-opened]
+						][
+							item/error: 'only-opened
+						]
 						stack: select last stack 'upper
-						break
 					]
 					src: skip src node/token/y - 1
 					continue
@@ -310,8 +309,11 @@ lexer: context [
 			]
 		]
 		;-- close pair
-		stop: index-line? lines index + index? tail src
+		stop: none
 		while [stack <> top][
+			unless stop [
+				stop: index-line? lines index + index? tail src
+			]
 			range: select last stack 'range
 			append range stop
 			item: last stack
@@ -332,6 +334,9 @@ lexer: context [
 		index		[integer!]
 		return:		[block!]
 	][
+		node: make map! 2
+		start: none
+		stop: none
 		lex: func [
 			event	[word!]
 			input	[string! binary!]
@@ -339,15 +344,77 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
+			/local ntype res
 		][
 			[scan load open close error]
 			;print [event mold type token mold input]
 			switch event [
 				scan [
-					0
+					clear node
+					node/token: either all [start stop][
+						as-pair start stop
+					][token]
+					node/type: type
+					true
+				]
+				load [
+					add-node stack lines index node/token/x node/token/y node/type token none
+					true
+				]
+				open [
+					either type = string! [
+						if none? start [
+							start: token/x
+						]
+					][
+						stack: push-node stack lines index token/x type
+					]
+					true
+				]
+				close [
+					res: true
+					either type = string! [
+						stop: token/y
+					][
+						stop: index-line? lines index + token/y
+						forever [
+							unless ntype: select last stack 'type [
+								add-node stack lines index token/x token/y type none 'only-closed
+								break
+							]
+							if any [
+								ntype = type
+								all [
+									type = path!
+									ntype = set-path!
+								]
+							][
+								node: last stack
+								node/type: ntype
+								range: select node 'range
+								append range index-line? lines index + token/y
+								stack: select node 'upper
+								break
+							]
+							range: select last stack 'range
+							append range stop
+							item: last stack
+							either none? item/error [
+								repend item ['error 'only-opened]
+							][
+								item/error: 'only-opened
+							]
+							stack: select last stack 'upper
+						]
+					]
+					res
+				]
+				error [
+
 				]
 			]
 		]
+		pos: system/words/transcode/trace src :lex
 	]
 
 	transcode: function [
