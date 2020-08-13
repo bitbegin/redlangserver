@@ -200,50 +200,6 @@ lexer: context [
 		]
 	]
 
-	add-node: func [
-		stack	[block!]
-		lines	[block!]
-		base	[integer!]
-		x		[integer!]
-		y		[integer!]
-		type	[datatype!]
-		expr
-		error
-		/local nested
-	][
-		nested: select last stack 'nested
-		repend/only nested [
-			'range reduce [index-line? lines base + x index-line? lines base + y]
-			'type  type
-			'upper back tail stack
-		]
-		if expr [
-			repend last nested ['expr expr]
-		]
-		if error [
-			repend last nested ['error error]
-		]
-	]
-
-	push-node: func [
-		stack	[block!]
-		lines	[block!]
-		base	[integer!]
-		x		[integer!]
-		type	[datatype!]
-		return:	[block!]
-		/local nested
-	][
-		nested: select last stack 'nested
-		repend/only nested [
-			'range reduce [index-line? lines base + x]
-			'type  type
-			'upper back tail stack
-		]
-		repend last nested ['nested reduce []]
-		nested
-	]
-
 	insert-node: function [
 		stack		[block!]
 		lines		[block!]
@@ -251,92 +207,45 @@ lexer: context [
 		index		[integer!]
 		return:		[block!]
 	][
-		top: stack
-
-
-		forever [
-			base: index + (index? src) - 1
-			node: fetch-token src
-			;probe node
-			unless node [break]
-			unless node/event [
-				add-node stack lines base node/token/x node/token/y node/type node/expr none
-				src: skip src node/token/y - 1
-				continue
+		add-node: func [
+			base	[integer!]
+			x		[integer!]
+			y		[integer!]
+			type	[datatype!]
+			expr
+			error
+			/local nested
+		][
+			nested: select last stack 'nested
+			repend/only nested [
+				'range reduce [index-line? lines base + x index-line? lines base + y]
+				'type  type
+				'upper back tail stack
 			]
-			case [
-				node/event = 'open [
-					stack: push-node stack lines base node/token/x node/type
-					src: skip src node/token/y - 1
-					continue
-				]
-				node/event = 'close [
-					stop: index-line? lines base + node/token/y
-					forever [
-						unless type: select last stack 'type [
-							add-node stack lines base node/token/x node/token/y node/type none 'only-closed
-							break
-						]
-						if type = node/type [
-							range: select last stack 'range
-							append range index-line? lines base + node/token/y
-							stack: select last stack 'upper
-							break
-						]
-						range: select last stack 'range
-						append range stop
-						item: last stack
-						either none? item/error [
-							repend item ['error 'only-opened]
-						][
-							item/error: 'only-opened
-						]
-						stack: select last stack 'upper
-					]
-					src: skip src node/token/y - 1
-					continue
-				]
-				node/event = 'error [
-					add-node stack lines base node/token/x node/token/y node/type node/expr node/error
-					src: skip src node/token/y - 1
-					continue
-				]
-				true [
-					probe "unknown"
-					src: skip src node/token/y - 1
-					continue
-				]
+			if expr [
+				repend last nested ['expr expr]
+			]
+			if error [
+				repend last nested ['error error]
 			]
 		]
-		;-- close pair
-		stop: none
-		while [stack <> top][
-			unless stop [
-				stop: index-line? lines index + index? tail src
+		push-node: func [
+			base	[integer!]
+			x		[integer!]
+			type	[datatype!]
+			return:	[block!]
+			/local nested
+		][
+			nested: select last stack 'nested
+			repend/only nested [
+				'range reduce [index-line? lines base + x]
+				'type  type
+				'upper back tail stack
 			]
-			range: select last stack 'range
-			append range stop
-			item: last stack
-			either none? item/error [
-				repend item ['error 'only-opened]
-			][
-				item/error: 'only-opened
-			]
-			stack: select last stack 'upper
+			repend last nested ['nested reduce []]
+			stack: nested
 		]
-		top
-	]
 
-	insert-path: function [
-		stack		[block!]
-		lines		[block!]
-		src			[string!]
-		index		[integer!]
-		return:		[block!]
-	][
-		node: make map! 2
-		start: none
-		stop: none
 		lex: func [
 			event	[word!]
 			input	[string! binary!]
@@ -344,60 +253,61 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local ntype res
+			/local nstop ntype range item y
 		][
-			[scan load open close error]
-			;print [event mold type token mold input]
+			[prescan scan load open close error]
+			print [event mold type token mold input]
 			switch event [
+				prescan [
+					pretoken: token
+					true
+				]
 				scan [
-					clear node
-					node/token: either all [start stop][
+					stoken: either all [start stop][							;-- string! need adjust the position
 						as-pair start stop
 					][token]
-					node/type: type
+					stype: type
 					true
 				]
 				load [
-					add-node stack lines index node/token/x node/token/y node/type token none
-					true
+					add-node base stoken/x stoken/y stype expr none
+					throw stoken/y - 1
 				]
 				open [
 					either type = string! [
 						if none? start [
 							start: token/x
 						]
+						true
 					][
-						stack: push-node stack lines index token/x type
+						push-node base token/x type
+						throw token/y
 					]
-					true
 				]
 				close [
-					res: true
 					either type = string! [
-						stop: token/y
+						stop: token/y + 1
+						true
 					][
-						stop: index-line? lines index + token/y
+						nstop: none
+						x: token/x
+						y: token/y + 1
 						forever [
-							unless ntype: select last stack 'type [
-								add-node stack lines index token/x token/y type none 'only-closed
+							unless ntype: select last stack 'type [				;-- check if top
+								add-node base x y type none 'only-closed
 								break
 							]
-							if any [
-								ntype = type
-								all [
-									type = path!
-									ntype = set-path!
-								]
-							][
-								node: last stack
-								node/type: ntype
-								range: select node 'range
-								append range index-line? lines index + token/y
-								stack: select node 'upper
+							if ntype = type [									;-- match the upper's type
+								range: select last stack 'range
+								append range index-line? lines base + y
+								stack: select last stack 'upper
 								break
+							]
+							unless nstop [
+								nstop: index-line? lines base + y
 							]
 							range: select last stack 'range
-							append range stop
+							append range nstop
 							item: last stack
 							either none? item/error [
 								repend item ['error 'only-opened]
@@ -406,15 +316,24 @@ lexer: context [
 							]
 							stack: select last stack 'upper
 						]
+						throw token/y
 					]
-					res
-				]
-				error [
-
 				]
 			]
 		]
-		pos: system/words/transcode/trace src :lex
+
+		forever [
+			pretoken: none										;-- used for store prescan token
+			start: none											;-- used for mark the begin of string!
+			stop: none											;-- used for mark the end of string!
+			stoken: none										;-- used for store scan token
+			stype: none											;-- used for store scan type
+			base: index + (index? src) - 1
+			pos: catch [system/words/transcode/trace src :lex]
+			probe pos
+			if block? pos [break]
+			src: skip src pos
+		]
 	]
 
 	transcode: function [
