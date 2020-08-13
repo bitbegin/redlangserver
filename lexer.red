@@ -245,7 +245,6 @@ lexer: context [
 			repend last nested ['nested reduce []]
 			stack: nested
 		]
-
 		lex: func [
 			event	[word!]
 			input	[string! binary!]
@@ -253,10 +252,10 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local nstop ntype range item y
+			/local nstop ntype range item y e
 		][
 			[prescan scan load open close error]
-			print [event mold type token mold input]
+			;print [event mold type token mold input]
 			switch event [
 				prescan [
 					pretoken: token
@@ -270,7 +269,7 @@ lexer: context [
 					true
 				]
 				load [
-					add-node base stoken/x stoken/y stype expr none
+					add-node base stoken/x stoken/y stype token none
 					throw stoken/y - 1
 				]
 				open [
@@ -319,9 +318,68 @@ lexer: context [
 						throw token/y
 					]
 				]
+				error [
+					case [
+						type = string! [
+							;-- multiline
+							either start [
+								x: start
+								y: token/y + 1
+							][
+								;-- have scaned
+								either node/token [
+									x: pretoken/x
+									y: pretoken/y + 1
+								][
+									x: token/x
+									y: token/y + 1
+								]
+							]
+							add-node base x y type none reduce ['type 'only-opened 'at token]
+							throw y - 1
+						]
+						type = error! [
+							either input/1 = #"}" [
+								type: string!
+								e: 'only-closed
+							][
+								e: 'only-opened
+							]
+							add-node base token/x token/y + 1 type none e
+							throw token/y
+						]
+						type = char! [
+							either input/1 = #"^"" [
+								y: token/y + 1
+								e: 'invalid
+							][
+								y: token/y
+								e: 'not-closed
+							]
+							add-node base token/x y type none e
+							throw y - 1
+						]
+						type = binary! [
+							either input/1 = #"}" [
+								y: token/y + 1
+								e: 'invalid
+							][
+								y: token/y
+								e: 'not-closed
+							]
+							add-node base token/x y type none e
+							throw y - 1
+						]
+						true [
+							add-node base token/x token/y type none none
+							throw token/y - 1
+						]
+					]
+				]
 			]
 		]
 
+		top: stack
 		forever [
 			pretoken: none										;-- used for store prescan token
 			start: none											;-- used for mark the begin of string!
@@ -330,10 +388,26 @@ lexer: context [
 			stype: none											;-- used for store scan type
 			base: index + (index? src) - 1
 			pos: catch [system/words/transcode/trace src :lex]
-			probe pos
 			if block? pos [break]
 			src: skip src pos
 		]
+
+		stop: none
+		while [stack <> top][
+			unless stop [
+				stop: index-line? lines index + index? tail src
+			]
+			range: select last stack 'range
+			append range stop
+			item: last stack
+			either none? item/error [
+				repend item ['error 'only-opened]
+			][
+				item/error: 'only-opened
+			]
+			stack: select last stack 'upper
+		]
+		top
 	]
 
 	transcode: function [
