@@ -123,7 +123,7 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local nstop ntype range item y e
+			/local nstop ntype range item y e ltype s
 		][
 			[prescan scan load open close error]
 			;print [event mold type token mold input]
@@ -141,7 +141,15 @@ lexer: context [
 				]
 				load [
 					add-node base stoken/x stoken/y stype token none
-					throw stoken/y - 1
+					ltype: select last stack 'type
+					either all [
+						ltype
+						find [path! lit-path! get-path!] to word! ltype
+					][
+						true
+					][
+						throw stoken/y - 1
+					]
 				]
 				open [
 					either type = string! [
@@ -150,8 +158,23 @@ lexer: context [
 						]
 						true
 					][
+						ltype: select last stack 'type
 						push-node base token/x type
-						throw token/y
+						either all [
+							type
+							find [path! lit-path! get-path!] to word! type
+						][
+							true
+						][
+							either all [
+								ltype
+								find [path! lit-path! get-path!] to word! ltype
+							][
+								true
+							][
+								throw token/y
+							]
+						]
 					]
 				]
 				close [
@@ -167,10 +190,18 @@ lexer: context [
 								add-node base x y type none 'only-closed
 								break
 							]
-							if ntype = type [									;-- match the upper's type
-								range: select last stack 'range
+							if any [											;-- match the upper's type
+								ntype = type
+								all [
+									ntype = path!
+									type = set-path!
+								]
+							][
+								s: last stack
+								s/type: type
+								range: select s 'range
 								append range index-line? lines base + y
-								stack: select last stack 'upper
+								stack: select s 'upper
 								break
 							]
 							unless nstop [
