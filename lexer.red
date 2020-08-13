@@ -123,9 +123,60 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local nstop ntype range item y e ltype s
+			/local ltype x y err p?
 		][
 			[prescan scan load open close error]
+			match-pair: func [
+				x	[integer!]
+				y	[integer!]
+				p?	[logic!]
+				/local ntype range nstop item
+			][
+				nstop: none
+				forever [
+					unless ntype: select last stack 'type [				;-- check if top
+						add-node base x y type none 'only-closed
+						break
+					]
+					if any [											;-- match the upper's type
+						ntype = type
+						all [
+							ntype = path!
+							type = set-path!
+						]
+					][
+						item: last stack
+						item/type: type
+						if all [
+							p?
+							find [path! lit-path! get-path!] to word! ntype
+						][
+							either item/error [
+								item/error: 'unknown
+							][
+								append item [error unknown]
+							]
+						]
+						range: select item 'range
+						append range index-line? lines base + y
+						stack: select item 'upper
+						break
+					]
+					unless nstop [
+						nstop: index-line? lines base + y
+					]
+					range: select last stack 'range
+					append range nstop
+					item: last stack
+					either none? item/error [
+						repend item ['error 'only-opened]
+					][
+						item/error: 'only-opened
+					]
+					stack: select last stack 'upper
+				]
+			]
+
 			;print [event mold type token mold input]
 			switch event [
 				prescan [
@@ -185,42 +236,26 @@ lexer: context [
 						nstop: none
 						x: token/x
 						y: token/y + 1
-						forever [
-							unless ntype: select last stack 'type [				;-- check if top
-								add-node base x y type none 'only-closed
-								break
-							]
-							if any [											;-- match the upper's type
-								ntype = type
-								all [
-									ntype = path!
-									type = set-path!
-								]
-							][
-								s: last stack
-								s/type: type
-								range: select s 'range
-								append range index-line? lines base + y
-								stack: select s 'upper
-								break
-							]
-							unless nstop [
-								nstop: index-line? lines base + y
-							]
-							range: select last stack 'range
-							append range nstop
-							item: last stack
-							either none? item/error [
-								repend item ['error 'only-opened]
-							][
-								item/error: 'only-opened
-							]
-							stack: select last stack 'upper
-						]
+						match-pair x y no
 						throw token/y
 					]
 				]
 				error [
+					if type = path! [
+						match-pair token/x token/y + 1 yes
+						throw token/y
+					]
+					p?: no
+					while [ltype: select last stack 'type][
+						if find [path! lit-path! get-path!] to word! ltype [
+							p?: yes
+						]
+					]
+					if p? [
+						match-pair token/x token/y yes
+						throw token/y - 1
+					]
+					
 					case [
 						type = string! [
 							;-- multiline
@@ -243,33 +278,33 @@ lexer: context [
 						type = error! [
 							either input/1 = #"}" [
 								type: string!
-								e: 'only-closed
+								err: 'only-closed
 							][
-								e: 'only-opened
+								err: 'only-opened
 							]
-							add-node base token/x token/y + 1 type none e
+							add-node base token/x token/y + 1 type none err
 							throw token/y
 						]
 						type = char! [
 							either input/1 = #"^"" [
 								y: token/y + 1
-								e: 'invalid
+								err: 'invalid
 							][
 								y: token/y
-								e: 'not-closed
+								err: 'not-closed
 							]
-							add-node base token/x y type none e
+							add-node base token/x y type none err
 							throw y - 1
 						]
 						type = binary! [
 							either input/1 = #"}" [
 								y: token/y + 1
-								e: 'invalid
+								err: 'invalid
 							][
 								y: token/y
-								e: 'not-closed
+								err: 'not-closed
 							]
-							add-node base token/x y type none e
+							add-node base token/x y type none err
 							throw y - 1
 						]
 						true [
@@ -291,6 +326,7 @@ lexer: context [
 			base: index + (index? src) - 1
 			pos: catch [system/words/transcode/trace src :lex]
 			if block? pos [break]
+			;probe pos
 			src: skip src pos
 		]
 
