@@ -200,6 +200,50 @@ lexer: context [
 		]
 	]
 
+	add-node: func [
+		stack	[block!]
+		lines	[block!]
+		base	[integer!]
+		x		[integer!]
+		y		[integer!]
+		type	[datatype!]
+		expr
+		error
+		/local nested
+	][
+		nested: select last stack 'nested
+		repend/only nested [
+			'range reduce [index-line? lines base + x index-line? lines base + y]
+			'type  type
+			'upper back tail stack
+		]
+		if expr [
+			repend last nested ['expr expr]
+		]
+		if error [
+			repend last nested ['error error]
+		]
+	]
+
+	push-node: func [
+		stack	[block!]
+		lines	[block!]
+		base	[integer!]
+		x		[integer!]
+		type	[datatype!]
+		return:	[block!]
+		/local nested
+	][
+		nested: select last stack 'nested
+		repend/only nested [
+			'range reduce [index-line? lines base + x]
+			'type  type
+			'upper back tail stack
+		]
+		repend last nested ['nested reduce []]
+		nested
+	]
+
 	insert-node: function [
 		stack		[block!]
 		lines		[block!]
@@ -208,56 +252,21 @@ lexer: context [
 		return:		[block!]
 	][
 		top: stack
-		add-node: func [
-			base	[integer!]
-			x		[integer!]
-			y		[integer!]
-			type	[datatype!]
-			expr
-			error
-			/local nested
-		][
-			nested: select last stack 'nested
-			repend/only nested [
-				'range reduce [index-line? lines base + x index-line? lines base + y]
-				'type  type
-				'upper back tail stack
-			]
-			if expr [
-				repend last nested ['expr expr]
-			]
-			if error [
-				repend last nested ['error error]
-			]
-		]
-		push-node: func [
-			base	[integer!]
-			x		[integer!]
-			type	[datatype!]
-			/local nested
-		][
-			nested: select last stack 'nested
-			repend/only nested [
-				'range reduce [index-line? lines base + x]
-				'type  type
-				'upper back tail stack
-			]
-			repend last nested ['nested reduce []]
-			stack: nested
-		]
+
+
 		forever [
 			base: index + (index? src) - 1
 			node: fetch-token src
 			;probe node
 			unless node [break]
 			unless node/event [
-				add-node base node/token/x node/token/y node/type node/expr none
+				add-node stack lines base node/token/x node/token/y node/type node/expr none
 				src: skip src node/token/y - 1
 				continue
 			]
 			case [
 				node/event = 'open [
-					push-node base node/token/x node/type
+					stack: push-node stack lines base node/token/x node/type
 					src: skip src node/token/y - 1
 					continue
 				]
@@ -265,7 +274,7 @@ lexer: context [
 					stop: index-line? lines base + node/token/y
 					forever [
 						unless type: select last stack 'type [
-							add-node base node/token/x node/token/y node/type none 'only-closed
+							add-node stack lines base node/token/x node/token/y node/type none 'only-closed
 							break
 						]
 						if type <> node/type [
@@ -289,7 +298,7 @@ lexer: context [
 					continue
 				]
 				node/event = 'error [
-					add-node base node/token/x node/token/y node/type node/expr node/error
+					add-node stack lines base node/token/x node/token/y node/type node/expr node/error
 					src: skip src node/token/y - 1
 					continue
 				]
@@ -322,7 +331,24 @@ lexer: context [
 		src			[string!]
 		index		[integer!]
 		return:		[block!]
-	][]
+	][
+		lex: func [
+			event	[word!]
+			input	[string! binary!]
+			type	[datatype! word! none!]
+			line	[integer!]
+			token
+			return:	[logic!]
+		][
+			[scan load open close error]
+			;print [event mold type token mold input]
+			switch event [
+				scan [
+					0
+				]
+			]
+		]
+	]
 
 	transcode: function [
 		src			[string!]
