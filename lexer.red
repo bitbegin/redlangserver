@@ -123,7 +123,7 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local ltype x y err p?
+			/local ltype x y err p? nstack
 		][
 			[prescan scan load open close error]
 			match-pair: func [
@@ -246,10 +246,19 @@ lexer: context [
 						throw token/y
 					]
 					p?: no
-					while [ltype: select last stack 'type][
+					nstack: stack
+					while [
+						all [
+							nstack
+							ltype: select last nstack 'type
+							ltype
+						]
+					][
 						if find [path! lit-path! get-path!] to word! ltype [
 							p?: yes
+							break
 						]
+						nstack: select last nstack 'upper
 					]
 					if p? [
 						match-pair token/x token/y yes
