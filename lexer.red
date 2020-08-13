@@ -71,135 +71,6 @@ lexer: context [
 		try [load copy/part start stop]
 	]
 
-	fetch-token: function [
-		src			[string!]
-	][
-		node: make map! 4
-		pre: none
-		start: none
-		stop: none
-		lex: func [
-			event	[word!]
-			input	[string! binary!]
-			type	[datatype! word! none!]
-			line	[integer!]
-			token
-			return:	[logic!]
-		][
-			[prescan scan load open close error]
-			;print [event mold type token mold input]
-			switch event [
-				prescan [
-					pre: token
-				]
-				scan [
-					node/token: either all [start stop][
-						as-pair start stop
-					][token]
-					node/type: type
-					true
-				]
-				load [
-					node/expr: token
-					throw node
-				]
-				open [
-					either type = string! [
-						if none? start [
-							start: token/x
-						]
-						true
-					][
-						node/event: event
-						node/type:  type
-						node/token: token + 0x1
-						throw node
-					]
-				]
-				close [
-					either type = string! [
-						stop: token/y + 1
-						true
-					][
-						node/event: event
-						node/type:  type
-						node/token: token + 0x1
-						throw node
-					]
-				]
-				error [
-					case [
-						type = string! [
-							;-- multiline
-							either start [
-								node/token: as-pair start token/y
-							][
-								;-- have scaned
-								either node/token [
-									node/token: pre + 0x1
-								][
-									node/token: token + 0x1
-								]
-							]
-							node/event: event
-							node/type:  type
-							node/error: reduce ['type 'only-opened 'at token]
-							throw node
-						]
-						type = error! [
-							node/event: event
-							either input/1 = #"}" [
-								node/type: string!
-								node/error: 'only-closed
-							][
-								node/type: type
-								node/error: 'only-opened
-							]
-							node/token: token + 0x1
-							throw node
-						]
-						type = char! [
-							node/event: event
-							node/type: type
-							either input/1 = #"^"" [
-								node/token: token + 0x1
-								node/error: 'invalid
-							][
-								node/token: token
-								node/error: 'not-closed
-							]
-							throw node
-						]
-						type = binary! [
-							node/event: event
-							node/type: type
-							either input/1 = #"}" [
-								node/token: token + 0x1
-								node/error: 'invalid
-							][
-								node/token: token
-								node/error: 'not-closed
-							]
-							throw node
-						]
-						true [
-							node/event: event
-							node/type: type
-							node/token: token
-							node/error: 'unknown
-							throw node
-						]
-					]
-				]
-			]
-		]
-		either block? pos: catch [system/words/transcode/trace src :lex][
-			none
-		][
-			node
-		]
-	]
-
 	insert-node: function [
 		stack		[block!]
 		lines		[block!]
@@ -324,10 +195,10 @@ lexer: context [
 							;-- multiline
 							either start [
 								x: start
-								y: token/y + 1
+								y: token/y
 							][
 								;-- have scaned
-								either node/token [
+								either stoken [
 									x: pretoken/x
 									y: pretoken/y + 1
 								][
@@ -371,7 +242,7 @@ lexer: context [
 							throw y - 1
 						]
 						true [
-							add-node base token/x token/y type none none
+							add-node base token/x token/y type none 'unknown
 							throw token/y - 1
 						]
 					]
