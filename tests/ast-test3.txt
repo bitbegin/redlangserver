@@ -795,7 +795,7 @@ begin path-cases.txt
     nested: 
     [
       [
-        range: [1x1 2x1]
+        range: [1x1 1x6]
         type: path!
         nested: 
         [
@@ -803,25 +803,25 @@ begin path-cases.txt
             expr: a
             range: [1x1 1x2]
             type: word!
-            upper: [1x1 2x1]
+            upper: [1x1 1x6]
           ]
           [
             expr: b
             range: [1x3 1x4]
             type: word!
-            upper: [1x1 2x1]
+            upper: [1x1 1x6]
           ]
           [
             expr: c
             range: [1x5 1x6]
             type: word!
-            upper: [1x1 2x1]
+            upper: [1x1 1x6]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [2x1 3x1]
+        range: [2x1 2x10]
         type: lit-path!
         nested: 
         [
@@ -829,25 +829,25 @@ begin path-cases.txt
             expr: a
             range: [2x2 2x3]
             type: word!
-            upper: [2x1 3x1]
+            upper: [2x1 2x10]
           ]
           [
             expr: bc
             range: [2x4 2x6]
             type: word!
-            upper: [2x1 3x1]
+            upper: [2x1 2x10]
           ]
           [
             expr: def
             range: [2x7 2x10]
             type: word!
-            upper: [2x1 3x1]
+            upper: [2x1 2x10]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [3x1 4x1]
+        range: [3x1 3x10]
         type: get-path!
         nested: 
         [
@@ -855,19 +855,19 @@ begin path-cases.txt
             expr: abc
             range: [3x2 3x5]
             type: word!
-            upper: [3x1 4x1]
+            upper: [3x1 3x10]
           ]
           [
             expr: de
             range: [3x6 3x8]
             type: word!
-            upper: [3x1 4x1]
+            upper: [3x1 3x10]
           ]
           [
             expr: f
             range: [3x9 3x10]
             type: word!
-            upper: [3x1 4x1]
+            upper: [3x1 3x10]
           ]
         ]
         upper: [0x0 22x1]
@@ -899,7 +899,7 @@ begin path-cases.txt
         upper: [0x0 22x1]
       ]
       [
-        range: [5x1 6x1]
+        range: [5x1 5x15]
         type: path!
         nested: 
         [
@@ -907,25 +907,25 @@ begin path-cases.txt
             expr: a^b
             range: [5x1 5x4]
             type: word!
-            upper: [5x1 6x1]
+            upper: [5x1 5x15]
           ]
           [
             expr: c^^d
             range: [5x5 5x9]
             type: word!
-            upper: [5x1 6x1]
+            upper: [5x1 5x15]
           ]
           [
             expr: e^^^f
             range: [5x10 5x15]
             type: word!
-            upper: [5x1 6x1]
+            upper: [5x1 5x15]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [6x1 7x1]
+        range: [6x1 6x10]
         type: path!
         nested: 
         [
@@ -933,13 +933,13 @@ begin path-cases.txt
             expr: a
             range: [6x1 6x2]
             type: word!
-            upper: [6x1 7x1]
+            upper: [6x1 6x10]
           ]
           [
             expr: b
             range: [6x3 6x4]
             type: word!
-            upper: [6x1 7x1]
+            upper: [6x1 6x10]
           ]
           [
             range: [6x5 6x10]
@@ -953,13 +953,13 @@ begin path-cases.txt
                 upper: [6x5 6x10]
               ]
             ]
-            upper: [6x1 7x1]
+            upper: [6x1 6x10]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [7x1 8x1]
+        range: [7x1 7x12]
         type: path!
         nested: 
         [
@@ -967,13 +967,13 @@ begin path-cases.txt
             expr: a
             range: [7x1 7x2]
             type: word!
-            upper: [7x1 8x1]
+            upper: [7x1 7x12]
           ]
           [
             expr: b
             range: [7x3 7x4]
             type: word!
-            upper: [7x1 8x1]
+            upper: [7x1 7x12]
           ]
           [
             range: [7x5 7x12]
@@ -999,7 +999,7 @@ begin path-cases.txt
                 upper: [7x5 7x12]
               ]
             ]
-            upper: [7x1 8x1]
+            upper: [7x1 7x12]
           ]
         ]
         upper: [0x0 22x1]
@@ -1051,7 +1051,7 @@ begin path-cases.txt
         upper: [0x0 22x1]
       ]
       [
-        range: [9x1 10x1]
+        range: [9x1 9x13]
         type: get-path!
         nested: 
         [
@@ -1059,13 +1059,13 @@ begin path-cases.txt
             expr: a
             range: [9x2 9x3]
             type: word!
-            upper: [9x1 10x1]
+            upper: [9x1 9x13]
           ]
           [
             expr: b
             range: [9x4 9x5]
             type: word!
-            upper: [9x1 10x1]
+            upper: [9x1 9x13]
           ]
           [
             range: [9x6 9x13]
@@ -1091,13 +1091,13 @@ begin path-cases.txt
                 upper: [9x6 9x13]
               ]
             ]
-            upper: [9x1 10x1]
+            upper: [9x1 9x13]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [10x1 11x1]
+        range: [10x1 10x13]
         type: lit-path!
         nested: 
         [
@@ -1105,13 +1105,13 @@ begin path-cases.txt
             expr: a
             range: [10x2 10x3]
             type: word!
-            upper: [10x1 11x1]
+            upper: [10x1 10x13]
           ]
           [
             expr: b
             range: [10x4 10x5]
             type: word!
-            upper: [10x1 11x1]
+            upper: [10x1 10x13]
           ]
           [
             range: [10x6 10x13]
@@ -1137,13 +1137,13 @@ begin path-cases.txt
                 upper: [10x6 10x13]
               ]
             ]
-            upper: [10x1 11x1]
+            upper: [10x1 10x13]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [11x1 12x1]
+        range: [11x1 11x12]
         type: path!
         nested: 
         [
@@ -1151,13 +1151,13 @@ begin path-cases.txt
             expr: a
             range: [11x1 11x2]
             type: word!
-            upper: [11x1 12x1]
+            upper: [11x1 11x12]
           ]
           [
             expr: b
             range: [11x3 11x4]
             type: word!
-            upper: [11x1 12x1]
+            upper: [11x1 11x12]
           ]
           [
             range: [11x5 11x10]
@@ -1171,19 +1171,19 @@ begin path-cases.txt
                 upper: [11x5 11x10]
               ]
             ]
-            upper: [11x1 12x1]
+            upper: [11x1 11x12]
           ]
           [
             expr: 1
             range: [11x11 11x12]
             type: integer!
-            upper: [11x1 12x1]
+            upper: [11x1 11x12]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [12x1 13x1]
+        range: [12x1 12x22]
         type: path!
         nested: 
         [
@@ -1191,13 +1191,13 @@ begin path-cases.txt
             expr: a
             range: [12x1 12x2]
             type: word!
-            upper: [12x1 13x1]
+            upper: [12x1 12x22]
           ]
           [
             expr: b
             range: [12x3 12x4]
             type: word!
-            upper: [12x1 13x1]
+            upper: [12x1 12x22]
           ]
           [
             range: [12x5 12x22]
@@ -1217,7 +1217,7 @@ begin path-cases.txt
                 upper: [12x5 12x22]
               ]
               [
-                range: [12x10 12x22]
+                range: [12x10 12x21]
                 type: path!
                 nested: 
                 [
@@ -1225,7 +1225,7 @@ begin path-cases.txt
                     expr: b
                     range: [12x10 12x11]
                     type: word!
-                    upper: [12x10 12x22]
+                    upper: [12x10 12x21]
                   ]
                   [
                     range: [12x12 12x21]
@@ -1259,19 +1259,19 @@ begin path-cases.txt
                         upper: [12x12 12x21]
                       ]
                     ]
-                    upper: [12x10 12x22]
+                    upper: [12x10 12x21]
                   ]
                 ]
                 upper: [12x5 12x22]
               ]
             ]
-            upper: [12x1 13x1]
+            upper: [12x1 12x22]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [13x1 14x1]
+        range: [13x1 13x9]
         type: path!
         nested: 
         [
@@ -1279,25 +1279,25 @@ begin path-cases.txt
             expr: a
             range: [13x1 13x2]
             type: word!
-            upper: [13x1 14x1]
+            upper: [13x1 13x9]
           ]
           [
             expr: b
             range: [13x3 13x4]
             type: word!
-            upper: [13x1 14x1]
+            upper: [13x1 13x9]
           ]
           [
             expr: 2.34
             range: [13x5 13x9]
             type: float!
-            upper: [13x1 14x1]
+            upper: [13x1 13x9]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [14x1 15x1]
+        range: [14x1 14x5]
         type: path!
         nested: 
         [
@@ -1305,19 +1305,19 @@ begin path-cases.txt
             expr: a
             range: [14x1 14x2]
             type: word!
-            upper: [14x1 15x1]
+            upper: [14x1 14x5]
           ]
           [
             expr: 'b
             range: [14x3 14x5]
             type: lit-word!
-            upper: [14x1 15x1]
+            upper: [14x1 14x5]
           ]
         ]
         upper: [0x0 22x1]
       ]
       [
-        range: [15x1 16x1]
+        range: [15x1 15x5]
         type: path!
         nested: 
         [
@@ -1325,13 +1325,13 @@ begin path-cases.txt
             expr: a
             range: [15x1 15x2]
             type: word!
-            upper: [15x1 16x1]
+            upper: [15x1 15x5]
           ]
           [
             expr: :b
             range: [15x3 15x5]
             type: get-word!
-            upper: [15x1 16x1]
+            upper: [15x1 15x5]
           ]
         ]
         upper: [0x0 22x1]

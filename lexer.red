@@ -240,12 +240,16 @@ lexer: context [
 					][
 						nstop: none
 						x: token/x
-						y: token/y + 1
+						either find [path! lit-path! get-path!] to word! type [
+							y: token/y
+						][
+							y: token/y + 1
+						]
 						match-pair x y no
 						either in-path? [
 							true
 						][
-							throw token/y
+							throw y - 1
 						]
 					]
 				]
