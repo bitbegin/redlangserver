@@ -14,6 +14,16 @@ semantic: context [
 	excluded-folders: []
 	root-folders: []
 
+	read-file: func [
+		file	[file!]
+		return:	[string!]
+	][
+		if error? ret: try [to string! read/binary file][
+			ret: ""
+		]
+		ret
+	]
+
 	find-expr: function [top [block!] range [block!]][
 		find-expr*: function [pc [block!]][
 			forall pc [
@@ -233,17 +243,11 @@ semantic: context [
 		include-file: function [file [file!]][
 			if all [
 				exists? file
-				code: read file
+				code: read-file file
 			][
 				uri: lexer/file-to-uri file
 				write-log rejoin ["include: " uri]
-				if any [
-					not top: find-top uri
-					top/1/source <> code
-				][
-					write-log "will parse code..."
-					add-source* uri code
-				]
+				add-source* uri code
 			]
 		]
 
@@ -280,20 +284,26 @@ semantic: context [
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		write-log rejoin ["add uri: " uri]
-		top: lexer/transcode code
-		unless empty? errors: collect-errors top [
-			append diagnostics make map! reduce [
-				'uri uri
-				'diagnostics errors
+		if any [
+			not top: find-top uri
+			top/1/source <> code
+		][
+			write-log rejoin ["parse uri: " uri]
+			top: lexer/transcode code
+			unless empty? errors: collect-errors top [
+				append diagnostics make map! reduce [
+					'uri uri
+					'diagnostics errors
+				]
 			]
+			add-source-to-table uri top
+			add-include-file top
 		]
-		add-source-to-table uri top
-		add-include-file top
 	]
 
 	add-source: function [uri [string!] code [string!]][
 		clear diagnostics
+		write-log rejoin ["add source: " uri]
 		add-source* uri code
 		diagnostics
 	]
@@ -313,12 +323,13 @@ semantic: context [
 				%.red = ext
 				;%.reds = ext
 			][
-				add-source* lexer/file-to-uri file read file
+				add-source* lexer/file-to-uri file read-file file
 			]
 		]
 	]
 
 	add-folder: function [folders [block!] excluded [string!]][
+		write-log rejoin ["add folder: " mold folders " excluded: " mold excluded]
 		clear diagnostics
 		clear root-folders
 		forall folders [
