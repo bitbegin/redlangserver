@@ -130,6 +130,7 @@ lexer: context [
 				x	[integer!]
 				y	[integer!]
 				p?	[logic!]
+				err
 				/local ntype range nstop item
 			][
 				nstop: none
@@ -151,10 +152,11 @@ lexer: context [
 							p?
 							find [path! lit-path! get-path!] to word! ntype
 						][
+							unless err [err: 'unknown]
 							either item/error [
-								item/error: 'unknown
+								item/error: err
 							][
-								append item [error unknown]
+								repend item ['error err]
 							]
 						]
 						range: select item 'range
@@ -245,7 +247,7 @@ lexer: context [
 						][
 							y: token/y + 1
 						]
-						match-pair x y no
+						match-pair x y no none
 						either in-path? [
 							true
 						][
@@ -255,11 +257,16 @@ lexer: context [
 				]
 				error [
 					if type = path! [
-						match-pair token/x token/y + 1 yes
+						either input/1 = #"/" [
+							err: 'slash
+						][
+							err: 'unknown
+						]
+						match-pair token/x token/y + 1 yes err
 						throw token/y
 					]
 					if in-path? [
-						match-pair token/x token/y yes
+						match-pair token/x token/y yes none
 						throw token/y - 1
 					]
 					
