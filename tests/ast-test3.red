@@ -11,7 +11,7 @@ files: [
 	%block-cases.txt
 	%binary-cases.txt
 	%tag-cases.txt
-	;%path-cases.txt
+	%path-cases.txt
 ]
 
 

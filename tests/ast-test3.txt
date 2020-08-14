@@ -786,3 +786,729 @@ begin tag-cases.txt
 end tag-cases.txt
 
 
+begin path-cases.txt
+================================================
+
+[
+  [
+    range: [0x0 22x1]
+    nested: 
+    [
+      [
+        range: [1x1 2x1]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 2x1]
+          ]
+          [
+            expr: b
+            range: [1x3 1x4]
+            type: word!
+            upper: [1x1 2x1]
+          ]
+          [
+            expr: c
+            range: [1x5 1x6]
+            type: word!
+            upper: [1x1 2x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [2x1 3x1]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [2x2 2x3]
+            type: word!
+            upper: [2x1 3x1]
+          ]
+          [
+            expr: bc
+            range: [2x4 2x6]
+            type: word!
+            upper: [2x1 3x1]
+          ]
+          [
+            expr: def
+            range: [2x7 2x10]
+            type: word!
+            upper: [2x1 3x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [3x1 4x1]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [3x2 3x5]
+            type: word!
+            upper: [3x1 4x1]
+          ]
+          [
+            expr: de
+            range: [3x6 3x8]
+            type: word!
+            upper: [3x1 4x1]
+          ]
+          [
+            expr: f
+            range: [3x9 3x10]
+            type: word!
+            upper: [3x1 4x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [4x1 4x13]
+        type: set-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [4x1 4x4]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+          [
+            expr: def
+            range: [4x5 4x8]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+          [
+            expr: ghi
+            range: [4x9 4x12]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [5x1 6x1]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a^b
+            range: [5x1 5x4]
+            type: word!
+            upper: [5x1 6x1]
+          ]
+          [
+            expr: c^^d
+            range: [5x5 5x9]
+            type: word!
+            upper: [5x1 6x1]
+          ]
+          [
+            expr: e^^^f
+            range: [5x10 5x15]
+            type: word!
+            upper: [5x1 6x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [6x1 8x13]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [6x1 6x2]
+            type: word!
+            upper: [6x1 8x13]
+          ]
+          [
+            expr: b
+            range: [6x3 6x4]
+            type: word!
+            upper: [6x1 8x13]
+          ]
+          [
+            range: [6x5 6x10]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: var
+                range: [6x6 6x9]
+                type: word!
+                upper: [6x5 6x10]
+              ]
+            ]
+            upper: [6x1 8x13]
+          ]
+          [
+            range: [7x1 8x13]
+            type: path!
+            nested: 
+            [
+              [
+                expr: a
+                range: [7x1 7x2]
+                type: word!
+                upper: [7x1 8x13]
+              ]
+              [
+                expr: b
+                range: [7x3 7x4]
+                type: word!
+                upper: [7x1 8x13]
+              ]
+              [
+                range: [7x5 7x12]
+                type: paren!
+                nested: 
+                [
+                  [
+                    expr: 1
+                    range: [7x6 7x7]
+                    type: integer!
+                    upper: [7x5 7x12]
+                  ]
+                  [
+                    expr: +
+                    range: [7x8 7x9]
+                    type: word!
+                    upper: [7x5 7x12]
+                  ]
+                  [
+                    expr: 2
+                    range: [7x10 7x11]
+                    type: integer!
+                    upper: [7x5 7x12]
+                  ]
+                ]
+                upper: [7x1 8x13]
+              ]
+              [
+                range: [8x1 8x13]
+                type: path!
+                nested: 
+                [
+                  [
+                    expr: a
+                    range: [8x1 8x2]
+                    type: word!
+                    upper: [8x1 8x13]
+                  ]
+                  [
+                    expr: b
+                    range: [8x3 8x4]
+                    type: word!
+                    upper: [8x1 8x13]
+                  ]
+                  [
+                    range: [8x5 8x12]
+                    type: paren!
+                    nested: 
+                    [
+                      [
+                        expr: 1
+                        range: [8x6 8x7]
+                        type: integer!
+                        upper: [8x5 8x12]
+                      ]
+                      [
+                        expr: +
+                        range: [8x8 8x9]
+                        type: word!
+                        upper: [8x5 8x12]
+                      ]
+                      [
+                        expr: 2
+                        range: [8x10 8x11]
+                        type: integer!
+                        upper: [8x5 8x12]
+                      ]
+                    ]
+                    upper: [8x1 8x13]
+                  ]
+                ]
+                upper: [7x1 8x13]
+                error: only-opened
+              ]
+            ]
+            upper: [6x1 8x13]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [8x12 8x13]
+        type: word!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [9x1 17x7]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [9x2 9x3]
+            type: word!
+            upper: [9x1 17x7]
+          ]
+          [
+            expr: b
+            range: [9x4 9x5]
+            type: word!
+            upper: [9x1 17x7]
+          ]
+          [
+            range: [9x6 9x13]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: 1
+                range: [9x7 9x8]
+                type: integer!
+                upper: [9x6 9x13]
+              ]
+              [
+                expr: +
+                range: [9x9 9x10]
+                type: word!
+                upper: [9x6 9x13]
+              ]
+              [
+                expr: 2
+                range: [9x11 9x12]
+                type: integer!
+                upper: [9x6 9x13]
+              ]
+            ]
+            upper: [9x1 17x7]
+          ]
+          [
+            range: [10x1 17x7]
+            type: lit-path!
+            nested: 
+            [
+              [
+                expr: a
+                range: [10x2 10x3]
+                type: word!
+                upper: [10x1 17x7]
+              ]
+              [
+                expr: b
+                range: [10x4 10x5]
+                type: word!
+                upper: [10x1 17x7]
+              ]
+              [
+                range: [10x6 10x13]
+                type: paren!
+                nested: 
+                [
+                  [
+                    expr: 1
+                    range: [10x7 10x8]
+                    type: integer!
+                    upper: [10x6 10x13]
+                  ]
+                  [
+                    expr: +
+                    range: [10x9 10x10]
+                    type: word!
+                    upper: [10x6 10x13]
+                  ]
+                  [
+                    expr: 2
+                    range: [10x11 10x12]
+                    type: integer!
+                    upper: [10x6 10x13]
+                  ]
+                ]
+                upper: [10x1 17x7]
+              ]
+              [
+                range: [11x1 17x7]
+                type: path!
+                nested: 
+                [
+                  [
+                    expr: a
+                    range: [11x1 11x2]
+                    type: word!
+                    upper: [11x1 17x7]
+                  ]
+                  [
+                    expr: b
+                    range: [11x3 11x4]
+                    type: word!
+                    upper: [11x1 17x7]
+                  ]
+                  [
+                    range: [11x5 11x10]
+                    type: paren!
+                    nested: 
+                    [
+                      [
+                        expr: var
+                        range: [11x6 11x9]
+                        type: word!
+                        upper: [11x5 11x10]
+                      ]
+                    ]
+                    upper: [11x1 17x7]
+                  ]
+                  [
+                    expr: /1
+                    range: [11x10 11x12]
+                    type: refinement!
+                    upper: [11x1 17x7]
+                  ]
+                  [
+                    range: [12x1 17x7]
+                    type: path!
+                    nested: 
+                    [
+                      [
+                        expr: a
+                        range: [12x1 12x2]
+                        type: word!
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        expr: b
+                        range: [12x3 12x4]
+                        type: word!
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        range: [12x5 12x22]
+                        type: paren!
+                        nested: 
+                        [
+                          [
+                            expr: a
+                            range: [12x6 12x7]
+                            type: word!
+                            upper: [12x5 12x22]
+                          ]
+                          [
+                            expr: +
+                            range: [12x8 12x9]
+                            type: word!
+                            upper: [12x5 12x22]
+                          ]
+                          [
+                            range: [12x10 12x22]
+                            type: path!
+                            nested: 
+                            [
+                              [
+                                expr: b
+                                range: [12x10 12x11]
+                                type: word!
+                                upper: [12x10 12x22]
+                              ]
+                              [
+                                range: [12x12 12x21]
+                                type: paren!
+                                nested: 
+                                [
+                                  [
+                                    expr: c
+                                    range: [12x13 12x14]
+                                    type: word!
+                                    upper: [12x12 12x21]
+                                  ]
+                                  [
+                                    range: [12x15 12x20]
+                                    type: block!
+                                    nested: 
+                                    [
+                                      [
+                                        expr: e
+                                        range: [12x16 12x17]
+                                        type: word!
+                                        upper: [12x15 12x20]
+                                      ]
+                                      [
+                                        expr: f
+                                        range: [12x18 12x19]
+                                        type: word!
+                                        upper: [12x15 12x20]
+                                      ]
+                                    ]
+                                    upper: [12x12 12x21]
+                                  ]
+                                ]
+                                upper: [12x10 12x22]
+                              ]
+                            ]
+                            upper: [12x5 12x22]
+                            error: only-opened
+                          ]
+                        ]
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        range: [13x1 14x1]
+                        type: path!
+                        nested: 
+                        [
+                          [
+                            expr: a
+                            range: [13x1 13x2]
+                            type: word!
+                            upper: [13x1 14x1]
+                          ]
+                          [
+                            expr: b
+                            range: [13x3 13x4]
+                            type: word!
+                            upper: [13x1 14x1]
+                          ]
+                          [
+                            expr: 2.34
+                            range: [13x5 13x9]
+                            type: float!
+                            upper: [13x1 14x1]
+                          ]
+                        ]
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        range: [14x1 15x1]
+                        type: path!
+                        nested: 
+                        [
+                          [
+                            expr: a
+                            range: [14x1 14x2]
+                            type: word!
+                            upper: [14x1 15x1]
+                          ]
+                          [
+                            expr: 'b
+                            range: [14x3 14x5]
+                            type: lit-word!
+                            upper: [14x1 15x1]
+                          ]
+                        ]
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        range: [15x1 16x1]
+                        type: path!
+                        nested: 
+                        [
+                          [
+                            expr: a
+                            range: [15x1 15x2]
+                            type: word!
+                            upper: [15x1 16x1]
+                          ]
+                          [
+                            expr: :b
+                            range: [15x3 15x5]
+                            type: get-word!
+                            upper: [15x1 16x1]
+                          ]
+                        ]
+                        upper: [12x1 17x7]
+                      ]
+                      [
+                        range: [17x1 17x6]
+                        type: path!
+                        nested: 
+                        [
+                          [
+                            expr: a
+                            range: [17x1 17x2]
+                            type: word!
+                            upper: [17x1 17x6]
+                          ]
+                          [
+                            expr: b
+                            range: [17x3 17x4]
+                            type: word!
+                            upper: [17x1 17x6]
+                          ]
+                        ]
+                        upper: [12x1 17x7]
+                        error: unknown
+                      ]
+                    ]
+                    upper: [11x1 17x7]
+                    error: only-opened
+                  ]
+                ]
+                upper: [10x1 17x7]
+                error: only-opened
+              ]
+            ]
+            upper: [9x1 17x7]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [17x6 17x7]
+        type: block!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [18x1 19x1]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [18x1 18x2]
+            type: word!
+            upper: [18x1 19x1]
+          ]
+          [
+            expr: b
+            range: [18x3 18x4]
+            type: word!
+            upper: [18x1 19x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: unknown
+      ]
+      [
+        range: [19x1 20x1]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [19x2 19x3]
+            type: word!
+            upper: [19x1 20x1]
+          ]
+          [
+            expr: bc
+            range: [19x4 19x6]
+            type: word!
+            upper: [19x1 20x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [19x1 20x1]
+        type: path!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [20x1 21x1]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [20x2 20x5]
+            type: word!
+            upper: [20x1 21x1]
+          ]
+          [
+            expr: de
+            range: [20x6 20x8]
+            type: word!
+            upper: [20x1 21x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [20x1 21x1]
+        type: path!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [21x1 21x10]
+        type: path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [21x1 21x4]
+            type: word!
+            upper: [21x1 21x10]
+          ]
+          [
+            expr: def
+            range: [21x5 21x8]
+            type: word!
+            upper: [21x1 21x10]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [21x9 21x10]
+        type: word!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+    ]
+    source: {a/b/c^/'a/
+    lines: [
+      {a/b/c^/'a/
+      1
+      7
+      17
+      27
+      40
+      55
+      65
+      77
+      90
+      103
+      116
+      128
+      150
+      159
+      164
+      169
+      170
+      177
+      182
+      189
+      198
+      208
+    ]
+  ]
+]
+================================================
+end path-cases.txt
+
+
