@@ -123,7 +123,7 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local ltype x y err p? nstack
+			/local ltype x y err
 		][
 			[prescan scan load open close error]
 			match-pair: func [
@@ -176,6 +176,26 @@ lexer: context [
 					stack: select last stack 'upper
 				]
 			]
+			in-path?: func [
+				/local p? nstack ltype
+			][
+				p?: no
+				nstack: stack
+				while [
+					all [
+						nstack
+						ltype: select last nstack 'type
+						ltype
+					]
+				][
+					if find [path! lit-path! get-path!] to word! ltype [
+						p?: yes
+						break
+					]
+					nstack: select last nstack 'upper
+				]
+				p?
+			]
 
 			;print [event mold type token mold input]
 			switch event [
@@ -192,11 +212,7 @@ lexer: context [
 				]
 				load [
 					add-node base stoken/x stoken/y stype token none
-					ltype: select last stack 'type
-					either all [
-						ltype
-						find [path! lit-path! get-path!] to word! ltype
-					][
+					either in-path? [
 						true
 					][
 						throw stoken/y - 1
@@ -209,22 +225,11 @@ lexer: context [
 						]
 						true
 					][
-						ltype: select last stack 'type
 						push-node base token/x type
-						either all [
-							type
-							find [path! lit-path! get-path!] to word! type
-						][
+						either in-path? [
 							true
 						][
-							either all [
-								ltype
-								find [path! lit-path! get-path!] to word! ltype
-							][
-								true
-							][
-								throw token/y
-							]
+							throw token/y
 						]
 					]
 				]
@@ -237,7 +242,11 @@ lexer: context [
 						x: token/x
 						y: token/y + 1
 						match-pair x y no
-						throw token/y
+						either in-path? [
+							true
+						][
+							throw token/y
+						]
 					]
 				]
 				error [
@@ -245,22 +254,7 @@ lexer: context [
 						match-pair token/x token/y + 1 yes
 						throw token/y
 					]
-					p?: no
-					nstack: stack
-					while [
-						all [
-							nstack
-							ltype: select last nstack 'type
-							ltype
-						]
-					][
-						if find [path! lit-path! get-path!] to word! ltype [
-							p?: yes
-							break
-						]
-						nstack: select last nstack 'upper
-					]
-					if p? [
+					if in-path? [
 						match-pair token/x token/y yes
 						throw token/y - 1
 					]
