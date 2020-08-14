@@ -301,10 +301,7 @@ semantic: context [
 
 	add-source*: function [uri [string!] code [string!]][
 		write-log rejoin ["add uri: " uri]
-		switch/default find/last uri "." [
-			".red"	[top: lexer/transcode code no]
-			;".reds"	[top: lexer/transcode code yes]
-		][exit]
+		top: lexer/transcode code
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
@@ -516,7 +513,7 @@ semantic: context [
 			write-log mold npc/1/range
 			write-log mold str
 			if any [
-				not top: lexer/transcode str system?
+				not top: lexer/transcode str
 				none? nested: top/1/nested
 				1 < length? nested
 			][
@@ -560,7 +557,7 @@ semantic: context [
 		write-log mold pc/1/range
 		write-log mold str
 		if any [
-			not top: lexer/transcode str system?
+			not top: lexer/transcode str
 			none? nested: top/1/nested
 			1 < length? nested
 		][
@@ -752,7 +749,7 @@ semantic: context [
 							write-log "empty insert npc: "
 							write-log mold range
 							if any [
-								not top: lexer/transcode text system?
+								not top: lexer/transcode text
 								none? nested: top/1/nested
 								1 < length? nested
 							][
@@ -770,7 +767,7 @@ semantic: context [
 						write-log "insert pc: "
 						write-log mold range
 						if any [
-							not top: lexer/transcode text system?
+							not top: lexer/transcode text
 							none? nested: top/1/nested
 							1 < length? nested
 						][
