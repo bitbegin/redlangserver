@@ -5,10 +5,10 @@
     nested: 
     [
       [
-        range: [1x1 1x2]
+        range: [1x1 1x3]
         type: string!
         upper: [0x0 1x2]
-        error: only-open
+        error: [type only-opened at 1x2]
       ]
     ]
     source: {"}
@@ -48,7 +48,7 @@
         range: [1x1 1x8]
         type: char!
         upper: [0x0 1x8]
-        error: unknown
+        error: not-closed
       ]
     ]
     source: {#"^^(00)}
@@ -65,16 +65,10 @@
     nested: 
     [
       [
-        range: [1x1 1x10]
+        range: [1x1 1x11]
         type: char!
         upper: [0x0 1x11]
-        error: unknown
-      ]
-      [
-        range: [1x10 1x11]
-        type: string!
-        upper: [0x0 1x11]
-        error: only-open
+        error: invalid
       ]
     ]
     source: {#"^^(00) a
@@ -111,10 +105,10 @@
     nested: 
     [
       [
-        range: [1x1 1x5]
+        range: [1x1 1x6]
         type: string!
         upper: [0x0 1x5]
-        error: only-open
+        error: [type only-opened at 1x5]
       ]
     ]
     source: {"abc}
@@ -131,16 +125,16 @@
     nested: 
     [
       [
-        range: [1x1 1x5]
+        range: [1x1 2x1]
         type: string!
         upper: [0x0 2x2]
-        error: only-open
+        error: [type only-opened at 1x5]
       ]
       [
-        range: [2x1 2x2]
+        range: [2x1 2x3]
         type: string!
         upper: [0x0 2x2]
-        error: only-open
+        error: [type only-opened at 1x2]
       ]
     ]
     source: {"abc^/"}
@@ -186,7 +180,7 @@
         [
         ]
         upper: [0x0 1x2]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "["
@@ -203,7 +197,7 @@
     nested: 
     [
       [
-        range: [1x2 1x2]
+        range: [1x1 1x2]
         type: block!
         upper: [0x0 1x2]
         error: only-closed
@@ -237,7 +231,7 @@
         [
         ]
         upper: [0x0 1x4]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "[]["
@@ -262,7 +256,7 @@
         upper: [0x0 1x4]
       ]
       [
-        range: [1x4 1x4]
+        range: [1x3 1x4]
         type: block!
         upper: [0x0 1x4]
         error: only-closed
@@ -296,7 +290,7 @@
           ]
         ]
         upper: [0x0 1x4]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "[[]"
@@ -313,7 +307,7 @@
     nested: 
     [
       [
-        range: [1x2 1x2]
+        range: [1x1 1x2]
         type: block!
         upper: [0x0 1x4]
         error: only-closed
@@ -399,7 +393,7 @@
         [
         ]
         upper: [0x0 1x2]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "("
@@ -416,7 +410,7 @@
     nested: 
     [
       [
-        range: [1x2 1x2]
+        range: [1x1 1x2]
         type: paren!
         upper: [0x0 1x2]
         error: only-closed
@@ -450,7 +444,7 @@
         [
         ]
         upper: [0x0 1x4]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "()("
@@ -475,7 +469,7 @@
         upper: [0x0 1x4]
       ]
       [
-        range: [1x4 1x4]
+        range: [1x3 1x4]
         type: paren!
         upper: [0x0 1x4]
         error: only-closed
@@ -509,7 +503,7 @@
           ]
         ]
         upper: [0x0 1x4]
-        error: only-opend
+        error: only-opened
       ]
     ]
     source: "(()"
@@ -526,7 +520,7 @@
     nested: 
     [
       [
-        range: [1x2 1x2]
+        range: [1x1 1x2]
         type: paren!
         upper: [0x0 1x4]
         error: only-closed
@@ -607,7 +601,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [0x0 1x2]
-        error: only-open
+        error: [type only-opened at 1x2]
       ]
     ]
     source: "{"
@@ -627,7 +621,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [0x0 1x2]
-        error: only-close
+        error: only-closed
       ]
     ]
     source: "}"
@@ -653,7 +647,7 @@
         range: [1x3 1x4]
         type: string!
         upper: [0x0 1x4]
-        error: only-open
+        error: [type only-opened at 1x2]
       ]
     ]
     source: "{}{"
@@ -679,7 +673,7 @@
         range: [1x3 1x4]
         type: string!
         upper: [0x0 1x4]
-        error: only-close
+        error: only-closed
       ]
     ]
     source: "{}}"
@@ -696,10 +690,16 @@
     nested: 
     [
       [
-        range: [1x1 1x4]
+        range: [1x1 1x3]
         type: string!
         upper: [0x0 1x4]
-        error: only-open
+        error: [type only-opened at 3x3]
+      ]
+      [
+        range: [1x3 1x4]
+        type: string!
+        upper: [0x0 1x4]
+        error: only-closed
       ]
     ]
     source: "{{}"
@@ -719,7 +719,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [0x0 1x4]
-        error: only-close
+        error: only-closed
       ]
       [
         expr: ""
@@ -762,10 +762,10 @@
     nested: 
     [
       [
-        range: [1x1 1x4]
+        range: [1x1 1x3]
         type: string!
         upper: [0x0 1x3]
-        error: only-open
+        error: [type only-opened at 1x3]
       ]
     ]
     source: "{{"
@@ -782,10 +782,10 @@
     nested: 
     [
       [
-        range: [1x1 1x5]
+        range: [1x1 1x4]
         type: string!
         upper: [0x0 1x4]
-        error: only-open
+        error: [type only-opened at 1x4]
       ]
     ]
     source: "{{{"
