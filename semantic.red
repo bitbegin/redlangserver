@@ -164,35 +164,15 @@ semantic: context [
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
 			while [not tail? pc] [
-				if errors: pc/1/error [
-					if all [
-						pc/1/type = path!
-						pc/2
-						pc/2/type = paren!
-					][
-						if nested: pc/2/nested [
-							collect-errors* nested
-						]
-						either all [
-							pc/3
-							pc/3/type = issue!
-							pc/3/range/1/x = pc/3/range/2/x
-							(pc/3/range/1/y + 1) = pc/3/range/2/y
-						][
-							pc: skip pc 3
-						][
-							pc: skip pc 2
-						]
-						continue
-					]
-					forall errors [
-						append ret make map! reduce [
-							'severity DiagnosticSeverity/(errors/1/level)
-							'code mold errors/1/type
-							'source "Syntax"
-							'message errors/1/msg
-							'range lexer/form-range pc/1/range ;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
-						]
+				if error: pc/1/error [
+					msg: either block? error [error/type][error]
+					range: reduce [pc/1/range/1 pc/1/range/1]
+					append ret make map! reduce [
+						'severity 1							;-- DiagnosticSeverity/Error
+						'code mold pc/1/type
+						'source "Syntax"
+						'message mold msg
+						'range lexer/form-range range		;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
 					]
 				]
 				if nested: pc/1/nested [
