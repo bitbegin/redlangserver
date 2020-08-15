@@ -1,0 +1,1814 @@
+begin binary.txt
+================================================
+
+[
+  [
+    range: [0x0 15x1]
+    nested: 
+    [
+      [
+        expr: #{12345678}
+        range: [1x1 1x13]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        expr: #{12345678}
+        range: [2x1 3x6]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [4x8 4x13]
+        type: binary!
+        upper: [0x0 15x1]
+        error: invalid
+      ]
+      [
+        expr: #{01020304}
+        range: [5x1 5x16]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [6x6 6x7]
+        type: binary!
+        upper: [0x0 15x1]
+        error: invalid
+      ]
+      [
+        expr: #{55}
+        range: [7x1 7x13]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [8x7 8x9]
+        type: binary!
+        upper: [0x0 15x1]
+        error: invalid
+      ]
+      [
+        expr: #{CDEF}
+        range: [9x1 9x10]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [10x7 10x10]
+        type: binary!
+        upper: [0x0 15x1]
+        error: invalid
+      ]
+      [
+        expr: #{61}
+        range: [11x1 11x10]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [12x7 12x8]
+        type: binary!
+        upper: [0x0 15x1]
+        error: invalid
+      ]
+      [
+        expr: #{01FF}
+        range: [13x1 13x8]
+        type: binary!
+        upper: [0x0 15x1]
+      ]
+      [
+        range: [13x8 13x9]
+        type: string!
+        upper: [0x0 15x1]
+        error: only-closed
+      ]
+      [
+        range: [14x1 15x1]
+        type: binary!
+        upper: [0x0 15x1]
+        error: not-closed
+      ]
+    ]
+    source: {#^{1234 56
+    lines: [
+      {#^{1234 56
+      1
+      14
+      21
+      27
+      40
+      56
+      63
+      76
+      85
+      95
+      105
+      115
+      123
+      132
+      139
+    ]
+  ]
+]
+================================================
+end binary.txt
+
+
+begin block.txt
+================================================
+
+[
+  [
+    range: [0x0 16x1]
+    nested: 
+    [
+      [
+        range: [1x1 3x2]
+        type: block!
+        nested: 
+        [
+          [
+            expr: this
+            range: [2x2 2x6]
+            type: word!
+            upper: [1x1 3x2]
+          ]
+          [
+            expr: is
+            range: [2x7 2x9]
+            type: word!
+            upper: [1x1 3x2]
+          ]
+          [
+            expr: a
+            range: [2x10 2x11]
+            type: word!
+            upper: [1x1 3x2]
+          ]
+          [
+            expr: block!
+            range: [2x12 2x18]
+            type: word!
+            upper: [1x1 3x2]
+          ]
+        ]
+        upper: [0x0 16x1]
+      ]
+      [
+        range: [5x1 5x6]
+        type: block!
+        nested: 
+        [
+          [
+            range: [5x2 5x6]
+            type: paren!
+            nested: 
+            [
+              [
+                range: [5x3 5x6]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [5x2 5x6]
+                error: only-opened
+              ]
+            ]
+            upper: [5x1 5x6]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 16x1]
+      ]
+      [
+        range: [6x1 6x4]
+        type: block!
+        nested: 
+        [
+          [
+            range: [6x2 6x3]
+            type: string!
+            upper: [6x1 6x4]
+            error: only-closed
+          ]
+        ]
+        upper: [0x0 16x1]
+      ]
+      [
+        range: [8x1 8x21]
+        type: block!
+        nested: 
+        [
+          [
+            expr: match
+            range: [8x2 8x7]
+            type: word!
+            upper: [8x1 8x21]
+          ]
+          [
+            range: [8x8 8x13]
+            type: block!
+            nested: 
+            [
+              [
+                range: [8x9 8x12]
+                type: block!
+                nested: 
+                [
+                  [
+                    expr: a
+                    range: [8x10 8x11]
+                    type: word!
+                    upper: [8x9 8x12]
+                  ]
+                ]
+                upper: [8x8 8x13]
+              ]
+            ]
+            upper: [8x1 8x21]
+          ]
+          [
+            expr: block!
+            range: [8x14 8x20]
+            type: word!
+            upper: [8x1 8x21]
+          ]
+        ]
+        upper: [0x0 16x1]
+      ]
+      [
+        range: [9x1 11x2]
+        type: block!
+        nested: 
+        [
+          [
+            expr: match
+            range: [10x2 10x7]
+            type: word!
+            upper: [9x1 11x2]
+          ]
+          [
+            expr: 1
+            range: [10x8 10x9]
+            type: integer!
+            upper: [9x1 11x2]
+          ]
+        ]
+        upper: [0x0 16x1]
+      ]
+      [
+        range: [11x2 11x3]
+        type: block!
+        upper: [0x0 16x1]
+        error: only-closed
+      ]
+      [
+        range: [13x1 16x1]
+        type: block!
+        nested: 
+        [
+          [
+            range: [13x2 15x2]
+            type: block!
+            nested: 
+            [
+              [
+                expr: match
+                range: [14x2 14x7]
+                type: word!
+                upper: [13x2 15x2]
+              ]
+              [
+                expr: 2
+                range: [14x8 14x9]
+                type: integer!
+                upper: [13x2 15x2]
+              ]
+            ]
+            upper: [13x1 16x1]
+          ]
+        ]
+        upper: [0x0 16x1]
+        error: only-opened
+      ]
+    ]
+    source: {[^/^-this i
+    lines: [
+      {[^/^-this i
+      1
+      3
+      21
+      23
+      24
+      30
+      34
+      35
+      56
+      58
+      67
+      70
+      71
+      74
+      83
+      85
+    ]
+  ]
+]
+================================================
+end block.txt
+
+
+begin char.txt
+================================================
+
+[
+  [
+    range: [0x0 17x1]
+    nested: 
+    [
+      [
+        expr: #"^@"
+        range: [1x1 1x4]
+        type: char!
+        upper: [0x0 17x1]
+      ]
+      [
+        expr: #"0"
+        range: [2x1 2x9]
+        type: char!
+        upper: [0x0 17x1]
+      ]
+      [
+        expr: #"銊?
+        range: [3x1 3x11]
+        type: char!
+        upper: [0x0 17x1]
+      ]
+      [
+        range: [4x1 4x13]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [5x1 5x15]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [6x1 6x17]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [7x1 7x19]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [8x1 8x21]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        expr: #"^/"
+        range: [9x1 9x11]
+        type: char!
+        upper: [0x0 17x1]
+      ]
+      [
+        range: [10x1 10x14]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [11x1 11x7]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [12x1 12x12]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [13x1 14x3]
+        type: char!
+        upper: [0x0 17x1]
+        error: invalid
+      ]
+      [
+        range: [15x1 17x1]
+        type: char!
+        upper: [0x0 17x1]
+        error: not-closed
+      ]
+    ]
+    source: {#""^/#"^^(3
+    lines: [
+      {#""^/#"^^(3
+      1
+      5
+      14
+      25
+      38
+      53
+      70
+      89
+      110
+      121
+      135
+      142
+      154
+      163
+      166
+      170
+      181
+    ]
+  ]
+]
+================================================
+end char.txt
+
+
+begin map.txt
+================================================
+
+[
+  [
+    range: [0x0 22x6]
+    nested: 
+    [
+      [
+        range: [2x1 2x18]
+        type: map!
+        nested: 
+        [
+          [
+            expr: this
+            range: [2x3 2x7]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: is
+            range: [2x8 2x10]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: a
+            range: [2x11 2x12]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: map!
+            range: [2x13 2x17]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [3x1 3x8]
+        type: map!
+        nested: 
+        [
+          [
+            range: [3x3 3x7]
+            type: paren!
+            nested: 
+            [
+              [
+                range: [3x4 3x6]
+                type: block!
+                nested: 
+                [
+                ]
+                upper: [3x3 3x7]
+              ]
+            ]
+            upper: [3x1 3x8]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [4x1 4x8]
+        type: block!
+        nested: 
+        [
+          [
+            range: [4x2 4x7]
+            type: paren!
+            nested: 
+            [
+              [
+                range: [4x3 4x6]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [4x2 4x7]
+              ]
+            ]
+            upper: [4x1 4x8]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [5x1 5x10]
+        type: map!
+        nested: 
+        [
+          [
+            range: [5x3 5x9]
+            type: map!
+            nested: 
+            [
+              [
+                range: [5x5 5x8]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [5x3 5x9]
+              ]
+            ]
+            upper: [5x1 5x10]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [7x1 15x2]
+        type: map!
+        nested: 
+        [
+          [
+            expr: a:
+            range: [8x2 8x4]
+            type: set-word!
+            upper: [7x1 15x2]
+          ]
+          [
+            range: [8x5 14x3]
+            type: map!
+            nested: 
+            [
+              [
+                expr: b:
+                range: [9x3 9x5]
+                type: set-word!
+                upper: [8x5 14x3]
+              ]
+              [
+                range: [9x6 13x4]
+                type: paren!
+                nested: 
+                [
+                  [
+                    expr: c:
+                    range: [10x4 10x6]
+                    type: set-word!
+                    upper: [9x6 13x4]
+                  ]
+                  [
+                    range: [10x7 12x5]
+                    type: block!
+                    nested: 
+                    [
+                      [
+                        expr: d:
+                        range: [11x5 11x7]
+                        type: set-word!
+                        upper: [10x7 12x5]
+                      ]
+                      [
+                        expr: "string!"
+                        range: [11x8 11x17]
+                        type: string!
+                        upper: [10x7 12x5]
+                      ]
+                    ]
+                    upper: [9x6 13x4]
+                  ]
+                ]
+                upper: [8x5 14x3]
+              ]
+            ]
+            upper: [7x1 15x2]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [17x1 17x6]
+        type: block!
+        nested: 
+        [
+          [
+            range: [17x2 17x5]
+            type: map!
+            nested: 
+            [
+            ]
+            upper: [17x1 17x6]
+          ]
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+      [
+        range: [17x5 17x6]
+        type: paren!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [17x6 17x7]
+        type: block!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [18x1 18x8]
+        type: block!
+        nested: 
+        [
+          [
+            range: [18x2 18x8]
+            type: map!
+            nested: 
+            [
+              [
+                range: [18x4 18x7]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [18x2 18x8]
+              ]
+            ]
+            upper: [18x1 18x8]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [19x1 19x5]
+        type: map!
+        nested: 
+        [
+          [
+            range: [19x3 19x5]
+            type: block!
+            nested: 
+            [
+            ]
+            upper: [19x1 19x5]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [20x1 20x4]
+        type: map!
+        nested: 
+        [
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+      [
+        range: [20x3 20x4]
+        type: block!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [20x4 20x5]
+        type: paren!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [21x1 22x6]
+        type: map!
+        nested: 
+        [
+          [
+            expr: map!
+            range: [22x2 22x6]
+            type: word!
+            upper: [21x1 22x6]
+          ]
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+    ]
+    source: {^/#(this i
+    lines: [
+      {^/#(this i
+      1
+      2
+      20
+      28
+      36
+      46
+      47
+      50
+      57
+      64
+      72
+      89
+      94
+      98
+      101
+      103
+      104
+      111
+      119
+      124
+      129
+      132
+    ]
+  ]
+]
+================================================
+end map.txt
+
+
+begin mstring.txt
+================================================
+
+[
+  [
+    range: [0x0 11x1]
+    nested: 
+    [
+      [
+        expr: "^/^-this is a multili
+        range: [1x1 3x2]
+        type: string!
+        upper: [0x0 11x1]
+      ]
+      [
+        expr: {^/^-hello {"1"} world
+        range: [4x1 6x2]
+        type: string!
+        upper: [0x0 11x1]
+      ]
+      [
+        expr: {{}^}"}
+        range: [7x1 7x9]
+        type: string!
+        upper: [0x0 11x1]
+      ]
+      [
+        expr: "{{{{match}}}}"
+        range: [8x1 8x16]
+        type: string!
+        upper: [0x0 11x1]
+      ]
+      [
+        expr: "not {{{{match}}}}"
+        range: [9x1 9x20]
+        type: string!
+        upper: [0x0 11x1]
+      ]
+      [
+        range: [9x20 9x21]
+        type: string!
+        upper: [0x0 11x1]
+        error: only-closed
+      ]
+      [
+        range: [10x1 11x1]
+        type: string!
+        upper: [0x0 11x1]
+        error: [type only-opened at 2x21]
+      ]
+    ]
+    source: {^{^/^-this i
+    lines: [
+      {^{^/^-this i
+      1
+      3
+      32
+      34
+      36
+      60
+      62
+      71
+      87
+      108
+      127
+    ]
+  ]
+]
+================================================
+end mstring.txt
+
+
+begin number.txt
+================================================
+
+[
+  [
+    range: [0x0 7x1]
+    nested: 
+    [
+      [
+        expr: 123
+        range: [1x1 1x4]
+        type: integer!
+        upper: [0x0 7x1]
+      ]
+      [
+        range: [2x1 2x4]
+        type: integer!
+        upper: [0x0 7x1]
+        error: unknown
+      ]
+      [
+        expr: abc
+        range: [2x4 2x7]
+        type: word!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: 123.0
+        range: [3x1 3x6]
+        type: float!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: 123000.0
+        range: [4x1 4x6]
+        type: float!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: 0.000123
+        range: [5x1 5x8]
+        type: float!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: 123000.0
+        range: [6x1 6x8]
+        type: float!
+        upper: [0x0 7x1]
+      ]
+    ]
+    source: "123^/123ab
+    lines: [
+      "123^/123ab
+      1
+      5
+      12
+      18
+      24
+      32
+      40
+    ]
+  ]
+]
+================================================
+end number.txt
+
+
+begin path.txt
+================================================
+
+[
+  [
+    range: [0x0 22x1]
+    nested: 
+    [
+      [
+        range: [1x1 1x6]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: b
+            range: [1x3 1x4]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: c
+            range: [1x5 1x6]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [2x1 2x10]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [2x2 2x3]
+            type: word!
+            upper: [2x1 2x10]
+          ]
+          [
+            expr: bc
+            range: [2x4 2x6]
+            type: word!
+            upper: [2x1 2x10]
+          ]
+          [
+            expr: def
+            range: [2x7 2x10]
+            type: word!
+            upper: [2x1 2x10]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [3x1 3x10]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [3x2 3x5]
+            type: word!
+            upper: [3x1 3x10]
+          ]
+          [
+            expr: de
+            range: [3x6 3x8]
+            type: word!
+            upper: [3x1 3x10]
+          ]
+          [
+            expr: f
+            range: [3x9 3x10]
+            type: word!
+            upper: [3x1 3x10]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [4x1 4x13]
+        type: set-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [4x1 4x4]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+          [
+            expr: def
+            range: [4x5 4x8]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+          [
+            expr: ghi
+            range: [4x9 4x12]
+            type: word!
+            upper: [4x1 4x13]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [5x1 5x15]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a^b
+            range: [5x1 5x4]
+            type: word!
+            upper: [5x1 5x15]
+          ]
+          [
+            expr: c^^d
+            range: [5x5 5x9]
+            type: word!
+            upper: [5x1 5x15]
+          ]
+          [
+            expr: e^^^f
+            range: [5x10 5x15]
+            type: word!
+            upper: [5x1 5x15]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [6x1 6x10]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [6x1 6x2]
+            type: word!
+            upper: [6x1 6x10]
+          ]
+          [
+            expr: b
+            range: [6x3 6x4]
+            type: word!
+            upper: [6x1 6x10]
+          ]
+          [
+            range: [6x5 6x10]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: var
+                range: [6x6 6x9]
+                type: word!
+                upper: [6x5 6x10]
+              ]
+            ]
+            upper: [6x1 6x10]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [7x1 7x12]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [7x1 7x2]
+            type: word!
+            upper: [7x1 7x12]
+          ]
+          [
+            expr: b
+            range: [7x3 7x4]
+            type: word!
+            upper: [7x1 7x12]
+          ]
+          [
+            range: [7x5 7x12]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: 1
+                range: [7x6 7x7]
+                type: integer!
+                upper: [7x5 7x12]
+              ]
+              [
+                expr: +
+                range: [7x8 7x9]
+                type: word!
+                upper: [7x5 7x12]
+              ]
+              [
+                expr: 2
+                range: [7x10 7x11]
+                type: integer!
+                upper: [7x5 7x12]
+              ]
+            ]
+            upper: [7x1 7x12]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [8x1 8x13]
+        type: set-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [8x1 8x2]
+            type: word!
+            upper: [8x1 8x13]
+          ]
+          [
+            expr: b
+            range: [8x3 8x4]
+            type: word!
+            upper: [8x1 8x13]
+          ]
+          [
+            range: [8x5 8x12]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: 1
+                range: [8x6 8x7]
+                type: integer!
+                upper: [8x5 8x12]
+              ]
+              [
+                expr: +
+                range: [8x8 8x9]
+                type: word!
+                upper: [8x5 8x12]
+              ]
+              [
+                expr: 2
+                range: [8x10 8x11]
+                type: integer!
+                upper: [8x5 8x12]
+              ]
+            ]
+            upper: [8x1 8x13]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [9x1 9x13]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [9x2 9x3]
+            type: word!
+            upper: [9x1 9x13]
+          ]
+          [
+            expr: b
+            range: [9x4 9x5]
+            type: word!
+            upper: [9x1 9x13]
+          ]
+          [
+            range: [9x6 9x13]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: 1
+                range: [9x7 9x8]
+                type: integer!
+                upper: [9x6 9x13]
+              ]
+              [
+                expr: +
+                range: [9x9 9x10]
+                type: word!
+                upper: [9x6 9x13]
+              ]
+              [
+                expr: 2
+                range: [9x11 9x12]
+                type: integer!
+                upper: [9x6 9x13]
+              ]
+            ]
+            upper: [9x1 9x13]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [10x1 10x13]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [10x2 10x3]
+            type: word!
+            upper: [10x1 10x13]
+          ]
+          [
+            expr: b
+            range: [10x4 10x5]
+            type: word!
+            upper: [10x1 10x13]
+          ]
+          [
+            range: [10x6 10x13]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: 1
+                range: [10x7 10x8]
+                type: integer!
+                upper: [10x6 10x13]
+              ]
+              [
+                expr: +
+                range: [10x9 10x10]
+                type: word!
+                upper: [10x6 10x13]
+              ]
+              [
+                expr: 2
+                range: [10x11 10x12]
+                type: integer!
+                upper: [10x6 10x13]
+              ]
+            ]
+            upper: [10x1 10x13]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [11x1 11x12]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [11x1 11x2]
+            type: word!
+            upper: [11x1 11x12]
+          ]
+          [
+            expr: b
+            range: [11x3 11x4]
+            type: word!
+            upper: [11x1 11x12]
+          ]
+          [
+            range: [11x5 11x10]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: var
+                range: [11x6 11x9]
+                type: word!
+                upper: [11x5 11x10]
+              ]
+            ]
+            upper: [11x1 11x12]
+          ]
+          [
+            expr: 1
+            range: [11x11 11x12]
+            type: integer!
+            upper: [11x1 11x12]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [12x1 12x22]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [12x1 12x2]
+            type: word!
+            upper: [12x1 12x22]
+          ]
+          [
+            expr: b
+            range: [12x3 12x4]
+            type: word!
+            upper: [12x1 12x22]
+          ]
+          [
+            range: [12x5 12x22]
+            type: paren!
+            nested: 
+            [
+              [
+                expr: a
+                range: [12x6 12x7]
+                type: word!
+                upper: [12x5 12x22]
+              ]
+              [
+                expr: +
+                range: [12x8 12x9]
+                type: word!
+                upper: [12x5 12x22]
+              ]
+              [
+                range: [12x10 12x21]
+                type: path!
+                nested: 
+                [
+                  [
+                    expr: b
+                    range: [12x10 12x11]
+                    type: word!
+                    upper: [12x10 12x21]
+                  ]
+                  [
+                    range: [12x12 12x21]
+                    type: paren!
+                    nested: 
+                    [
+                      [
+                        expr: c
+                        range: [12x13 12x14]
+                        type: word!
+                        upper: [12x12 12x21]
+                      ]
+                      [
+                        range: [12x15 12x20]
+                        type: block!
+                        nested: 
+                        [
+                          [
+                            expr: e
+                            range: [12x16 12x17]
+                            type: word!
+                            upper: [12x15 12x20]
+                          ]
+                          [
+                            expr: f
+                            range: [12x18 12x19]
+                            type: word!
+                            upper: [12x15 12x20]
+                          ]
+                        ]
+                        upper: [12x12 12x21]
+                      ]
+                    ]
+                    upper: [12x10 12x21]
+                  ]
+                ]
+                upper: [12x5 12x22]
+              ]
+            ]
+            upper: [12x1 12x22]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [13x1 13x9]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [13x1 13x2]
+            type: word!
+            upper: [13x1 13x9]
+          ]
+          [
+            expr: b
+            range: [13x3 13x4]
+            type: word!
+            upper: [13x1 13x9]
+          ]
+          [
+            expr: 2.34
+            range: [13x5 13x9]
+            type: float!
+            upper: [13x1 13x9]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [14x1 14x5]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [14x1 14x2]
+            type: word!
+            upper: [14x1 14x5]
+          ]
+          [
+            expr: 'b
+            range: [14x3 14x5]
+            type: lit-word!
+            upper: [14x1 14x5]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [15x1 15x5]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [15x1 15x2]
+            type: word!
+            upper: [15x1 15x5]
+          ]
+          [
+            expr: :b
+            range: [15x3 15x5]
+            type: get-word!
+            upper: [15x1 15x5]
+          ]
+        ]
+        upper: [0x0 22x1]
+      ]
+      [
+        range: [17x1 17x6]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [17x1 17x2]
+            type: word!
+            upper: [17x1 17x6]
+          ]
+          [
+            expr: b
+            range: [17x3 17x4]
+            type: word!
+            upper: [17x1 17x6]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: unknown
+      ]
+      [
+        range: [17x6 17x7]
+        type: block!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [18x1 19x1]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [18x1 18x2]
+            type: word!
+            upper: [18x1 19x1]
+          ]
+          [
+            expr: b
+            range: [18x3 18x4]
+            type: word!
+            upper: [18x1 19x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: unknown
+      ]
+      [
+        range: [19x1 20x1]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [19x2 19x3]
+            type: word!
+            upper: [19x1 20x1]
+          ]
+          [
+            expr: bc
+            range: [19x4 19x6]
+            type: word!
+            upper: [19x1 20x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [19x1 20x1]
+        type: path!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [20x1 21x1]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [20x2 20x5]
+            type: word!
+            upper: [20x1 21x1]
+          ]
+          [
+            expr: de
+            range: [20x6 20x8]
+            type: word!
+            upper: [20x1 21x1]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [20x1 21x1]
+        type: path!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+      [
+        range: [21x1 21x10]
+        type: path!
+        nested: 
+        [
+          [
+            expr: abc
+            range: [21x1 21x4]
+            type: word!
+            upper: [21x1 21x10]
+          ]
+          [
+            expr: def
+            range: [21x5 21x8]
+            type: word!
+            upper: [21x1 21x10]
+          ]
+        ]
+        upper: [0x0 22x1]
+        error: only-opened
+      ]
+      [
+        range: [21x9 21x10]
+        type: word!
+        upper: [0x0 22x1]
+        error: only-closed
+      ]
+    ]
+    source: {a/b/c^/'a/
+    lines: [
+      {a/b/c^/'a/
+      1
+      7
+      17
+      27
+      40
+      55
+      65
+      77
+      90
+      103
+      116
+      128
+      150
+      159
+      164
+      169
+      170
+      177
+      182
+      189
+      198
+      208
+    ]
+  ]
+]
+================================================
+end path.txt
+
+
+begin rstring.txt
+================================================
+
+[
+  [
+    range: [0x0 12x1]
+    nested: 
+    [
+      [
+        expr: "^/^-{^^any string! is 
+        range: [1x1 3x3]
+        type: string!
+        upper: [0x0 12x1]
+      ]
+      [
+        expr: "haha"
+        range: [4x1 4x11]
+        type: string!
+        upper: [0x0 12x1]
+      ]
+      [
+        range: [5x1 8x1]
+        type: string!
+        upper: [0x0 12x1]
+        error: [type only-opened at 2x19]
+      ]
+      [
+        range: [9x1 12x1]
+        type: string!
+        upper: [0x0 12x1]
+        error: [type only-opened at 2x17]
+      ]
+    ]
+    source: {%^{^/^-^{^^any
+    lines: [
+      {%^{^/^-^{^^any
+      1
+      4
+      40
+      43
+      54
+      58
+      67
+      72
+      73
+      77
+      86
+      89
+    ]
+  ]
+]
+================================================
+end rstring.txt
+
+
+begin string.txt
+================================================
+
+[
+  [
+    range: [0x0 10x1]
+    nested: 
+    [
+      [
+        expr: "this is a string!"
+        range: [1x1 1x20]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        expr: "涓枃瀛楃"
+        range: [2x1 2x7]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        expr: "hello ^/1 world!"
+        range: [3x1 3x23]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        expr: {"ha ha"}
+        range: [4x1 4x12]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        expr: "test open {[(<"
+        range: [5x1 5x17]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        expr: "test close }])>"
+        range: [6x1 6x18]
+        type: string!
+        upper: [0x0 10x1]
+      ]
+      [
+        range: [7x8 7x18]
+        type: string!
+        upper: [0x0 10x1]
+        error: [type only-opened at 9x18]
+      ]
+      [
+        range: [8x1 9x1]
+        type: string!
+        upper: [0x0 10x1]
+        error: [type only-opened at 2x8]
+      ]
+      [
+        expr: newline
+        range: [9x1 9x8]
+        type: word!
+        upper: [0x0 10x1]
+      ]
+      [
+        range: [9x8 10x1]
+        type: string!
+        upper: [0x0 10x1]
+        error: [type only-opened at 1x2]
+      ]
+    ]
+    source: {"this is 
+    lines: [
+      {"this is 
+      1
+      21
+      28
+      51
+      63
+      80
+      98
+      116
+      123
+      132
+    ]
+  ]
+]
+================================================
+end string.txt
+
+
+begin tag.txt
+================================================
+
+[
+  [
+    range: [0x0 7x1]
+    nested: 
+    [
+      [
+        expr: <this is a tag!>
+        range: [1x1 1x17]
+        type: tag!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: <a (bb) [ccc] ;dddd
+        range: [2x1 3x7]
+        type: tag!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: <a b c d>
+        range: [4x1 4x10]
+        type: tag!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: >
+        range: [4x10 4x11]
+        type: word!
+        upper: [0x0 7x1]
+      ]
+      [
+        expr: <
+        range: [5x1 5x2]
+        type: word!
+        upper: [0x0 7x1]
+      ]
+      [
+        range: [6x1 7x1]
+        type: tag!
+        upper: [0x0 7x1]
+        error: unknown
+      ]
+    ]
+    source: {<this is 
+    lines: [
+      {<this is 
+      1
+      18
+      38
+      45
+      56
+      58
+      61
+    ]
+  ]
+]
+================================================
+end tag.txt
+
+
