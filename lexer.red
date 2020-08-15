@@ -145,9 +145,15 @@ lexer: context [
 							ntype = path!
 							type = set-path!
 						]
+						all [
+							ntype = map!
+							type = paren!
+						]
 					][
 						item: last stack
-						item/type: type
+						if type = set-path! [
+							item/type: type
+						]
 						if all [
 							p?
 							find [path! lit-path! get-path!] to word! ntype

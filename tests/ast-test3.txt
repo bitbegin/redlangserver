@@ -1498,3 +1498,317 @@ begin path-cases.txt
 end path-cases.txt
 
 
+begin map-cases.txt
+================================================
+
+[
+  [
+    range: [0x0 22x6]
+    nested: 
+    [
+      [
+        range: [2x1 2x18]
+        type: map!
+        nested: 
+        [
+          [
+            expr: this
+            range: [2x3 2x7]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: is
+            range: [2x8 2x10]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: a
+            range: [2x11 2x12]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+          [
+            expr: map!
+            range: [2x13 2x17]
+            type: word!
+            upper: [2x1 2x18]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [3x1 3x8]
+        type: map!
+        nested: 
+        [
+          [
+            range: [3x3 3x7]
+            type: paren!
+            nested: 
+            [
+              [
+                range: [3x4 3x6]
+                type: block!
+                nested: 
+                [
+                ]
+                upper: [3x3 3x7]
+              ]
+            ]
+            upper: [3x1 3x8]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [4x1 4x8]
+        type: block!
+        nested: 
+        [
+          [
+            range: [4x2 4x7]
+            type: paren!
+            nested: 
+            [
+              [
+                range: [4x3 4x6]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [4x2 4x7]
+              ]
+            ]
+            upper: [4x1 4x8]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [5x1 5x10]
+        type: map!
+        nested: 
+        [
+          [
+            range: [5x3 5x9]
+            type: map!
+            nested: 
+            [
+              [
+                range: [5x5 5x8]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [5x3 5x9]
+              ]
+            ]
+            upper: [5x1 5x10]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [7x1 15x2]
+        type: map!
+        nested: 
+        [
+          [
+            expr: a:
+            range: [8x2 8x4]
+            type: set-word!
+            upper: [7x1 15x2]
+          ]
+          [
+            range: [8x5 14x3]
+            type: map!
+            nested: 
+            [
+              [
+                expr: b:
+                range: [9x3 9x5]
+                type: set-word!
+                upper: [8x5 14x3]
+              ]
+              [
+                range: [9x6 13x4]
+                type: paren!
+                nested: 
+                [
+                  [
+                    expr: c:
+                    range: [10x4 10x6]
+                    type: set-word!
+                    upper: [9x6 13x4]
+                  ]
+                  [
+                    range: [10x7 12x5]
+                    type: block!
+                    nested: 
+                    [
+                      [
+                        expr: d:
+                        range: [11x5 11x7]
+                        type: set-word!
+                        upper: [10x7 12x5]
+                      ]
+                      [
+                        expr: "string!"
+                        range: [11x8 11x17]
+                        type: string!
+                        upper: [10x7 12x5]
+                      ]
+                    ]
+                    upper: [9x6 13x4]
+                  ]
+                ]
+                upper: [8x5 14x3]
+              ]
+            ]
+            upper: [7x1 15x2]
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [17x1 17x6]
+        type: block!
+        nested: 
+        [
+          [
+            range: [17x2 17x5]
+            type: map!
+            nested: 
+            [
+            ]
+            upper: [17x1 17x6]
+          ]
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+      [
+        range: [17x5 17x6]
+        type: paren!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [17x6 17x7]
+        type: block!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [18x1 18x8]
+        type: block!
+        nested: 
+        [
+          [
+            range: [18x2 18x8]
+            type: map!
+            nested: 
+            [
+              [
+                range: [18x4 18x7]
+                type: map!
+                nested: 
+                [
+                ]
+                upper: [18x2 18x8]
+              ]
+            ]
+            upper: [18x1 18x8]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [19x1 19x5]
+        type: map!
+        nested: 
+        [
+          [
+            range: [19x3 19x5]
+            type: block!
+            nested: 
+            [
+            ]
+            upper: [19x1 19x5]
+            error: only-opened
+          ]
+        ]
+        upper: [0x0 22x6]
+      ]
+      [
+        range: [20x1 20x4]
+        type: map!
+        nested: 
+        [
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+      [
+        range: [20x3 20x4]
+        type: block!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [20x4 20x5]
+        type: paren!
+        upper: [0x0 22x6]
+        error: only-closed
+      ]
+      [
+        range: [21x1 22x6]
+        type: map!
+        nested: 
+        [
+          [
+            expr: map!
+            range: [22x2 22x6]
+            type: word!
+            upper: [21x1 22x6]
+          ]
+        ]
+        upper: [0x0 22x6]
+        error: only-opened
+      ]
+    ]
+    source: {^/#(this i
+    lines: [
+      {^/#(this i
+      1
+      2
+      20
+      28
+      36
+      46
+      47
+      50
+      57
+      64
+      72
+      89
+      94
+      98
+      101
+      103
+      104
+      111
+      119
+      124
+      129
+      132
+    ]
+  ]
+]
+================================================
+end map-cases.txt
+
+

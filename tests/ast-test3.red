@@ -12,6 +12,7 @@ files: [
 	%binary-cases.txt
 	%tag-cases.txt
 	%path-cases.txt
+	%map-cases.txt
 ]
 
 
