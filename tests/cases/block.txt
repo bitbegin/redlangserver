@@ -1,0 +1,15 @@
+[
+	this is a block!
+]
+
+[(#(]
+[}]
+
+[match [[a]] block!]
+[
+	match 1
+]]
+
+[[
+	match 2
+]
