@@ -122,7 +122,7 @@ semantic: context [
 						return reduce ['last pc]
 					]
 					unless pc/1/nested [
-						if find reduce [block! map! paren!] pc/1/type [
+						if find [block! map! paren!] to word! pc/1/type [
 							return reduce ['empty pc]
 						]
 						return reduce ['one pc]
@@ -488,7 +488,7 @@ semantic: context [
 	update-upper: function [pc [block!] /remove?][
 		forall pc [
 			if all [
-				find reduce [block! paren! map!] pc/1/type
+				find [block! paren! map!] to word! pc/1/type
 				npc: pc/1/nested
 			][
 				forall npc [
@@ -1057,7 +1057,7 @@ completion: context [
 		collect*-func: function [npc [block!]][
 			forall npc [
 				if all [
-					find reduce [word! lit-word! refinement!] npc/1/type
+					find [word! lit-word! refinement!] to word! npc/1/type
 					npc/1/expr <> [/local]
 				][
 					collect* to word! npc/1/expr npc
@@ -1572,7 +1572,7 @@ completion: context [
 			type: rpc/1/type
 			rstring: to string! to word! rpc/1/expr
 			case [
-				find reduce [word! lit-word! refinement!] type [
+				find [word! lit-word! refinement!] to word! type [
 					kind: CompletionItemKind/Field
 				]
 				type = set-word! [
@@ -2188,7 +2188,7 @@ completion: context [
 				type: pc/1/type
 				lstr: pick lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y - 1 1
 				unless any [
-					find reduce [word! lit-word! get-word! path! lit-path! get-path! file!] type
+					find [word! lit-word! get-word! path! lit-path! get-path! file!] to word! type
 					all [
 						any [
 							type = path!
@@ -2203,9 +2203,10 @@ completion: context [
 			]
 		][return none]
 		type: pc/1/type
+		wtype: to word! type
 		lstr: pick lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y - 1 1
 		unless any [
-			find reduce [word! lit-word! get-word! path! lit-path! get-path! file!] type
+			find [word! lit-word! get-word! path! lit-path! get-path! file!] wtype
 			all [
 				any [
 					type = path!
@@ -2218,16 +2219,16 @@ completion: context [
 			return none
 		]
 		comps: clear last-comps
-		if type = 'file! [
+		if type = file! [
 			complete-file top pc comps
 			return comps
 		]
-		if find reduce [word! lit-word! get-word!] type [
+		if find [word! lit-word! get-word!] wtype [
 			complete-word top pc comps
 			return comps
 		]
 		if any [
-			find reduce [path! lit-path! get-path!] type
+			find [path! lit-path! get-path!] wtype
 			all [
 				any [
 					type = path!
@@ -2292,7 +2293,7 @@ completion: context [
 	get-block: function [pc [block!]][
 		ret: make block! 4
 		forall pc [
-			if find reduce [block! map! paren!] pc/1/type [
+			if find [block! map! paren!] to word! pc/1/type [
 				append/only ret make pc/1/expr
 					either pc/1/nested [
 						get-block pc/1/nested
@@ -2313,7 +2314,7 @@ completion: context [
 					refinement! = pc/1/type
 					'local = to word! pc/1/expr
 				][return ret]
-				if find reduce [block! map! paren!] pc/1/type [
+				if find [block! map! paren!] to word! pc/1/type [
 					append/only ret make pc/1/expr
 						either pc/1/nested [
 							get-func-block pc/1/nested
@@ -2371,7 +2372,7 @@ completion: context [
 								upper: specs/1/1/upper
 								upper/-1
 								word! = upper/-1/type
-								find reduce [func function] upper/-1/expr
+								find [func function] upper/-1/expr
 							][
 								ret: rejoin [string " is a function!^/" to string! fn " "]
 								append ret form-func-spec get-func-spec upper/1/nested
@@ -2384,7 +2385,7 @@ completion: context [
 							upper: specs/1/1/upper
 							upper/-1
 							word! = upper/-1/type
-							find reduce [func function] upper/-1/expr
+							find [func function] upper/-1/expr
 						][
 							return func-info fn get-func-spec upper/1/nested to string! pc/1/expr
 						]
