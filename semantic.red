@@ -175,7 +175,7 @@ semantic: context [
 		collect-errors*: function [pc [block!]][
 			while [not tail? pc] [
 				if error: pc/1/error [
-					msg: either block? error [error/type][error]
+					msg: either block? error [error/code][error]
 					range: reduce [pc/1/range/1 pc/1/range/1]
 					append ret make map! reduce [
 						'severity 1							;-- DiagnosticSeverity/Error

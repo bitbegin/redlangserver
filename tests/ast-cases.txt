@@ -802,7 +802,7 @@ begin mstring.txt
         range: [10x1 11x1]
         type: string!
         upper: [0x0 11x1]
-        error: [type only-opened at 2x21]
+        error: [code only-opened at 2x21]
       ]
     ]
     source: {^{^/^-this i
@@ -1555,7 +1555,7 @@ begin path.txt
           ]
         ]
         upper: [0x0 24x1]
-        error: [type slash-get extra word!]
+        error: [code slash-get type word!]
       ]
       [
         range: [22x1 22x6]
@@ -1681,13 +1681,13 @@ begin rstring.txt
         range: [5x1 8x1]
         type: string!
         upper: [0x0 12x1]
-        error: [type only-opened at 2x19]
+        error: [code only-opened at 2x19]
       ]
       [
         range: [9x1 12x1]
         type: string!
         upper: [0x0 12x1]
-        error: [type only-opened at 2x17]
+        error: [code only-opened at 2x17]
       ]
     ]
     source: {%^{^/^-^{^^any
@@ -1760,13 +1760,13 @@ begin string.txt
         range: [7x8 7x18]
         type: string!
         upper: [0x0 10x1]
-        error: [type only-opened at 9x18]
+        error: [code only-opened at 9x18]
       ]
       [
         range: [8x1 9x1]
         type: string!
         upper: [0x0 10x1]
-        error: [type only-opened at 2x8]
+        error: [code only-opened at 2x8]
       ]
       [
         expr: newline
@@ -1778,7 +1778,7 @@ begin string.txt
         range: [9x8 10x1]
         type: string!
         upper: [0x0 10x1]
-        error: [type only-opened at 1x2]
+        error: [code only-opened at 1x2]
       ]
     ]
     source: {"this is 

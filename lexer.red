@@ -295,7 +295,7 @@ lexer: context [
 							#"/" = str/1
 							#":" = str/2
 						][
-							err: reduce ['type 'slash-get 'extra type]
+							err: reduce ['code 'slash-get 'type type]
 							type: path!
 						][
 							err: 'unknown
@@ -320,7 +320,7 @@ lexer: context [
 									y: token/y + 1
 								]
 							]
-							add-node base x y type none reduce ['type 'only-opened 'at token]
+							add-node base x y type none reduce ['code 'only-opened 'at token]
 							throw y - 1
 						]
 						type = error! [
