@@ -123,7 +123,7 @@ lexer: context [
 			line	[integer!]
 			token
 			return:	[logic!]
-			/local ltype x y err
+			/local ltype x y err str
 		][
 			[prescan scan load open close error]
 			match-pair: func [
@@ -289,7 +289,18 @@ lexer: context [
 						throw y - 1
 					]
 					if in-path? [
-						match-pair token/x token/y yes none
+						either all [					;-- path! like a/:
+							token/x + 1 = token/y
+							str: back back input
+							#"/" = str/1
+							#":" = str/2
+						][
+							err: reduce ['type 'slash-get 'extra type]
+							type: path!
+						][
+							err: 'unknown
+						]
+						match-pair token/x token/y yes err
 						throw token/y - 1
 					]
 					

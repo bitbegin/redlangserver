@@ -1555,13 +1555,7 @@ begin path.txt
           ]
         ]
         upper: [0x0 24x1]
-        error: only-opened
-      ]
-      [
-        range: [21x9 21x10]
-        type: word!
-        upper: [0x0 24x1]
-        error: only-closed
+        error: [type slash-get extra word!]
       ]
       [
         range: [22x1 22x6]
