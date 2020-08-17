@@ -39,6 +39,7 @@ semantic: context [
 		find-expr* top
 	]
 
+	;-- IMPORTANT NOTE: token's range/y = last-char-pos + 1
 	position?: function [top [block!] line [integer!] column [integer!]][
 		position?*: function [pc [block!]][
 			forall pc [
@@ -49,6 +50,8 @@ semantic: context [
 						pc/1/range/1/y > column
 					]
 				][
+					;--  "   token"
+					;--    ^
 					return reduce ['head pc]
 				]
 				if any [
@@ -65,6 +68,8 @@ semantic: context [
 						return reduce ['top-err pc]
 					]
 					unless pc/2 [
+						;-- "token   "
+						;--        ^
 						return reduce ['tail pc]
 					]
 					if any [
@@ -74,6 +79,8 @@ semantic: context [
 							pc/2/range/1/y > column
 						]
 					][
+						;-- "token   token"
+						;--        ^
 						return reduce ['insert pc]
 					]
 				]
@@ -98,6 +105,8 @@ semantic: context [
 						pc/1/range/1/y = column
 						pc <> top
 					][
+						;-- "   token"
+						;--     ^
 						return reduce ['first pc]
 					]
 					if all [
@@ -111,20 +120,30 @@ semantic: context [
 							return reduce ['top-err pc]
 						]
 						unless pc/2 [
+							;-- "token   "
+							;--      ^
 							return reduce ['last pc]
 						]
 						if all [
 							pc/2/range/1/x = line
 							pc/2/range/1/y = column
 						][
+							;-- word[]
+							;--     ^
 							return reduce ['mid pc]
 						]
+						;-- "token   "
+						;--      ^
 						return reduce ['last pc]
 					]
 					unless pc/1/nested [
 						if find [block! map! paren!] to word! pc/1/type [
+							;-- "[]"
+							;--   ^
 							return reduce ['empty pc]
 						]
+						;-- "token"
+						;--   ^
 						return reduce ['one pc]
 					]
 					return position?* pc/1/nested
