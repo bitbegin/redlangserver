@@ -312,7 +312,7 @@ semantic: context [
 	]
 
 	add-source*: function [uri [string!] code [string!]][
-		if any [
+		either any [
 			not top: find-top uri
 			top/1/source <> code
 		][
