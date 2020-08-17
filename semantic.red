@@ -283,6 +283,34 @@ semantic: context [
 		]
 	]
 
+	update-diags: func [
+		top			[block!]
+		uri			[string!]
+		/local errors diags f nuri
+	][
+		unless top [exit]
+		if empty? errors: collect-errors top [exit]
+		diags: diagnostics
+		f: none
+		forall diags [
+			if any [
+				uri = nuri: diags/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
+				f: diags/1
+				break
+			]
+		]
+		either f [
+			f/diagnostics: errors
+		][
+			append diagnostics make map! reduce [
+				'uri uri
+				'diagnostics errors
+			]
+		]
+	]
+
 	add-source*: function [uri [string!] code [string!]][
 		if any [
 			not top: find-top uri
@@ -290,14 +318,11 @@ semantic: context [
 		][
 			write-log rejoin ["parse uri: " uri]
 			top: lexer/transcode code
-			unless empty? errors: collect-errors top [
-				append diagnostics make map! reduce [
-					'uri uri
-					'diagnostics errors
-				]
-			]
+			update-diags top uri
 			add-source-to-table uri top
 			add-include-file top
+		][
+			update-diags top uri
 		]
 	]
 
