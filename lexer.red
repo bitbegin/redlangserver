@@ -131,7 +131,7 @@ lexer: context [
 				y	[integer!]
 				p?	[logic!]
 				err
-				/local ntype range nstop item
+				/local ntype wtype range nstop item
 			][
 				nstop: none
 				forever [
@@ -139,6 +139,7 @@ lexer: context [
 						add-node base x y type none 'only-closed
 						break
 					]
+					wtype: to word! ntype
 					if any [											;-- match the upper's type
 						ntype = type
 						all [
@@ -149,6 +150,10 @@ lexer: context [
 							ntype = map!
 							type = paren!
 						]
+						all [
+							find [path! lit-path! get-path!] wtype
+							type = path!
+						]
 					][
 						item: last stack
 						if type = set-path! [
@@ -156,7 +161,7 @@ lexer: context [
 						]
 						if all [
 							p?
-							find [path! lit-path! get-path!] to word! ntype
+							find [path! lit-path! get-path!] wtype
 						][
 							unless err [err: 'unknown]
 							either item/error [
@@ -263,13 +268,25 @@ lexer: context [
 				]
 				error [
 					if type = path! [
-						either input/1 = #"/" [
-							err: 'slash
-						][
-							err: 'unknown
+						case [
+							input/1 = #"/" [			;-- eof after /
+								y: token/y + 1
+								err: 'slash
+							]
+							all [						;-- slash
+								input/1
+								#"/" = pick back input 1
+							][
+								y: token/y
+								err: 'slash
+							]
+							true [
+								y: token/y + 1
+								err: 'unknown
+							]
 						]
-						match-pair token/x token/y + 1 yes err
-						throw token/y
+						match-pair token/x y yes err
+						throw y - 1
 					]
 					if in-path? [
 						match-pair token/x token/y yes none

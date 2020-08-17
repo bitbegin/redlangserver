@@ -899,7 +899,7 @@ begin path.txt
 
 [
   [
-    range: [0x0 22x1]
+    range: [0x0 24x1]
     nested: 
     [
       [
@@ -926,7 +926,7 @@ begin path.txt
             upper: [1x1 1x6]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [2x1 2x10]
@@ -952,7 +952,7 @@ begin path.txt
             upper: [2x1 2x10]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [3x1 3x10]
@@ -978,7 +978,7 @@ begin path.txt
             upper: [3x1 3x10]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [4x1 4x13]
@@ -1004,7 +1004,7 @@ begin path.txt
             upper: [4x1 4x13]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [5x1 5x15]
@@ -1030,7 +1030,7 @@ begin path.txt
             upper: [5x1 5x15]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [6x1 6x10]
@@ -1064,7 +1064,7 @@ begin path.txt
             upper: [6x1 6x10]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [7x1 7x12]
@@ -1110,7 +1110,7 @@ begin path.txt
             upper: [7x1 7x12]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [8x1 8x13]
@@ -1156,7 +1156,7 @@ begin path.txt
             upper: [8x1 8x13]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [9x1 9x13]
@@ -1202,7 +1202,7 @@ begin path.txt
             upper: [9x1 9x13]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [10x1 10x13]
@@ -1248,7 +1248,7 @@ begin path.txt
             upper: [10x1 10x13]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [11x1 11x12]
@@ -1288,7 +1288,7 @@ begin path.txt
             upper: [11x1 11x12]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [12x1 12x22]
@@ -1376,7 +1376,7 @@ begin path.txt
             upper: [12x1 12x22]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [13x1 13x9]
@@ -1402,7 +1402,7 @@ begin path.txt
             upper: [13x1 13x9]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [14x1 14x5]
@@ -1422,7 +1422,7 @@ begin path.txt
             upper: [14x1 14x5]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
         range: [15x1 15x5]
@@ -1442,10 +1442,10 @@ begin path.txt
             upper: [15x1 15x5]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
       ]
       [
-        range: [17x1 17x6]
+        range: [17x1 17x5]
         type: path!
         nested: 
         [
@@ -1453,26 +1453,28 @@ begin path.txt
             expr: a
             range: [17x1 17x2]
             type: word!
-            upper: [17x1 17x6]
+            upper: [17x1 17x5]
           ]
           [
             expr: b
             range: [17x3 17x4]
             type: word!
-            upper: [17x1 17x6]
+            upper: [17x1 17x5]
           ]
         ]
-        upper: [0x0 22x1]
-        error: unknown
+        upper: [0x0 24x1]
+        error: slash
       ]
       [
-        range: [17x6 17x7]
+        range: [17x5 17x7]
         type: block!
-        upper: [0x0 22x1]
-        error: only-closed
+        nested: 
+        [
+        ]
+        upper: [0x0 24x1]
       ]
       [
-        range: [18x1 19x1]
+        range: [18x1 18x5]
         type: path!
         nested: 
         [
@@ -1480,20 +1482,20 @@ begin path.txt
             expr: a
             range: [18x1 18x2]
             type: word!
-            upper: [18x1 19x1]
+            upper: [18x1 18x5]
           ]
           [
             expr: b
             range: [18x3 18x4]
             type: word!
-            upper: [18x1 19x1]
+            upper: [18x1 18x5]
           ]
         ]
-        upper: [0x0 22x1]
-        error: unknown
+        upper: [0x0 24x1]
+        error: slash
       ]
       [
-        range: [19x1 20x1]
+        range: [19x1 19x7]
         type: lit-path!
         nested: 
         [
@@ -1501,26 +1503,20 @@ begin path.txt
             expr: a
             range: [19x2 19x3]
             type: word!
-            upper: [19x1 20x1]
+            upper: [19x1 19x7]
           ]
           [
             expr: bc
             range: [19x4 19x6]
             type: word!
-            upper: [19x1 20x1]
+            upper: [19x1 19x7]
           ]
         ]
-        upper: [0x0 22x1]
-        error: only-opened
+        upper: [0x0 24x1]
+        error: slash
       ]
       [
-        range: [19x1 20x1]
-        type: path!
-        upper: [0x0 22x1]
-        error: only-closed
-      ]
-      [
-        range: [20x1 21x1]
+        range: [20x1 20x9]
         type: get-path!
         nested: 
         [
@@ -1528,23 +1524,17 @@ begin path.txt
             expr: abc
             range: [20x2 20x5]
             type: word!
-            upper: [20x1 21x1]
+            upper: [20x1 20x9]
           ]
           [
             expr: de
             range: [20x6 20x8]
             type: word!
-            upper: [20x1 21x1]
+            upper: [20x1 20x9]
           ]
         ]
-        upper: [0x0 22x1]
-        error: only-opened
-      ]
-      [
-        range: [20x1 21x1]
-        type: path!
-        upper: [0x0 22x1]
-        error: only-closed
+        upper: [0x0 24x1]
+        error: slash
       ]
       [
         range: [21x1 21x10]
@@ -1564,14 +1554,79 @@ begin path.txt
             upper: [21x1 21x10]
           ]
         ]
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
         error: only-opened
       ]
       [
         range: [21x9 21x10]
         type: word!
-        upper: [0x0 22x1]
+        upper: [0x0 24x1]
         error: only-closed
+      ]
+      [
+        range: [22x1 22x6]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [22x1 22x2]
+            type: word!
+            upper: [22x1 22x6]
+          ]
+          [
+            expr: b
+            range: [22x3 22x4]
+            type: word!
+            upper: [22x1 22x6]
+          ]
+        ]
+        upper: [0x0 24x1]
+        error: only-opened
+      ]
+      [
+        range: [22x5 22x6]
+        type: word!
+        upper: [0x0 24x1]
+        error: only-closed
+      ]
+      [
+        expr: :d
+        range: [22x6 22x8]
+        type: get-word!
+        upper: [0x0 24x1]
+      ]
+      [
+        range: [23x1 23x7]
+        type: set-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [23x1 23x2]
+            type: word!
+            upper: [23x1 23x7]
+          ]
+          [
+            expr: b
+            range: [23x3 23x4]
+            type: word!
+            upper: [23x1 23x7]
+          ]
+          [
+            expr: 1
+            range: [23x5 23x6]
+            type: integer!
+            upper: [23x1 23x7]
+          ]
+        ]
+        upper: [0x0 24x1]
+      ]
+      [
+        expr: 2
+        range: [23x7 23x8]
+        type: integer!
+        upper: [0x0 24x1]
       ]
     ]
     source: {a/b/c^/'a/
@@ -1599,6 +1654,8 @@ begin path.txt
       189
       198
       208
+      216
+      224
     ]
   ]
 ]

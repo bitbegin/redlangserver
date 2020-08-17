@@ -19,3 +19,5 @@ a/b/
 'a/bc/
 :abc/de/
 abc/def/:
+a/b/c:d
+a/b/1:2
