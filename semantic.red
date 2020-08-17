@@ -1123,14 +1123,14 @@ completion: context [
 				all [
 					word! = pc/1/type
 					find [context object] pc/1/expr
-					block! = pc/2/expr
+					block! = pc/2/type
 					spec: pc/2
 				]
 				all [
 					word! = pc/1/type
 					pc/1/expr = 'make
 					pc/3
-					block! = pc/3/expr
+					block! = pc/3/type
 					spec: pc/3
 					any [
 						all [
@@ -1932,7 +1932,7 @@ completion: context [
 						]
 					][
 						if word = to word! npc/1/expr [
-							if npc/1/expr = [/local][exit]
+							if npc/1/expr = /local [exit]
 							repend/only result ['ref npc make block! 1]
 							unless *all? [return result]
 						]
