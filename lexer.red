@@ -53,6 +53,7 @@ lexer: context [
 		append range pos-line? stack e
 		range
 	]
+	;-- Range in lsp is zero-based position, use /keep for print
 	form-range: function [range [block!] return: [map!] /keep][
 		make map! reduce [
 			'start make map! reduce [
