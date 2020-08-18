@@ -1077,7 +1077,7 @@ completion: context [
 			forall npc [
 				if all [
 					find [word! lit-word! refinement!] to word! npc/1/type
-					npc/1/expr <> [/local]
+					npc/1/expr <> /local
 				][
 					collect* to word! npc/1/expr npc
 				]
@@ -2313,7 +2313,7 @@ completion: context [
 		ret: make block! 4
 		forall pc [
 			if find [block! map! paren!] to word! pc/1/type [
-				append/only ret make pc/1/expr
+				append/only ret make pc/1/type
 					either pc/1/nested [
 						get-block pc/1/nested
 					][[]]
@@ -2334,7 +2334,7 @@ completion: context [
 					'local = to word! pc/1/expr
 				][return ret]
 				if find [block! map! paren!] to word! pc/1/type [
-					append/only ret make pc/1/expr
+					append/only ret make pc/1/type
 						either pc/1/nested [
 							get-func-block pc/1/nested
 						][[]]
@@ -2391,7 +2391,7 @@ completion: context [
 								upper: specs/1/1/upper
 								upper/-1
 								word! = upper/-1/type
-								find [func function] upper/-1/expr
+								find [func function] fn: upper/-1/expr
 							][
 								ret: rejoin [string " is a function!^/" to string! fn " "]
 								append ret form-func-spec get-func-spec upper/1/nested
@@ -2404,7 +2404,7 @@ completion: context [
 							upper: specs/1/1/upper
 							upper/-1
 							word! = upper/-1/type
-							find [func function] upper/-1/expr
+							find [func function] fn: upper/-1/expr
 						][
 							return func-info fn get-func-spec upper/1/nested to string! pc/1/expr
 						]
@@ -2729,7 +2729,7 @@ completion: context [
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2 path: ret/3
 		if find literal-disp type: pc/1/type [
-			if file! = pc/1/type [
+			if file! = type [
 				return rejoin [mold type " : " form/part pc/1/expr 60]
 			]
 			return rejoin [mold type " : " mold/part pc/1/expr 60]
