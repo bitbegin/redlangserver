@@ -2743,18 +2743,21 @@ completion: context [
 
 	definition: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
-		top: ret/1 pc: ret/2 path: ret/3
+		top: ret/1 pc: ret/2
+		upper: pc/1/upper
+		in-path?: no
+		if upper/1/type [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
+		]
+		if in-path? [
+			unless path: gain-path pc [return none]
+			if 1 = length? path [
+				return definition-word top pc to word! path/1
+			]
+			return definition-path top pc path
+		]
 		if find literal-disp pc/1/type [
 			return none
-		]
-		if 1 = length? path [
-			return definition-word top pc to word! path/1
-		]
-		if all [
-			pc/1/expr
-			any-path? pc/1/expr
-		][
-			return definition-path top pc path
 		]
 		definition-word top pc to word! pc/1/expr
 	]
