@@ -843,7 +843,6 @@ completion: context [
 
 	complete-file: function [top [block!] pc [block!] comps [block!]][
 		range: lexer/form-range pc/1/range
-		str: to string! pc/1/expr
 		insert str: to string! file: pc/1/expr "%"
 		if error? result: try [red-complete-ctx/red-complete-file str no][
 			exit
@@ -2474,7 +2473,7 @@ completion: context [
 				upper: pc/1/upper
 				upper/-1
 				upper/-1/type = word!
-				find reduce [func function has] upper/-1/expr
+				find [func function has] upper/-1/expr
 			][
 				if upper/-1/expr = 'has [
 					return rejoin [string " is a local variable."]
