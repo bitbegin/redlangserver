@@ -276,7 +276,7 @@ lexer: context [
 							]
 							all [						;-- slash
 								input/1
-								#"/" = pick back input 1
+								#"/" = input/-1
 							][
 								y: token/y
 								err: 'slash
@@ -292,9 +292,8 @@ lexer: context [
 					if in-path? [
 						either all [					;-- path! like a/:
 							token/x + 1 = token/y
-							str: back back input
-							#"/" = str/1
-							#":" = str/2
+							#"/" = input/-2
+							#":" = input/-1
 						][
 							err: reduce ['code 'slash-get 'type type]
 							type: path!
