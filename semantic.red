@@ -100,10 +100,16 @@ semantic: context [
 						]
 					]
 				][
+					in-path?: no
+					type: none
+					if pc/1/type [
+						in-path?: find [path! lit-path! get-path! set-path!] type: to word! pc/1/type
+					]
 					if all [
 						pc/1/range/1/x = line
 						pc/1/range/1/y = column
 						pc <> top
+						not in-path?
 					][
 						;-- "   token"
 						;--     ^
@@ -112,6 +118,7 @@ semantic: context [
 					if all [
 						pc/1/range/2/x = line
 						pc/1/range/2/y = column
+						not in-path?
 					][
 						if pc = top [
 							if pc/1/nested [
@@ -137,7 +144,7 @@ semantic: context [
 						return reduce ['last pc]
 					]
 					unless pc/1/nested [
-						if find [block! map! paren!] to word! pc/1/type [
+						if find [block! map! paren!] type [
 							;-- "[]"
 							;--   ^
 							return reduce ['empty pc]
@@ -1980,7 +1987,7 @@ completion: context [
 			return make block! 1
 		]
 		if empty? specs [return specs]
-		if empty? path/2 [
+		if path/2 = '/ [
 			nspecs: make block! 4
 			forall specs [
 				switch specs/1/1 [
@@ -2009,7 +2016,7 @@ completion: context [
 			slash-end?: no
 			either path/2 [
 				end?: no
-				if empty? path/2 [
+				if path/2 = '/ [
 					slash-end?: yes
 				]
 			][
@@ -2055,7 +2062,7 @@ completion: context [
 			specs: nspecs
 			any [
 				tail? path: next path
-				empty? path/1
+				path/1 = '/
 			]
 		]
 		specs
@@ -2645,63 +2652,8 @@ completion: context [
 		]
 		pc: pcs/2
 		unless find [one first last mid] pcs/1 [return none]
-		if find [one first last] pcs/1 [
-			unless find hover-types pc/1/type [
-				return none
-			]
-		]
-		path: none
-		if all [
-			pc/1/expr
-			any-path? pc/1/expr
-		][
-			pos: lexer/line-pos? top/1/lines line column
-			spos: lexer/line-pos? top/1/lines pc/1/range/1/x pc/1/range/1/y
-			epos: lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y
-			path: copy/part spos epos
-		]
-		switch pcs/1 [
-			one		[
-				if all [
-					pc/1/expr
-					any-path? pc/1/expr
-					npos: find/part pos "/" pc/1/range/4 - column
-				][
-					path: copy/part spos npos
-				]
-			]
-			first	[
-				if all [
-					pc/1/expr
-					any-path? pc/1/expr
-					npos: find path "/"
-				][
-					path: copy/part path npos
-				]
-			]
-			last	[]
-			mid		[
-				unless find hover-types pc/1/type [
-					pc: next pc
-					unless find hover-types pc/1/type [
-						return none
-					]
-					if all [
-						pc/1/expr
-						any-path? pc/1/expr
-					][
-						spos: lexer/line-pos? top/1/lines pc/1/range/1/x pc/1/range/1/y
-						epos: lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y
-						path: copy/part spos epos
-						if npos: find path "/" [
-							path: copy/part path npos
-						]
-					]
-				]
-			]
-		]
-		if path [path: split path "/"]
-		return reduce [top pc path]
+		unless find hover-types pc/1/type [return none]
+		return reduce [top pc]
 	]
 
 	hover-keyword: function [word [word!]][
@@ -2715,32 +2667,40 @@ completion: context [
 	]
 
 	hover-keypath: function [path [block!]][
-		forall path [
-			if error? word: try [to word! path/1][
-				return none
-			]
-			path/1: word
+		if error? path: try [to path! path][return none]
+		system-words/get-path-info no path
+	]
+
+	gain-path: function [pc [block!]][
+		res: make block! 4
+		forever [
+			unless pc/1/expr [return none]
+			insert res pc/1/expr
+			if head? pc [break]
+			pc: back pc
 		]
-		system-words/get-path-info no to path! path
+		res
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
-		top: ret/1 pc: ret/2 path: ret/3
+		top: ret/1 pc: ret/2
 		if find literal-disp type: pc/1/type [
 			if file! = type [
 				return rejoin [mold type " : " form/part pc/1/expr 60]
 			]
 			return rejoin [mold type " : " mold/part pc/1/expr 60]
 		]
-		if 1 = length? path [
-			if ret: hover-word top pc word: to word! path/1 [return ret]
-			return hover-keyword word
-		]
+		upper: pc/1/upper
 		if all [
-			pc/1/expr
-			any-path? pc/1/expr
+			upper/1/type
+			find [path! lit-path! get-path! set-path!] to word! upper/1/type
 		][
+			unless path: gain-path pc [return none]
+			if 1 = length? path [
+				if ret: hover-word top pc word: to word! path/1 [return ret]
+				return hover-keyword word
+			]
 			if ret: hover-path top pc path [return ret]
 			return hover-keypath path
 		]
