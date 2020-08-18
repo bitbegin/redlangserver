@@ -2685,17 +2685,12 @@ completion: context [
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2
-		if find literal-disp type: pc/1/type [
-			if file! = type [
-				return rejoin [mold type " : " form/part pc/1/expr 60]
-			]
-			return rejoin [mold type " : " mold/part pc/1/expr 60]
-		]
 		upper: pc/1/upper
-		if all [
-			upper/1/type
-			find [path! lit-path! get-path! set-path!] to word! upper/1/type
-		][
+		in-path?: no
+		if upper/1/type [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
+		]
+		if in-path? [
 			unless path: gain-path pc [return none]
 			if 1 = length? path [
 				if ret: hover-word top pc word: to word! path/1 [return ret]
@@ -2703,6 +2698,12 @@ completion: context [
 			]
 			if ret: hover-path top pc path [return ret]
 			return hover-keypath path
+		]
+		if find literal-disp type: pc/1/type [
+			if file! = type [
+				return rejoin [mold type " : " form/part pc/1/expr 60]
+			]
+			return rejoin [mold type " : " mold/part pc/1/expr 60]
 		]
 		if ret: hover-word top pc word: to word! pc/1/expr [return ret]
 		hover-keyword word
