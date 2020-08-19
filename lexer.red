@@ -403,7 +403,7 @@ lexer: context [
 		lines: make block! 64
 		parse-line lines src
 		range: make block! 1
-		append range 0x0
+		append range 1x1
 		append range pos-line? lines tail src
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack

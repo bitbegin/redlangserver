@@ -3,91 +3,91 @@ begin binary.txt
 
 [
   [
-    range: [0x0 15x1]
+    range: [1x1 15x1]
     nested: 
     [
       [
         expr: #{12345678}
         range: [1x1 1x13]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         expr: #{12345678}
         range: [2x1 3x6]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [4x8 4x13]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: invalid
       ]
       [
         expr: #{01020304}
         range: [5x1 5x16]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [6x6 6x7]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: invalid
       ]
       [
         expr: #{55}
         range: [7x1 7x13]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [8x7 8x9]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: invalid
       ]
       [
         expr: #{CDEF}
         range: [9x1 9x10]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [10x7 10x10]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: invalid
       ]
       [
         expr: #{61}
         range: [11x1 11x10]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [12x7 12x8]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: invalid
       ]
       [
         expr: #{01FF}
         range: [13x1 13x8]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
       ]
       [
         range: [13x8 13x9]
         type: string!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: only-closed
       ]
       [
         range: [14x1 15x1]
         type: binary!
-        upper: [0x0 15x1]
+        upper: [1x1 15x1]
         error: not-closed
       ]
     ]
@@ -121,7 +121,7 @@ begin block.txt
 
 [
   [
-    range: [0x0 16x1]
+    range: [1x1 16x1]
     nested: 
     [
       [
@@ -154,7 +154,7 @@ begin block.txt
             upper: [1x1 3x2]
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
       ]
       [
         range: [5x1 5x6]
@@ -180,7 +180,7 @@ begin block.txt
             error: only-opened
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
       ]
       [
         range: [6x1 6x4]
@@ -194,7 +194,7 @@ begin block.txt
             error: only-closed
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
       ]
       [
         range: [8x1 8x21]
@@ -236,7 +236,7 @@ begin block.txt
             upper: [8x1 8x21]
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
       ]
       [
         range: [9x1 11x2]
@@ -256,12 +256,12 @@ begin block.txt
             upper: [9x1 11x2]
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
       ]
       [
         range: [11x2 11x3]
         type: block!
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
         error: only-closed
       ]
       [
@@ -290,7 +290,7 @@ begin block.txt
             upper: [13x1 16x1]
           ]
         ]
-        upper: [0x0 16x1]
+        upper: [1x1 16x1]
         error: only-opened
       ]
     ]
@@ -325,91 +325,91 @@ begin char.txt
 
 [
   [
-    range: [0x0 17x1]
+    range: [1x1 17x1]
     nested: 
     [
       [
         expr: #"^@"
         range: [1x1 1x4]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
       ]
       [
         expr: #"0"
         range: [2x1 2x9]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
       ]
       [
         expr: #"銊?
         range: [3x1 3x11]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
       ]
       [
         range: [4x1 4x13]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [5x1 5x15]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [6x1 6x17]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [7x1 7x19]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [8x1 8x21]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         expr: #"^/"
         range: [9x1 9x11]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
       ]
       [
         range: [10x1 10x14]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [11x1 11x7]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [12x1 12x12]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [13x1 14x3]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: invalid
       ]
       [
         range: [15x1 17x1]
         type: char!
-        upper: [0x0 17x1]
+        upper: [1x1 17x1]
         error: not-closed
       ]
     ]
@@ -445,7 +445,7 @@ begin map.txt
 
 [
   [
-    range: [0x0 22x6]
+    range: [1x1 22x6]
     nested: 
     [
       [
@@ -478,7 +478,7 @@ begin map.txt
             upper: [2x1 2x18]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [3x1 3x8]
@@ -502,7 +502,7 @@ begin map.txt
             upper: [3x1 3x8]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [4x1 4x8]
@@ -526,7 +526,7 @@ begin map.txt
             upper: [4x1 4x8]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [5x1 5x10]
@@ -550,7 +550,7 @@ begin map.txt
             upper: [5x1 5x10]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [7x1 15x2]
@@ -612,7 +612,7 @@ begin map.txt
             upper: [7x1 15x2]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [17x1 17x6]
@@ -628,19 +628,19 @@ begin map.txt
             upper: [17x1 17x6]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-opened
       ]
       [
         range: [17x5 17x6]
         type: paren!
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-closed
       ]
       [
         range: [17x6 17x7]
         type: block!
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-closed
       ]
       [
@@ -666,7 +666,7 @@ begin map.txt
             error: only-opened
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [19x1 19x5]
@@ -683,7 +683,7 @@ begin map.txt
             error: only-opened
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
       ]
       [
         range: [20x1 20x4]
@@ -691,19 +691,19 @@ begin map.txt
         nested: 
         [
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-opened
       ]
       [
         range: [20x3 20x4]
         type: block!
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-closed
       ]
       [
         range: [20x4 20x5]
         type: paren!
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-closed
       ]
       [
@@ -718,7 +718,7 @@ begin map.txt
             upper: [21x1 22x6]
           ]
         ]
-        upper: [0x0 22x6]
+        upper: [1x1 22x6]
         error: only-opened
       ]
     ]
@@ -759,20 +759,20 @@ begin mixure.red
 
 [
   [
-    range: [0x0 78x1]
+    range: [1x1 78x1]
     nested: 
     [
       [
         expr: Red
         range: [1x1 1x4]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: he:
         range: [1x5 1x8]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [1x9 1x11]
@@ -780,31 +780,31 @@ begin mixure.red
         nested: 
         [
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: a:
         range: [3x1 3x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: 'test
         range: [3x4 3x9]
         type: lit-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: b:
         range: [4x1 4x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: context
         range: [4x4 4x11]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [4x12 33x2]
@@ -1272,13 +1272,13 @@ begin mixure.red
             upper: [4x12 33x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: l:
         range: [35x1 35x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [35x4 35x15]
@@ -1310,31 +1310,31 @@ begin mixure.red
             upper: [35x4 35x15]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: o:
         range: [36x1 36x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: l
         range: [36x4 36x5]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: r:
         range: [38x1 38x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: func
         range: [38x4 38x8]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [38x9 44x2]
@@ -1452,7 +1452,7 @@ begin mixure.red
             upper: [38x9 44x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [44x2 48x2]
@@ -1552,19 +1552,19 @@ begin mixure.red
             upper: [44x2 48x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: s:
         range: [50x1 50x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: function
         range: [50x4 50x12]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [50x13 50x56]
@@ -1632,7 +1632,7 @@ begin mixure.red
             upper: [50x13 50x56]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [50x56 56x2]
@@ -1744,31 +1744,31 @@ begin mixure.red
             upper: [50x56 56x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: fff:
         range: [58x1 58x5]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: 3
         range: [58x6 58x7]
         type: integer!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: ft:
         range: [60x1 60x4]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: func
         range: [60x5 60x9]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [60x10 60x104]
@@ -1918,7 +1918,7 @@ begin mixure.red
             upper: [60x10 60x104]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [60x104 63x2]
@@ -1996,19 +1996,19 @@ begin mixure.red
             upper: [60x104 63x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: fh1:
         range: [65x1 65x5]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: has
         range: [65x6 65x9]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [65x10 65x20]
@@ -2034,19 +2034,19 @@ begin mixure.red
             upper: [65x10 65x20]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: fh2:
         range: [66x1 66x5]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: has
         range: [66x6 66x9]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [66x10 66x15]
@@ -2066,7 +2066,7 @@ begin mixure.red
             upper: [66x10 66x15]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [66x15 66x17]
@@ -2074,25 +2074,25 @@ begin mixure.red
         nested: 
         [
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: z:
         range: [68x1 68x3]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: z
         range: [68x4 68x5]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: blk:
         range: [70x1 70x5]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [70x6 70x12]
@@ -2112,19 +2112,19 @@ begin mixure.red
             upper: [70x6 70x12]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: ctx:
         range: [71x1 71x5]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: context
         range: [71x6 71x13]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [71x14 73x2]
@@ -2144,49 +2144,49 @@ begin mixure.red
             upper: [71x14 73x2]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: do
         range: [75x1 75x3]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: bind
         range: [75x4 75x8]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: blk
         range: [75x9 75x12]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: ctx
         range: [75x13 75x16]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: if
         range: [77x1 77x3]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: all
         range: [77x4 77x7]
         type: word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         expr: tt:
         range: [77x8 77x11]
         type: set-word!
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [77x12 77x30]
@@ -2224,7 +2224,7 @@ begin mixure.red
             upper: [77x12 77x30]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
       [
         range: [77x30 77x39]
@@ -2244,7 +2244,7 @@ begin mixure.red
             upper: [77x30 77x39]
           ]
         ]
-        upper: [0x0 78x1]
+        upper: [1x1 78x1]
       ]
     ]
     source: {Red he: [
@@ -2340,49 +2340,49 @@ begin mstring.txt
 
 [
   [
-    range: [0x0 11x1]
+    range: [1x1 11x1]
     nested: 
     [
       [
         expr: "^/^-this is a multili
         range: [1x1 3x2]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
       ]
       [
         expr: {^/^-hello {"1"} world
         range: [4x1 6x2]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
       ]
       [
         expr: {{}^}"}
         range: [7x1 7x9]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
       ]
       [
         expr: "{{{{match}}}}"
         range: [8x1 8x16]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
       ]
       [
         expr: "not {{{{match}}}}"
         range: [9x1 9x20]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
       ]
       [
         range: [9x20 9x21]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
         error: only-closed
       ]
       [
         range: [10x1 11x1]
         type: string!
-        upper: [0x0 11x1]
+        upper: [1x1 11x1]
         error: [code only-opened at 2x21]
       ]
     ]
@@ -2412,50 +2412,50 @@ begin number.txt
 
 [
   [
-    range: [0x0 7x1]
+    range: [1x1 7x1]
     nested: 
     [
       [
         expr: 123
         range: [1x1 1x4]
         type: integer!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         range: [2x1 2x4]
         type: integer!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
         error: unknown
       ]
       [
         expr: abc
         range: [2x4 2x7]
         type: word!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: 123.0
         range: [3x1 3x6]
         type: float!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: 123000.0
         range: [4x1 4x6]
         type: float!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: 0.000123
         range: [5x1 5x8]
         type: float!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: 123000.0
         range: [6x1 6x8]
         type: float!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
     ]
     source: "123^/123ab
@@ -2480,7 +2480,7 @@ begin path.txt
 
 [
   [
-    range: [0x0 24x1]
+    range: [1x1 24x1]
     nested: 
     [
       [
@@ -2507,7 +2507,7 @@ begin path.txt
             upper: [1x1 1x6]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [2x1 2x10]
@@ -2533,7 +2533,7 @@ begin path.txt
             upper: [2x1 2x10]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [3x1 3x10]
@@ -2559,7 +2559,7 @@ begin path.txt
             upper: [3x1 3x10]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [4x1 4x13]
@@ -2585,7 +2585,7 @@ begin path.txt
             upper: [4x1 4x13]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [5x1 5x15]
@@ -2611,7 +2611,7 @@ begin path.txt
             upper: [5x1 5x15]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [6x1 6x10]
@@ -2645,7 +2645,7 @@ begin path.txt
             upper: [6x1 6x10]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [7x1 7x12]
@@ -2691,7 +2691,7 @@ begin path.txt
             upper: [7x1 7x12]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [8x1 8x13]
@@ -2737,7 +2737,7 @@ begin path.txt
             upper: [8x1 8x13]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [9x1 9x13]
@@ -2783,7 +2783,7 @@ begin path.txt
             upper: [9x1 9x13]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [10x1 10x13]
@@ -2829,7 +2829,7 @@ begin path.txt
             upper: [10x1 10x13]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [11x1 11x12]
@@ -2869,7 +2869,7 @@ begin path.txt
             upper: [11x1 11x12]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [12x1 12x22]
@@ -2957,7 +2957,7 @@ begin path.txt
             upper: [12x1 12x22]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [13x1 13x9]
@@ -2983,7 +2983,7 @@ begin path.txt
             upper: [13x1 13x9]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [14x1 14x5]
@@ -3003,7 +3003,7 @@ begin path.txt
             upper: [14x1 14x5]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [15x1 15x5]
@@ -3023,7 +3023,7 @@ begin path.txt
             upper: [15x1 15x5]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [17x1 17x5]
@@ -3043,7 +3043,7 @@ begin path.txt
             upper: [17x1 17x5]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: slash
       ]
       [
@@ -3052,7 +3052,7 @@ begin path.txt
         nested: 
         [
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [18x1 18x5]
@@ -3072,7 +3072,7 @@ begin path.txt
             upper: [18x1 18x5]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: slash
       ]
       [
@@ -3093,7 +3093,7 @@ begin path.txt
             upper: [19x1 19x7]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: slash
       ]
       [
@@ -3114,7 +3114,7 @@ begin path.txt
             upper: [20x1 20x9]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: slash
       ]
       [
@@ -3135,7 +3135,7 @@ begin path.txt
             upper: [21x1 21x10]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: [code slash-get type word!]
       ]
       [
@@ -3156,20 +3156,20 @@ begin path.txt
             upper: [22x1 22x6]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: only-opened
       ]
       [
         range: [22x5 22x6]
         type: word!
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
         error: only-closed
       ]
       [
         expr: :d
         range: [22x6 22x8]
         type: get-word!
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         range: [23x1 23x7]
@@ -3195,13 +3195,13 @@ begin path.txt
             upper: [23x1 23x7]
           ]
         ]
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
       [
         expr: 2
         range: [23x7 23x8]
         type: integer!
-        upper: [0x0 24x1]
+        upper: [1x1 24x1]
       ]
     ]
     source: {a/b/c^/'a/
@@ -3243,31 +3243,31 @@ begin rstring.txt
 
 [
   [
-    range: [0x0 12x1]
+    range: [1x1 12x1]
     nested: 
     [
       [
         expr: "^/^-{^^any string! is 
         range: [1x1 3x3]
         type: string!
-        upper: [0x0 12x1]
+        upper: [1x1 12x1]
       ]
       [
         expr: "haha"
         range: [4x1 4x11]
         type: string!
-        upper: [0x0 12x1]
+        upper: [1x1 12x1]
       ]
       [
         range: [5x1 8x1]
         type: string!
-        upper: [0x0 12x1]
+        upper: [1x1 12x1]
         error: [code only-opened at 2x19]
       ]
       [
         range: [9x1 12x1]
         type: string!
-        upper: [0x0 12x1]
+        upper: [1x1 12x1]
         error: [code only-opened at 2x17]
       ]
     ]
@@ -3298,67 +3298,67 @@ begin string.txt
 
 [
   [
-    range: [0x0 10x1]
+    range: [1x1 10x1]
     nested: 
     [
       [
         expr: "this is a string!"
         range: [1x1 1x20]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         expr: "涓枃瀛楃"
         range: [2x1 2x7]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         expr: "hello ^/1 world!"
         range: [3x1 3x23]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         expr: {"ha ha"}
         range: [4x1 4x12]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         expr: "test open {[(<"
         range: [5x1 5x17]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         expr: "test close }])>"
         range: [6x1 6x18]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         range: [7x8 7x18]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
         error: [code only-opened at 9x18]
       ]
       [
         range: [8x1 9x1]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
         error: [code only-opened at 2x8]
       ]
       [
         expr: newline
         range: [9x1 9x8]
         type: word!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
       ]
       [
         range: [9x8 10x1]
         type: string!
-        upper: [0x0 10x1]
+        upper: [1x1 10x1]
         error: [code only-opened at 1x2]
       ]
     ]
@@ -3387,43 +3387,43 @@ begin tag.txt
 
 [
   [
-    range: [0x0 7x1]
+    range: [1x1 7x1]
     nested: 
     [
       [
         expr: <this is a tag!>
         range: [1x1 1x17]
         type: tag!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: <a (bb) [ccc] ;dddd
         range: [2x1 3x7]
         type: tag!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: <a b c d>
         range: [4x1 4x10]
         type: tag!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: >
         range: [4x10 4x11]
         type: word!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         expr: <
         range: [5x1 5x2]
         type: word!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
       ]
       [
         range: [6x1 7x1]
         type: tag!
-        upper: [0x0 7x1]
+        upper: [1x1 7x1]
         error: unknown
       ]
     ]
