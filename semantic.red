@@ -2205,68 +2205,49 @@ completion: context [
 		unless pcs: semantic/position? top line column [
 			return none
 		]
+		unless find [one last mid] pcs/1 [return none]
 		pc: pcs/2
-		switch/default pcs/1 [
-			one		[]
-			last	[]
-			mid		[
-				type: pc/1/type
-				lstr: pick lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y - 1 1
-				unless any [
-					find [word! lit-word! get-word! path! lit-path! get-path! file!] to word! type
-					all [
-						any [
-							type = path!
-							type = lit-path!
-							type = get-path!
-						]
-						#"/" = lstr
-					]
+		i: 0
+		while [i < 2] [
+			upper: pc/1/upper
+			in-path?: no
+			if upper/1/type [
+				in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
+			]
+			unless any [
+				all [
+					in-path?
+					upper/1/error
+					upper/1/error = 'slash
+				]
+				all [
+					not in-path?
+					find [word! lit-word! get-word! file!] to word! pc/1/type
+				]
+			][
+				either [
+					i = 0
+					pcs/1 = 'mid
 				][
 					pc: next pc
-				]
+					i: i + 1
+					continue
+				][return none]
 			]
-		][return none]
-		type: pc/1/type
-		wtype: to word! type
-		lstr: pick lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y - 1 1
-		unless any [
-			find [word! lit-word! get-word! path! lit-path! get-path! file!] wtype
-			all [
-				any [
-					type = path!
-					type = lit-path!
-					type = get-path!
-				]
-				#"/" = lstr
-			]
-		][
-			return none
+			break
 		]
 		comps: clear last-comps
-		if type = file! [
-			complete-file top pc comps
-			return comps
-		]
-		if find [word! lit-word! get-word!] wtype [
+		if not in-path? [
+			wtype: to word! pc/1/type
+			if wtype = 'file! [
+				complete-file top pc comps
+				return comps
+			]
 			complete-word top pc comps
 			return comps
 		]
-		if any [
-			find [path! lit-path! get-path!] wtype
-			all [
-				any [
-					type = path!
-					type = lit-path!
-					type = get-path!
-				]
-				#"/" = lstr
-			]
-		][
-			complete-path top pc comps
-			return comps
-		]
-		none
+		complete-path top pc comps
+		comps
 	]
 
 	form-func-spec: function [spec [block! none!]][
@@ -2314,7 +2295,6 @@ completion: context [
 		return str
 	]
 
-	;-- TBD
 	get-block: function [pc [block!]][
 		ret: make block! 4
 		forall pc [
@@ -2330,7 +2310,6 @@ completion: context [
 		ret
 	]
 
-	;-- TBD
 	get-func-spec: function [pc [block!]][
 		get-func-block: function [pc [block!]][
 			ret: make block! 4
