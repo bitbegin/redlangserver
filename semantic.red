@@ -2746,7 +2746,7 @@ completion: context [
 
 	symbols: function [uri [string!]][
 		unless top: semantic/find-top uri [return none]
-		unless pc: top/1/nested [return none]
+		if empty? nested: top/1/nested [return none]
 		symbols*: function [npc [block!] depth [integer!]][
 			result: make block! 4
 			until [
@@ -2821,6 +2821,6 @@ completion: context [
 			]
 			result
 		]
-		symbols* back tail top/1/nested 0
+		symbols* back tail nested 0
 	]
 ]
