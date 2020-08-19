@@ -1624,7 +1624,7 @@ completion: context [
 						]
 					]
 				]
-				type = 'word! [
+				type = word! [
 					kind: CompletionItemKind/Constant
 				]
 			]
@@ -2103,9 +2103,9 @@ completion: context [
 			;".reds"	[system?: yes]
 		][exit]
 		complete-sys-path: function [][
-			tstr: find/tail/last pure-path "/"
-			tstr: copy/part pure-path tstr
+			tstr: to string! last paths
 			unless system-words/keyword? no fword [exit]
+			pure-path: to path! path
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
@@ -2130,29 +2130,25 @@ completion: context [
 				]
 			]
 		]
-		spos: lexer/line-pos? top/1/lines pc/1/range/1/x pc/1/range/1/y
-		epos: lexer/line-pos? top/1/lines pc/1/range/2/x pc/1/range/2/y
-		path-str: copy/part spos epos
-		paths: split path-str "/"
-		fword: to word! paths/1
-		filter: last paths
-		pure-path: path-str
-		if any [
-			pure-path/1 = #"'"
-			pure-path/1 = #":"
+
+		unless path: gain-path pc [exit]
+		paths: copy path
+		upper: pc/1/upper
+		range: lexer/form-range upper/1/range
+		either all [
+			upper/1/error
+			upper/1/error = 'slash
 		][
-			pure-path: next pure-path
-		]
-		slash-end?: no
-		if empty? filter [
 			slash-end?: yes
-		]
-		range: lexer/form-range pc/1/range
-		either slash-end? [
+			append paths '/
 			range/start/character: range/end/character
 		][
-			range/start/character: range/end/character - length? filter
+			slash-end?: no
+			range/start/character: range/end/character - (pc/1/range/2/y - pc/1/range/1/y)
 		]
+		fword: to word! paths/1
+		filter: to string! last paths
+
 		pcs: collect-path top pc paths no no system?
 		forall pcs [
 			type: pcs/1/1
