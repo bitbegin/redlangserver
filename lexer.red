@@ -72,6 +72,17 @@ lexer: context [
 		try [load copy/part start stop]
 	]
 
+	remove-last-empty-nested: func [
+		item	[block!]
+	][
+		if all [
+			item/nested
+			empty? item/nested
+		][
+			item/nested: none
+		]
+	]
+
 	insert-node: function [
 		stack		[block!]
 		lines		[block!]
@@ -171,23 +182,23 @@ lexer: context [
 								repend item ['error err]
 							]
 						]
-						range: select item 'range
-						append range index-line? lines base + y
-						stack: select item 'upper
+						append item/range index-line? lines base + y
+						remove-last-empty-nested item
+						stack: item/upper
 						break
 					]
 					unless nstop [
 						nstop: index-line? lines base + y
 					]
-					range: select last stack 'range
-					append range nstop
 					item: last stack
+					append item/range nstop
 					either none? item/error [
 						repend item ['error 'only-opened]
 					][
 						item/error: 'only-opened
 					]
-					stack: select last stack 'upper
+					remove-last-empty-nested item
+					stack: item/upper
 				]
 			]
 			in-path?: func [
@@ -383,15 +394,15 @@ lexer: context [
 			unless stop [
 				stop: index-line? lines index + index? tail src
 			]
-			range: select last stack 'range
-			append range stop
 			item: last stack
+			append item/range stop
 			either none? item/error [
 				repend item ['error 'only-opened]
 			][
 				item/error: 'only-opened
 			]
-			stack: select last stack 'upper
+			remove-last-empty-nested item
+			stack: item/upper
 		]
 		top
 	]

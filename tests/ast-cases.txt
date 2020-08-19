@@ -169,9 +169,6 @@ begin block.txt
               [
                 range: [5x3 5x6]
                 type: map!
-                nested: 
-                [
-                ]
                 upper: [5x2 5x6]
                 error: only-opened
               ]
@@ -493,9 +490,6 @@ begin map.txt
               [
                 range: [3x4 3x6]
                 type: block!
-                nested: 
-                [
-                ]
                 upper: [3x3 3x7]
               ]
             ]
@@ -517,9 +511,6 @@ begin map.txt
               [
                 range: [4x3 4x6]
                 type: map!
-                nested: 
-                [
-                ]
                 upper: [4x2 4x7]
               ]
             ]
@@ -541,9 +532,6 @@ begin map.txt
               [
                 range: [5x5 5x8]
                 type: map!
-                nested: 
-                [
-                ]
                 upper: [5x3 5x9]
               ]
             ]
@@ -622,9 +610,6 @@ begin map.txt
           [
             range: [17x2 17x5]
             type: map!
-            nested: 
-            [
-            ]
             upper: [17x1 17x6]
           ]
         ]
@@ -656,9 +641,6 @@ begin map.txt
               [
                 range: [18x4 18x7]
                 type: map!
-                nested: 
-                [
-                ]
                 upper: [18x2 18x8]
               ]
             ]
@@ -676,9 +658,6 @@ begin map.txt
           [
             range: [19x3 19x5]
             type: block!
-            nested: 
-            [
-            ]
             upper: [19x1 19x5]
             error: only-opened
           ]
@@ -688,9 +667,6 @@ begin map.txt
       [
         range: [20x1 20x4]
         type: map!
-        nested: 
-        [
-        ]
         upper: [1x1 22x6]
         error: only-opened
       ]
@@ -777,9 +753,6 @@ begin mixure.red
       [
         range: [1x9 1x11]
         type: block!
-        nested: 
-        [
-        ]
         upper: [1x1 78x1]
       ]
       [
@@ -1201,9 +1174,6 @@ begin mixure.red
               [
                 range: [27x6 27x8]
                 type: block!
-                nested: 
-                [
-                ]
                 upper: [7x13 28x3]
               ]
             ]
@@ -2071,9 +2041,6 @@ begin mixure.red
       [
         range: [66x15 66x17]
         type: block!
-        nested: 
-        [
-        ]
         upper: [1x1 78x1]
       ]
       [
@@ -3049,9 +3016,6 @@ begin path.txt
       [
         range: [17x5 17x7]
         type: block!
-        nested: 
-        [
-        ]
         upper: [1x1 24x1]
       ]
       [
