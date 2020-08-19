@@ -408,6 +408,9 @@ lexer: context [
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack
 		insert-node stack lines src 0
+		if empty? top/1/nested [
+			top/1/nested: none
+		]
 		top
 	]
 
