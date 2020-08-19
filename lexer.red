@@ -24,9 +24,9 @@ lexer: context [
 			append stack index? src
 		]
 	]
-	line-pos?: function [stack [block!] line [pair!] return: [string!]][
-		pos: pick stack line/x + 1
-		skip at stack/1 pos line/y - 1
+	line-pos?: function [stack [block!] line [integer!] column [integer!] return: [string!]][
+		pos: pick stack line + 1
+		skip at stack/1 pos column - 1
 	]
 	index-line?: function [stack [block!] pos [integer!] return: [pair!]][
 		stack: next stack
@@ -67,8 +67,8 @@ lexer: context [
 		]
 	]
 	load-range: function [stack [block!] range [block!]][
-		start: line-pos? stack range/1
-		stop: line-pos? stack range/2
+		start: line-pos? stack range/1/x range/1/y
+		stop: line-pos? stack range/2/x range/2/y
 		try [load copy/part start stop]
 	]
 
