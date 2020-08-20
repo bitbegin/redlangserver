@@ -562,6 +562,7 @@ semantic: context [
 				return false
 			]
 			npc/1/expr: nested/1/expr
+			npc/1/type: nested/1/type
 			either find npc/1 'error [
 				npc/1/error: nested/1/error
 			][
@@ -606,6 +607,7 @@ semantic: context [
 			return false
 		]
 		pc/1/expr: nested/1/expr
+		pc/1/type: nested/1/type
 		either find pc/1 'error [
 			pc/1/error: nested/1/error
 		][
@@ -787,7 +789,7 @@ semantic: context [
 							update-range/only pc 0 end-chars s-line s-column e-line e-column
 							repend pc/1 ['nested make block! 1]
 							npc: pc/1/nested
-							range: reduce [s-line s-column e-line e-column + end-chars]
+							range: reduce [as-pair s-line s-column as-pair e-line e-column + end-chars]
 							write-log "empty insert npc: "
 							write-log mold range
 							if any [
@@ -800,12 +802,12 @@ semantic: context [
 								ncode: ncode
 								continue
 							]
-							append/only npc reduce ['expr nested/1/expr 'range range 'upper pc 'error nested/1/error]
+							append/only npc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper pc 'error nested/1/error]
 							continue
 						]
 						update-range pc 0 end-chars s-line s-column e-line e-column
 						update-upper pc
-						range: reduce [s-line s-column e-line e-column + end-chars]
+						range: reduce [as-pair s-line s-column as-pair e-line e-column + end-chars]
 						write-log "insert pc: "
 						write-log mold range
 						if any [
@@ -820,7 +822,7 @@ semantic: context [
 						either pc/1 [upper: pc/1/upper][
 							upper: pc/-1/upper
 						]
-						insert/only pc reduce ['expr nested/1/expr 'range range 'upper upper 'error nested/1/error]
+						insert/only pc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper upper 'error nested/1/error]
 						ncode: ncode
 						continue
 					]
