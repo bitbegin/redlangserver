@@ -2114,6 +2114,9 @@ completion: context [
 			tstr: to string! last paths
 			unless system-words/keyword? no fword [exit]
 			pure-path: to path! path
+			if slash-end? [
+				append pure-path "/"
+			]
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
