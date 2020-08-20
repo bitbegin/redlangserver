@@ -555,8 +555,8 @@ semantic: context [
 			write-log mold npc/1/range
 			write-log mold str
 			if any [
-				not top: lexer/transcode str
-				none? nested: top/1/nested
+				not ntop: lexer/transcode str
+				none? nested: ntop/1/nested
 				1 < length? nested
 			][
 				return false
@@ -600,8 +600,8 @@ semantic: context [
 		write-log mold pc/1/range
 		write-log mold str
 		if any [
-			not top: lexer/transcode str
-			none? nested: top/1/nested
+			not ntop: lexer/transcode str
+			none? nested: ntop/1/nested
 			1 < length? nested
 		][
 			return false
@@ -797,8 +797,8 @@ semantic: context [
 							write-log "empty insert npc: "
 							write-log mold range
 							if any [
-								not top: lexer/transcode text
-								none? nested: top/1/nested
+								not ntop: lexer/transcode text
+								none? nested: ntop/1/nested
 								1 < length? nested
 							][
 								write-log "empty insert failed"
@@ -816,8 +816,8 @@ semantic: context [
 						write-log "insert pc: "
 						write-log mold range
 						if any [
-							not top: lexer/transcode text
-							none? nested: top/1/nested
+							not ntop: lexer/transcode text
+							none? nested: ntop/1/nested
 							1 < length? nested
 						][
 							write-log "insert failed"
