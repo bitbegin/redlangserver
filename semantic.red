@@ -40,6 +40,7 @@ semantic: context [
 	]
 
 	;-- IMPORTANT NOTE: token's range/y = last-char-pos + 1
+	;-- types: top-err head tail insert first last mid empty one
 	position?: function [top [block!] line [integer!] column [integer!]][
 		position?*: function [pc [block!]][
 			forall pc [
@@ -541,34 +542,11 @@ semantic: context [
 		pc: pcs/2
 		switch/default pcs/1 [
 			head empty first [npc: pc]
-			tail insert last mid one [
+			tail insert last mid [
 				npc: next pc
 			]
 		][return false]
 		update-range npc lines end-chars s-line s-column e-line e-column
-		if pcs/1 = 'one [
-			npc: pcs/2
-			update-range/only npc lines end-chars s-line s-column e-line e-column
-			spos: lexer/line-pos? line-stack npc/1/range/1/x npc/1/range/1/y
-			epos: lexer/line-pos? line-stack npc/1/range/2/x npc/1/range/2/y
-			str: copy/part spos epos
-			write-log mold npc/1/range
-			write-log mold str
-			if any [
-				not ntop: lexer/transcode str
-				none? nested: ntop/1/nested
-				1 < length? nested
-			][
-				return false
-			]
-			npc/1/expr: nested/1/expr
-			npc/1/type: nested/1/type
-			either find npc/1 'error [
-				npc/1/error: nested/1/error
-			][
-				repend npc/1 ['error nested/1/error]
-			]
-		]
 		true
 	]
 
@@ -669,21 +647,17 @@ semantic: context [
 				]
 				pc: spcs/2
 				epc: epcs/2
-				;-- insert/remove spaces in spaces or string!
+				;-- insert/remove spaces outside tokens
 				if all [
+					spcs/1 <> 'one
+					epcs/1 <> 'one
 					any [
-						epcs/1 <> 'one
-						string! = epc/1/type
+						empty? text
+						text-ws?
 					]
-					all [
-						any [
-							empty? text
-							text-ws?
-						]
-						any [
-							empty? otext
-							otext-ws?
-						]
+					any [
+						empty? otext
+						otext-ws?
 					]
 				][
 					either update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
@@ -695,6 +669,7 @@ semantic: context [
 					]
 					continue
 				]
+
 				;-- token internal
 				if all [
 					any [
