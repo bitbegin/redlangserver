@@ -623,7 +623,7 @@ semantic: context [
 			;".reds"	[system?: yes]
 		][return false]
 		clear diagnostics
-		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
+		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%.+-_=?*&~?`"
 		;write-log mold changes
 		forall changes [
 			unless top: find-top uri [
@@ -649,8 +649,6 @@ semantic: context [
 			append ncode epos
 			line-stack: make block! 1000
 			lexer/parse-line line-stack ncode
-			top/1/source: ncode
-			top/1/lines: line-stack
 			otext-ws?: parse otext [some ws]
 			text-ws?: parse text [some ws]
 			if top/1/nested [
@@ -688,7 +686,10 @@ semantic: context [
 						]
 					]
 				][
-					unless update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
+					either update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+					][
 						write-log "update-ws failed"
 						add-source* uri ncode
 					]
@@ -735,7 +736,10 @@ semantic: context [
 						not find otext not-trigger-charset
 					]
 				][
-					unless update-one system? epcs s-line s-column e-line e-column otext text line-stack [
+					either update-one system? epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+					][
 						write-log "update-one failed"
 						add-source* uri ncode
 					]
@@ -799,10 +803,11 @@ semantic: context [
 							][
 								write-log "empty insert failed"
 								add-source* uri ncode
-								ncode: ncode
 								continue
 							]
 							append/only npc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper pc 'error nested/1/error]
+							top/1/source: ncode
+							top/1/lines: line-stack
 							continue
 						]
 						update-range pc 0 end-chars s-line s-column e-line e-column
@@ -823,7 +828,8 @@ semantic: context [
 							upper: pc/-1/upper
 						]
 						insert/only pc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper upper 'error nested/1/error]
-						ncode: ncode
+						top/1/source: ncode
+						top/1/lines: line-stack
 						continue
 					]
 				]
