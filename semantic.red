@@ -629,6 +629,8 @@ semantic: context [
 			lexer/parse-line line-stack ncode
 			otext-ws?: parse otext [some ws]
 			text-ws?: parse text [some ws]
+			write-log rejoin ["remove: " mold otext]
+			write-log rejoin ["add: " mold text]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
 				if all [
@@ -667,6 +669,71 @@ semantic: context [
 						write-log "update-ws failed"
 						add-source* uri ncode
 					]
+					continue
+				]
+				stype: to word! pc/1/type
+				upper: pc/1/upper
+				sspos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+				espos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+				in-path?: no
+				if upper/1/type [
+					in-path?: find [path! lit-path! get-path!] to word! upper/1/type
+				]
+				;-- input "/" after word!
+				if all [
+					spcs = epcs
+					text = "/"
+					spcs/1 = 'last
+					none? pc/1/error
+					any [
+						find [word! lit-word! get-word!] stype
+						all [
+							in-path?
+							pc/1/type = string!
+							sspos/1 = #"^""
+							espos/-1 = #"^""
+						]
+						all [
+							in-path?
+							pc/1/type = paren!
+						]
+					]
+					none? upper/1/error
+				][
+					;-- input "/" after a word!/lit-word!/get-word!
+					unless in-path? [
+						write-log "token to path"
+						range: copy pc/1/range
+						expr: pc/1/expr
+						type: pc/1/type
+						pc/1/range/2: range/2 + 0x1
+						pc/1/type: switch stype [word! [path!] lit-word! [lit-path!] get-word! [get-path!]]
+						pc/1/expr: none
+						either find pc/1 'error [
+							pc/1/error: 'slash
+						][
+							append pc/1 [error slash]
+						]
+						repend pc/1 [
+							'nested reduce [
+								reduce [
+									'range		range
+									'expr		expr
+									'type		type
+									'upper		pc
+								]
+							]
+						]
+						continue
+					]
+					;-- input "/" after a word!/string! in path!/lit-path!/get-path! parent
+					write-log "append slash to path"
+					either find pc/1 'error [
+						pc/1/error: 'slash
+					][
+						append pc/1 [error slash]
+					]
+					pc/1/range/2: pc/1/range/2 + 0x1
 					continue
 				]
 
