@@ -2,8 +2,10 @@ Red []
 
 #include %../lexer.red
 
-files: read %cases/
+;-- usage:
+;-- ./console ast-cases.red > ast-cases.txt
 
+files: read %cases/
 
 forall files [
 	src: read rejoin [%cases/ files/1]

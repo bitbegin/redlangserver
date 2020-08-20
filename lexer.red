@@ -285,10 +285,7 @@ lexer: context [
 								y: token/y + 1
 								err: 'slash
 							]
-							all [						;-- slash
-								input/1
-								#"/" = input/-1
-							][
+							#"/" = input/-1 [			;-- slash
 								y: token/y
 								err: 'slash
 							]
