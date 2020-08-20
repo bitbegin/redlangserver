@@ -2206,51 +2206,36 @@ completion: context [
 
 	complete: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
-		unless pcs: semantic/position? top line column [
-			return none
-		]
-		unless find [one last mid] pcs/1 [return none]
+		unless pcs: semantic/position? top line column [return none]
+		unless find [last tail] pcs/1 [return none]
 		pc: pcs/2
-		i: 0
-		while [i < 2] [
-			upper: pc/1/upper
-			in-path?: no
-			if upper/1/type [
-				in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
-			]
-			unless any [
-				all [
-					in-path?
-					upper/1/error
-					upper/1/error = 'slash
-				]
-				all [
-					not in-path?
-					find [word! lit-word! get-word! file!] to word! pc/1/type
-				]
-			][
-				either [
-					i = 0
-					pcs/1 = 'mid
-				][
-					pc: next pc
-					i: i + 1
-					continue
-				][return none]
-			]
-			break
-		]
 		comps: clear last-comps
-		if not in-path? [
-			wtype: to word! pc/1/type
-			if wtype = 'file! [
-				complete-file top pc comps
+		upper: pc/1/upper
+		type: upper/1/type
+		in-path?: no
+		if all [upper type][
+			in-path?: find [path! lit-path! get-path! set-path!] to word! type
+		]
+		if pcs/1 = 'tail [
+			if all [
+				in-path?
+				upper/1/error
+				upper/1/error = 'slash
+			][
+				complete-path top pc comps
 				return comps
 			]
-			complete-word top pc comps
+			return none
+		]
+		if in-path? [
+			complete-path top pc comps
 			return comps
 		]
-		complete-path top pc comps
+		if pc/1/type = file! [
+			complete-file top pc comps
+			return comps
+		]
+		complete-word top pc comps
 		comps
 	]
 
