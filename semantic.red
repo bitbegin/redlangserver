@@ -554,6 +554,156 @@ semantic: context [
 		true
 	]
 
+	insert-one: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
+	][
+		write-log "insert-one"
+		olines: new-lines? otext
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		lines: lines - olines
+		pc: pcs/2
+		ntop: lexer/transcode text
+		unless nested: ntop/1/nested [
+			switch pcs/1 [
+				empty [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range/only pc lines end-chars s-line s-column e-line e-column
+				]
+				head [
+					update-range pc lines end-chars s-line s-column e-line e-column
+				]
+				tail [
+					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+				]
+				insert [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+				]
+			]
+			return true
+		]
+		type: pc/1/type
+		if any [
+			all [
+				type = block!
+				text = "[]"
+			]
+			all [
+				type = paren!
+				text = "()"
+			]
+			all [
+				type = map!
+				text = "#()"
+			]
+		][
+			either type = map! [
+				range: reduce [as-pair s-line s-column as-pair s-line s-column + 3]
+			][
+				range: reduce [as-pair s-line s-column as-pair s-line s-column + 2]
+			]
+			switch pcs/1 [
+				empty [
+					append pc/1 reduce [
+						'nested reduce [
+							'type type
+							'range range
+							'upper pc
+						]
+					]
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range/only pc lines end-chars s-line s-column e-line e-column
+				]
+				head [
+					insert/only pc reduce [
+						'type type
+						'range range
+						'upper pc/1/upper
+					]
+					update-range pc lines end-chars s-line s-column e-line e-column
+				]
+				tail [
+					append/only pc reduce [
+						'type type
+						'range range
+						'upper pc/1/upper
+					]
+					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+				]
+				insert [
+					insert/only next pc reduce [
+						'type type
+						'range range
+						'upper pc/1/upper
+					]
+					update-range next pc lines end-chars s-line s-column e-line e-column
+				]
+			]
+			return true
+		]
+		if find [path! lit-path! get-path! set-path! block! paren! map!] to word! type [				;-- TBD
+			return false
+		]
+		if 1 = length? nested [
+			spos: lexer/line-pos? line-stack s-line s-column
+			epos: skip spos length? text
+			range: reduce [as-pair s-line s-column pos-line? line-stack epos]
+			switch pcs/1 [
+				empty [
+					append pc/1 reduce [
+						'nested reduce [
+							'type type
+							'expr nested/1/expr
+							'error nested/1/error
+							'range range
+							'upper pc
+						]
+					]
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range/only pc lines end-chars s-line s-column e-line e-column
+				]
+				head [
+					insert/only pc reduce [
+						'type type
+						'expr nested/1/expr
+						'error nested/1/error
+						'range range
+						'upper pc/1/upper
+					]
+					update-range pc lines end-chars s-line s-column e-line e-column
+				]
+				tail [
+					append/only pc reduce [
+						'type type
+						'expr nested/1/expr
+						'error nested/1/error
+						'range range
+						'upper pc/1/upper
+					]
+					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+				]
+				insert [
+					insert/only next pc reduce [
+						'type type
+						'expr nested/1/expr
+						'error nested/1/error
+						'range range
+						'upper pc/1/upper
+					]
+					update-range next pc lines end-chars s-line s-column e-line e-column
+				]
+			]
+			return true
+		]
+
+		false
+	]
+
 	update-one: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
@@ -782,6 +932,18 @@ semantic: context [
 					continue
 				]
 
+				;-- insert a new token
+				if all [
+					empty? otext
+					find [head tail insert empty] spcs/1
+				][
+					if insert-one epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+				]
+
 				;-- token internal
 				if all [
 					any [
@@ -831,94 +993,6 @@ semantic: context [
 						add-source* uri ncode
 					]
 					continue
-				]
-				;-- insert a new token
-				if all [
-					spcs = epcs
-					empty? otext
-					any [
-						not find text not-trigger-charset
-						text = "[]"
-						text = "()"
-						text = "{}"
-						text = {""}
-					]
-				][
-					;write-log text
-					;write-log mold spcs/1
-					;write-log mold spcs/2/1/range
-					if any [
-						spcs/1 = 'head
-						all [
-							spcs/1 = 'tail
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'insert
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'first
-							find reduce [block! paren!] pc/1/type
-						]
-						all [
-							spcs/1 = 'last
-							find reduce [block! paren!] pc/1/type
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'mid
-							find reduce [block! paren!] pc/1/type
-							pc: next pc
-							find reduce [block! paren!] pc/1/type
-						]
-						spcs/1 = 'empty
-					][
-						
-						if spcs/1 = 'empty [
-							update-range next pc 0 end-chars s-line s-column e-line e-column
-							update-range/only pc 0 end-chars s-line s-column e-line e-column
-							repend pc/1 ['nested make block! 1]
-							npc: pc/1/nested
-							range: reduce [as-pair s-line s-column as-pair e-line e-column + end-chars]
-							write-log "empty insert npc: "
-							write-log mold range
-							if any [
-								not ntop: lexer/transcode text
-								none? nested: ntop/1/nested
-								1 < length? nested
-							][
-								write-log "empty insert failed"
-								add-source* uri ncode
-								continue
-							]
-							append/only npc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper pc 'error nested/1/error]
-							top/1/source: ncode
-							top/1/lines: line-stack
-							continue
-						]
-						update-range pc 0 end-chars s-line s-column e-line e-column
-						update-upper pc
-						range: reduce [as-pair s-line s-column as-pair e-line e-column + end-chars]
-						write-log "insert pc: "
-						write-log mold range
-						if any [
-							not ntop: lexer/transcode text
-							none? nested: ntop/1/nested
-							1 < length? nested
-						][
-							write-log "insert failed"
-							add-source* uri ncode
-							continue
-						]
-						either pc/1 [upper: pc/1/upper][
-							upper: pc/-1/upper
-						]
-						insert/only pc reduce ['expr nested/1/expr 'type nested/1/type 'range range 'upper upper 'error nested/1/error]
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
 				]
 			]
 			write-log "diff failed"
