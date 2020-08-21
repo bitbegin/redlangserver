@@ -106,7 +106,7 @@ lexer: context [
 				'upper back tail stack
 			]
 			if expr [
-				repend last nested ['expr expr]
+				repend last nested ['expr reduce [expr]]
 			]
 			if error [
 				repend last nested ['error error]
@@ -439,7 +439,7 @@ lexer: context [
 				if pc/1/expr [
 					newline pad + 4
 					append buffer "expr: "
-					append buffer mold/flat/part pc/1/expr 20
+					append buffer mold/flat/part pc/1/expr/1 20
 				]
 				if pc/1/range [
 					newline pad + 4
