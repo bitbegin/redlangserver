@@ -21,3 +21,4 @@ a/b/
 abc/def/:
 a/b/c:d
 a/b/1:2
+abc/def/'

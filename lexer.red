@@ -300,9 +300,16 @@ lexer: context [
 						either all [					;-- path! like a/:
 							token/x + 1 = token/y
 							#"/" = input/-2
-							#":" = input/-1
+							any [
+								#":" = input/-1
+								#"'" = input/-1
+							]
 						][
-							err: reduce ['code 'slash-get 'type type]
+							either #":" = input/-1 [
+								err: [code slash-get]
+							][
+								err: [code slash-lit]
+							]
 							type: path!
 						][
 							err: [code unknown]

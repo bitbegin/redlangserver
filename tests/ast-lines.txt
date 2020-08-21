@@ -1,4 +1,4 @@
-21-Aug-2020/14:25:33+08:00
+21-Aug-2020/14:30:41+08:00
 
 [
   [
@@ -935,7 +935,7 @@
           ]
         ]
         upper: [1x1 1x6]
-        error: [code slash-get type word!]
+        error: [code slash-get]
       ]
     ]
     source: "a/b/:"
@@ -970,12 +970,82 @@
           ]
         ]
         upper: [1x1 1x7]
-        error: [code slash-get type word!]
+        error: [code slash-get]
       ]
     ]
     source: "a/b/: "
     lines: [
       "a/b/: "
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [1x1 1x6]
+    nested: 
+    [
+      [
+        range: [1x1 1x6]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: b
+            range: [1x3 1x4]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+        ]
+        upper: [1x1 1x6]
+        error: [code slash-lit]
+      ]
+    ]
+    source: "a/b/'"
+    lines: [
+      "a/b/'"
+      1
+    ]
+  ]
+]
+
+[
+  [
+    range: [1x1 1x7]
+    nested: 
+    [
+      [
+        range: [1x1 1x6]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: b
+            range: [1x3 1x4]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+        ]
+        upper: [1x1 1x7]
+        error: [code slash-lit]
+      ]
+    ]
+    source: "a/b/' "
+    lines: [
+      "a/b/' "
       1
     ]
   ]

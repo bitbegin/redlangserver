@@ -57,6 +57,8 @@ codes: [
 	"a/b/ "
 	"a/b/:"
 	"a/b/: "
+	"a/b/'"
+	"a/b/' "
 ]
 
 forall codes [
