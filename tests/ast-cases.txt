@@ -1,4 +1,5 @@
-begin binary.txt
+21-Aug-2020/12:27:23+08:00
+begin %binary.txt
 ================================================
 
 [
@@ -113,10 +114,9 @@ begin binary.txt
   ]
 ]
 ================================================
-end binary.txt
+end %binary.txt
 
-
-begin block.txt
+begin %block.txt
 ================================================
 
 [
@@ -314,10 +314,9 @@ begin block.txt
   ]
 ]
 ================================================
-end block.txt
+end %block.txt
 
-
-begin char.txt
+begin %char.txt
 ================================================
 
 [
@@ -338,7 +337,7 @@ begin char.txt
         upper: [1x1 17x1]
       ]
       [
-        expr: #"銊?
+        expr: #"ㄲ"
         range: [3x1 3x11]
         type: char!
         upper: [1x1 17x1]
@@ -434,10 +433,9 @@ begin char.txt
   ]
 ]
 ================================================
-end char.txt
+end %char.txt
 
-
-begin map.txt
+begin %map.txt
 ================================================
 
 [
@@ -727,10 +725,9 @@ begin map.txt
   ]
 ]
 ================================================
-end map.txt
+end %map.txt
 
-
-begin mixure.red
+begin %mixure.red
 ================================================
 
 [
@@ -2299,10 +2296,9 @@ begin mixure.red
   ]
 ]
 ================================================
-end mixure.red
+end %mixure.red
 
-
-begin mstring.txt
+begin %mstring.txt
 ================================================
 
 [
@@ -2371,10 +2367,9 @@ begin mstring.txt
   ]
 ]
 ================================================
-end mstring.txt
+end %mstring.txt
 
-
-begin number.txt
+begin %number.txt
 ================================================
 
 [
@@ -2439,10 +2434,9 @@ begin number.txt
   ]
 ]
 ================================================
-end number.txt
+end %number.txt
 
-
-begin path.txt
+begin %path.txt
 ================================================
 
 [
@@ -3199,10 +3193,9 @@ begin path.txt
   ]
 ]
 ================================================
-end path.txt
+end %path.txt
 
-
-begin rstring.txt
+begin %rstring.txt
 ================================================
 
 [
@@ -3254,10 +3247,9 @@ begin rstring.txt
   ]
 ]
 ================================================
-end rstring.txt
+end %rstring.txt
 
-
-begin string.txt
+begin %string.txt
 ================================================
 
 [
@@ -3272,7 +3264,7 @@ begin string.txt
         upper: [1x1 10x1]
       ]
       [
-        expr: "涓枃瀛楃"
+        expr: "中文字符"
         range: [2x1 2x7]
         type: string!
         upper: [1x1 10x1]
@@ -3343,10 +3335,9 @@ begin string.txt
   ]
 ]
 ================================================
-end string.txt
+end %string.txt
 
-
-begin tag.txt
+begin %tag.txt
 ================================================
 
 [
@@ -3405,6 +3396,5 @@ begin tag.txt
   ]
 ]
 ================================================
-end tag.txt
-
+end %tag.txt
 
