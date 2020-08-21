@@ -119,7 +119,13 @@ semantic: context [
 					if all [
 						pc/1/range/2/x = line
 						pc/1/range/2/y = column
-						not in-path?
+						any [
+							not in-path?
+							all [
+								pc/1/error
+								find [slash slash-get slash-lit] pc/1/error/code
+							]
+						]
 					][
 						if pc = top [
 							if pc/1/nested [
@@ -632,7 +638,7 @@ semantic: context [
 			write-log rejoin ["add: " mold text]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
-				if all [
+				if any [
 					s-line <> e-line
 					s-column <> e-column
 				][
@@ -709,9 +715,9 @@ semantic: context [
 						pc/1/type: switch stype [word! [path!] lit-word! [lit-path!] get-word! [get-path!]]
 						pc/1/expr: none
 						either find pc/1 'error [
-							pc/1/error: 'slash
+							pc/1/error: [code slash]
 						][
-							append pc/1 [error slash]
+							append pc/1 [error [code slash]]
 						]
 						repend pc/1 [
 							'nested reduce [
@@ -723,16 +729,52 @@ semantic: context [
 								]
 							]
 						]
+						top/1/source: ncode
+						top/1/lines: line-stack
 						continue
 					]
 					;-- input "/" after a word!/string! in path!/lit-path!/get-path! parent
 					write-log "append slash to path"
-					either find pc/1 'error [
-						pc/1/error: 'slash
+					either find upper/1 'error [
+						upper/1/error: [code slash]
 					][
-						append pc/1 [error slash]
+						append upper/1 [error [code slash]]
 					]
-					pc/1/range/2: pc/1/range/2 + 0x1
+					upper/1/range/2: upper/1/range/2 + 0x1
+					top/1/source: ncode
+					top/1/lines: line-stack
+					continue
+				]
+
+				;-- remove "/" from path! tail
+				if all [
+					otext = "/"
+					empty? text
+					epcs/1 = 'last
+					find [path! lit-path! get-path!] to word! epc/1/type
+					epc/1/error
+					epc/1/error/code = 'slash
+				][
+					if 1 = length? nested: epc/1/nested [
+						epc/1/range: nested/1/range
+						either find epc/1 'expr [
+							epc/1/expr: nested/1/expr
+						][
+							repend epc/1 ['expr nested/1/expr]
+						]
+						epc/1/type: nested/1/type
+						epc/1/nested: none
+						epc/1/error: none
+						write-log "path to word!"
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+					write-log "remove slash"
+					epc/1/range: epc/1/range - 0x1
+					epc/1/error: none
+					top/1/source: ncode
+					top/1/lines: line-stack
 					continue
 				]
 
@@ -2189,7 +2231,7 @@ completion: context [
 		range: lexer/form-range upper/1/range
 		either all [
 			upper/1/error
-			upper/1/error = 'slash
+			upper/1/error/code = 'slash
 		][
 			slash-end?: yes
 			append paths '/
@@ -2264,7 +2306,7 @@ completion: context [
 			if all [
 				in-path?
 				upper/1/error
-				upper/1/error = 'slash
+				upper/1/error/code = 'slash
 			][
 				complete-path top pc comps
 				return comps
