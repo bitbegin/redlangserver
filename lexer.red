@@ -323,11 +323,17 @@ lexer: context [
 									x: pretoken/x
 									y: pretoken/y + 1
 								][
-									x: token/x
-									y: token/y + 1
+									either input/1 = #"^"" [
+										x: pretoken/x
+										y: pretoken/y + 1
+									][
+										x: pretoken/x
+										y: pretoken/y
+									]
 								]
 							]
-							add-node base x y type none reduce ['code 'only-opened 'at y - x]
+							err: reduce ['code 'only-opened 'at token/x - x]
+							add-node base x y type none err
 							throw y - 1
 						]
 						type = error! [

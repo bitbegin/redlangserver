@@ -2350,7 +2350,7 @@ begin mstring.txt
         range: [10x1 11x1]
         type: string!
         upper: [1x1 11x1]
-        error: [code only-opened at 19]
+        error: [code only-opened at 0]
       ]
     ]
     source: {^{^/^-this i
@@ -3223,16 +3223,16 @@ begin rstring.txt
         upper: [1x1 12x1]
       ]
       [
-        range: [5x1 8x1]
+        range: [5x1 7x5]
         type: string!
         upper: [1x1 12x1]
-        error: [code only-opened at 18]
+        error: [code only-opened at 0]
       ]
       [
-        range: [9x1 12x1]
+        range: [9x1 11x3]
         type: string!
         upper: [1x1 12x1]
-        error: [code only-opened at 16]
+        error: [code only-opened at 0]
       ]
     ]
     source: {%^{^/^-^{^^any
@@ -3302,16 +3302,16 @@ begin string.txt
         upper: [1x1 10x1]
       ]
       [
-        range: [7x8 7x18]
-        type: string!
-        upper: [1x1 10x1]
-        error: [code only-opened at 10]
-      ]
-      [
-        range: [8x1 9x1]
+        range: [7x1 7x18]
         type: string!
         upper: [1x1 10x1]
         error: [code only-opened at 7]
+      ]
+      [
+        range: [8x1 8x7]
+        type: string!
+        upper: [1x1 10x1]
+        error: [code only-opened at 0]
       ]
       [
         expr: newline
@@ -3320,10 +3320,10 @@ begin string.txt
         upper: [1x1 10x1]
       ]
       [
-        range: [9x8 10x1]
+        range: [9x8 9x9]
         type: string!
         upper: [1x1 10x1]
-        error: [code only-opened at 2]
+        error: [code only-opened at 0]
       ]
     ]
     source: {"this is 

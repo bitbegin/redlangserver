@@ -5,10 +5,10 @@
     nested: 
     [
       [
-        range: [1x1 1x3]
+        range: [1x1 1x2]
         type: string!
         upper: [1x1 1x2]
-        error: [code only-opened at 2]
+        error: [code only-opened at 0]
       ]
     ]
     source: {"}
@@ -105,10 +105,10 @@
     nested: 
     [
       [
-        range: [1x1 1x6]
+        range: [1x1 1x5]
         type: string!
         upper: [1x1 1x5]
-        error: [code only-opened at 5]
+        error: [code only-opened at 0]
       ]
     ]
     source: {"abc}
@@ -125,16 +125,16 @@
     nested: 
     [
       [
-        range: [1x1 2x1]
+        range: [1x1 1x5]
         type: string!
         upper: [1x1 2x2]
-        error: [code only-opened at 5]
+        error: [code only-opened at 0]
       ]
       [
-        range: [2x1 2x3]
+        range: [2x1 2x2]
         type: string!
         upper: [1x1 2x2]
-        error: [code only-opened at 2]
+        error: [code only-opened at 0]
       ]
     ]
     source: {"abc^/"}
@@ -553,7 +553,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [1x1 1x2]
-        error: [code only-opened at 1]
+        error: [code only-opened at 0]
       ]
     ]
     source: "{"
@@ -599,7 +599,7 @@
         range: [1x3 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: [code only-opened at 1]
+        error: [code only-opened at 0]
       ]
     ]
     source: "{}{"
@@ -717,7 +717,7 @@
         range: [1x1 1x3]
         type: string!
         upper: [1x1 1x3]
-        error: [code only-opened at 2]
+        error: [code only-opened at 0]
       ]
     ]
     source: "{{"
@@ -737,7 +737,7 @@
         range: [1x1 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: [code only-opened at 3]
+        error: [code only-opened at 0]
       ]
     ]
     source: "{{{"
