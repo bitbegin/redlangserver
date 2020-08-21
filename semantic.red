@@ -531,7 +531,6 @@ semantic: context [
 	]
 
 	update-ws: function [
-			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -556,7 +555,6 @@ semantic: context [
 	]
 
 	update-one: function [
-			system? [logic!]
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
@@ -667,7 +665,7 @@ semantic: context [
 						otext-ws?
 					]
 				][
-					either update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
+					either update-ws epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 					][
@@ -677,16 +675,18 @@ semantic: context [
 					continue
 				]
 				stype: to word! pc/1/type
+				etype: to word! epc/1/type
 				upper: pc/1/upper
 				sspos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
 				espos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+				end-chars: length? text
 				in-path?: no
 				if upper/1/type [
 					in-path?: find [path! lit-path! get-path!] to word! upper/1/type
 				]
 				;-- input "/" after word!
 				if all [
-					spcs = epcs
+					empty? otext
 					text = "/"
 					spcs/1 = 'last
 					none? pc/1/error
@@ -729,6 +729,7 @@ semantic: context [
 								]
 							]
 						]
+						update-range next pc 0 end-chars s-line s-column e-line e-column
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
@@ -741,6 +742,7 @@ semantic: context [
 						append upper/1 [error [code slash]]
 					]
 					upper/1/range/2: upper/1/range/2 + 0x1
+					update-range next upper 0 end-chars s-line s-column e-line e-column
 					top/1/source: ncode
 					top/1/lines: line-stack
 					continue
@@ -756,6 +758,7 @@ semantic: context [
 					epc/1/error/code = 'slash
 				][
 					if 1 = length? nested: epc/1/nested [
+						write-log "path to word!"
 						epc/1/range: nested/1/range
 						either find epc/1 'expr [
 							epc/1/expr: nested/1/expr
@@ -765,7 +768,7 @@ semantic: context [
 						epc/1/type: nested/1/type
 						epc/1/nested: none
 						epc/1/error: none
-						write-log "path to word!"
+						update-range next epc 0 end-chars s-line s-column e-line e-column
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
@@ -773,6 +776,7 @@ semantic: context [
 					write-log "remove slash"
 					epc/1/range/2: epc/1/range/2 - 0x1
 					epc/1/error: none
+					update-range next epc 0 end-chars s-line s-column e-line e-column
 					top/1/source: ncode
 					top/1/lines: line-stack
 					continue
@@ -819,7 +823,7 @@ semantic: context [
 						not find otext not-trigger-charset
 					]
 				][
-					either update-one system? epcs s-line s-column e-line e-column otext text line-stack [
+					either update-one epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 					][
@@ -870,7 +874,7 @@ semantic: context [
 						]
 						spcs/1 = 'empty
 					][
-						end-chars: length? text
+						
 						if spcs/1 = 'empty [
 							update-range next pc 0 end-chars s-line s-column e-line e-column
 							update-range/only pc 0 end-chars s-line s-column e-line e-column
