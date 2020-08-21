@@ -560,7 +560,7 @@ semantic: context [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
-		write-log "insert-one"
+		write-log rejoin ["insert-one: " mold pcs/1]
 		olines: new-lines? otext
 		lines: new-lines? text
 		either lines = 0 [
@@ -581,7 +581,7 @@ semantic: context [
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
 				tail [
-					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+					update-range tail pc lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					update-range next pc lines end-chars s-line s-column e-line e-column
@@ -589,33 +589,27 @@ semantic: context [
 			]
 			return true
 		]
-		type: pc/1/type
-		if any [
-			all [
+		type: nested/1/type
+		if all [
+			any [
 				type = block!
-				text = "[]"
-			]
-			all [
 				type = paren!
-				text = "()"
-			]
-			all [
 				type = map!
-				text = "#()"
 			]
+			none? nested/1/nested
 		][
-			either type = map! [
-				range: reduce [as-pair s-line s-column as-pair s-line s-column + 3]
-			][
-				range: reduce [as-pair s-line s-column as-pair s-line s-column + 2]
-			]
+			spos: lexer/line-pos? line-stack s-line s-column
+			epos: skip spos length? text
+			range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 			switch pcs/1 [
 				empty [
 					append pc/1 reduce [
 						'nested reduce [
-							'type type
-							'range range
-							'upper pc
+							reduce [
+								'type type
+								'range range
+								'upper pc
+							]
 						]
 					]
 					update-range next pc lines end-chars s-line s-column e-line e-column
@@ -635,7 +629,7 @@ semantic: context [
 						'range range
 						'upper pc/1/upper
 					]
-					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+					update-range tail pc lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					insert/only next pc reduce [
@@ -659,11 +653,13 @@ semantic: context [
 				empty [
 					append pc/1 reduce [
 						'nested reduce [
-							'type type
-							'expr nested/1/expr
-							'error nested/1/error
-							'range range
-							'upper pc
+							reduce [
+								'type type
+								'expr nested/1/expr
+								'error nested/1/error
+								'range range
+								'upper pc
+							]
 						]
 					]
 					update-range next pc lines end-chars s-line s-column e-line e-column
@@ -687,7 +683,7 @@ semantic: context [
 						'range range
 						'upper pc/1/upper
 					]
-					update-range pc/1/upper lines end-chars s-line s-column e-line e-column
+					update-range tail pc lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					insert/only next pc reduce [
@@ -762,6 +758,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
+			;write-log lexer/format top
 			;write %f-log1.txt top/1/source
 			;write/append %f-log1.txt "^/"
 			;write/append %f-log1.txt lexer/format top
@@ -1000,6 +997,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
+		;write-log lexer/format top
 		;write %f-log2.txt top/1/source
 		;write/append %f-log2.txt "^/"
 		;write/append %f-log2.txt lexer/format top
