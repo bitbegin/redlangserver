@@ -202,13 +202,12 @@ semantic: context [
 		collect-errors*: function [pc [block!]][
 			while [not tail? pc] [
 				if error: pc/1/error [
-					msg: either block? error [error/code][error]
 					range: reduce [pc/1/range/1 pc/1/range/1]
 					append ret make map! reduce [
 						'severity 1							;-- DiagnosticSeverity/Error
 						'code mold pc/1/type
 						'source "Syntax"
-						'message mold msg
+						'message mold error/code
 						'range lexer/form-range range		;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
 					]
 				]

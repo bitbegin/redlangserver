@@ -7,7 +7,6 @@ Red [
 	License: "BSD-3 - https://github.com/red/red/blob/origin/BSD-3-License.txt"
 ]
 
-#include %error.red
 #include %lsp-const.red
 #include %system-words.red
 #include %lexer.red
