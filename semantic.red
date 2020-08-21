@@ -2293,25 +2293,22 @@ completion: context [
 	complete: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
 		unless pcs: semantic/position? top line column [return none]
-		unless find [last tail] pcs/1 [return none]
+		if pcs/1 <> 'last [return none]
 		pc: pcs/2
 		comps: clear last-comps
+		if all [
+			find [path! lit-path! get-path!] to word! pc/1/type
+			pc/1/error
+			pc/1/error/code = 'slash
+		][
+			complete-path top back tail pc/1/nested comps
+			return comps
+		]
 		upper: pc/1/upper
 		type: upper/1/type
 		in-path?: no
 		if all [upper type][
-			in-path?: find [path! lit-path! get-path! set-path!] to word! type
-		]
-		if pcs/1 = 'tail [
-			if all [
-				in-path?
-				upper/1/error
-				upper/1/error/code = 'slash
-			][
-				complete-path top pc comps
-				return comps
-			]
-			return none
+			in-path?: find [path! lit-path! get-path!] to word! type
 		]
 		if in-path? [
 			complete-path top pc comps
