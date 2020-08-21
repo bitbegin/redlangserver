@@ -771,7 +771,7 @@ semantic: context [
 						continue
 					]
 					write-log "remove slash"
-					epc/1/range: epc/1/range - 0x1
+					epc/1/range/2: epc/1/range/2 - 0x1
 					epc/1/error: none
 					top/1/source: ncode
 					top/1/lines: line-stack
