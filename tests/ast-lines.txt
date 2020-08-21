@@ -8,7 +8,7 @@
         range: [1x1 1x3]
         type: string!
         upper: [1x1 1x2]
-        error: [code only-opened at 1x2]
+        error: [code only-opened at 2]
       ]
     ]
     source: {"}
@@ -48,7 +48,7 @@
         range: [1x1 1x8]
         type: char!
         upper: [1x1 1x8]
-        error: not-closed
+        error: [code not-closed]
       ]
     ]
     source: {#"^^(00)}
@@ -68,7 +68,7 @@
         range: [1x1 1x11]
         type: char!
         upper: [1x1 1x11]
-        error: invalid
+        error: [code invalid]
       ]
     ]
     source: {#"^^(00) a
@@ -108,7 +108,7 @@
         range: [1x1 1x6]
         type: string!
         upper: [1x1 1x5]
-        error: [code only-opened at 1x5]
+        error: [code only-opened at 5]
       ]
     ]
     source: {"abc}
@@ -128,13 +128,13 @@
         range: [1x1 2x1]
         type: string!
         upper: [1x1 2x2]
-        error: [code only-opened at 1x5]
+        error: [code only-opened at 5]
       ]
       [
         range: [2x1 2x3]
         type: string!
         upper: [1x1 2x2]
-        error: [code only-opened at 1x2]
+        error: [code only-opened at 2]
       ]
     ]
     source: {"abc^/"}
@@ -174,7 +174,7 @@
         range: [1x1 1x2]
         type: block!
         upper: [1x1 1x2]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "["
@@ -194,7 +194,7 @@
         range: [1x1 1x2]
         type: block!
         upper: [1x1 1x2]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "]"
@@ -219,7 +219,7 @@
         range: [1x3 1x4]
         type: block!
         upper: [1x1 1x4]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "[]["
@@ -244,7 +244,7 @@
         range: [1x3 1x4]
         type: block!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "[]]"
@@ -272,7 +272,7 @@
           ]
         ]
         upper: [1x1 1x4]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "[[]"
@@ -292,7 +292,7 @@
         range: [1x1 1x2]
         type: block!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
       [
         range: [1x2 1x4]
@@ -363,7 +363,7 @@
         range: [1x1 1x2]
         type: paren!
         upper: [1x1 1x2]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "("
@@ -383,7 +383,7 @@
         range: [1x1 1x2]
         type: paren!
         upper: [1x1 1x2]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: ")"
@@ -408,7 +408,7 @@
         range: [1x3 1x4]
         type: paren!
         upper: [1x1 1x4]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "()("
@@ -433,7 +433,7 @@
         range: [1x3 1x4]
         type: paren!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "())"
@@ -461,7 +461,7 @@
           ]
         ]
         upper: [1x1 1x4]
-        error: only-opened
+        error: [code only-opened]
       ]
     ]
     source: "(()"
@@ -481,7 +481,7 @@
         range: [1x1 1x2]
         type: paren!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
       [
         range: [1x2 1x4]
@@ -553,7 +553,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [1x1 1x2]
-        error: [code only-opened at 1x2]
+        error: [code only-opened at 1]
       ]
     ]
     source: "{"
@@ -573,7 +573,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [1x1 1x2]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "}"
@@ -599,7 +599,7 @@
         range: [1x3 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: [code only-opened at 1x2]
+        error: [code only-opened at 1]
       ]
     ]
     source: "{}{"
@@ -625,7 +625,7 @@
         range: [1x3 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "{}}"
@@ -645,13 +645,13 @@
         range: [1x1 1x3]
         type: string!
         upper: [1x1 1x4]
-        error: [code only-opened at 3x3]
+        error: [code only-opened at 2]
       ]
       [
         range: [1x3 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
     ]
     source: "{{}"
@@ -671,7 +671,7 @@
         range: [1x1 1x2]
         type: string!
         upper: [1x1 1x4]
-        error: only-closed
+        error: [code only-closed]
       ]
       [
         expr: ""
@@ -717,7 +717,7 @@
         range: [1x1 1x3]
         type: string!
         upper: [1x1 1x3]
-        error: [code only-opened at 1x3]
+        error: [code only-opened at 2]
       ]
     ]
     source: "{{"
@@ -737,7 +737,7 @@
         range: [1x1 1x4]
         type: string!
         upper: [1x1 1x4]
-        error: [code only-opened at 1x4]
+        error: [code only-opened at 3]
       ]
     ]
     source: "{{{"
@@ -766,7 +766,7 @@
           ]
         ]
         upper: [1x1 1x3]
-        error: slash
+        error: [code slash]
       ]
     ]
     source: "a/"
@@ -795,7 +795,7 @@
           ]
         ]
         upper: [1x1 1x4]
-        error: slash
+        error: [code slash]
       ]
     ]
     source: "a/ "
@@ -864,7 +864,7 @@
           ]
         ]
         upper: [1x1 1x5]
-        error: slash
+        error: [code slash]
       ]
     ]
     source: "a/b/"
@@ -899,7 +899,7 @@
           ]
         ]
         upper: [1x1 1x6]
-        error: slash
+        error: [code slash]
       ]
     ]
     source: "a/b/ "

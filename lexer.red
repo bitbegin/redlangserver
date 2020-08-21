@@ -87,7 +87,6 @@ lexer: context [
 		stack		[block!]
 		lines		[block!]
 		src			[string!]
-		index		[integer!]
 		return:		[block!]
 	][
 		add-node: func [
@@ -148,7 +147,7 @@ lexer: context [
 				nstop: none
 				forever [
 					unless ntype: select last stack 'type [				;-- check if top
-						add-node base x y type none 'only-closed
+						add-node base x y type none [code only-closed]
 						break
 					]
 					wtype: to word! ntype
@@ -175,7 +174,7 @@ lexer: context [
 							p?
 							find [path! lit-path! get-path!] wtype
 						][
-							unless err [err: 'unknown]
+							unless err [err: [code unknown]]
 							either item/error [
 								item/error: err
 							][
@@ -192,10 +191,10 @@ lexer: context [
 					]
 					item: last stack
 					append item/range nstop
-					either none? item/error [
-						repend item ['error 'only-opened]
+					either item/error [
+						item/error/code: 'only-opened
 					][
-						item/error: 'only-opened
+						repend item ['error [code only-opened]]
 					]
 					remove-last-empty-nested item
 					stack: item/upper
@@ -283,15 +282,15 @@ lexer: context [
 						case [
 							input/1 = #"/" [			;-- eof after /
 								y: token/y + 1
-								err: 'slash
+								err: [code slash]
 							]
 							#"/" = input/-1 [			;-- slash
 								y: token/y
-								err: 'slash
+								err: [code slash]
 							]
 							true [
 								y: token/y + 1
-								err: 'unknown
+								err: [code unknown]
 							]
 						]
 						match-pair token/x y yes err
@@ -306,7 +305,7 @@ lexer: context [
 							err: reduce ['code 'slash-get 'type type]
 							type: path!
 						][
-							err: 'unknown
+							err: [code unknown]
 						]
 						match-pair token/x token/y yes err
 						throw token/y - 1
@@ -328,15 +327,15 @@ lexer: context [
 									y: token/y + 1
 								]
 							]
-							add-node base x y type none reduce ['code 'only-opened 'at token]
+							add-node base x y type none reduce ['code 'only-opened 'at y - x]
 							throw y - 1
 						]
 						type = error! [
 							either input/1 = #"}" [
 								type: string!
-								err: 'only-closed
+								err: [code only-closed]
 							][
-								err: 'only-opened
+								err: [code only-opened]
 							]
 							add-node base token/x token/y + 1 type none err
 							throw token/y
@@ -344,10 +343,10 @@ lexer: context [
 						type = char! [
 							either input/1 = #"^"" [
 								y: token/y + 1
-								err: 'invalid
+								err: [code invalid]
 							][
 								y: token/y
-								err: 'not-closed
+								err: [code not-closed]
 							]
 							add-node base token/x y type none err
 							throw y - 1
@@ -355,16 +354,16 @@ lexer: context [
 						type = binary! [
 							either input/1 = #"}" [
 								y: token/y + 1
-								err: 'invalid
+								err: [code invalid]
 							][
 								y: token/y
-								err: 'not-closed
+								err: [code not-closed]
 							]
 							add-node base token/x y type none err
 							throw y - 1
 						]
 						true [
-							add-node base token/x token/y type none 'unknown
+							add-node base token/x token/y type none [code unknown]
 							throw token/y - 1
 						]
 					]
@@ -379,7 +378,7 @@ lexer: context [
 			stop: none											;-- used for mark the end of string!
 			stoken: none										;-- used for store scan token
 			stype: none											;-- used for store scan type
-			base: index + (index? src) - 1
+			base: (index? src) - 1
 			pos: catch [system/words/transcode/trace src :lex]
 			if block? pos [break]
 			;probe pos
@@ -389,14 +388,14 @@ lexer: context [
 		stop: none
 		while [stack <> top][
 			unless stop [
-				stop: index-line? lines index + index? tail src
+				stop: index-line? lines index? tail src
 			]
 			item: last stack
 			append item/range stop
-			either none? item/error [
-				repend item ['error 'only-opened]
+			either item/error [
+				item/error/code: 'only-opened
 			][
-				item/error: 'only-opened
+				append item [error [code only-opened]]
 			]
 			remove-last-empty-nested item
 			stack: item/upper
@@ -408,6 +407,7 @@ lexer: context [
 		src			[string!]
 		return:		[block!]
 	][
+		unless head? src [return none]
 		lines: make block! 64
 		parse-line lines src
 		range: make block! 1
@@ -415,7 +415,7 @@ lexer: context [
 		append range pos-line? lines tail src
 		stack: reduce [reduce ['source src 'lines lines 'range range 'nested reduce []]]
 		top: stack
-		insert-node stack lines src 0
+		insert-node stack lines src
 		if empty? top/1/nested [
 			top/1/nested: none
 		]
