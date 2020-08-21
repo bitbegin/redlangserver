@@ -343,8 +343,9 @@ semantic: context [
 		]
 	]
 
-	add-source*: function [uri [string!] code [string!]][
+	add-source*: function [uri [string!] code [string!] /force return: [block!]][
 		either any [
+			force
 			not top: find-top uri
 			top/1/source <> code
 		][
@@ -356,6 +357,7 @@ semantic: context [
 		][
 			update-diags top uri
 		]
+		top
 	]
 
 	add-source: function [uri [string!] code [string!]][
@@ -652,7 +654,7 @@ semantic: context [
 		if 1 = length? nested [
 			spos: lexer/line-pos? line-stack s-line s-column
 			epos: skip spos length? text
-			range: reduce [as-pair s-line s-column pos-line? line-stack epos]
+			range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 			switch pcs/1 [
 				empty [
 					append pc/1 reduce [
@@ -756,10 +758,10 @@ semantic: context [
 		clear diagnostics
 		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%.+-_=?*&~?`"
 		;write-log mold changes
+		unless top: find-top uri [
+			return false
+		]
 		forall changes [
-			unless top: find-top uri [
-				return false
-			]
 			;write %f-log1.txt top/1/source
 			;write/append %f-log1.txt "^/"
 			;write/append %f-log1.txt lexer/format top
@@ -797,7 +799,7 @@ semantic: context [
 					none? epcs
 				][
 					write-log "position failed"
-					add-source* uri ncode
+					top: add-source*/force uri ncode
 					continue
 				]
 				pc: spcs/2
@@ -820,7 +822,7 @@ semantic: context [
 						top/1/lines: line-stack
 					][
 						write-log "update-ws failed"
-						add-source* uri ncode
+						top: add-source*/force uri ncode
 					]
 					continue
 				]
@@ -990,16 +992,13 @@ semantic: context [
 						top/1/lines: line-stack
 					][
 						write-log "update-one failed"
-						add-source* uri ncode
+						top: add-source*/force uri ncode
 					]
 					continue
 				]
 			]
 			write-log "diff failed"
-			add-source* uri ncode
-		]
-		unless top: find-top uri [
-			return false
+			top: add-source*/force uri ncode
 		]
 		;write %f-log2.txt top/1/source
 		;write/append %f-log2.txt "^/"
