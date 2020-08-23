@@ -556,11 +556,11 @@ semantic: context [
 		true
 	]
 
-	insert-token: function [
+	create-token: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
-		write-log rejoin ["insert-token: " mold pcs/1]
+		write-log rejoin ["create-token: " mold pcs/1]
 		olines: new-lines? otext
 		lines: new-lines? text
 		either lines = 0 [
@@ -598,6 +598,7 @@ semantic: context [
 			]
 			none? nested/1/nested
 		][
+			if nested/1/error [return false]
 			spos: lexer/line-pos? line-stack s-line s-column
 			epos: skip spos length? text
 			range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
@@ -700,6 +701,38 @@ semantic: context [
 		]
 
 		false
+	]
+
+	append-token: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
+	][
+		write-log "append-token"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		pc: pcs/2
+		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+		str: copy/part spos epos
+		append str text
+		ntop: lexer/transcode str
+		unless nested: ntop/1/nested [
+			return false
+		]
+		if nested/1/nested [return false]
+		if 1 <> length? nested [return false]
+		upper: pc/1/upper
+		range: pc/1/range
+		pc/1: nested/1
+		pc/1/upper: upper
+		pc/1/range: range
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		update-range/only pc lines end-chars s-line s-column e-line e-column
+		true
 	]
 
 	update-one: function [
@@ -943,7 +976,20 @@ semantic: context [
 						]
 					]
 				][
-					if insert-token epcs s-line s-column e-line e-column otext text line-stack [
+					if create-token epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+				]
+
+				;-- append char to the token's tail
+				if all [
+					empty? otext
+					spcs/1 = 'last
+					not find [block! paren! map! string! binary!] stype
+				][
+					if append-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
