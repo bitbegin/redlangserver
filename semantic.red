@@ -556,11 +556,11 @@ semantic: context [
 		true
 	]
 
-	insert-one: function [
+	insert-token: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
-		write-log rejoin ["insert-one: " mold pcs/1]
+		write-log rejoin ["insert-token: " mold pcs/1]
 		olines: new-lines? otext
 		lines: new-lines? text
 		either lines = 0 [
@@ -936,7 +936,7 @@ semantic: context [
 					empty? otext
 					find [head tail insert empty] spcs/1
 				][
-					if insert-one epcs s-line s-column e-line e-column otext text line-stack [
+					if insert-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
