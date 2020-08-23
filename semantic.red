@@ -532,292 +532,6 @@ semantic: context [
 		]
 	]
 
-	update-ws: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "update-ws"
-		olines: new-lines? otext
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
-		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		lines: lines - olines
-		pc: pcs/2
-		switch/default pcs/1 [
-			head empty first [npc: pc]
-			tail insert last mid [
-				npc: next pc
-			]
-		][return false]
-		update-range npc lines end-chars s-line s-column e-line e-column
-		true
-	]
-
-	create-token: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log rejoin ["create-token: " mold pcs/1]
-		olines: new-lines? otext
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
-		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		lines: lines - olines
-		pc: pcs/2
-		ntop: lexer/transcode text
-		unless nested: ntop/1/nested [
-			switch pcs/1 [
-				empty [
-					update-range next pc lines end-chars s-line s-column e-line e-column
-					update-range/only pc lines end-chars s-line s-column e-line e-column
-				]
-				head [
-					update-range pc lines end-chars s-line s-column e-line e-column
-				]
-				last tail [
-					update-range next pc lines end-chars s-line s-column e-line e-column
-				]
-				insert [
-					update-range next pc lines end-chars s-line s-column e-line e-column
-				]
-			]
-			return true
-		]
-		type: nested/1/type
-		if all [
-			any [
-				type = block!
-				type = paren!
-				type = map!
-			]
-			none? nested/1/nested
-		][
-			if nested/1/error [return false]
-			spos: lexer/line-pos? line-stack s-line s-column
-			epos: skip spos length? text
-			range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
-			switch pcs/1 [
-				empty [
-					append pc/1 reduce [
-						'nested reduce [
-							reduce [
-								'type type
-								'range range
-								'upper pc
-							]
-						]
-					]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-					update-range/only pc lines end-chars s-line s-column e-line e-column
-				]
-				head [
-					insert/only pc reduce [
-						'type type
-						'range range
-						'upper pc/1/upper
-					]
-					update-range pc lines end-chars s-line s-column e-line e-column
-				]
-				last tail [
-					append/only pc reduce [
-						'type type
-						'range range
-						'upper pc/1/upper
-					]
-					update-range skip pc 2 lines end-chars s-line s-column e-line e-column
-				]
-				insert [
-					insert/only next pc reduce [
-						'type type
-						'range range
-						'upper pc/1/upper
-					]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-				]
-			]
-			return true
-		]
-		if find [path! lit-path! get-path! set-path! block! paren! map!] to word! type [				;-- TBD
-			return false
-		]
-		if 1 = length? nested [
-			spos: lexer/line-pos? line-stack s-line s-column
-			epos: skip spos length? text
-			range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
-			switch pcs/1 [
-				empty [
-					append pc/1 reduce [
-						'nested reduce [
-							reduce [
-								'type type
-								'expr nested/1/expr
-								'error nested/1/error
-								'range range
-								'upper pc
-							]
-						]
-					]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-					update-range/only pc lines end-chars s-line s-column e-line e-column
-				]
-				head [
-					insert/only pc reduce [
-						'type type
-						'expr nested/1/expr
-						'error nested/1/error
-						'range range
-						'upper pc/1/upper
-					]
-					update-range pc lines end-chars s-line s-column e-line e-column
-				]
-				last tail [
-					append/only pc reduce [
-						'type type
-						'expr nested/1/expr
-						'error nested/1/error
-						'range range
-						'upper pc/1/upper
-					]
-					update-range skip pc 2 lines end-chars s-line s-column e-line e-column
-				]
-				insert [
-					insert/only next pc reduce [
-						'type type
-						'expr nested/1/expr
-						'error nested/1/error
-						'range range
-						'upper pc/1/upper
-					]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-				]
-			]
-			return true
-		]
-
-		false
-	]
-
-	remove-token: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "remove-token"
-		olines: new-lines? otext
-		lines: 0
-		end-chars: length? text
-		lines: lines - olines
-		pc: pcs/2
-		update-range next pc lines end-chars s-line s-column e-line e-column
-		remove pc
-		true
-	]
-
-	append-chars: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "append-chars"
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
-		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		pc: pcs/2
-		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
-		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
-		str: copy/part spos epos
-		append str text
-		ntop: lexer/transcode str
-		unless nested: ntop/1/nested [
-			return false
-		]
-		if nested/1/nested [return false]
-		if 1 <> length? nested [return false]
-		upper: pc/1/upper
-		range: pc/1/range
-		pc/1: nested/1
-		pc/1/upper: upper
-		pc/1/range: range
-		update-range next pc lines end-chars s-line s-column e-line e-column
-		update-range/only pc lines end-chars s-line s-column e-line e-column
-		true
-	]
-
-	insert-chars: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "insert-chars"
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
-		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		pc: pcs/2
-		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
-		npos: lexer/line-pos? line-stack s-line s-column
-		str: copy/part spos npos
-		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
-		str2: copy/part npos epos
-		append str text
-		append str str2
-		ntop: lexer/transcode str
-		unless nested: ntop/1/nested [
-			return false
-		]
-		if nested/1/nested [return false]
-		if 1 <> length? nested [return false]
-		upper: pc/1/upper
-		range: pc/1/range
-		pc/1: nested/1
-		pc/1/upper: upper
-		pc/1/range: range
-		update-range next pc lines end-chars s-line s-column e-line e-column
-		update-range/only pc lines end-chars s-line s-column e-line e-column
-		true
-	]
-
-	delete-chars: function [
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "delete-chars"
-		olines: new-lines? otext
-		lines: 0
-		end-chars: length? text
-		lines: lines - olines
-		pc: pcs/2
-		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
-		npos: lexer/line-pos? line-stack s-line s-column
-		str: copy/part spos npos
-		npos: lexer/line-pos? line-stack e-line e-column
-		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
-		str2: copy/part npos epos
-		append str str2
-		ntop: lexer/transcode str
-		unless nested: ntop/1/nested [
-			return false
-		]
-		if nested/1/nested [return false]
-		if 1 <> length? nested [return false]
-		upper: pc/1/upper
-		range: pc/1/range
-		pc/1: nested/1
-		pc/1/upper: upper
-		pc/1/range: range
-		update-range next pc lines end-chars s-line s-column e-line e-column
-		update-range/only pc lines end-chars s-line s-column e-line e-column
-		true
-	]
-
 	update-one: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
@@ -861,6 +575,208 @@ semantic: context [
 		true
 	]
 
+	insert-token: function [
+		tag [word!] pc [block!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "insert-token"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		ntop: lexer/transcode text
+		unless nested: ntop/1/nested [
+			switch tag [
+				empty [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range/only pc lines end-chars s-line s-column e-line e-column
+				]
+				head [
+					update-range pc lines end-chars s-line s-column e-line e-column
+				]
+				last tail [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+				]
+				insert [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+				]
+			]
+			return true
+		]
+		if 1 <> length? nested [return false]
+		ntype: nested/1/type
+		case [
+			find [block! paren! map!] to word! ntype [
+				if nested/1/nested [return false]
+				if nested/1/error [return false]
+				spos: lexer/line-pos? line-stack s-line s-column
+				epos: skip spos length? text
+				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+			find [path! lit-path! get-path! set-path!] to word! ntype [
+				start: as-pair s-line s-column
+				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
+				nested/1/range: range
+				nnested: nested/1/nested
+				if find [lit-path! get-path!][start: start + 0x1]
+				forall nnested [
+					if nnn: nnested/1/nested [return false]
+					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
+					nnn/1/range: reduce [start stop]
+					start: stop + 0x1
+				]
+			]
+			true [
+				spos: lexer/line-pos? line-stack s-line s-column
+				epos: skip spos length? text
+				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+		]
+		switch tag [
+			empty [
+				append pc/1 reduce [
+					'nested reduce [
+						reduce [
+							'type nested/1/type
+							'expr nested/1/expr
+							'error nested/1/error
+							'range nested/1/range
+							'upper pc
+						]
+					]
+				]
+				update-range next pc lines end-chars s-line s-column e-line e-column
+				update-range/only pc lines end-chars s-line s-column e-line e-column
+			]
+			head [
+				insert/only pc reduce [
+					'type nested/1/type
+					'expr nested/1/expr
+					'error nested/1/error
+					'range nested/1/range
+					'upper pc/1/upper
+				]
+				update-range pc lines end-chars s-line s-column e-line e-column
+			]
+			last tail [
+				append/only pc reduce [
+					'type nested/1/type
+					'expr nested/1/expr
+					'error nested/1/error
+					'range nested/1/range
+					'upper pc/1/upper
+				]
+				update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+			]
+			insert [
+				insert/only next pc reduce [
+					'type nested/1/type
+					'expr nested/1/expr
+					'error nested/1/error
+					'range nested/1/range
+					'upper pc/1/upper
+				]
+				update-range next pc lines end-chars s-line s-column e-line e-column
+			]
+		]
+		return true
+	]
+
+	change-token: function [
+		tag [word!] pc [block!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "change-token"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+		npos: lexer/line-pos? oline-stack s-line s-column
+		str: copy/part spos npos
+		epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+		str2: copy/part npos epos
+		append str text
+		append str str2
+		ntop: lexer/transcode str
+		nested: ntop/1/nested
+		if 1 <> length? nested [return false]
+		wtype: to wrod! nested/1/type
+		if find [block! paren! map!] wtype [return false]
+		case [
+			find [path! lit-path! get-path! set-path!] wtype [
+				start: pc/1/range/1
+				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
+				nested/1/range: range
+				nnested: nested/1/nested
+				if find [lit-path! get-path!][start: start + 0x1]
+				forall nnested [
+					if nnn: nnested/1/nested [return false]
+					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
+					nnn/1/range: reduce [start stop]
+					start: stop + 0x1
+				]
+			]
+			true [
+				spos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+				epos: skip spos length? str
+				range: reduce [as-pair pc/1/range/1 lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+		]
+		upper: pc/1/upper
+		pc/1: nested/1
+		pc/1/upper: upper
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
+	;-- only input chars
+	input-text: function [
+		spcs [block!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		tag: spcs/1
+		pc: spcs/2
+		type: pc/1/type
+		upper: pc/1/upper
+		utype: upper/1/type
+		if any [
+			find [empty head tail insert] tag
+			all [
+				find [first last] tag
+				find [block! paren! map! binary! string!] to word! type
+				not find [path! lit-path! get-path! set-path!] to word! utype
+				none? pc/1/error
+			]
+		][
+			return insert-token tag pc text oline-stack line-stack s-line s-column e-line e-column
+		]
+
+		if find [first last one] tag [
+			either find [path! lit-path! get-path! set-path!] to word! utype [
+				return change-token tag upper text oline-stack line-stack s-line s-column e-line e-column
+			][
+				return change-token tag pc text oline-stack line-stack s-line s-column e-line e-column
+			]
+		]
+		false
+	]
+
+	;-- only remove chars
+	remove-text: function [
+		spcs [block!] epcs [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		false
+	]
+
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
 		switch/default find/last uri "." [
@@ -875,11 +791,8 @@ semantic: context [
 		]
 		forall changes [
 			;write-log lexer/format top
-			;write %f-log1.txt top/1/source
-			;write/append %f-log1.txt "^/"
-			;write/append %f-log1.txt lexer/format top
 			code: top/1/source
-			line-stack: top/1/lines
+			oline-stack: top/1/lines
 			range: changes/1/range
 			text: changes/1/text
 			rangeLength: changes/1/rangeLength
@@ -887,18 +800,28 @@ semantic: context [
 			s-column: range/start/character + 1
 			e-line: range/end/line + 1
 			e-column: range/end/character + 1
-			spos: lexer/line-pos? line-stack s-line s-column
-			epos: lexer/line-pos? line-stack e-line e-column
+			spos: lexer/line-pos? oline-stack s-line s-column
+			epos: lexer/line-pos? oline-stack e-line e-column
 			otext: copy/part spos epos
 			ncode: copy/part code spos
 			append ncode text
 			append ncode epos
-			line-stack: make block! 1000
+			line-stack: make block! 100
 			lexer/parse-line line-stack ncode
-			otext-ws?: parse otext [some ws]
-			text-ws?: parse text [some ws]
+			if all [
+				empty? otext
+				empty? text
+			][continue]
 			write-log rejoin ["remove: " mold otext]
 			write-log rejoin ["add: " mold text]
+			if all [
+				not empty? otext
+				not empty? text
+			][
+				write-log "TBD"
+				top: add-source*/force uri ncode
+				continue
+			]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
 				if any [
@@ -915,207 +838,16 @@ semantic: context [
 					top: add-source*/force uri ncode
 					continue
 				]
-				pc: spcs/2
-				epc: epcs/2
-				;-- insert/remove spaces outside tokens
-				if all [
-					spcs/1 <> 'one
-					epcs/1 <> 'one
-					any [
-						empty? text
-						text-ws?
-					]
-					any [
-						empty? otext
-						otext-ws?
-					]
-				][
-					either update-ws epcs s-line s-column e-line e-column otext text line-stack [
-						top/1/source: ncode
-						top/1/lines: line-stack
-					][
-						write-log "update-ws failed"
-						top: add-source*/force uri ncode
-					]
-					continue
-				]
-				stype: to word! pc/1/type
-				etype: to word! epc/1/type
-				upper: pc/1/upper
-				sspos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
-				espos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
-				end-chars: length? text
-				in-path?: no
-				if upper/1/type [
-					in-path?: find [path! lit-path! get-path!] to word! upper/1/type
-				]
-				;-- input "/" after word!
-				if all [
-					empty? otext
-					text = "/"
-					spcs/1 = 'last
-					none? pc/1/error
-					any [
-						find [word! lit-word! get-word!] stype
-						all [
-							in-path?
-							pc/1/type = string!
-							sspos/1 = #"^""
-							espos/-1 = #"^""
-						]
-						all [
-							in-path?
-							pc/1/type = paren!
-						]
-					]
-					none? upper/1/error
-				][
-					;-- input "/" after a word!/lit-word!/get-word!
-					unless in-path? [
-						write-log "token to path"
-						range: copy pc/1/range
-						expr: pc/1/expr
-						type: pc/1/type
-						pc/1/range/2: range/2 + 0x1
-						pc/1/type: switch stype [word! [path!] lit-word! [lit-path!] get-word! [get-path!]]
-						pc/1/expr: none
-						either find pc/1 'error [
-							pc/1/error: [code slash]
-						][
-							append pc/1 [error [code slash]]
-						]
-						repend pc/1 [
-							'nested reduce [
-								reduce [
-									'range		range
-									'expr		expr
-									'type		type
-									'upper		pc
-								]
-							]
-						]
-						update-range next pc 0 end-chars s-line s-column e-line e-column
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-					;-- input "/" after a word!/string! in path!/lit-path!/get-path! parent
-					write-log "append slash to path"
-					either find upper/1 'error [
-						upper/1/error: [code slash]
-					][
-						append upper/1 [error [code slash]]
-					]
-					upper/1/range/2: upper/1/range/2 + 0x1
-					update-range next upper 0 end-chars s-line s-column e-line e-column
-					top/1/source: ncode
-					top/1/lines: line-stack
-					continue
-				]
 
-				;-- remove "/" from path! tail
-				if all [
-					otext = "/"
-					empty? text
-					epcs/1 = 'last
-					find [path! lit-path! get-path!] to word! epc/1/type
-					epc/1/error
-					epc/1/error/code = 'slash
-				][
-					if 1 = length? nested: epc/1/nested [
-						write-log "path to word!"
-						epc/1/range: nested/1/range
-						either find epc/1 'expr [
-							epc/1/expr: nested/1/expr
-						][
-							repend epc/1 ['expr nested/1/expr]
-						]
-						epc/1/type: nested/1/type
-						epc/1/nested: none
-						epc/1/error: none
-						update-range next epc 0 end-chars s-line s-column e-line e-column
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-					write-log "remove slash"
-					epc/1/range/2: epc/1/range/2 - 0x1
-					epc/1/error: none
-					update-range next epc 0 end-chars s-line s-column e-line e-column
-					top/1/source: ncode
-					top/1/lines: line-stack
-					continue
-				]
-
-				;-- insert a new token
-				if all [
-					empty? otext
-					any [
-						find [head tail insert empty] spcs/1
-						all [
-							spcs/1 = 'last
-							find [block! paren! map! string! binary!] stype
-							none? pc/1/error
-						]
-					]
-				][
-					if create-token epcs s-line s-column e-line e-column otext text line-stack [
+				if empty? otext [
+					if input-text spcs text oline-stack line-stack s-line s-column e-line e-column [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
 					]
 				]
-
-				;-- remove a token
-				if all [
-					empty? text
-					spcs/1 = 'first
-					epcs/1 = 'last
-					pc = epc
-					none? pc/1/error
-					not find [path! lit-path! get-path! set-path!] to word! upper/1/type
-				][
-					if remove-token epcs s-line s-column e-line e-column otext text line-stack [
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-				]
-
-				;-- append chars to the token's tail
-				if all [
-					empty? otext
-					spcs/1 = 'last
-					not find [block! paren! map! string! binary! path! lit-path! get-path! set-path!] stype
-				][
-					if append-chars epcs s-line s-column e-line e-column otext text line-stack [
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-				]
-
-				;-- insert chars in string!/binary!
-				if all [
-					empty? otext
-					spcs/1 = 'one
-					find [string! binary!] stype
-				][
-					if insert-chars epcs s-line s-column e-line e-column otext text line-stack [
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-				]
-
-				;-- delete chars from token
-				if all [
-					empty? text
-					find [first one] spcs/1
-					find [one last] epcs/1
-					pc = epc
-				][
-					if delete-chars spcs s-line s-column e-line e-column otext text line-stack [
+				if empty? text [
+					if remove-text spcs epcs otext oline-stack line-stack s-line s-column e-line e-column [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
@@ -1126,9 +858,6 @@ semantic: context [
 			top: add-source*/force uri ncode
 		]
 		;write-log lexer/format top
-		;write %f-log2.txt top/1/source
-		;write/append %f-log2.txt "^/"
-		;write/append %f-log2.txt lexer/format top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
