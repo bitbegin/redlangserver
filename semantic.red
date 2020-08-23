@@ -703,6 +703,21 @@ semantic: context [
 		false
 	]
 
+	delete-token: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
+	][
+		write-log "delete-token"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: length? text
+		lines: lines - olines
+		pc: pcs/2
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		remove pc
+		true
+	]
+
 	append-token: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
@@ -977,6 +992,21 @@ semantic: context [
 					]
 				][
 					if create-token epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+				]
+
+				;-- delete a token
+				if all [
+					empty? text
+					spcs/1 = 'first
+					epcs/1 = 'last
+					pc = epc
+					none? pc/1/nested
+				][
+					if delete-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
