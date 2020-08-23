@@ -580,7 +580,7 @@ semantic: context [
 				head [
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
-				tail [
+				last tail [
 					update-range tail pc lines end-chars s-line s-column e-line e-column
 				]
 				insert [
@@ -623,7 +623,7 @@ semantic: context [
 					]
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
-				tail [
+				last tail [
 					append/only pc reduce [
 						'type type
 						'range range
@@ -675,7 +675,7 @@ semantic: context [
 					]
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
-				tail [
+				last tail [
 					append/only pc reduce [
 						'type type
 						'expr nested/1/expr
@@ -934,7 +934,14 @@ semantic: context [
 				;-- insert a new token
 				if all [
 					empty? otext
-					find [head tail insert empty] spcs/1
+					any [
+						find [head tail insert empty] spcs/1
+						all [
+							spcs/1 = 'last
+							find [block! paren! map! string! binary!] stype
+							none? pc/1/error
+						]
+					]
 				][
 					if insert-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
