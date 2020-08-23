@@ -750,6 +750,41 @@ semantic: context [
 		true
 	]
 
+	insert-chars: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
+	][
+		write-log "insert-chars"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		pc: pcs/2
+		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+		npos: lexer/line-pos? line-stack s-line s-column
+		str: copy/part spos npos
+		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+		str2: copy/part npos epos
+		append str text
+		append str str2
+		ntop: lexer/transcode str
+		unless nested: ntop/1/nested [
+			return false
+		]
+		if nested/1/nested [return false]
+		if 1 <> length? nested [return false]
+		upper: pc/1/upper
+		range: pc/1/range
+		pc/1: nested/1
+		pc/1/upper: upper
+		pc/1/range: range
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		update-range/only pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
 	delete-chars: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
@@ -1060,6 +1095,19 @@ semantic: context [
 					]
 				]
 
+				;-- insert chars in string!/binary!
+				if all [
+					empty? otext
+					spcs/1 = 'one
+					find [string! binary!] stype
+				][
+					if insert-chars epcs s-line s-column e-line e-column otext text line-stack [
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+				]
+
 				;-- delete chars from token
 				if all [
 					empty? text
@@ -1067,7 +1115,7 @@ semantic: context [
 					find [one last] epcs/1
 					pc = epc
 				][
-					if delete-chars epcs s-line s-column e-line e-column otext text line-stack [
+					if delete-chars spcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
