@@ -703,11 +703,11 @@ semantic: context [
 		false
 	]
 
-	delete-token: function [
+	remove-token: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
-		write-log "delete-token"
+		write-log "remove-token"
 		olines: new-lines? otext
 		lines: 0
 		end-chars: length? text
@@ -718,11 +718,11 @@ semantic: context [
 		true
 	]
 
-	append-token: function [
+	append-chars: function [
 			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
 			e-column [integer!] otext [string!] text [string!] line-stack [block!]
 	][
-		write-log "append-token"
+		write-log "append-chars"
 		lines: new-lines? text
 		either lines = 0 [
 			end-chars: length? text
@@ -734,6 +734,39 @@ semantic: context [
 		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
 		str: copy/part spos epos
 		append str text
+		ntop: lexer/transcode str
+		unless nested: ntop/1/nested [
+			return false
+		]
+		if nested/1/nested [return false]
+		if 1 <> length? nested [return false]
+		upper: pc/1/upper
+		range: pc/1/range
+		pc/1: nested/1
+		pc/1/upper: upper
+		pc/1/range: range
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		update-range/only pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
+	delete-chars: function [
+			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
+			e-column [integer!] otext [string!] text [string!] line-stack [block!]
+	][
+		write-log "delete-chars"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: length? text
+		lines: lines - olines
+		pc: pcs/2
+		spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+		npos: lexer/line-pos? line-stack s-line s-column
+		str: copy/part spos npos
+		npos: lexer/line-pos? line-stack e-line e-column
+		epos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+		str2: copy/part npos epos
+		append str str2
 		ntop: lexer/transcode str
 		unless nested: ntop/1/nested [
 			return false
@@ -998,7 +1031,7 @@ semantic: context [
 					]
 				]
 
-				;-- delete a token
+				;-- remove a token
 				if all [
 					empty? text
 					spcs/1 = 'first
@@ -1007,7 +1040,7 @@ semantic: context [
 					none? pc/1/error
 					not find [path! lit-path! get-path! set-path!] to word! upper/1/type
 				][
-					if delete-token epcs s-line s-column e-line e-column otext text line-stack [
+					if remove-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
@@ -1020,62 +1053,25 @@ semantic: context [
 					spcs/1 = 'last
 					not find [block! paren! map! string! binary! path! lit-path! get-path! set-path!] stype
 				][
-					if append-token epcs s-line s-column e-line e-column otext text line-stack [
+					if append-chars epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
 						continue
 					]
 				]
 
-				;-- token internal
+				;-- delete chars from token
 				if all [
-					any [
-						all [
-							find [first last one] spcs/1
-							find [first last one] epcs/1
-							spcs/2 = epcs/2
-							not find reduce [block! map! paren!] pc/1/type
-						]
-						all [
-							spcs <> epcs
-							spcs/1 = 'mid
-							epcs/1 = 'mid
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] epc/1/type
-						]
-						all [
-							spcs <> epcs
-							spcs/1 = 'mid
-							find [last one] epcs/1
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] epc/1/type
-						]
-						all [
-							spcs <> epcs
-							epcs/1 = 'mid
-							find [first one] spcs/1
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] pc/1/type
-							epcs: spcs
-						]
-					]
-					any [
-						empty? text
-						not find text not-trigger-charset
-					]
-					any [
-						empty? otext
-						not find otext not-trigger-charset
-					]
+					empty? text
+					find [first one] spcs/1
+					find [one last] epcs/1
+					pc = epc
 				][
-					either update-one epcs s-line s-column e-line e-column otext text line-stack [
+					if delete-chars epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
 						top/1/lines: line-stack
-					][
-						write-log "update-one failed"
-						top: add-source*/force uri ncode
+						continue
 					]
-					continue
 				]
 			]
 			write-log "diff failed"
