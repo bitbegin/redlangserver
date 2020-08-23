@@ -1004,7 +1004,8 @@ semantic: context [
 					spcs/1 = 'first
 					epcs/1 = 'last
 					pc = epc
-					none? pc/1/nested
+					none? pc/1/error
+					not find [path! lit-path! get-path! set-path!] to word! upper/1/type
 				][
 					if delete-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
@@ -1013,11 +1014,11 @@ semantic: context [
 					]
 				]
 
-				;-- append char to the token's tail
+				;-- append chars to the token's tail
 				if all [
 					empty? otext
 					spcs/1 = 'last
-					not find [block! paren! map! string! binary!] stype
+					not find [block! paren! map! string! binary! path! lit-path! get-path! set-path!] stype
 				][
 					if append-token epcs s-line s-column e-line e-column otext text line-stack [
 						top/1/source: ncode
