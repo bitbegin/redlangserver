@@ -581,7 +581,7 @@ semantic: context [
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
 				last tail [
-					update-range tail pc lines end-chars s-line s-column e-line e-column
+					update-range next pc lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					update-range next pc lines end-chars s-line s-column e-line e-column
@@ -630,7 +630,7 @@ semantic: context [
 						'range range
 						'upper pc/1/upper
 					]
-					update-range tail pc lines end-chars s-line s-column e-line e-column
+					update-range skip pc 2 lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					insert/only next pc reduce [
@@ -684,7 +684,7 @@ semantic: context [
 						'range range
 						'upper pc/1/upper
 					]
-					update-range tail pc lines end-chars s-line s-column e-line e-column
+					update-range skip pc 2 lines end-chars s-line s-column e-line e-column
 				]
 				insert [
 					insert/only next pc reduce [
