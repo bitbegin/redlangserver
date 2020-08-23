@@ -59,9 +59,17 @@ codes: [
 	"a/b/: "
 	"a/b/'"
 	"a/b/' "
+	%{a/"b}%
+	%{a/"b }%
+	%{a/"b"c}%
+	%{a/"b"^/}%
 ]
 
 forall codes [
+	write/append output rejoin ["begin " mold codes/1 "^/"]
+	write/append output "================================================^/"
 	write/append output lexer/format lexer/transcode codes/1
+	write/append output "================================================^/"
+	write/append output rejoin ["end " mold codes/1 "^/"]
 	write/append output "^/"
 ]
