@@ -2424,7 +2424,7 @@ completion: context [
 		complete-sys-path: function [][
 			tstr: to string! last paths
 			unless system-words/keyword? no fword [exit]
-			pure-path: to path! path
+			pure-path: to string! to path! path
 			if slash-end? [
 				append pure-path "/"
 			]
