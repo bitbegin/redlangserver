@@ -623,9 +623,10 @@ semantic: context [
 				nnested: nested/1/nested
 				if find [lit-path! get-path!][start: start + 0x1]
 				forall nnested [
-					if nnn: nnested/1/nested [return false]
-					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
-					nnn/1/range: reduce [start stop]
+					if nnested/1/nested [return false]
+					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+					nnested/1/range: reduce [start stop]
+					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
@@ -715,18 +716,22 @@ semantic: context [
 				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
 				nested/1/range: range
 				nnested: nested/1/nested
-				if find [lit-path! get-path!][start: start + 0x1]
+				if find [lit-path! get-path!] wtype [start: start + 0x1]
 				forall nnested [
-					if nnn: nnested/1/nested [return false]
-					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
-					nnn/1/range: reduce [start stop]
+					if nnested/1/nested [return false]
+					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+					nnested/1/range: reduce [start stop]
+					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
 			true [
-				spos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
-				epos: skip spos length? str
-				range: reduce [as-pair pc/1/range/1 lexer/pos-line? line-stack epos]
+				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+				npos: lexer/line-pos? line-stack nested/1/range/1/x nested/1/range/1/y
+				epos: lexer/line-pos? line-stack nested/1/range/2/x nested/1/range/2/y
+				str2: copy/part npos epos
+				epos: skip spos length? str2
+				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
 				nested/1/range: range
 			]
 		]
@@ -747,20 +752,24 @@ semantic: context [
 		type: pc/1/type
 		upper: pc/1/upper
 		utype: upper/1/type
+		in-path?: no
+		if utype [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! utype
+		]
 		if any [
 			find [empty head tail insert] tag
 			all [
 				find [first last] tag
 				find [block! paren! map! binary! string!] to word! type
-				not find [path! lit-path! get-path! set-path!] to word! utype
+				not in-path?
 				none? pc/1/error
 			]
 		][
 			return insert-token tag pc text oline-stack line-stack s-line s-column e-line e-column
 		]
 
-		if find [first last one] tag [
-			either find [path! lit-path! get-path! set-path!] to word! utype [
+		if find [one last] tag [
+			either in-path? [
 				return change-token tag upper text oline-stack line-stack s-line s-column e-line e-column
 			][
 				return change-token tag pc text oline-stack line-stack s-line s-column e-line e-column
@@ -824,9 +833,10 @@ semantic: context [
 				nnested: nested/1/nested
 				if find [lit-path! get-path!][start: start + 0x1]
 				forall nnested [
-					if nnn: nnested/1/nested [return false]
-					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
-					nnn/1/range: reduce [start stop]
+					if nnested/1/nested [return false]
+					stop: start + as-pair 0 nnested/1/range/2/y - nnnnestedn/1/range/1/y
+					nnested/1/range: reduce [start stop]
+					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
@@ -873,16 +883,17 @@ semantic: context [
 				nnested: nested/1/nested
 				if find [lit-path! get-path!][start: start + 0x1]
 				forall nnested [
-					if nnn: nnested/1/nested [return false]
-					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
-					nnn/1/range: reduce [start stop]
+					if nnested/1/nested [return false]
+					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+					nnested/1/range: reduce [start stop]
+					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
 			true [
-				spos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
 				epos: skip spos length? str
-				range: reduce [pc/1/range lexer/pos-line? line-stack epos]
+				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
 				nested/1/range: range
 			]
 		]
@@ -918,9 +929,10 @@ semantic: context [
 				nnested: nested/1/nested
 				if find [lit-path! get-path!][start: start + 0x1]
 				forall nnested [
-					if nnn: nnested/1/nested [return false]
-					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
-					nnn/1/range: reduce [start stop]
+					if nnested/1/nested [return false]
+					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+					nnested/1/range: reduce [start stop]
+					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
@@ -1068,7 +1080,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
-			;write-log lexer/format top
+			write-log lexer/format top
 			code: top/1/source
 			oline-stack: top/1/lines
 			range: changes/1/range
@@ -1135,7 +1147,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
-		;write-log lexer/format top
+		write-log lexer/format top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
