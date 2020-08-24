@@ -707,7 +707,7 @@ semantic: context [
 		ntop: lexer/transcode str
 		nested: ntop/1/nested
 		if 1 <> length? nested [return false]
-		wtype: to wrod! nested/1/type
+		wtype: to word! nested/1/type
 		if find [block! paren! map!] wtype [return false]
 		case [
 			find [path! lit-path! get-path! set-path!] wtype [
@@ -769,11 +769,289 @@ semantic: context [
 		false
 	]
 
+	remove-token: function [
+		tag [word!] pc [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "remove-token"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: 0
+		lines: lines - olines
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		remove pc
+		true
+	]
+
+	remove-ws: function [
+		tag [word!] pc [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "remove spaces"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: 0
+		lines: lines - olines
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		if tag = 'empty [
+			update-range/only pc lines end-chars s-line s-column e-line e-column
+		]
+		true
+	]
+
+	remove-token-head: function [
+		tag [word!] pc [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "remove token from head"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: 0
+		lines: lines - olines
+		npos: lexer/line-pos? oline-stack e-line e-column
+		epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+		str: copy/part npos epos
+		ntop: lexer/transcode str
+		nested: ntop/1/nested
+		if 1 <> length? nested [return false]
+		wtype: to word! nested/1/type
+		if find [block! paren! map!] wtype [return false]
+		case [
+			find [path! lit-path! get-path! set-path!] wtype [
+				start: as-pair s-line s-column
+				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
+				nested/1/range: range
+				nnested: nested/1/nested
+				if find [lit-path! get-path!][start: start + 0x1]
+				forall nnested [
+					if nnn: nnested/1/nested [return false]
+					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
+					nnn/1/range: reduce [start stop]
+					start: stop + 0x1
+				]
+			]
+			true [
+				spos: lexer/line-pos? line-stack s-line s-column
+				epos: skip spos length? str
+				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+		]
+		upper: pc/1/upper
+		pc/1: nested/1
+		pc/1/upper: upper
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
+	remove-token-one: function [
+		tag [word!] pc [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "remove token from internal"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: 0
+		lines: lines - olines
+		spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+		npos: lexer/line-pos? oline-stack s-line s-column
+		str: copy/part spos npos
+		npos: lexer/line-pos? oline-stack e-line e-column
+		epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+		str2: copy/part npos epos
+		append str str2
+		ntop: lexer/transcode str
+		nested: ntop/1/nested
+		if 1 <> length? nested [return false]
+		wtype: to word! nested/1/type
+		if find [block! paren! map!] wtype [return false]
+		case [
+			find [path! lit-path! get-path! set-path!] wtype [
+				start: pc/1/range/1
+				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
+				nested/1/range: range
+				nnested: nested/1/nested
+				if find [lit-path! get-path!][start: start + 0x1]
+				forall nnested [
+					if nnn: nnested/1/nested [return false]
+					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
+					nnn/1/range: reduce [start stop]
+					start: stop + 0x1
+				]
+			]
+			true [
+				spos: lexer/line-pos? line-stack pc/1/range/2/x pc/1/range/2/y
+				epos: skip spos length? str
+				range: reduce [pc/1/range lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+		]
+		upper: pc/1/upper
+		pc/1: nested/1
+		pc/1/upper: upper
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
+	remove-token-tail: function [
+		tag [word!] pc [block!] otext [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "remove token from tail"
+		olines: new-lines? otext
+		lines: 0
+		end-chars: 0
+		lines: lines - olines
+		spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+		npos: lexer/line-pos? oline-stack s-line s-column
+		str: copy/part spos npos
+		ntop: lexer/transcode str
+		nested: ntop/1/nested
+		if 1 <> length? nested [return false]
+		wtype: to word! nested/1/type
+		if find [block! paren! map!] wtype [return false]
+		case [
+			find [path! lit-path! get-path! set-path!] wtype [
+				start: pc/1/range/1
+				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
+				nested/1/range: range
+				nnested: nested/1/nested
+				if find [lit-path! get-path!][start: start + 0x1]
+				forall nnested [
+					if nnn: nnested/1/nested [return false]
+					stop: start + as-pair 0 nnn/1/range/2/y - nnn/1/range/1/y
+					nnn/1/range: reduce [start stop]
+					start: stop + 0x1
+				]
+			]
+			true [
+				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
+				epos: skip spos length? str
+				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
+				nested/1/range: range
+			]
+		]
+		upper: pc/1/upper
+		pc/1: nested/1
+		pc/1/upper: upper
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
 	;-- only remove chars
 	remove-text: function [
 		spcs [block!] epcs [block!] otext [string!] oline-stack [block!] line-stack [block!]
 		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
 	][
+		tag: spcs/1
+		pc: spcs/2
+		etag: epcs/1
+		epc: epcs/2
+		type: pc/1/type
+		upper: pc/1/upper
+		utype: upper/1/type
+		if all [
+			find [head first] tag
+			find [last tail] etag
+		][
+			if pc <> epc [return false]
+			if all [
+				find [block! paren! map!] to word! type
+				none? pc/1/error
+			][
+				return false
+			]
+			return remove-token tag pc otext oline-stack line-stack s-line s-column e-line e-column
+		]
+		if any [
+			all [
+				tag = 'head
+				etag = 'head
+			]
+			all [
+				tag = 'tail
+				etag = 'tail
+			]
+			all [
+				tag = 'empty
+				etag = 'empty
+			]
+		][
+			if pc <> epc [return false]
+			return remove-ws tag pc otext oline-stack line-stack s-line s-column e-line e-column
+		]
+		if all [
+			find [head first] tag
+			etag = 'one
+		][
+			switch tag [
+				head [
+					if all [
+						find [path! lit-path! get-path! set-path!] to word! epc/1/upper/1/type
+						pc = epc/1/upper
+					][
+						return remove-token-head tag pc otext oline-stack line-stack s-line s-column e-line e-column
+					]
+					if pc = epc [
+						return remove-token-head tag pc otext oline-stack line-stack s-line s-column e-line e-column
+					]
+				]
+				first [
+					if all [
+						find [path! lit-path! get-path! set-path!] to word! epc/1/upper/1/type
+						upper = epc/1/upper
+					][
+						return remove-token-head tag upper otext oline-stack line-stack s-line s-column e-line e-column
+					]
+					if pc = epc [
+						return remove-token-head tag pc otext oline-stack line-stack s-line s-column e-line e-column
+					]
+				]
+			]
+		]
+		if all [
+			tag = 'one
+			etag = 'one
+		][
+			if all [
+				find [path! lit-path! get-path! set-path!] to word! epc/1/upper/1/type
+				upper = epc/1/upper
+			][
+				return remove-token-one tag upper otext oline-stack line-stack s-line s-column e-line e-column
+			]
+			if pc = epc [
+				return remove-token-one tag pc otext oline-stack line-stack s-line s-column e-line e-column
+			]
+		]
+		if all [
+			tag = 'one
+			find [last tail] etag
+		][
+			switch etag [
+				last [
+					if all [
+						find [path! lit-path! get-path! set-path!] to word! utype
+						any [epc/1/upper = upper upper = epc]
+					][
+						return remove-token-tail tag upper otext oline-stack line-stack s-line s-column e-line e-column
+					]
+					if pc = epc [
+						return remove-token-tail tag pc otext oline-stack line-stack s-line s-column e-line e-column
+					]
+				]
+				tail [
+					if all [
+						find [path! lit-path! get-path! set-path!] to word! utype
+						upper = epc
+					][
+						return remove-token-tail tag upper otext oline-stack line-stack s-line s-column e-line e-column
+					]
+					if pc = epc [
+						return remove-token-tail tag pc otext oline-stack line-stack s-line s-column e-line e-column
+					]
+				]
+			]
+		]
 		false
 	]
 
