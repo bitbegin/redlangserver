@@ -606,9 +606,9 @@ semantic: context [
 			return true
 		]
 		if 1 <> length? nested [return false]
-		ntype: nested/1/type
+		ntype: to word! nested/1/type
 		case [
-			find [block! paren! map!] to word! ntype [
+			find [block! paren! map!] ntype [
 				if nested/1/nested [return false]
 				if nested/1/error [return false]
 				spos: lexer/line-pos? line-stack s-line s-column
@@ -616,17 +616,16 @@ semantic: context [
 				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 				nested/1/range: range
 			]
-			find [path! lit-path! get-path! set-path!] to word! ntype [
+			find [path! lit-path! get-path! set-path!] ntype [
 				start: as-pair s-line s-column
 				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
 				nested/1/range: range
 				nnested: nested/1/nested
-				if find [lit-path! get-path!][start: start + 0x1]
+				if find [lit-path! get-path!] ntype [start: start + 0x1]
 				forall nnested [
 					if nnested/1/nested [return false]
 					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
 					nnested/1/range: reduce [start stop]
-					nnested/1/upper: pc
 					start: stop + 0x1
 				]
 			]
@@ -639,49 +638,49 @@ semantic: context [
 		]
 		switch tag [
 			empty [
-				append pc/1 reduce [
-					'nested reduce [
-						reduce [
-							'type nested/1/type
-							'expr nested/1/expr
-							'error nested/1/error
-							'range nested/1/range
-							'upper pc
-						]
+				upper: pc/1/upper
+				pc/1: nested/1
+				pc/1/upper: upper
+				if nn: pc/1/nested [
+					forall nn [
+						nn/1/upper: pc
 					]
 				]
 				update-range next pc lines end-chars s-line s-column e-line e-column
 				update-range/only pc lines end-chars s-line s-column e-line e-column
 			]
 			head [
-				insert/only pc reduce [
-					'type nested/1/type
-					'expr nested/1/expr
-					'error nested/1/error
-					'range nested/1/range
-					'upper pc/1/upper
+				upper: pc/1/upper
+				insert/only pc nested/1
+				pc/1/upper: upper
+				if nn: pc/1/nested [
+					forall nn [
+						nn/1/upper: pc
+					]
 				]
-				update-range pc lines end-chars s-line s-column e-line e-column
+				update-range next pc lines end-chars s-line s-column e-line e-column
 			]
 			last tail [
-				append/only pc reduce [
-					'type nested/1/type
-					'expr nested/1/expr
-					'error nested/1/error
-					'range nested/1/range
-					'upper pc/1/upper
+				upper: pc/1/upper
+				append/only pc nested/1
+				pc/2/upper: upper
+				if nn: pc/2/nested [
+					forall nn [
+						nn/1/upper: next pc
+					]
 				]
 				update-range skip pc 2 lines end-chars s-line s-column e-line e-column
 			]
 			insert [
-				insert/only next pc reduce [
-					'type nested/1/type
-					'expr nested/1/expr
-					'error nested/1/error
-					'range nested/1/range
-					'upper pc/1/upper
+				upper: pc/1/upper
+				append/only pc nested/1
+				pc/2/upper: upper
+				if nn: pc/2/nested [
+					forall nn [
+						nn/1/upper: next pc
+					]
 				]
-				update-range next pc lines end-chars s-line s-column e-line e-column
+				update-range skip pc 2 lines end-chars s-line s-column e-line e-column
 			]
 		]
 		return true
@@ -831,7 +830,7 @@ semantic: context [
 				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
 				nested/1/range: range
 				nnested: nested/1/nested
-				if find [lit-path! get-path!][start: start + 0x1]
+				if find [lit-path! get-path!] wtype [start: start + 0x1]
 				forall nnested [
 					if nnested/1/nested [return false]
 					stop: start + as-pair 0 nnested/1/range/2/y - nnnnestedn/1/range/1/y
@@ -881,7 +880,7 @@ semantic: context [
 				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
 				nested/1/range: range
 				nnested: nested/1/nested
-				if find [lit-path! get-path!][start: start + 0x1]
+				if find [lit-path! get-path!] wtype [start: start + 0x1]
 				forall nnested [
 					if nnested/1/nested [return false]
 					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
@@ -927,7 +926,7 @@ semantic: context [
 				range: reduce [start start + as-pair 0 nested/1/range/2/y - nested/1/range/1/y]
 				nested/1/range: range
 				nnested: nested/1/nested
-				if find [lit-path! get-path!][start: start + 0x1]
+				if find [lit-path! get-path!] wtype [start: start + 0x1]
 				forall nnested [
 					if nnested/1/nested [return false]
 					stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
