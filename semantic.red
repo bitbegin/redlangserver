@@ -965,6 +965,13 @@ semantic: context [
 			find [head first] tag
 			find [last tail] etag
 		][
+			if all [
+				tag = 'first
+				any [epc/1/upper = upper epc = upper]
+				find [path! lit-path! get-path! set-path!] to word! utype
+			][
+				return remove-token tag upper otext oline-stack line-stack s-line s-column e-line e-column
+			]
 			if pc <> epc [return false]
 			if all [
 				find [block! paren! map!] to word! type
