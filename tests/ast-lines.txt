@@ -1,4 +1,4 @@
-23-Aug-2020/21:24:33+08:00
+25-Aug-2020/16:17:48+08:00
 begin {"}
 ================================================
 
@@ -1418,4 +1418,271 @@ begin {a/"b"^^/}
   ]
 ]================================================
 end {a/"b"^^/}
+
+begin "abc;--comment"
+================================================
+
+[
+  [
+    range: [1x1 1x14]
+    nested: 
+    [
+      [
+        expr: abc
+        range: [1x1 1x4]
+        type: word!
+        upper: [1x1 1x14]
+      ]
+    ]
+    source: "abc;--com
+    lines: [
+      "abc;--com
+      1
+    ]
+  ]
+]================================================
+end "abc;--comment"
+
+begin "abc;--comment^/"
+================================================
+
+[
+  [
+    range: [1x1 2x1]
+    nested: 
+    [
+      [
+        expr: abc
+        range: [1x1 1x4]
+        type: word!
+        upper: [1x1 2x1]
+      ]
+      [
+        range: [1x4 1x14]
+        type: comment
+        upper: [1x1 2x1]
+      ]
+    ]
+    source: "abc;--com
+    lines: [
+      "abc;--com
+      1
+      15
+    ]
+  ]
+]================================================
+end "abc;--comment^/"
+
+begin "abc;--comment^/efg"
+================================================
+
+[
+  [
+    range: [1x1 2x4]
+    nested: 
+    [
+      [
+        expr: abc
+        range: [1x1 1x4]
+        type: word!
+        upper: [1x1 2x4]
+      ]
+      [
+        range: [1x4 1x14]
+        type: comment
+        upper: [1x1 2x4]
+      ]
+      [
+        expr: efg
+        range: [2x1 2x4]
+        type: word!
+        upper: [1x1 2x4]
+      ]
+    ]
+    source: "abc;--com
+    lines: [
+      "abc;--com
+      1
+      15
+    ]
+  ]
+]================================================
+end "abc;--comment^/efg"
+
+begin ";--comment^/abc"
+================================================
+
+[
+  [
+    range: [1x1 2x4]
+    nested: 
+    [
+      [
+        range: [1x1 1x11]
+        type: comment
+        upper: [1x1 2x4]
+      ]
+      [
+        expr: abc
+        range: [2x1 2x4]
+        type: word!
+        upper: [1x1 2x4]
+      ]
+    ]
+    source: ";--commen
+    lines: [
+      ";--commen
+      1
+      12
+    ]
+  ]
+]================================================
+end ";--comment^/abc"
+
+begin "[;--comment^/]"
+================================================
+
+[
+  [
+    range: [1x1 2x2]
+    nested: 
+    [
+      [
+        range: [1x1 2x2]
+        type: block!
+        nested: 
+        [
+          [
+            range: [1x2 1x12]
+            type: comment
+            upper: [1x1 2x2]
+          ]
+        ]
+        upper: [1x1 2x2]
+      ]
+    ]
+    source: "[;--comme
+    lines: [
+      "[;--comme
+      1
+      13
+    ]
+  ]
+]================================================
+end "[;--comment^/]"
+
+begin "(;--comment^/)"
+================================================
+
+[
+  [
+    range: [1x1 2x2]
+    nested: 
+    [
+      [
+        range: [1x1 2x2]
+        type: paren!
+        nested: 
+        [
+          [
+            range: [1x2 1x12]
+            type: comment
+            upper: [1x1 2x2]
+          ]
+        ]
+        upper: [1x1 2x2]
+      ]
+    ]
+    source: "(;--comme
+    lines: [
+      "(;--comme
+      1
+      13
+    ]
+  ]
+]================================================
+end "(;--comment^/)"
+
+begin "a/b;--comment^/"
+================================================
+
+[
+  [
+    range: [1x1 2x1]
+    nested: 
+    [
+      [
+        range: [1x1 1x4]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 1x4]
+          ]
+          [
+            expr: b
+            range: [1x3 1x4]
+            type: word!
+            upper: [1x1 1x4]
+          ]
+        ]
+        upper: [1x1 2x1]
+      ]
+      [
+        range: [1x4 1x14]
+        type: comment
+        upper: [1x1 2x1]
+      ]
+    ]
+    source: "a/b;--com
+    lines: [
+      "a/b;--com
+      1
+      15
+    ]
+  ]
+]================================================
+end "a/b;--comment^/"
+
+begin "a/;--comment^/"
+================================================
+
+[
+  [
+    range: [1x1 2x1]
+    nested: 
+    [
+      [
+        range: [1x1 1x3]
+        type: path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x1 1x2]
+            type: word!
+            upper: [1x1 1x3]
+          ]
+        ]
+        upper: [1x1 2x1]
+        error: [code slash]
+      ]
+      [
+        range: [1x3 1x13]
+        type: comment
+        upper: [1x1 2x1]
+      ]
+    ]
+    source: "a/;--comm
+    lines: [
+      "a/;--comm
+      1
+      14
+    ]
+  ]
+]================================================
+end "a/;--comment^/"
 

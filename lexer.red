@@ -93,7 +93,7 @@ lexer: context [
 			base	[integer!]
 			x		[integer!]
 			y		[integer!]
-			type	[datatype!]
+			type	[datatype! word!]
 			expr
 			error
 			/local nested
@@ -232,10 +232,20 @@ lexer: context [
 						as-pair start stop
 					][token]
 					stype: type
-					true
+					either stype = 'comment [
+						add-node base stoken/x stoken/y stype none none
+						either in-path? [
+							true
+						][
+							throw stoken/y - 1
+						]
+					][
+						true
+					]
 				]
 				load [
 					add-node base stoken/x stoken/y stype token none
+					start: stop: none
 					either in-path? [
 						true
 					][

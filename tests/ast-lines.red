@@ -64,6 +64,15 @@ codes: [
 	%{a/"b }%
 	%{a/"b"c}%
 	%{a/"b"^/}%
+	;-- comment!
+	"abc;--comment"
+	"abc;--comment^/"
+	"abc;--comment^/efg"
+	";--comment^/abc"
+	"[;--comment^/]"
+	"(;--comment^/)"
+	"a/b;--comment^/"
+	"a/;--comment^/"
 ]
 
 forall codes [
