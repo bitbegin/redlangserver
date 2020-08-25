@@ -587,59 +587,6 @@ semantic: context [
 		][
 			end-chars: length? find/last/tail text "^/"
 		]
-		npos: lexer/line-pos? oline-stack s-line s-column
-		switch tag [
-			empty [
-				spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
-				str: copy/part spos npos
-				unless tstr: find/last/tail str "^/" [
-					tstr: str
-				]
-				if find tstr ";" [
-					if all [
-						ntext: find/tail text "^/"
-						not parse ntext [any ws]
-					][return false]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-					update-range/only pc lines end-chars s-line s-column e-line e-column
-					write-log "in comment"
-					return true
-				]
-			]
-			head [
-				upper: pc/1/upper
-				spos: lexer/line-pos? oline-stack upper/1/range/1/x upper/1/range/1/y
-				str: copy/part spos npos
-				unless tstr: find/last/tail str "^/" [
-					tstr: str
-				]
-				if find tstr ";" [
-					if all [
-						ntext: find/tail text "^/"
-						not parse ntext [any ws]
-					][return false]
-					update-range pc lines end-chars s-line s-column e-line e-column
-					write-log "in comment"
-					return true
-				]
-			]
-			tail insert [
-				spos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
-				str: copy/part spos npos
-				unless tstr: find/last/tail str "^/" [
-					tstr: str
-				]
-				if find tstr ";" [
-					if all [
-						ntext: find/tail text "^/"
-						not parse ntext [any ws]
-					][return false]
-					update-range next pc lines end-chars s-line s-column e-line e-column
-					write-log "in comment"
-					return true
-				]
-			]
-		]
 		ntop: lexer/transcode text
 		unless nested: ntop/1/nested [
 			write-log "spaces"
@@ -648,7 +595,7 @@ semantic: context [
 					update-range next pc lines end-chars s-line s-column e-line e-column
 					update-range/only pc lines end-chars s-line s-column e-line e-column
 				]
-				head [
+				first head [
 					update-range pc lines end-chars s-line s-column e-line e-column
 				]
 				last tail [
@@ -687,6 +634,35 @@ semantic: context [
 				write-log "any path"
 			]
 			true [
+				if nested/1/type = 'comment [
+					switch tag [
+						empty [
+							if all [
+								(lines + 1) = nested/1/range/1/x
+								e-line = pc/1/range/1/x
+							][return false]
+						]
+						first head [
+							if all [
+								(lines + 1) = nested/1/range/1/x
+								e-line = pc/1/range/1/x
+							][return false]
+						]
+						last tail [
+							upper: pc/1/upper
+							if all [
+								(lines + 1) = nested/1/range/1/x
+								e-line = upper/1/range/2/x
+							][return false]
+						]
+						insert [
+							if all [
+								(lines + 1) = nested/1/range/1/x
+								e-line = pc/2/range/1/x
+							][return false]
+						]
+					]
+				]
 				spos: lexer/line-pos? line-stack s-line s-column
 				epos: skip spos length? text
 				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
@@ -707,7 +683,7 @@ semantic: context [
 				update-range next pc lines end-chars s-line s-column e-line e-column
 				update-range/only pc lines end-chars s-line s-column e-line e-column
 			]
-			head [
+			first head [
 				upper: pc/1/upper
 				insert/only pc nested/1
 				pc/1/upper: upper
@@ -784,6 +760,20 @@ semantic: context [
 				write-log "any path"
 			]
 			true [
+				if nested/1/type = 'comment [
+					either tail? npc: next pc [
+						upper: pc/1/upper
+						if all [
+							(lines + 1) = nested/1/range/1/x
+							e-line = upper/1/range/2/x
+						][return false]
+					][
+						if all [
+							(lines + 1) = nested/1/range/1/x
+							e-line = npc/1/range/1/x
+						][return false]
+					]
+				]
 				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
 				npos: lexer/line-pos? line-stack nested/1/range/1/x nested/1/range/1/y
 				epos: lexer/line-pos? line-stack nested/1/range/2/x nested/1/range/2/y
