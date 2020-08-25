@@ -1027,7 +1027,7 @@ semantic: context [
 				any [epc/1/upper = upper epc = upper]
 				in-path?
 			][
-				return remove-token tag upper otext oline-stack line-stack s-line s-column e-line e-column
+				return remove-token-tail tag upper otext oline-stack line-stack s-line s-column e-line e-column
 			]
 			if pc <> epc [return false]
 			if all [
