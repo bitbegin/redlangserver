@@ -961,6 +961,10 @@ semantic: context [
 		type: pc/1/type
 		upper: pc/1/upper
 		utype: upper/1/type
+		in-path?: no
+		if utype [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! utype
+		]
 		if all [
 			find [head first] tag
 			find [last tail] etag
@@ -968,7 +972,7 @@ semantic: context [
 			if all [
 				tag = 'first
 				any [epc/1/upper = upper epc = upper]
-				find [path! lit-path! get-path! set-path!] to word! utype
+				in-path?
 			][
 				return remove-token tag upper otext oline-stack line-stack s-line s-column e-line e-column
 			]
@@ -1048,7 +1052,7 @@ semantic: context [
 			switch etag [
 				last [
 					if all [
-						find [path! lit-path! get-path! set-path!] to word! utype
+						in-path?
 						any [epc/1/upper = upper upper = epc]
 					][
 						return remove-token-tail tag upper otext oline-stack line-stack s-line s-column e-line e-column
@@ -1059,7 +1063,7 @@ semantic: context [
 				]
 				tail [
 					if all [
-						find [path! lit-path! get-path! set-path!] to word! utype
+						in-path?
 						upper = epc
 					][
 						return remove-token-tail tag upper otext oline-stack line-stack s-line s-column e-line e-column
