@@ -651,6 +651,7 @@ semantic: context [
 						last tail [
 							upper: pc/1/upper
 							if all [
+								upper/1/type
 								(lines + 1) = nested/1/range/1/x
 								e-line = upper/1/range/2/x
 							][return false]
@@ -764,6 +765,7 @@ semantic: context [
 					either tail? npc: next pc [
 						upper: pc/1/upper
 						if all [
+							upper/1/type
 							(lines + 1) = nested/1/range/1/x
 							e-line = upper/1/range/2/x
 						][return false]
