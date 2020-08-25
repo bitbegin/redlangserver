@@ -788,6 +788,22 @@ semantic: context [
 		true
 	]
 
+	insert-ws: function [
+		tag [word!] pc [block!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "insert-ws"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
+	ws: charset " ^M^/^-"
 	;-- only input chars
 	input-text: function [
 		spcs [block!] text [string!] oline-stack [block!] line-stack [block!]
@@ -801,6 +817,12 @@ semantic: context [
 		in-path?: no
 		if utype [
 			in-path?: find [path! lit-path! get-path! set-path!] to word! utype
+		]
+		if all [
+			tag = 'mid
+			parse text [some ws]
+		][
+			return insert-ws tag pc text oline-stack line-stack s-line s-column e-line e-column
 		]
 		if any [
 			find [empty head tail insert] tag
