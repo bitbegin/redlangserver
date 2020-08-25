@@ -575,6 +575,7 @@ semantic: context [
 		true
 	]
 
+	ws: charset " ^M^/^-"
 	insert-token: function [
 		tag [word!] pc [block!] text [string!] oline-stack [block!] line-stack [block!]
 		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
@@ -595,6 +596,10 @@ semantic: context [
 					tstr: str
 				]
 				if find tstr ";" [
+					if all [
+						ntext: find/tail text "^/"
+						not parse ntext [any ws]
+					][return false]
 					update-range next pc lines end-chars s-line s-column e-line e-column
 					update-range/only pc lines end-chars s-line s-column e-line e-column
 					write-log "in comment"
@@ -609,6 +614,10 @@ semantic: context [
 					tstr: str
 				]
 				if find tstr ";" [
+					if all [
+						ntext: find/tail text "^/"
+						not parse ntext [any ws]
+					][return false]
 					update-range pc lines end-chars s-line s-column e-line e-column
 					write-log "in comment"
 					return true
@@ -621,6 +630,10 @@ semantic: context [
 					tstr: str
 				]
 				if find tstr ";" [
+					if all [
+						ntext: find/tail text "^/"
+						not parse ntext [any ws]
+					][return false]
 					update-range next pc lines end-chars s-line s-column e-line e-column
 					write-log "in comment"
 					return true
@@ -803,7 +816,6 @@ semantic: context [
 		true
 	]
 
-	ws: charset " ^M^/^-"
 	;-- only input chars
 	input-text: function [
 		spcs [block!] text [string!] oline-stack [block!] line-stack [block!]
