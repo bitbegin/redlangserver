@@ -1,4 +1,4 @@
-25-Aug-2020/16:17:48+08:00
+25-Aug-2020/17:19:22+08:00
 begin {"}
 ================================================
 
@@ -1431,6 +1431,11 @@ begin "abc;--comment"
         expr: abc
         range: [1x1 1x4]
         type: word!
+        upper: [1x1 1x14]
+      ]
+      [
+        range: [1x4 1x14]
+        type: comment
         upper: [1x1 1x14]
       ]
     ]

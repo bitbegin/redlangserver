@@ -225,6 +225,13 @@ lexer: context [
 			switch event [
 				prescan [
 					pretoken: token
+					if all [
+						type = 'eof
+						input/1 = #";"
+					][
+						add-node base token/x token/y 'comment none none
+						throw token/y - 1
+					]
 					true
 				]
 				scan [
