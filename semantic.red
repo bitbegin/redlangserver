@@ -2479,11 +2479,16 @@ completion: context [
 			;".reds"	[system?: yes]
 		][exit]
 		complete-sys-path: function [][
-			tstr: to string! last paths
 			unless system-words/keyword? no fword [exit]
 			pure-path: to string! to path! path
-			if slash-end? [
+			either slash-end? [
 				append pure-path "/"
+				tstr: copy pure-path
+			][
+				npath: copy path
+				remove back tail npath
+				tstr: to string! to path! npath
+				append tstr "/"
 			]
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
@@ -2503,7 +2508,7 @@ completion: context [
 						'newText nstring
 					]
 					'data make map! reduce [
-						'path append copy tstr nstring
+						'path rejoin [tstr nstring]
 						'type "keypath"
 					]
 				]
