@@ -597,6 +597,7 @@ semantic: context [
 				if find tstr ";" [
 					update-range next pc lines end-chars s-line s-column e-line e-column
 					update-range/only pc lines end-chars s-line s-column e-line e-column
+					write-log "in comment"
 					return true
 				]
 			]
@@ -609,6 +610,7 @@ semantic: context [
 				]
 				if find tstr ";" [
 					update-range pc lines end-chars s-line s-column e-line e-column
+					write-log "in comment"
 					return true
 				]
 			]
@@ -620,12 +622,14 @@ semantic: context [
 				]
 				if find tstr ";" [
 					update-range next pc lines end-chars s-line s-column e-line e-column
+					write-log "in comment"
 					return true
 				]
 			]
 		]
 		ntop: lexer/transcode text
 		unless nested: ntop/1/nested [
+			write-log "spaces"
 			switch tag [
 				empty [
 					update-range next pc lines end-chars s-line s-column e-line e-column
@@ -653,6 +657,7 @@ semantic: context [
 				epos: skip spos length? text
 				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "empty pair"
 			]
 			find [path! lit-path! get-path! set-path!] ntype [
 				start: as-pair s-line s-column
@@ -666,12 +671,14 @@ semantic: context [
 					nnested/1/range: reduce [start stop]
 					start: stop + 0x1
 				]
+				write-log "any path"
 			]
 			true [
 				spos: lexer/line-pos? line-stack s-line s-column
 				epos: skip spos length? text
 				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "one token"
 			]
 		]
 		switch tag [
@@ -761,6 +768,7 @@ semantic: context [
 					nnested/1/upper: pc
 					start: stop + 0x1
 				]
+				write-log "any path"
 			]
 			true [
 				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
@@ -770,6 +778,7 @@ semantic: context [
 				epos: skip spos length? str2
 				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "one token"
 			]
 		]
 		upper: pc/1/upper
@@ -876,12 +885,14 @@ semantic: context [
 					nnested/1/upper: pc
 					start: stop + 0x1
 				]
+				write-log "any path"
 			]
 			true [
 				spos: lexer/line-pos? line-stack s-line s-column
 				epos: skip spos length? str
 				range: reduce [as-pair s-line s-column lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "one token"
 			]
 		]
 		upper: pc/1/upper
@@ -926,12 +937,14 @@ semantic: context [
 					nnested/1/upper: pc
 					start: stop + 0x1
 				]
+				write-log "any path"
 			]
 			true [
 				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
 				epos: skip spos length? str
 				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "one token"
 			]
 		]
 		upper: pc/1/upper
@@ -972,12 +985,14 @@ semantic: context [
 					nnested/1/upper: pc
 					start: stop + 0x1
 				]
+				write-log "any path"
 			]
 			true [
 				spos: lexer/line-pos? line-stack pc/1/range/1/x pc/1/range/1/y
 				epos: skip spos length? str
 				range: reduce [pc/1/range/1 lexer/pos-line? line-stack epos]
 				nested/1/range: range
+				write-log "one token"
 			]
 		]
 		upper: pc/1/upper
@@ -1128,7 +1143,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
-			write-log lexer/format top
+			;write-log lexer/format top
 			code: top/1/source
 			oline-stack: top/1/lines
 			range: changes/1/range
@@ -1195,7 +1210,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
-		write-log lexer/format top
+		;write-log lexer/format top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
