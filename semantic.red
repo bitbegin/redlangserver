@@ -586,6 +586,44 @@ semantic: context [
 		][
 			end-chars: length? find/last/tail text "^/"
 		]
+		npos: lexer/line-pos? oline-stack s-line s-column
+		switch tag [
+			empty [
+				spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+				str: copy/part spos npos
+				unless tstr: find/last/tail str "^/" [
+					tstr: str
+				]
+				if find tstr ";" [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range/only pc lines end-chars s-line s-column e-line e-column
+					return true
+				]
+			]
+			head [
+				upper: pc/1/upper
+				spos: lexer/line-pos? oline-stack upper/1/range/1/x upper/1/range/1/y
+				str: copy/part spos npos
+				unless tstr: find/last/tail str "^/" [
+					tstr: str
+				]
+				if find tstr ";" [
+					update-range pc lines end-chars s-line s-column e-line e-column
+					return true
+				]
+			]
+			tail insert [
+				spos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+				str: copy/part spos npos
+				unless tstr: find/last/tail str "^/" [
+					tstr: str
+				]
+				if find tstr ";" [
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					return true
+				]
+			]
+		]
 		ntop: lexer/transcode text
 		unless nested: ntop/1/nested [
 			switch tag [
