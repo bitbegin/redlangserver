@@ -708,7 +708,7 @@ semantic: context [
 			]
 			insert [
 				upper: pc/1/upper
-				append/only pc nested/1
+				insert/only next pc nested/1
 				pc/2/upper: upper
 				if nn: pc/2/nested [
 					forall nn [
