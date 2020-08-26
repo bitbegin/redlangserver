@@ -1160,6 +1160,21 @@ semantic: context [
 		false
 	]
 
+	insert-mid-spaces: function [
+		pc [block!] text [string!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		write-log "insert-mid-spaces"
+		lines: new-lines? text
+		either lines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		update-range next pc lines end-chars s-line s-column e-line e-column
+		true
+	]
+
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
 		switch/default find/last uri "." [
@@ -1218,6 +1233,29 @@ semantic: context [
 					none? epcs
 				][
 					write-log "position failed"
+					top: add-source*/force uri ncode
+					continue
+				]
+
+				if all [
+					spcs = epcs
+					spcs/1 = 'mid
+				][
+					if parse text [some ws][
+						insert-mid-spaces spcs/2 text s-line s-column e-line e-column
+						top/1/source: ncode
+						top/1/lines: line-stack
+						continue
+					]
+					write-log "insert chars at mid"
+					top: add-source*/force uri ncode
+					continue
+				]
+				unless all [
+					find [head first one last insert tail empty] spcs/1
+					find [head first one last insert tail empty] epcs/1
+				][
+					write-log "position failed 2"
 					top: add-source*/force uri ncode
 					continue
 				]
