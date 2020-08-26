@@ -2611,6 +2611,7 @@ completion: context [
 		unless pcs: semantic/position? top line column [return none]
 		if pcs/1 <> 'last [return none]
 		pc: pcs/2
+		if pc/1/type = 'comment [return none]
 		comps: clear last-comps
 		if all [
 			find [path! lit-path! get-path!] to word! pc/1/type
