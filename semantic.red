@@ -673,12 +673,16 @@ semantic: context [
 		]
 		switch tag [
 			empty [
-				upper: pc/1/upper
-				pc/1: nested/1
-				pc/1/upper: upper
-				if nn: pc/1/nested [
+				either find pc/1 'nested [
+					pc/1/nested: make block! 1
+				][
+					repend pc/1 ['nested make block! 1]
+				]
+				append/only pc/1/nested nested/1
+				nested/1/upper: pc
+				if nn: nested/1/nested [
 					forall nn [
-						nn/1/upper: pc
+						nn/1/upper: pc/1/nested
 					]
 				]
 				update-range next pc lines end-chars s-line s-column e-line e-column
