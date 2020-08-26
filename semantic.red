@@ -3011,8 +3011,6 @@ completion: context [
 		resolve-word top pc to string! pc/1/expr/1 result/1/1
 	]
 
-	hover-types: reduce [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! integer! float! pair! binary! char! email! logic! percent! tuple! time! date! file! url! string! refinement! issue!]
-	literal-disp: skip hover-types 8
 	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
 		unless pcs: semantic/position? top line column [
@@ -3020,7 +3018,6 @@ completion: context [
 		]
 		pc: pcs/2
 		unless find [one first last mid] pcs/1 [return none]
-		unless find hover-types pc/1/type [return none]
 		return reduce [top pc]
 	]
 
@@ -3067,10 +3064,18 @@ completion: context [
 			if ret: hover-path top pc path [return ret]
 			return hover-keypath path
 		]
-		if find literal-disp type: pc/1/type [
-			if file! = type [
-				return rejoin [mold type " : " form/part pc/1/expr/1 60]
-			]
+		type: pc/1/type
+		if type = 'comment [
+			return "comment!"
+		]
+		if type = file! [
+			return rejoin [mold type " : " form/part pc/1/expr/1 60]
+		]
+		wtype: to word! type
+		if find [block! paren! map! path! lit-path! get-path! set-path!] wtype [
+			return mold type
+		]
+		unless find [word! get-word! set-word!] wtype [
 			return rejoin [mold type " : " mold/part pc/1/expr/1 60]
 		]
 		if ret: hover-word top pc word: to word! pc/1/expr/1 [return ret]
@@ -3124,10 +3129,15 @@ completion: context [
 			]
 			return definition-path top pc path
 		]
-		if find literal-disp pc/1/type [
+		type: pc/1/type
+		wtype: to word! type
+		if find [block! paren! map! path! lit-path! get-path! set-path!] wtype [
 			return none
 		]
-		definition-word top pc to word! pc/1/expr/1
+		if find [word! get-word! set-word!] wtype [
+			return definition-word top pc to word! pc/1/expr/1
+		]
+		none
 	]
 
 	unique3?: function [specs [block!] str [string!]][
