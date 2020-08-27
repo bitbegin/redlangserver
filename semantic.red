@@ -519,6 +519,16 @@ semantic: context [
 		]
 	]
 
+	update-upper: function [pc [block!] /remove?][
+		forall pc [
+			if npc: pc/1/nested [
+				forall npc [
+					npc/1/upper: either remove? [back npc/1/upper][next npc/1/upper]
+				]
+			]
+		]
+	]
+
 	ws: charset " ^M^/^-"
 	all-path!: reduce [path! lit-path! get-path! set-path!]
 	all-pair!: reduce [block! paren! map!]
@@ -582,6 +592,7 @@ semantic: context [
 			unless nested: ntop/1/nested [
 				write-log "remove token"
 				remove wpc
+				update-upper/remove? wpc
 				update-range wpc lines end-chars s-line s-column e-line e-column
 				return true
 			]
@@ -645,6 +656,7 @@ semantic: context [
 								]
 							]
 							write-log "insert new token"
+							update-upper next wpc
 							update-range next wpc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -682,6 +694,7 @@ semantic: context [
 							unless parse text [any ws] [return false]
 							remove pc
 							write-log "remove token"
+							update-upper/remove? pc
 							update-range pc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -714,6 +727,7 @@ semantic: context [
 								]
 							]
 							write-log "insert new token"
+							update-upper next wpc
 							update-range next wpc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -731,6 +745,7 @@ semantic: context [
 							unless parse text [any ws] [return false]
 							remove pc
 							write-log "remove token"
+							update-upper/remove? pc
 							update-range pc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -787,6 +802,7 @@ semantic: context [
 								unless parse text [any ws][return false]
 								remove pc
 								write-log "remove token"
+								update-upper/remove? pc
 								update-range pc lines end-chars s-line s-column e-line e-column
 								return true
 							]
@@ -849,6 +865,7 @@ semantic: context [
 								unless parse text [any ws][return false]
 								remove pc
 								write-log "remove token"
+								update-upper/remove? pc
 								update-range pc lines end-chars s-line s-column e-line e-column
 								return true
 							]
@@ -998,6 +1015,7 @@ semantic: context [
 						unless parse text [any ws][return false]
 						remove wpc
 						write-log "remove token"
+						update-upper/remove? wpc
 						update-range wpc lines end-chars s-line s-column e-line e-column
 						return true
 					]
@@ -1007,6 +1025,7 @@ semantic: context [
 						unless parse text [any ws][return false]
 						remove wpc
 						write-log "remove token"
+						update-upper/remove? wpc
 						update-range wpc lines end-chars s-line s-column e-line e-column
 						return true
 					]
@@ -1075,7 +1094,8 @@ semantic: context [
 									]
 								]
 								write-log "insert new token"
-								update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+								update-upper npc: skip pc 2
+								update-range npc lines end-chars s-line s-column e-line e-column
 								return true
 							]
 						]
@@ -1087,6 +1107,7 @@ semantic: context [
 							unless parse text [any ws] [return false]
 							remove npc
 							write-log "remove token"
+							update-upper/remove? npc
 							update-range npc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -1133,7 +1154,8 @@ semantic: context [
 									]
 								]
 								write-log "insert new token"
-								update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+								update-upper npc: skip pc 2
+								update-range npc lines end-chars s-line s-column e-line e-column
 								return true
 							]
 						]
@@ -1145,6 +1167,7 @@ semantic: context [
 							unless parse text [any ws] [return false]
 							remove npc
 							write-log "remove token"
+							update-upper/remove? npc
 							update-range npc lines end-chars s-line s-column e-line e-column
 							return true
 						]
@@ -1179,7 +1202,8 @@ semantic: context [
 					]
 				]
 				write-log "append new token"
-				update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+				update-upper npc: skip pc 2
+				update-range npc lines end-chars s-line s-column e-line e-column
 				return true
 			]
 			empty [
@@ -1208,7 +1232,8 @@ semantic: context [
 					]
 				]
 				write-log "insert new token"
-				update-range next wpc lines end-chars s-line s-column e-line e-column
+				update-upper npc: next wpc
+				update-range npc lines end-chars s-line s-column e-line e-column
 				return true
 			]
 		]
