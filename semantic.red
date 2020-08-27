@@ -545,9 +545,9 @@ semantic: context [
 				start: as-pair s-line + range/1/x - 1 range/1/y
 			]
 			either range/2/x = 1 [
-				stop: as-pair s-line s-column + range/1/y - 1
+				stop: as-pair s-line s-column + range/2/y - 1
 			][
-				stop: as-pair s-line + range/1/x - 1 range/1/y
+				stop: as-pair s-line + range/1/x - 1 range/2/y
 			]
 			nested/1/range: reduce [start stop]
 			case [
@@ -559,7 +559,7 @@ semantic: context [
 				find all-path! type [
 					start: nested/1/range/1
 					nnested: nested/1/nested
-					if pre-path! type [start: start + 0x1]
+					if find pre-path! type [start: start + 0x1]
 					forall nnested [
 						if nnested/1/nested [return false]
 						stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
@@ -603,6 +603,7 @@ semantic: context [
 					nn/1/upper: wpc
 				]
 			]
+			write-log "change token"
 			update-range next wpc lines end-chars s-line s-column e-line e-column
 		]
 
@@ -1227,7 +1228,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
-			;write-log lexer/format top
+			write-log lexer/format top
 			code: top/1/source
 			oline-stack: top/1/lines
 			range: changes/1/range
@@ -1251,14 +1252,6 @@ semantic: context [
 			][continue]
 			write-log rejoin ["remove: " mold otext]
 			write-log rejoin ["add: " mold text]
-			if all [
-				not empty? otext
-				not empty? text
-			][
-				write-log "TBD"
-				top: add-source*/force uri ncode
-				continue
-			]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
 				if any [
@@ -1275,7 +1268,7 @@ semantic: context [
 					top: add-source*/force uri ncode
 					continue
 				]
-
+				write-log mold reduce [spcs/1 epcs/1]
 				unless all [
 					find tags spcs/1
 					find tags epcs/1
@@ -1296,7 +1289,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
-		;write-log lexer/format top
+		write-log lexer/format top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
