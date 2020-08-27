@@ -515,7 +515,7 @@ semantic: context [
 		]
 		while [par: par/1/upper][
 			update-pc par no
-			update-pc-nested next par no
+			update-pc-nested next par yes
 		]
 	]
 
