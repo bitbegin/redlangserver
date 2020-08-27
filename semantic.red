@@ -1175,6 +1175,700 @@ semantic: context [
 		true
 	]
 
+	all-path!: reduce [path! lit-path! get-path! set-path!]
+	all-pair!: reduce [block! paren! map!]
+	pre-path!: reduce [lit-path! get-path!]
+	update-token: function [
+		tag [word!] pc [block!] etag [word!] epc [block!]
+		otext [string!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		olines: new-lines? otext
+		nlines: new-lines? text
+		either nlines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		lines: nlines - olines
+		rebuild: [
+			type: nested/1/type
+			range: nested/1/range
+			either range/1/x = 1 [
+				start: as-pair s-line s-column + range/1/y - 1
+			][
+				start: as-pair s-line + range/1/x - 1 range/1/y
+			]
+			either range/2/x = 1 [
+				stop: as-pair s-line s-column + range/1/y - 1
+			][
+				stop: as-pair s-line + range/1/x - 1 range/1/y
+			]
+			nested/1/range: reduce [start stop]
+			case [
+				find all-pair! type [
+					if nested/1/nested [return false]
+					if nested/1/error [return false]
+					write-log "empty pair"
+				]
+				find all-path! type [
+					start: nested/1/range/1
+					nnested: nested/1/nested
+					if pre-path! type [start: start + 0x1]
+					forall nnested [
+						if nnested/1/nested [return false]
+						stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+						nnested/1/range: reduce [start stop]
+						start: stop + 0x1
+					]
+					write-log "any path"
+				]
+			]
+		]
+
+		replace-node: [
+			unless empty? head-str [
+				text: rejoin [head-str text]
+			]
+			unless empty? tail-str [
+				append text tail-str
+			]
+			ntop: lexer/transcode text
+			unless nested: ntop/1/nested [
+				write-log "remove token"
+				remove wpc
+				update-range wpc lines end-chars s-line s-column e-line e-column
+				return true
+			]
+			if 1 <> length? nested [return false]
+			if nested/1/type = 'comment [
+				npc: next wpc
+				if tail? npc [
+					npc: wpc/1/upper
+				]
+				if all [
+					(nlines + 1) = nested/1/range/1/x
+					e-line = npc/1/range/1/x
+				][return false]
+			]
+			do rebuild
+			wpc/1: nested/1
+			if nn: wpc/1/nested [
+				forall nn [
+					nn/1/upper: wpc
+				]
+			]
+			update-range next wpc lines end-chars s-line s-column e-line e-column
+		]
+
+		in-path?: no
+		if utype: pc/1/upper/1/type [
+			in-path?: find all-path! utype
+		]
+
+		head-str: ""
+		tail-str: ""
+		wpc: pc
+
+		switch tag [
+			head [
+				either find all-path! pc/1/type [
+					switch etag [
+						head [
+							if pc <> epc [return false]
+							ntop: lexer/transcode text
+							unless nested: ntop/1/nested [
+								write-log "remove/insert spaces"
+								update-range pc lines end-chars s-line s-column e-line e-column
+								return true
+							]
+							if 1 <> length? nested [return false]
+							if nested/1/type = 'comment [
+								if all [
+									(nlines + 1) = nested/1/range/1/x
+									e-line = wpc/1/range/1/x
+								][return false]
+							]
+							do rebuild
+							upper: wpc/1/upper
+							insert/only wpc nested/1
+							wpc/1/upper: upper
+							if nn: wpc/1/nested [
+								forall nn [
+									nn/1/upper: wpc
+								]
+							]
+							write-log "insert new token"
+							update-range next wpc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						first [
+							unless any [
+								pc = epc
+								epc/1/upper = pc
+							][return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						one [
+							if epc/1/upper <> pc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							unless any [
+								pc = epc
+								epc/1/upper = pc
+							][return false]
+							if epc/1/upper = pc [
+								epos: lexer/line-pos? oline-stack e-line e-column
+								npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+								tail-str: copy/part epos npos
+							]
+						]
+						insert tail [
+							if pc <> epc [return false]
+						]
+						mid [
+							if pc <> epc [return false]
+							unless parse text [any ws] [return false]
+							remove pc
+							write-log "remove token"
+							update-range pc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						empty [return false]
+					]
+				][
+					switch etag [
+						head [
+							if pc <> epc [return false]
+							ntop: lexer/transcode text
+							unless nested: ntop/1/nested [
+								write-log "remove/insert spaces"
+								update-range pc lines end-chars s-line s-column e-line e-column
+								return true
+							]
+							if 1 <> length? nested [return false]
+							if nested/1/type = 'comment [
+								if all [
+									(nlines + 1) = nested/1/range/1/x
+									e-line = wpc/1/range/1/x
+								][return false]
+							]
+							do rebuild
+							upper: wpc/1/upper
+							insert/only wpc nested/1
+							wpc/1/upper: upper
+							if nn: wpc/1/nested [
+								forall nn [
+									nn/1/upper: wpc
+								]
+							]
+							write-log "insert new token"
+							update-range next wpc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						first one [
+							if epc <> pc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last insert tail [
+							if epc <> pc [return false]
+						]
+						mid [
+							if pc <> epc [return false]
+							unless parse text [any ws] [return false]
+							remove pc
+							write-log "remove token"
+							update-range pc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						empty [return false]
+					]
+				]
+			]
+			;-- switch tag
+			first [
+				case [
+					find all-path! pc/1/type [
+						switch etag [
+							head [return false]
+							first [
+								case [
+									find all-path! epc/1/type [
+										if pc <> epc [return false]
+										spos: lexer/line-pos? oline-stack e-line e-column
+										epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+										tail-str: copy/part spos epos
+									]
+									epc/1/upper = pc [
+										spos: lexer/line-pos? oline-stack e-line e-column
+										epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+										tail-str: copy/part spos epos
+									]
+									true [return false]
+								]
+							]
+							one [
+								if epc/1/upper <> pc [return false]
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either find all-path! epc/1/type [
+									if pc <> epc [return false]
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+									tail-str: copy/part spos epos
+								][
+									if epc/1/upper <> pc [return false]
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+									tail-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if pc <> epc [return false]
+							]
+							mid [
+								if pc <> epc [return false]
+								unless parse text [any ws][return false]
+								remove pc
+								write-log "remove token"
+								update-range pc lines end-chars s-line s-column e-line e-column
+								return true
+							]
+							empty [return false]
+						]
+					]
+					in-path? [
+						wpc: pc/1/upper
+						switch etag [
+							head [return false]
+							first one [
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either find all-path! epc/1/type [
+									if wpc <> epc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+								][
+									if epc/1/upper <> wpc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+									tail-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if epc <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid [return false]
+							empty [return false]
+						]
+					]
+					true [
+						switch etag [
+							head [return false]
+							first one [
+								if epc <> pc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							last insert tail [
+								if epc <> pc [return false]
+							]
+							mid [
+								if pc <> epc [return false]
+								unless parse text [any ws][return false]
+								remove pc
+								write-log "remove token"
+								update-range pc lines end-chars s-line s-column e-line e-column
+								return true
+							]
+							empty [return false]
+						]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			one [
+				either in-path? [
+					wpc: pc/1/upper
+					switch etag [
+						head first [return false]
+						one [
+							if epc/1/upper <> wpc [return false]
+							spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+							spos: lexer/line-pos? oline-stack e-line e-column
+							epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+							tail-str: copy/part spos epos
+						]
+						last [
+							either find all-path! epc/1/type [
+								if wpc <> epc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							][
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+						]
+						insert tail [
+							if epc <> wpc [return false]
+							spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+						]
+						mid empty [return false]
+					]
+				][
+					switch etag [
+						head first [return false]
+						one [
+							if epc <> pc [return false]
+							spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+							spos: lexer/line-pos? oline-stack e-line e-column
+							epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part spos epos
+						]
+						last insert tail [
+							if epc <> pc [return false]
+							spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+						]
+						mid empty [return false]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			last [
+				case [
+					find all-path! pc/1/type [
+						switch etag [
+							head first one [return false]
+							last insert tail [
+								if epc <> pc [return false]
+							]
+							mid empty [return false]
+						]
+					]
+					in-path? [
+						wpc: pc/1/upper
+						switch etag [
+							head [return false]
+							first one [
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either all [
+									xtype: epc/1/upper/1/type
+									find all-path! xtype
+								][
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+									tail-str: copy/part spos epos
+								][
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if epc <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid empty [return false]
+						]
+					]
+					true [
+						switch etag [
+							head first one [return false]
+							last insert tail [
+								if pc <> epc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid empty [return false]
+						]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			mid [
+				switch etag [
+					head first one [return false]
+					last insert tail [
+						if epc <> wpc: next pc [return false]
+						unless parse text [any ws][return false]
+						remove wpc
+						write-log "remove token"
+						update-range wpc lines end-chars s-line s-column e-line e-column
+						return true
+					]
+					mid [
+						if epc <> pc [return false]
+						wpc: next pc
+						unless parse text [any ws][return false]
+						remove wpc
+						write-log "remove token"
+						update-range wpc lines end-chars s-line s-column e-line e-column
+						return true
+					]
+					empty [return false]
+				]
+			]
+			;-- switch tag
+			insert [
+				wpc: next pc
+				npc: next pc
+				either find all-path! pc/1/type [
+					switch etag [
+						head [return false]
+						first [
+							unless any [
+								epc = npc
+								epc/1/upper = npc
+							][return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						one [
+							if epc/1/upper <> pc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							unless any [
+								epc = npc
+								epc/1/upper = npc
+							][return false]
+							if epc/1/upper = npc [
+								epos: lexer/line-pos? oline-stack e-line e-column
+								npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+								tail-str: copy/part epos npos
+							]
+						]
+						insert [
+							unless any [
+								epc = npc
+								epc = pc
+							][return false]
+							if epc = pc [
+								upper: pc/1/upper
+								ntop: lexer/transcode text
+								unless nested: ntop/1/nested [
+									write-log "remove/insert spaces"
+									update-range next pc lines end-chars s-line s-column e-line e-column
+									return true
+								]
+								if 1 <> length? nested [return false]
+								if nested/1/type = 'comment [
+									if all [
+										(nlines + 1) = nested/1/range/1/x
+										e-line = upper/1/range/2/x
+									][return false]
+								]
+								do rebuild
+								insert/only next pc nested/1
+								pc/2/upper: upper
+								if nn: pc/2/nested [
+									forall nn [
+										nn/1/upper: next pc
+									]
+								]
+								write-log "insert new token"
+								update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+								return true
+							]
+						]
+						tail [
+							if npc <> epc [return false]
+						]
+						mid [
+							if npc <> epc [return false]
+							unless parse text [any ws] [return false]
+							remove npc
+							write-log "remove token"
+							update-range npc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						empty [return false]
+					]
+				][
+					switch etag [
+						head [return false]
+						first one [
+							if epc <> npc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							if epc <> npc [return false]
+						]
+						insert [
+							unless any [
+								epc = npc
+								epc = pc
+							][return false]
+							if epc = pc [
+								upper: pc/1/upper
+								ntop: lexer/transcode text
+								unless nested: ntop/1/nested [
+									write-log "remove/insert spaces"
+									update-range next pc lines end-chars s-line s-column e-line e-column
+									return true
+								]
+								if 1 <> length? nested [return false]
+								if nested/1/type = 'comment [
+									if all [
+										(nlines + 1) = nested/1/range/1/x
+										e-line = upper/1/range/2/x
+									][return false]
+								]
+								do rebuild
+								insert/only next pc nested/1
+								pc/2/upper: upper
+								if nn: pc/2/nested [
+									forall nn [
+										nn/1/upper: next pc
+									]
+								]
+								write-log "insert new token"
+								update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+								return true
+							]
+						]
+						tail [
+							if epc <> npc [return false]
+						]
+						mid [
+							if npc <> epc [return false]
+							unless parse text [any ws] [return false]
+							remove npc
+							write-log "remove token"
+							update-range npc lines end-chars s-line s-column e-line e-column
+							return true
+						]
+						empty [return false]
+					]
+				]
+			]
+			;-- switch tag
+			tail [
+				if etag <> 'tail [return false]
+				if epc <> pc [return false]
+				upper: pc/1/upper
+				ntop: lexer/transcode text
+				unless nested: ntop/1/nested [
+					write-log "remove/insert spaces"
+					update-range next pc lines end-chars s-line s-column e-line e-column
+					return true
+				]
+				if 1 <> length? nested [return false]
+				if nested/1/type = 'comment [
+					if all [
+						(nlines + 1) = nested/1/range/1/x
+						e-line = upper/1/range/2/x
+					][return false]
+				]
+				do rebuild
+				append/only pc nested/1
+				pc/2/upper: upper
+				if nn: pc/2/nested [
+					forall nn [
+						nn/1/upper: next pc
+					]
+				]
+				write-log "append new token"
+				update-range skip pc 2 lines end-chars s-line s-column e-line e-column
+				return true
+			]
+			empty [
+				if etag <> 'empty [return false]
+				if pc <> epc [return flase]
+				ntop: lexer/transcode text
+				unless nested: ntop/1/nested [
+					write-log "remove/insert spaces"
+					update-range pc lines end-chars s-line s-column e-line e-column
+					return true
+				]
+				if 1 <> length? nested [return false]
+				if nested/1/type = 'comment [
+					if all [
+						(nlines + 1) = nested/1/range/1/x
+						e-line = wpc/1/range/1/x
+					][return false]
+				]
+				do rebuild
+				upper: wpc/1/upper
+				insert/only wpc nested/1
+				wpc/1/upper: upper
+				if nn: wpc/1/nested [
+					forall nn [
+						nn/1/upper: wpc
+					]
+				]
+				write-log "insert new token"
+				update-range next wpc lines end-chars s-line s-column e-line e-column
+				return true
+			]
+		]
+	]
+
+	tags: [head first one last mid insert tail empty]
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
 		switch/default find/last uri "." [
@@ -1237,42 +1931,21 @@ semantic: context [
 					continue
 				]
 
-				if all [
-					spcs = epcs
-					spcs/1 = 'mid
-				][
-					if parse text [some ws][
-						insert-mid-spaces spcs/2 text s-line s-column e-line e-column
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-					write-log "insert chars at mid"
-					top: add-source*/force uri ncode
-					continue
-				]
 				unless all [
-					find [head first one last insert tail empty] spcs/1
-					find [head first one last insert tail empty] epcs/1
+					find tags spcs/1
+					find tags epcs/1
 				][
 					write-log "position failed 2"
 					top: add-source*/force uri ncode
 					continue
 				]
 
-				if empty? otext [
-					if input-text spcs text oline-stack line-stack s-line s-column e-line e-column [
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
-				]
-				if empty? text [
-					if remove-text spcs epcs otext oline-stack line-stack s-line s-column e-line e-column [
-						top/1/source: ncode
-						top/1/lines: line-stack
-						continue
-					]
+				if update-token spcs/1 spcs/2 epcs/1 epcs/2
+								otext text oline-stack line-stack
+								s-line s-column e-line e-column [
+					top/1/source: ncode
+					top/1/lines: line-stack
+					continue
 				]
 			]
 			write-log "diff failed"
