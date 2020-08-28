@@ -1210,6 +1210,8 @@ semantic: context [
 						empty [return false]
 					]
 				]
+				do replace-node
+				return true
 			]
 			;-- switch tag
 			tail [
