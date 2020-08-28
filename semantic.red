@@ -554,15 +554,28 @@ semantic: context [
 		rebuild: [
 			type: nested/1/type
 			range: nested/1/range
+			wrange: wpc/1/range
+			case [
+				wrange/1/x = s-line [
+					line: s-line
+					column: either wrange/1/y >= s-column [s-column][wrange/1/y]
+				]
+				wrange/1/x > s-line [
+					line: s-line column: s-column
+				]
+				true [
+					line: wrange/1/x column: wrange/1/y
+				]
+			]
 			either range/1/x = 1 [
-				start: as-pair s-line s-column + range/1/y - 1
+				start: as-pair line column + range/1/y - 1
 			][
-				start: as-pair s-line + range/1/x - 1 range/1/y
+				start: as-pair line + range/1/x - 1 range/1/y
 			]
 			either range/2/x = 1 [
-				stop: as-pair s-line s-column + range/2/y - 1
+				stop: as-pair line column + range/2/y - 1
 			][
-				stop: as-pair s-line + range/2/x - 1 range/2/y
+				stop: as-pair line + range/2/x - 1 range/2/y
 			]
 			nested/1/range: reduce [start stop]
 			case [
@@ -985,6 +998,7 @@ semantic: context [
 									xtype: epc/1/upper/1/type
 									find all-path! xtype
 								][
+									if epc/1/upper <> wpc [return false]
 									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
 									epos: lexer/line-pos? oline-stack s-line s-column
 									head-str: copy/part spos epos
@@ -992,6 +1006,7 @@ semantic: context [
 									epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
 									tail-str: copy/part spos epos
 								][
+									if epc <> wpc [return false]
 									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
 									epos: lexer/line-pos? oline-stack s-line s-column
 									head-str: copy/part spos epos
