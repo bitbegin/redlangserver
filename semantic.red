@@ -536,6 +536,12 @@ semantic: context [
 		]
 	]
 
+	remove-node: function [pc [block!]][
+		upper: pc/1/upper
+		remove pc
+		if 1 = length? upper/1/nested [upper/1/nested: none]
+	]
+
 	ws: charset " ^M^/^-"
 	all-path!: reduce [path! lit-path! get-path! set-path!]
 	all-pair!: reduce [block! paren! map!]
@@ -616,7 +622,7 @@ semantic: context [
 				write-log "remove token"
 				update-upper/remove? next wpc
 				update-range next wpc nlines end-chars s-line s-column e-line e-column
-				remove wpc
+				remove-node wpc
 				return true
 			]
 			if 1 <> length? nested [return false]
@@ -721,7 +727,7 @@ semantic: context [
 							write-log "remove token"
 							update-upper/remove? next pc
 							update-range next pc nlines end-chars s-line s-column e-line e-column
-							remove pc
+							remove-node pc
 							return true
 						]
 						empty [return false]
@@ -773,7 +779,7 @@ semantic: context [
 							write-log "remove token"
 							update-upper/remove? next pc
 							update-range next pc nlines end-chars s-line s-column e-line e-column
-							remove pc
+							remove-node pc
 							return true
 						]
 						empty [return false]
@@ -813,9 +819,6 @@ semantic: context [
 							last [
 								either find all-path! epc/1/type [
 									if pc <> epc [return false]
-									spos: lexer/line-pos? oline-stack e-line e-column
-									epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
-									tail-str: copy/part spos epos
 								][
 									if epc/1/upper <> pc [return false]
 									spos: lexer/line-pos? oline-stack e-line e-column
@@ -832,7 +835,7 @@ semantic: context [
 								write-log "remove token"
 								update-upper/remove? next pc
 								update-range next pc nlines end-chars s-line s-column e-line e-column
-								remove pc
+								remove-node pc
 								return true
 							]
 							empty [return false]
@@ -895,7 +898,7 @@ semantic: context [
 								write-log "remove token"
 								update-upper/remove? next pc
 								update-range next pc nlines end-chars s-line s-column e-line e-column
-								remove pc
+								remove-node pc
 								return true
 							]
 							empty [return false]
@@ -1047,7 +1050,7 @@ semantic: context [
 						write-log "remove token"
 						update-upper/remove? next wpc
 						update-range next wpc nlines end-chars s-line s-column e-line e-column
-						remove wpc
+						remove-node wpc
 						return true
 					]
 					mid [
@@ -1057,7 +1060,7 @@ semantic: context [
 						write-log "remove token"
 						update-upper/remove? next wpc
 						update-range next wpc nlines end-chars s-line s-column e-line e-column
-						remove wpc
+						remove-node wpc
 						return true
 					]
 					empty [return false]
@@ -1140,7 +1143,7 @@ semantic: context [
 							write-log "remove token"
 							update-upper/remove? next npc
 							update-range next npc nlines end-chars s-line s-column e-line e-column
-							remove npc
+							remove-node npc
 							return true
 						]
 						empty [return false]
@@ -1201,7 +1204,7 @@ semantic: context [
 							write-log "remove token"
 							update-upper/remove? next npc
 							update-range next npc nlines end-chars s-line s-column e-line e-column
-							remove npc
+							remove-node npc
 							return true
 						]
 						empty [return false]
