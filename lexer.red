@@ -531,4 +531,48 @@ lexer: context [
 		format* top 0
 		buffer
 	]
+
+	sformat: function [top [block!]][
+		buffer: make string! 1000
+		newline: function [cnt [integer!]] [
+			append buffer lf
+			append/dup buffer " " cnt
+		]
+		format*: function [pc [block!] depth [integer!]][
+			pad: depth * 4
+			newline pad
+			append buffer "["
+			forall pc [
+				newline pad + 2
+				append buffer "["
+				append buffer "range: "
+				append buffer mold/flat pc/1/range
+				if upper: pc/1/upper [
+					append buffer " upper: "
+					append buffer mold/flat upper/1/range
+				]
+				if pc/1/type [
+					append buffer " type: "
+					append buffer mold/flat pc/1/type
+				]
+				if pc/1/expr [
+					append buffer " expr: "
+					append buffer mold/flat/part pc/1/expr/1 20
+				]
+				if error: pc/1/error [
+					append buffer " error: "
+					append buffer mold/flat/part error 30
+				]
+				if pc/1/nested [
+					append buffer " nested: "
+					format* pc/1/nested depth + 1
+				]
+				append buffer "]"
+			]
+			newline pad
+			append buffer "]"
+		]
+		format* top 0
+		buffer
+	]
 ]

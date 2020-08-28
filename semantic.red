@@ -1253,7 +1253,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
-			write-log lexer/format top
+			write-log lexer/sformat top
 			code: top/1/source
 			oline-stack: top/1/lines
 			range: changes/1/range
@@ -1314,7 +1314,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
-		write-log lexer/format top
+		write-log lexer/sformat top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
