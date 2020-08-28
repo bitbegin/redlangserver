@@ -826,6 +826,7 @@ semantic: context [
 							last [
 								either find all-path! epc/1/type [
 									if pc <> epc [return false]
+									;-- TBD: maybe need to check next pc, as last prior to mid
 								][
 									if epc/1/upper <> pc [return false]
 									spos: lexer/line-pos? oline-stack e-line e-column
@@ -1062,12 +1063,9 @@ semantic: context [
 					]
 					mid [
 						if epc <> pc [return false]
-						wpc: next pc
 						unless parse text [any ws][return false]
-						write-log "remove token"
-						update-upper/remove? next wpc
-						update-range next wpc nlines end-chars s-line s-column e-line e-column
-						remove-node wpc
+						write-log "insert spaces"
+						update-range next pc nlines end-chars s-line s-column e-line e-column
 						return true
 					]
 					empty [return false]
