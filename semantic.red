@@ -110,7 +110,7 @@ semantic: context [
 						pc/1/range/1/x = line
 						pc/1/range/1/y = column
 						pc <> top
-						not in-path?
+						not find [path! set-path!] type
 					][
 						;-- "   token"
 						;--     ^
@@ -122,8 +122,8 @@ semantic: context [
 						any [
 							not in-path?
 							all [
-								pc/1/error
-								find [slash slash-get slash-lit] pc/1/error/code
+								item: back tail pc/1/nested
+								item/1/range/2/y <> column
 							]
 						]
 					][
@@ -557,7 +557,7 @@ semantic: context [
 			either range/2/x = 1 [
 				stop: as-pair s-line s-column + range/2/y - 1
 			][
-				stop: as-pair s-line + range/1/x - 1 range/2/y
+				stop: as-pair s-line + range/2/x - 1 range/2/y
 			]
 			nested/1/range: reduce [start stop]
 			case [
@@ -578,6 +578,9 @@ semantic: context [
 					]
 					write-log "any path"
 				]
+				true [
+					write-log "token"
+				]
 			]
 		]
 
@@ -588,6 +591,7 @@ semantic: context [
 			unless empty? tail-str [
 				append text tail-str
 			]
+			write-log rejoin ["transcode: " text]
 			ntop: lexer/transcode text
 			unless nested: ntop/1/nested [
 				write-log "remove token"
@@ -608,7 +612,9 @@ semantic: context [
 				][return false]
 			]
 			do rebuild
+			upper: wpc/1/upper
 			wpc/1: nested/1
+			wpc/1/upper: upper
 			if nn: wpc/1/nested [
 				forall nn [
 					nn/1/upper: wpc
@@ -633,6 +639,7 @@ semantic: context [
 					switch etag [
 						head [
 							if pc <> epc [return false]
+							write-log rejoin ["transcode: " text]
 							ntop: lexer/transcode text
 							unless nested: ntop/1/nested [
 								write-log "remove/insert spaces"
@@ -704,6 +711,7 @@ semantic: context [
 					switch etag [
 						head [
 							if pc <> epc [return false]
+							write-log rejoin ["transcode: " text]
 							ntop: lexer/transcode text
 							unless nested: ntop/1/nested [
 								write-log "remove/insert spaces"
@@ -752,6 +760,8 @@ semantic: context [
 						empty [return false]
 					]
 				]
+				do replace-node
+				return true
 			]
 			;-- switch tag
 			first [
@@ -853,9 +863,9 @@ semantic: context [
 							head [return false]
 							first one [
 								if epc <> pc [return false]
-								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
-								epos: lexer/line-pos? oline-stack s-line s-column
-								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
 							]
 							last insert tail [
 								if epc <> pc [return false]
@@ -1072,6 +1082,7 @@ semantic: context [
 							][return false]
 							if epc = pc [
 								upper: pc/1/upper
+								write-log rejoin ["transcode: " text]
 								ntop: lexer/transcode text
 								unless nested: ntop/1/nested [
 									write-log "remove/insert spaces"
@@ -1132,6 +1143,7 @@ semantic: context [
 							][return false]
 							if epc = pc [
 								upper: pc/1/upper
+								write-log rejoin ["transcode: " text]
 								ntop: lexer/transcode text
 								unless nested: ntop/1/nested [
 									write-log "remove/insert spaces"
@@ -1180,6 +1192,7 @@ semantic: context [
 				if etag <> 'tail [return false]
 				if epc <> pc [return false]
 				upper: pc/1/upper
+				write-log rejoin ["transcode: " text]
 				ntop: lexer/transcode text
 				unless nested: ntop/1/nested [
 					write-log "remove/insert spaces"
@@ -1209,6 +1222,7 @@ semantic: context [
 			empty [
 				if etag <> 'empty [return false]
 				if pc <> epc [return flase]
+				write-log rejoin ["transcode: " text]
 				ntop: lexer/transcode text
 				unless nested: ntop/1/nested [
 					write-log "remove/insert spaces"
