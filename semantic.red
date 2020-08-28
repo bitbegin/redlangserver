@@ -466,33 +466,40 @@ semantic: context [
 	]
 
 	update-range: function [
-		npc* [block!] lines [integer!] end-chars [integer!]
+		npc* [block!] nlines [integer!] end-chars [integer!]
 		s-line [integer!] s-column [integer!]
 		e-line [integer!] e-column [integer!] /only
 	][
+		olines: e-line - s-line
+		either nlines = 0 [
+			include-line?: no
+		][
+			include-line?: yes
+		]
+		lines: nlines - olines
 		update-pc: function [npc [block!] first* [logic!]][
 			if first* [
-				either lines = 0 [
-					if npc/1/range/1/x = e-line [
-						npc/1/range/1/y: npc/1/range/1/y - e-column + s-column + end-chars
-					]
-				][
+				either include-line? [
 					if npc/1/range/1/x = e-line [
 						npc/1/range/1/y: npc/1/range/1/y - e-column + end-chars + 1
 					]
-					npc/1/range/1/x: npc/1/range/1/x + lines
+				][
+					if npc/1/range/1/x = e-line [
+						npc/1/range/1/y: npc/1/range/1/y - e-column + s-column + end-chars
+					]
 				]
+				npc/1/range/1/x: npc/1/range/1/x + lines
 			]
-			either lines = 0 [
-				if npc/1/range/2/x = e-line [
-					npc/1/range/2/y: npc/1/range/2/y - e-column + s-column + end-chars
-				]
-			][
+			either include-line? [
 				if npc/1/range/2/x = e-line [
 					npc/1/range/2/y: npc/1/range/2/y - e-column + end-chars + 1
 				]
-				npc/1/range/2/x: npc/1/range/2/x + lines
+			][
+				if npc/1/range/2/x = e-line [
+					npc/1/range/2/y: npc/1/range/2/y - e-column + s-column + end-chars
+				]
 			]
+			npc/1/range/2/x: npc/1/range/2/x + lines
 		]
 
 		update-pc-nested: function [npc [block!] first* [logic!]][
@@ -538,14 +545,12 @@ semantic: context [
 		otext [string!] text [string!] oline-stack [block!] line-stack [block!]
 		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
 	][
-		olines: new-lines? otext
 		nlines: new-lines? text
 		either nlines = 0 [
 			end-chars: length? text
 		][
 			end-chars: length? find/last/tail text "^/"
 		]
-		lines: nlines - olines
 		rebuild: [
 			type: nested/1/type
 			range: nested/1/range
@@ -585,19 +590,20 @@ semantic: context [
 		]
 
 		replace-node: [
+			ntext: copy text
 			unless empty? head-str [
-				text: rejoin [head-str text]
+				insert ntext head-str
 			]
 			unless empty? tail-str [
-				append text tail-str
+				append ntext tail-str
 			]
-			write-log rejoin ["transcode: " text]
-			ntop: lexer/transcode text
+			write-log rejoin ["transcode: " ntext]
+			ntop: lexer/transcode ntext
 			unless nested: ntop/1/nested [
 				write-log "remove token"
 				remove wpc
 				update-upper/remove? wpc
-				update-range wpc lines end-chars s-line s-column e-line e-column
+				update-range wpc nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 			if 1 <> length? nested [return false]
@@ -607,7 +613,7 @@ semantic: context [
 					npc: wpc/1/upper
 				]
 				if all [
-					(nlines + 1) = nested/1/range/1/x
+					(length? ntop/1/lines) - 1 = nested/1/range/1/x
 					e-line = npc/1/range/1/x
 				][return false]
 			]
@@ -621,7 +627,7 @@ semantic: context [
 				]
 			]
 			write-log "change token"
-			update-range next wpc lines end-chars s-line s-column e-line e-column
+			update-range next wpc nlines end-chars s-line s-column e-line e-column
 		]
 
 		in-path?: no
@@ -643,13 +649,13 @@ semantic: context [
 							ntop: lexer/transcode text
 							unless nested: ntop/1/nested [
 								write-log "remove/insert spaces"
-								update-range pc lines end-chars s-line s-column e-line e-column
+								update-range pc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 							if 1 <> length? nested [return false]
 							if nested/1/type = 'comment [
 								if all [
-									(nlines + 1) = nested/1/range/1/x
+									(length? ntop/1/lines) - 1 = nested/1/range/1/x
 									e-line = wpc/1/range/1/x
 								][return false]
 							]
@@ -664,7 +670,7 @@ semantic: context [
 							]
 							write-log "insert new token"
 							update-upper next wpc
-							update-range next wpc lines end-chars s-line s-column e-line e-column
+							update-range next wpc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						first [
@@ -702,7 +708,7 @@ semantic: context [
 							remove pc
 							write-log "remove token"
 							update-upper/remove? pc
-							update-range pc lines end-chars s-line s-column e-line e-column
+							update-range pc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						empty [return false]
@@ -715,13 +721,13 @@ semantic: context [
 							ntop: lexer/transcode text
 							unless nested: ntop/1/nested [
 								write-log "remove/insert spaces"
-								update-range pc lines end-chars s-line s-column e-line e-column
+								update-range pc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 							if 1 <> length? nested [return false]
 							if nested/1/type = 'comment [
 								if all [
-									(nlines + 1) = nested/1/range/1/x
+									(length? ntop/1/lines) - 1 = nested/1/range/1/x
 									e-line = wpc/1/range/1/x
 								][return false]
 							]
@@ -736,7 +742,7 @@ semantic: context [
 							]
 							write-log "insert new token"
 							update-upper next wpc
-							update-range next wpc lines end-chars s-line s-column e-line e-column
+							update-range next wpc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						first one [
@@ -754,7 +760,7 @@ semantic: context [
 							remove pc
 							write-log "remove token"
 							update-upper/remove? pc
-							update-range pc lines end-chars s-line s-column e-line e-column
+							update-range pc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						empty [return false]
@@ -813,7 +819,7 @@ semantic: context [
 								remove pc
 								write-log "remove token"
 								update-upper/remove? pc
-								update-range pc lines end-chars s-line s-column e-line e-column
+								update-range pc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 							empty [return false]
@@ -876,7 +882,7 @@ semantic: context [
 								remove pc
 								write-log "remove token"
 								update-upper/remove? pc
-								update-range pc lines end-chars s-line s-column e-line e-column
+								update-range pc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 							empty [return false]
@@ -1026,7 +1032,7 @@ semantic: context [
 						remove wpc
 						write-log "remove token"
 						update-upper/remove? wpc
-						update-range wpc lines end-chars s-line s-column e-line e-column
+						update-range wpc nlines end-chars s-line s-column e-line e-column
 						return true
 					]
 					mid [
@@ -1036,7 +1042,7 @@ semantic: context [
 						remove wpc
 						write-log "remove token"
 						update-upper/remove? wpc
-						update-range wpc lines end-chars s-line s-column e-line e-column
+						update-range wpc nlines end-chars s-line s-column e-line e-column
 						return true
 					]
 					empty [return false]
@@ -1086,13 +1092,13 @@ semantic: context [
 								ntop: lexer/transcode text
 								unless nested: ntop/1/nested [
 									write-log "remove/insert spaces"
-									update-range next pc lines end-chars s-line s-column e-line e-column
+									update-range next pc nlines end-chars s-line s-column e-line e-column
 									return true
 								]
 								if 1 <> length? nested [return false]
 								if nested/1/type = 'comment [
 									if all [
-										(nlines + 1) = nested/1/range/1/x
+										(length? ntop/1/lines) - 1 = nested/1/range/1/x
 										e-line = upper/1/range/2/x
 									][return false]
 								]
@@ -1106,7 +1112,7 @@ semantic: context [
 								]
 								write-log "insert new token"
 								update-upper npc: skip pc 2
-								update-range npc lines end-chars s-line s-column e-line e-column
+								update-range npc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 						]
@@ -1119,7 +1125,7 @@ semantic: context [
 							remove npc
 							write-log "remove token"
 							update-upper/remove? npc
-							update-range npc lines end-chars s-line s-column e-line e-column
+							update-range npc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						empty [return false]
@@ -1147,13 +1153,13 @@ semantic: context [
 								ntop: lexer/transcode text
 								unless nested: ntop/1/nested [
 									write-log "remove/insert spaces"
-									update-range next pc lines end-chars s-line s-column e-line e-column
+									update-range next pc nlines end-chars s-line s-column e-line e-column
 									return true
 								]
 								if 1 <> length? nested [return false]
 								if nested/1/type = 'comment [
 									if all [
-										(nlines + 1) = nested/1/range/1/x
+										(length? ntop/1/lines) - 1 = nested/1/range/1/x
 										e-line = upper/1/range/2/x
 									][return false]
 								]
@@ -1167,7 +1173,7 @@ semantic: context [
 								]
 								write-log "insert new token"
 								update-upper npc: skip pc 2
-								update-range npc lines end-chars s-line s-column e-line e-column
+								update-range npc nlines end-chars s-line s-column e-line e-column
 								return true
 							]
 						]
@@ -1180,7 +1186,7 @@ semantic: context [
 							remove npc
 							write-log "remove token"
 							update-upper/remove? npc
-							update-range npc lines end-chars s-line s-column e-line e-column
+							update-range npc nlines end-chars s-line s-column e-line e-column
 							return true
 						]
 						empty [return false]
@@ -1196,13 +1202,13 @@ semantic: context [
 				ntop: lexer/transcode text
 				unless nested: ntop/1/nested [
 					write-log "remove/insert spaces"
-					update-range next pc lines end-chars s-line s-column e-line e-column
+					update-range next pc nlines end-chars s-line s-column e-line e-column
 					return true
 				]
 				if 1 <> length? nested [return false]
 				if nested/1/type = 'comment [
 					if all [
-						(nlines + 1) = nested/1/range/1/x
+						(length? ntop/1/lines) - 1 = nested/1/range/1/x
 						e-line = upper/1/range/2/x
 					][return false]
 				]
@@ -1216,7 +1222,7 @@ semantic: context [
 				]
 				write-log "append new token"
 				update-upper npc: skip pc 2
-				update-range npc lines end-chars s-line s-column e-line e-column
+				update-range npc nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 			empty [
@@ -1226,13 +1232,13 @@ semantic: context [
 				ntop: lexer/transcode text
 				unless nested: ntop/1/nested [
 					write-log "remove/insert spaces"
-					update-range pc lines end-chars s-line s-column e-line e-column
+					update-range pc nlines end-chars s-line s-column e-line e-column
 					return true
 				]
 				if 1 <> length? nested [return false]
 				if nested/1/type = 'comment [
 					if all [
-						(nlines + 1) = nested/1/range/1/x
+						(length? ntop/1/lines) - 1 = nested/1/range/1/x
 						e-line = wpc/1/range/1/x
 					][return false]
 				]
@@ -1247,7 +1253,7 @@ semantic: context [
 				]
 				write-log "insert new token"
 				update-upper npc: next wpc
-				update-range npc lines end-chars s-line s-column e-line e-column
+				update-range npc nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 		]
@@ -1289,6 +1295,7 @@ semantic: context [
 				empty? otext
 				empty? text
 			][continue]
+			write-log mold reduce [s-line s-column e-line e-column]
 			write-log rejoin ["remove: " mold otext]
 			write-log rejoin ["add: " mold text]
 			if top/1/nested [
