@@ -538,8 +538,11 @@ semantic: context [
 
 	remove-node: function [pc [block!]][
 		upper: pc/1/upper
-		remove pc
-		if 1 = length? upper/1/nested [upper/1/nested: none]
+		either 1 = length? upper/1/nested [
+			upper/1/nested: none
+		][
+			remove pc
+		]
 	]
 
 	ws: charset " ^M^/^-"
@@ -560,17 +563,21 @@ semantic: context [
 		rebuild: [
 			type: nested/1/type
 			range: nested/1/range
-			wrange: wpc/1/range
-			case [
-				wrange/1/x = s-line [
-					line: s-line
-					column: either wrange/1/y >= s-column [s-column][wrange/1/y]
-				]
-				wrange/1/x > s-line [
-					line: s-line column: s-column
-				]
-				true [
-					line: wrange/1/x column: wrange/1/y
+			either tag = 'empty [
+				line: s-line column: s-column
+			][
+				wrange: wpc/1/range
+				case [
+					wrange/1/x = s-line [
+						line: s-line
+						column: either wrange/1/y >= s-column [s-column][wrange/1/y]
+					]
+					wrange/1/x > s-line [
+						line: s-line column: s-column
+					]
+					true [
+						line: wrange/1/x column: wrange/1/y
+					]
 				]
 			]
 			either range/1/x = 1 [
@@ -1263,17 +1270,21 @@ semantic: context [
 					][return false]
 				]
 				do rebuild
-				upper: wpc/1/upper
-				insert/only wpc nested/1
-				wpc/1/upper: upper
-				if nn: wpc/1/nested [
+				either find wpc/1 'nested [
+					wpc/1/nested: reduce [nested/1]
+				][
+					repend/only wpc/1 ['nested reduce [nested/1]]
+				]
+				wnested: wpc/1/nested
+				wnested/1/upper: wpc
+				if nn: wnested/1/nested [
 					forall nn [
-						nn/1/upper: wpc
+						nn/1/upper: wnested
 					]
 				]
 				write-log "insert new token"
-				update-upper npc: next wpc
-				update-range npc nlines end-chars s-line s-column e-line e-column
+				update-range next wpc nlines end-chars s-line s-column e-line e-column
+				update-range/only wpc nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 		]
