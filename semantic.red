@@ -601,9 +601,9 @@ semantic: context [
 			ntop: lexer/transcode ntext
 			unless nested: ntop/1/nested [
 				write-log "remove token"
+				update-upper/remove? next wpc
+				update-range next wpc nlines end-chars s-line s-column e-line e-column
 				remove wpc
-				update-upper/remove? wpc
-				update-range wpc nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 			if 1 <> length? nested [return false]
@@ -705,10 +705,10 @@ semantic: context [
 						mid [
 							if pc <> epc [return false]
 							unless parse text [any ws] [return false]
-							remove pc
 							write-log "remove token"
-							update-upper/remove? pc
-							update-range pc nlines end-chars s-line s-column e-line e-column
+							update-upper/remove? next pc
+							update-range next pc nlines end-chars s-line s-column e-line e-column
+							remove pc
 							return true
 						]
 						empty [return false]
@@ -757,10 +757,10 @@ semantic: context [
 						mid [
 							if pc <> epc [return false]
 							unless parse text [any ws] [return false]
-							remove pc
 							write-log "remove token"
-							update-upper/remove? pc
-							update-range pc nlines end-chars s-line s-column e-line e-column
+							update-upper/remove? next pc
+							update-range next pc nlines end-chars s-line s-column e-line e-column
+							remove pc
 							return true
 						]
 						empty [return false]
@@ -816,10 +816,10 @@ semantic: context [
 							mid [
 								if pc <> epc [return false]
 								unless parse text [any ws][return false]
-								remove pc
 								write-log "remove token"
-								update-upper/remove? pc
-								update-range pc nlines end-chars s-line s-column e-line e-column
+								update-upper/remove? next pc
+								update-range next pc nlines end-chars s-line s-column e-line e-column
+								remove pc
 								return true
 							]
 							empty [return false]
@@ -879,10 +879,10 @@ semantic: context [
 							mid [
 								if pc <> epc [return false]
 								unless parse text [any ws][return false]
-								remove pc
 								write-log "remove token"
-								update-upper/remove? pc
-								update-range pc nlines end-chars s-line s-column e-line e-column
+								update-upper/remove? next pc
+								update-range next pc nlines end-chars s-line s-column e-line e-column
+								remove pc
 								return true
 							]
 							empty [return false]
@@ -1029,20 +1029,20 @@ semantic: context [
 					last insert tail [
 						if epc <> wpc: next pc [return false]
 						unless parse text [any ws][return false]
-						remove wpc
 						write-log "remove token"
-						update-upper/remove? wpc
-						update-range wpc nlines end-chars s-line s-column e-line e-column
+						update-upper/remove? next wpc
+						update-range next wpc nlines end-chars s-line s-column e-line e-column
+						remove wpc
 						return true
 					]
 					mid [
 						if epc <> pc [return false]
 						wpc: next pc
 						unless parse text [any ws][return false]
-						remove wpc
 						write-log "remove token"
-						update-upper/remove? wpc
-						update-range wpc nlines end-chars s-line s-column e-line e-column
+						update-upper/remove? next wpc
+						update-range next wpc nlines end-chars s-line s-column e-line e-column
+						remove wpc
 						return true
 					]
 					empty [return false]
@@ -1122,10 +1122,10 @@ semantic: context [
 						mid [
 							if npc <> epc [return false]
 							unless parse text [any ws] [return false]
-							remove npc
 							write-log "remove token"
-							update-upper/remove? npc
-							update-range npc nlines end-chars s-line s-column e-line e-column
+							update-upper/remove? next npc
+							update-range next npc nlines end-chars s-line s-column e-line e-column
+							remove npc
 							return true
 						]
 						empty [return false]
@@ -1183,10 +1183,10 @@ semantic: context [
 						mid [
 							if npc <> epc [return false]
 							unless parse text [any ws] [return false]
-							remove npc
 							write-log "remove token"
-							update-upper/remove? npc
-							update-range npc nlines end-chars s-line s-column e-line e-column
+							update-upper/remove? next npc
+							update-range next npc nlines end-chars s-line s-column e-line e-column
+							remove npc
 							return true
 						]
 						empty [return false]
