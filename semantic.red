@@ -563,7 +563,7 @@ semantic: context [
 		rebuild: [
 			type: nested/1/type
 			range: nested/1/range
-			either tag = 'empty [
+			either find [empty tail] tag [
 				line: s-line column: s-column
 			][
 				wrange: wpc/1/range
@@ -921,8 +921,8 @@ semantic: context [
 				either in-path? [
 					wpc: pc/1/upper
 					switch etag [
-						head first [return false]
-						one [
+						head [return false]
+						one first [
 							if epc/1/upper <> wpc [return false]
 							spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
 							epos: lexer/line-pos? oline-stack s-line s-column
@@ -987,6 +987,9 @@ semantic: context [
 							head first one [return false]
 							last insert tail [
 								if epc <> pc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
 							]
 							mid empty [return false]
 						]
@@ -1075,7 +1078,7 @@ semantic: context [
 			insert [
 				wpc: next pc
 				npc: next pc
-				either find all-path! pc/1/type [
+				either find all-path! npc/1/type [
 					switch etag [
 						head [return false]
 						first [
@@ -1088,7 +1091,7 @@ semantic: context [
 							tail-str: copy/part epos npos
 						]
 						one [
-							if epc/1/upper <> pc [return false]
+							if epc/1/upper <> npc [return false]
 							epos: lexer/line-pos? oline-stack e-line e-column
 							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
 							tail-str: copy/part epos npos
@@ -1246,8 +1249,7 @@ semantic: context [
 					]
 				]
 				write-log "append new token"
-				update-upper npc: skip pc 2
-				update-range npc nlines end-chars s-line s-column e-line e-column
+				update-range skip pc 2 nlines end-chars s-line s-column e-line e-column
 				return true
 			]
 			empty [
@@ -1257,7 +1259,8 @@ semantic: context [
 				ntop: lexer/transcode text
 				unless nested: ntop/1/nested [
 					write-log "remove/insert spaces"
-					update-range pc nlines end-chars s-line s-column e-line e-column
+					update-range next wpc nlines end-chars s-line s-column e-line e-column
+					update-range/only wpc nlines end-chars s-line s-column e-line e-column
 					return true
 				]
 				if 1 <> length? nested [return false]
@@ -1286,6 +1289,7 @@ semantic: context [
 				return true
 			]
 		]
+		false
 	]
 
 	tags: [head first one last mid insert tail empty]
@@ -1302,7 +1306,7 @@ semantic: context [
 			return false
 		]
 		forall changes [
-			write-log lexer/sformat top
+			;write-log lexer/sformat top
 			code: top/1/source
 			oline-stack: top/1/lines
 			range: changes/1/range
@@ -1327,6 +1331,7 @@ semantic: context [
 			write-log mold reduce [s-line s-column e-line e-column]
 			write-log rejoin ["remove: " mold otext]
 			write-log rejoin ["add: " mold text]
+			if otext = text [continue]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
 				if any [
@@ -1364,7 +1369,7 @@ semantic: context [
 			write-log "diff failed"
 			top: add-source*/force uri ncode
 		]
-		write-log lexer/sformat top
+		;write-log lexer/sformat top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
