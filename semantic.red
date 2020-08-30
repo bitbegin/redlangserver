@@ -2746,11 +2746,11 @@ completion: context [
 		pc: pcs/2
 		if pc/1/type = 'comment [return none]
 		comps: clear last-comps
-		if all [
-			find [path! lit-path! get-path!] to word! pc/1/type
-			pc/1/error
-			pc/1/error/code = 'slash
-		][
+		if find [path! lit-path! get-path!] to word! pc/1/type [
+			unless all [
+				pc/1/error
+				pc/1/error/code = 'slash
+			][return none]
 			complete-path top back tail pc/1/nested comps
 			return comps
 		]

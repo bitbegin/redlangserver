@@ -295,7 +295,7 @@ lexer: context [
 					]
 				]
 				error [
-					if type = path! [
+					if find [path! lit-path! get-path!] to word! type [
 						case [
 							input/1 = #"/" [			;-- eof after /
 								y: token/y + 1

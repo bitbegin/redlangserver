@@ -1,4 +1,4 @@
-25-Aug-2020/17:19:22+08:00
+30-Aug-2020/17:35:19+08:00
 begin {"}
 ================================================
 
@@ -1022,6 +1022,84 @@ begin "a/b/"
   ]
 ]================================================
 end "a/b/"
+
+begin "'a/b/"
+================================================
+
+[
+  [
+    range: [1x1 1x6]
+    nested: 
+    [
+      [
+        range: [1x1 1x6]
+        type: lit-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x2 1x3]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: b
+            range: [1x4 1x5]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+        ]
+        upper: [1x1 1x6]
+        error: [code slash]
+      ]
+    ]
+    source: "'a/b/"
+    lines: [
+      "'a/b/"
+      1
+    ]
+  ]
+]================================================
+end "'a/b/"
+
+begin ":a/b/"
+================================================
+
+[
+  [
+    range: [1x1 1x6]
+    nested: 
+    [
+      [
+        range: [1x1 1x6]
+        type: get-path!
+        nested: 
+        [
+          [
+            expr: a
+            range: [1x2 1x3]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+          [
+            expr: b
+            range: [1x4 1x5]
+            type: word!
+            upper: [1x1 1x6]
+          ]
+        ]
+        upper: [1x1 1x6]
+        error: [code slash]
+      ]
+    ]
+    source: ":a/b/"
+    lines: [
+      ":a/b/"
+      1
+    ]
+  ]
+]================================================
+end ":a/b/"
 
 begin "a/b/ "
 ================================================
