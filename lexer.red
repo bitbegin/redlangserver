@@ -509,14 +509,6 @@ lexer: context [
 					append buffer "upper: "
 					append buffer mold/flat upper/1/range
 				]
-				;unless empty? error: pc/1/error [
-				;	newline pad + 4
-				;	append buffer "error: ["
-				;	newline pad + 6
-				;	append buffer mold/flat/part error 30
-				;	newline pad + 4
-				;	append buffer "]"
-				;]
 				if error: pc/1/error [
 					newline pad + 4
 					append buffer "error: "
