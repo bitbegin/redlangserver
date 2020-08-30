@@ -1,0 +1,10 @@
+{
+	this is a multiline string!
+}
+{
+	hello {"^(31)"} world!
+}
+{{}^}^"}
+{{{{{match}}}}}
+{not {{{{match}}}}}}
+{not {{{{match}}}}

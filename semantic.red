@@ -14,6 +14,16 @@ semantic: context [
 	excluded-folders: []
 	root-folders: []
 
+	read-file: func [
+		file	[file!]
+		return:	[string!]
+	][
+		if error? ret: try [to string! read/binary file][
+			ret: ""
+		]
+		ret
+	]
+
 	find-expr: function [top [block!] range [block!]][
 		find-expr*: function [pc [block!]][
 			forall pc [
@@ -29,23 +39,27 @@ semantic: context [
 		find-expr* top
 	]
 
+	;-- IMPORTANT NOTE: token's range/y = last-char-pos + 1
+	;-- types: top-err head tail insert first last mid empty one
 	position?: function [top [block!] line [integer!] column [integer!]][
 		position?*: function [pc [block!]][
 			forall pc [
 				if any [
-					pc/1/range/1 > line
+					pc/1/range/1/x > line
 					all [
-						pc/1/range/1 = line
-						pc/1/range/2 > column
+						pc/1/range/1/x = line
+						pc/1/range/1/y > column
 					]
 				][
+					;--  "   token"
+					;--    ^
 					return reduce ['head pc]
 				]
 				if any [
-					pc/1/range/3 < line
+					pc/1/range/2/x < line
 					all [
-						pc/1/range/3 = line
-						pc/1/range/4 < column
+						pc/1/range/2/x = line
+						pc/1/range/2/y < column
 					]
 				][
 					if pc = top [
@@ -55,44 +69,63 @@ semantic: context [
 						return reduce ['top-err pc]
 					]
 					unless pc/2 [
+						;-- "token   "
+						;--        ^
 						return reduce ['tail pc]
 					]
 					if any [
-						pc/2/range/1 > line
+						pc/2/range/1/x > line
 						all [
-							pc/2/range/1 = line
-							pc/2/range/2 > column
+							pc/2/range/1/x = line
+							pc/2/range/1/y > column
 						]
 					][
+						;-- "token   token"
+						;--        ^
 						return reduce ['insert pc]
 					]
 				]
 				if all [
 					any [
-						pc/1/range/1 < line
+						pc/1/range/1/x < line
 						all [
-							pc/1/range/1 = line
-							pc/1/range/2 <= column
+							pc/1/range/1/x = line
+							pc/1/range/1/y <= column
 						]
 					]
 					any [
-						pc/1/range/3 > line
+						pc/1/range/2/x > line
 						all [
-							pc/1/range/3 = line
-							pc/1/range/4 >= column
+							pc/1/range/2/x = line
+							pc/1/range/2/y >= column
 						]
 					]
 				][
+					in-path?: no
+					type: none
+					if pc/1/type [
+						in-path?: find [path! lit-path! get-path! set-path!] type: to word! pc/1/type
+					]
 					if all [
-						pc/1/range/1 = line
-						pc/1/range/2 = column
+						pc/1/range/1/x = line
+						pc/1/range/1/y = column
 						pc <> top
+						not find [path! set-path!] type
 					][
+						;-- "   token"
+						;--     ^
 						return reduce ['first pc]
 					]
 					if all [
-						pc/1/range/3 = line
-						pc/1/range/4 = column
+						pc/1/range/2/x = line
+						pc/1/range/2/y = column
+						any [
+							not in-path?
+							all [
+								item: back tail pc/1/nested
+								item/1/range/2/y <> column
+							]
+						]
 					][
 						if pc = top [
 							if pc/1/nested [
@@ -101,20 +134,30 @@ semantic: context [
 							return reduce ['top-err pc]
 						]
 						unless pc/2 [
+							;-- "token   "
+							;--      ^
 							return reduce ['last pc]
 						]
 						if all [
-							pc/2/range/1 = line
-							pc/2/range/2 = column
+							pc/2/range/1/x = line
+							pc/2/range/1/y = column
 						][
+							;-- word[]
+							;--     ^
 							return reduce ['mid pc]
 						]
+						;-- "token   "
+						;--      ^
 						return reduce ['last pc]
 					]
 					unless pc/1/nested [
-						if find reduce [block! map! paren!] pc/1/expr/1 [
+						if find [block! map! paren!] type [
+							;-- "[]"
+							;--   ^
 							return reduce ['empty pc]
 						]
+						;-- "token"
+						;--   ^
 						return reduce ['one pc]
 					]
 					return position?* pc/1/nested
@@ -164,35 +207,14 @@ semantic: context [
 		ret: make block! 4
 		collect-errors*: function [pc [block!]][
 			while [not tail? pc] [
-				if errors: pc/1/error [
-					if all [
-						pc/1/expr/1 = path!
-						pc/2
-						pc/2/expr/1 = paren!
-					][
-						if nested: pc/2/nested [
-							collect-errors* nested
-						]
-						either all [
-							pc/3
-							pc/3/expr/1 = issue!
-							pc/3/range/1 = pc/3/range/3
-							(pc/3/range/2 + 1) = pc/3/range/4
-						][
-							pc: skip pc 3
-						][
-							pc: skip pc 2
-						]
-						continue
-					]
-					forall errors [
-						append ret make map! reduce [
-							'severity DiagnosticSeverity/(errors/1/level)
-							'code mold errors/1/type
-							'source "Syntax"
-							'message errors/1/msg
-							'range lexer/form-range pc/1/range ;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
-						]
+				if error: pc/1/error [
+					range: reduce [pc/1/range/1 pc/1/range/1]
+					append ret make map! reduce [
+						'severity 1							;-- DiagnosticSeverity/Error
+						'code mold pc/1/type
+						'source "Syntax"
+						'message mold error/code
+						'range lexer/form-range range		;-- TBD: calc error position reduce [pc/1/range/1 pc/1/range/2 errors/1/at/1 errors/1/at/2]
 					]
 				]
 				if nested: pc/1/nested [
@@ -253,26 +275,21 @@ semantic: context [
 		include-file: function [file [file!]][
 			if all [
 				exists? file
-				code: read file
+				code: read-file file
 			][
 				uri: lexer/file-to-uri file
 				write-log rejoin ["include: " uri]
-				if any [
-					not top: find-top uri
-					top/1/source <> code
-				][
-					write-log "will parse code..."
-					add-source* uri code
-				]
+				add-source* uri code
 			]
 		]
 
 		include-each: function [pc [block!]][
 			if all [
-				issue? pc/1/expr/1
+				issue! = pc/1/type
 				"include" = to string! pc/1/expr/1
 				pc/2
-				file? file: pc/2/expr/1
+				file! = pc/2/type
+				file: pc/2/expr/1
 			][
 				if nfile: related-file origin-dir file [
 					include-file nfile
@@ -298,24 +315,54 @@ semantic: context [
 		]
 	]
 
-	add-source*: function [uri [string!] code [string!]][
-		write-log rejoin ["add uri: " uri]
-		switch/default find/last uri "." [
-			".red"	[top: lexer/transcode code no]
-			;".reds"	[top: lexer/transcode code yes]
-		][exit]
-		unless empty? errors: collect-errors top [
+	update-diags: func [
+		top			[block!]
+		uri			[string!]
+		/local errors diags f nuri
+	][
+		unless top [exit]
+		if empty? errors: collect-errors top [exit]
+		diags: diagnostics
+		f: none
+		forall diags [
+			if any [
+				uri = nuri: diags/1/uri
+				(lexer/uri-to-file uri) = (lexer/uri-to-file nuri)
+			][
+				f: diags/1
+				break
+			]
+		]
+		either f [
+			f/diagnostics: errors
+		][
 			append diagnostics make map! reduce [
 				'uri uri
 				'diagnostics errors
 			]
 		]
-		add-source-to-table uri top
-		add-include-file top
+	]
+
+	add-source*: function [uri [string!] code [string!] /force return: [block!]][
+		either any [
+			force
+			not top: find-top uri
+			top/1/source <> code
+		][
+			write-log rejoin ["parse uri: " uri]
+			top: lexer/transcode code
+			update-diags top uri
+			add-source-to-table uri top
+			add-include-file top
+		][
+			update-diags top uri
+		]
+		top
 	]
 
 	add-source: function [uri [string!] code [string!]][
 		clear diagnostics
+		write-log rejoin ["add source: " uri]
 		add-source* uri code
 		diagnostics
 	]
@@ -335,12 +382,13 @@ semantic: context [
 				%.red = ext
 				;%.reds = ext
 			][
-				add-source* lexer/file-to-uri file read file
+				add-source* lexer/file-to-uri file read-file file
 			]
 		]
 	]
 
 	add-folder: function [folders [block!] excluded [string!]][
+		write-log rejoin ["add folder: " mold folders " excluded: " mold excluded]
 		clear diagnostics
 		clear root-folders
 		forall folders [
@@ -418,33 +466,40 @@ semantic: context [
 	]
 
 	update-range: function [
-		npc* [block!] lines [integer!] end-chars [integer!]
+		npc* [block!] nlines [integer!] end-chars [integer!]
 		s-line [integer!] s-column [integer!]
 		e-line [integer!] e-column [integer!] /only
 	][
+		olines: e-line - s-line
+		either nlines = 0 [
+			include-line?: no
+		][
+			include-line?: yes
+		]
+		lines: nlines - olines
 		update-pc: function [npc [block!] first* [logic!]][
 			if first* [
-				either lines = 0 [
-					if npc/1/range/1 = e-line [
-						npc/1/range/2: npc/1/range/2 - e-column + s-column + end-chars
+				either include-line? [
+					if npc/1/range/1/x = e-line [
+						npc/1/range/1/y: npc/1/range/1/y - e-column + end-chars + 1
 					]
 				][
-					if npc/1/range/1 = e-line [
-						npc/1/range/2: npc/1/range/2 - e-column + end-chars + 1
+					if npc/1/range/1/x = e-line [
+						npc/1/range/1/y: npc/1/range/1/y - e-column + s-column + end-chars
 					]
-					npc/1/range/1: npc/1/range/1 + lines
 				]
+				npc/1/range/1/x: npc/1/range/1/x + lines
 			]
-			either lines = 0 [
-				if npc/1/range/3 = e-line [
-					npc/1/range/4: npc/1/range/4 - e-column + s-column + end-chars
+			either include-line? [
+				if npc/1/range/2/x = e-line [
+					npc/1/range/2/y: npc/1/range/2/y - e-column + end-chars + 1
 				]
 			][
-				if npc/1/range/3 = e-line [
-					npc/1/range/4: npc/1/range/4 - e-column + end-chars + 1
+				if npc/1/range/2/x = e-line [
+					npc/1/range/2/y: npc/1/range/2/y - e-column + s-column + end-chars
 				]
-				npc/1/range/3: npc/1/range/3 + lines
 			]
+			npc/1/range/2/x: npc/1/range/2/x + lines
 		]
 
 		update-pc-nested: function [npc [block!] first* [logic!]][
@@ -467,16 +522,13 @@ semantic: context [
 		]
 		while [par: par/1/upper][
 			update-pc par no
-			update-pc-nested next par no
+			update-pc-nested next par yes
 		]
 	]
 
 	update-upper: function [pc [block!] /remove?][
 		forall pc [
-			if all [
-				find reduce [block! paren! map!] pc/1/expr/1
-				npc: pc/1/nested
-			][
+			if npc: pc/1/nested [
 				forall npc [
 					npc/1/upper: either remove? [back npc/1/upper][next npc/1/upper]
 				]
@@ -484,96 +536,763 @@ semantic: context [
 		]
 	]
 
-	update-ws: function [
-			system? [logic!]
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "update-ws"
-		olines: new-lines? otext
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
+	remove-node: function [pc [block!]][
+		upper: pc/1/upper
+		either 1 = length? upper/1/nested [
+			upper/1/nested: none
 		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		lines: lines - olines
-		pc: pcs/2
-		switch/default pcs/1 [
-			head empty first [npc: pc]
-			tail insert last mid one [
-				npc: next pc
-			]
-		][return false]
-		update-range npc lines end-chars s-line s-column e-line e-column
-		if pcs/1 = 'one [
-			npc: pcs/2
-			update-range/only npc lines end-chars s-line s-column e-line e-column
-			spos: lexer/line-pos? line-stack npc/1/range/1 npc/1/range/2
-			epos: lexer/line-pos? line-stack npc/1/range/3 npc/1/range/4
-			str: copy/part spos epos
-			write-log mold npc/1/range
-			write-log mold str
-			if any [
-				not top: lexer/transcode str system?
-				none? nested: top/1/nested
-				1 < length? nested
-			][
-				return false
-			]
-			npc/1/expr: nested/1/expr
-			either find npc/1 'error [
-				npc/1/error: nested/1/error
-			][
-				repend npc/1 ['error nested/1/error]
-			]
-		]
-		true
-	]
-
-	update-one: function [
-			system? [logic!]
-			pcs [block!] s-line [integer!] s-column [integer!] e-line [integer!]
-			e-column [integer!] otext [string!] text [string!] line-stack [block!]
-	][
-		write-log "update-one"
-		olines: new-lines? otext
-		lines: new-lines? text
-		either lines = 0 [
-			end-chars: length? text
-		][
-			end-chars: length? find/last/tail text "^/"
-		]
-		lines: lines - olines
-		pc: pcs/2
-		update-range next pc lines end-chars s-line s-column e-line e-column
-		update-range/only pc lines end-chars s-line s-column e-line e-column
-		spos: lexer/line-pos? line-stack pc/1/range/1 pc/1/range/2
-		epos: lexer/line-pos? line-stack pc/1/range/3 pc/1/range/4
-		if empty? str: copy/part spos epos [
 			remove pc
-			update-upper/remove? pc
-			write-log "update-one: remove"
-			return true
 		]
-		write-log mold pc/1/range
-		write-log mold str
-		if any [
-			not top: lexer/transcode str system?
-			none? nested: top/1/nested
-			1 < length? nested
-		][
-			return false
-		]
-		pc/1/expr: nested/1/expr
-		either find pc/1 'error [
-			pc/1/error: nested/1/error
-		][
-			repend pc/1 ['error nested/1/error]
-		]
-		true
 	]
 
+	ws: charset " ^M^/^-"
+	all-path!: reduce [path! lit-path! get-path! set-path!]
+	all-pair!: reduce [block! paren! map!]
+	pre-path!: reduce [lit-path! get-path!]
+	update-token: function [
+		tag [word!] pc [block!] etag [word!] epc [block!]
+		otext [string!] text [string!] oline-stack [block!] line-stack [block!]
+		s-line [integer!] s-column [integer!] e-line [integer!] e-column [integer!]
+	][
+		nlines: new-lines? text
+		either nlines = 0 [
+			end-chars: length? text
+		][
+			end-chars: length? find/last/tail text "^/"
+		]
+		rebuild: [
+			type: nested/1/type
+			range: nested/1/range
+			either find [empty tail] tag [
+				line: s-line column: s-column
+			][
+				wrange: wpc/1/range
+				case [
+					wrange/1/x = s-line [
+						line: s-line
+						column: either wrange/1/y >= s-column [s-column][wrange/1/y]
+					]
+					wrange/1/x > s-line [
+						line: s-line column: s-column
+					]
+					true [
+						line: wrange/1/x column: wrange/1/y
+					]
+				]
+			]
+			either range/1/x = 1 [
+				start: as-pair line column + range/1/y - 1
+			][
+				start: as-pair line + range/1/x - 1 range/1/y
+			]
+			either range/2/x = 1 [
+				stop: as-pair line column + range/2/y - 1
+			][
+				stop: as-pair line + range/2/x - 1 range/2/y
+			]
+			nested/1/range: reduce [start stop]
+			case [
+				find all-pair! type [
+					if nested/1/nested [return false]
+					if nested/1/error [return false]
+					write-log "empty pair"
+				]
+				find all-path! type [
+					start: nested/1/range/1
+					nnested: nested/1/nested
+					if find pre-path! type [start: start + 0x1]
+					forall nnested [
+						if nnested/1/nested [return false]
+						stop: start + as-pair 0 nnested/1/range/2/y - nnested/1/range/1/y
+						nnested/1/range: reduce [start stop]
+						start: stop + 0x1
+					]
+					write-log "any path"
+				]
+				true [
+					write-log "token"
+				]
+			]
+		]
+
+		replace-node: [
+			ntext: copy text
+			unless empty? head-str [
+				insert ntext head-str
+			]
+			unless empty? tail-str [
+				append ntext tail-str
+			]
+			write-log rejoin ["transcode: " ntext]
+			ntop: lexer/transcode ntext
+			unless nested: ntop/1/nested [
+				write-log "remove token"
+				update-upper/remove? next wpc
+				update-range next wpc nlines end-chars s-line s-column e-line e-column
+				remove-node wpc
+				return true
+			]
+			if 1 <> length? nested [return false]
+			if nested/1/type = 'comment [
+				npc: next wpc
+				if tail? npc [
+					npc: wpc/1/upper
+				]
+				if all [
+					(length? ntop/1/lines) - 1 = nested/1/range/1/x
+					e-line = npc/1/range/1/x
+				][return false]
+			]
+			do rebuild
+			upper: wpc/1/upper
+			wpc/1: nested/1
+			wpc/1/upper: upper
+			if nn: wpc/1/nested [
+				forall nn [
+					nn/1/upper: wpc
+				]
+			]
+			write-log "change token"
+			update-range next wpc nlines end-chars s-line s-column e-line e-column
+		]
+
+		in-path?: no
+		if utype: pc/1/upper/1/type [
+			in-path?: find all-path! utype
+		]
+
+		head-str: ""
+		tail-str: ""
+		wpc: pc
+
+		switch tag [
+			head [
+				either find all-path! pc/1/type [
+					switch etag [
+						head [
+							if pc <> epc [return false]
+							write-log rejoin ["transcode: " text]
+							ntop: lexer/transcode text
+							unless nested: ntop/1/nested [
+								write-log "remove/insert spaces"
+								update-range pc nlines end-chars s-line s-column e-line e-column
+								return true
+							]
+							if 1 <> length? nested [return false]
+							if nested/1/type = 'comment [
+								if all [
+									(length? ntop/1/lines) - 1 = nested/1/range/1/x
+									e-line = wpc/1/range/1/x
+								][return false]
+							]
+							do rebuild
+							upper: wpc/1/upper
+							insert/only wpc nested/1
+							wpc/1/upper: upper
+							if nn: wpc/1/nested [
+								forall nn [
+									nn/1/upper: wpc
+								]
+							]
+							write-log "insert new token"
+							update-upper next wpc
+							update-range next wpc nlines end-chars s-line s-column e-line e-column
+							return true
+						]
+						first [
+							unless any [
+								pc = epc
+								epc/1/upper = pc
+							][return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						one [
+							if epc/1/upper <> pc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							unless any [
+								pc = epc
+								epc/1/upper = pc
+							][return false]
+							if epc/1/upper = pc [
+								epos: lexer/line-pos? oline-stack e-line e-column
+								npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+								tail-str: copy/part epos npos
+							]
+						]
+						insert tail [
+							if pc <> epc [return false]
+						]
+						mid [
+							if pc <> epc [return false]
+							unless parse text [any ws] [return false]
+							write-log "remove token"
+							update-upper/remove? next pc
+							update-range next pc nlines end-chars s-line s-column e-line e-column
+							remove-node pc
+							return true
+						]
+						empty [return false]
+					]
+				][
+					switch etag [
+						head [
+							if pc <> epc [return false]
+							write-log rejoin ["transcode: " text]
+							ntop: lexer/transcode text
+							unless nested: ntop/1/nested [
+								write-log "remove/insert spaces"
+								update-range pc nlines end-chars s-line s-column e-line e-column
+								return true
+							]
+							if 1 <> length? nested [return false]
+							if nested/1/type = 'comment [
+								if all [
+									(length? ntop/1/lines) - 1 = nested/1/range/1/x
+									e-line = wpc/1/range/1/x
+								][return false]
+							]
+							do rebuild
+							upper: wpc/1/upper
+							insert/only wpc nested/1
+							wpc/1/upper: upper
+							if nn: wpc/1/nested [
+								forall nn [
+									nn/1/upper: wpc
+								]
+							]
+							write-log "insert new token"
+							update-upper next wpc
+							update-range next wpc nlines end-chars s-line s-column e-line e-column
+							return true
+						]
+						first one [
+							if epc <> pc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last insert tail [
+							if epc <> pc [return false]
+						]
+						mid [
+							if pc <> epc [return false]
+							unless parse text [any ws] [return false]
+							write-log "remove token"
+							update-upper/remove? next pc
+							update-range next pc nlines end-chars s-line s-column e-line e-column
+							remove-node pc
+							return true
+						]
+						empty [return false]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			first [
+				case [
+					find all-path! pc/1/type [
+						switch etag [
+							head [return false]
+							first [
+								case [
+									find all-path! epc/1/type [
+										if pc <> epc [return false]
+										spos: lexer/line-pos? oline-stack e-line e-column
+										epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+										tail-str: copy/part spos epos
+									]
+									epc/1/upper = pc [
+										spos: lexer/line-pos? oline-stack e-line e-column
+										epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+										tail-str: copy/part spos epos
+									]
+									true [return false]
+								]
+							]
+							one [
+								if epc/1/upper <> pc [return false]
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either find all-path! epc/1/type [
+									if pc <> epc [return false]
+									;-- TBD: maybe need to check next pc, as last prior to mid
+								][
+									if epc/1/upper <> pc [return false]
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+									tail-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if pc <> epc [return false]
+							]
+							mid [
+								if pc <> epc [return false]
+								unless parse text [any ws][return false]
+								write-log "remove token"
+								update-upper/remove? next pc
+								update-range next pc nlines end-chars s-line s-column e-line e-column
+								remove-node pc
+								return true
+							]
+							empty [return false]
+						]
+					]
+					in-path? [
+						wpc: pc/1/upper
+						switch etag [
+							head [return false]
+							first one [
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either find all-path! epc/1/type [
+									if wpc <> epc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+								][
+									if epc/1/upper <> wpc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+									tail-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if epc <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid [return false]
+							empty [return false]
+						]
+					]
+					true [
+						switch etag [
+							head [return false]
+							first one [
+								if epc <> pc [return false]
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last insert tail [
+								if epc <> pc [return false]
+							]
+							mid [
+								if pc <> epc [return false]
+								unless parse text [any ws][return false]
+								write-log "remove token"
+								update-upper/remove? next pc
+								update-range next pc nlines end-chars s-line s-column e-line e-column
+								remove-node pc
+								return true
+							]
+							empty [return false]
+						]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			one [
+				either in-path? [
+					wpc: pc/1/upper
+					switch etag [
+						head [return false]
+						one first [
+							if epc/1/upper <> wpc [return false]
+							spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+							spos: lexer/line-pos? oline-stack e-line e-column
+							epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+							tail-str: copy/part spos epos
+						]
+						last [
+							either find all-path! epc/1/type [
+								if wpc <> epc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							][
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+						]
+						insert tail [
+							if epc <> wpc [return false]
+							spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+						]
+						mid empty [return false]
+					]
+				][
+					switch etag [
+						head first [return false]
+						one [
+							if epc <> pc [return false]
+							spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+							spos: lexer/line-pos? oline-stack e-line e-column
+							epos: lexer/line-pos? oline-stack pc/1/range/2/x pc/1/range/2/y
+							tail-str: copy/part spos epos
+						]
+						last insert tail [
+							if epc <> pc [return false]
+							spos: lexer/line-pos? oline-stack pc/1/range/1/x pc/1/range/1/y
+							epos: lexer/line-pos? oline-stack s-line s-column
+							head-str: copy/part spos epos
+						]
+						mid empty [return false]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			last [
+				case [
+					find all-path! pc/1/type [
+						switch etag [
+							head first one [return false]
+							last insert tail [
+								if epc <> pc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid empty [return false]
+						]
+					]
+					in-path? [
+						wpc: pc/1/upper
+						switch etag [
+							head [return false]
+							first one [
+								if epc/1/upper <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+								spos: lexer/line-pos? oline-stack e-line e-column
+								epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+								tail-str: copy/part spos epos
+							]
+							last [
+								either all [
+									xtype: epc/1/upper/1/type
+									find all-path! xtype
+								][
+									if epc/1/upper <> wpc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+									spos: lexer/line-pos? oline-stack e-line e-column
+									epos: lexer/line-pos? oline-stack wpc/1/range/2/x wpc/1/range/2/y
+									tail-str: copy/part spos epos
+								][
+									if epc <> wpc [return false]
+									spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+									epos: lexer/line-pos? oline-stack s-line s-column
+									head-str: copy/part spos epos
+								]
+							]
+							insert tail [
+								if epc <> wpc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid empty [return false]
+						]
+					]
+					true [
+						switch etag [
+							head first one [return false]
+							last insert tail [
+								if pc <> epc [return false]
+								spos: lexer/line-pos? oline-stack wpc/1/range/1/x wpc/1/range/1/y
+								epos: lexer/line-pos? oline-stack s-line s-column
+								head-str: copy/part spos epos
+							]
+							mid empty [return false]
+						]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			mid [
+				switch etag [
+					head first one [return false]
+					last insert tail [
+						if epc <> wpc: next pc [return false]
+						unless parse text [any ws][return false]
+						write-log "remove token"
+						update-upper/remove? next wpc
+						update-range next wpc nlines end-chars s-line s-column e-line e-column
+						remove-node wpc
+						return true
+					]
+					mid [
+						if epc <> pc [return false]
+						unless parse text [any ws][return false]
+						write-log "insert spaces"
+						update-range next pc nlines end-chars s-line s-column e-line e-column
+						return true
+					]
+					empty [return false]
+				]
+			]
+			;-- switch tag
+			insert [
+				wpc: next pc
+				npc: next pc
+				either find all-path! npc/1/type [
+					switch etag [
+						head [return false]
+						first [
+							unless any [
+								epc = npc
+								epc/1/upper = npc
+							][return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						one [
+							if epc/1/upper <> npc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							unless any [
+								epc = npc
+								epc/1/upper = npc
+							][return false]
+							if epc/1/upper = npc [
+								epos: lexer/line-pos? oline-stack e-line e-column
+								npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+								tail-str: copy/part epos npos
+							]
+						]
+						insert [
+							unless any [
+								epc = npc
+								epc = pc
+							][return false]
+							if epc = pc [
+								upper: pc/1/upper
+								write-log rejoin ["transcode: " text]
+								ntop: lexer/transcode text
+								unless nested: ntop/1/nested [
+									write-log "remove/insert spaces"
+									update-range next pc nlines end-chars s-line s-column e-line e-column
+									return true
+								]
+								if 1 <> length? nested [return false]
+								if nested/1/type = 'comment [
+									if all [
+										(length? ntop/1/lines) - 1 = nested/1/range/1/x
+										e-line = upper/1/range/2/x
+									][return false]
+								]
+								do rebuild
+								insert/only next pc nested/1
+								pc/2/upper: upper
+								if nn: pc/2/nested [
+									forall nn [
+										nn/1/upper: next pc
+									]
+								]
+								write-log "insert new token"
+								update-upper npc: skip pc 2
+								update-range npc nlines end-chars s-line s-column e-line e-column
+								return true
+							]
+						]
+						tail [
+							if npc <> epc [return false]
+						]
+						mid [
+							if npc <> epc [return false]
+							unless parse text [any ws] [return false]
+							write-log "remove token"
+							update-upper/remove? next npc
+							update-range next npc nlines end-chars s-line s-column e-line e-column
+							remove-node npc
+							return true
+						]
+						empty [return false]
+					]
+				][
+					switch etag [
+						head [return false]
+						first one [
+							if epc <> npc [return false]
+							epos: lexer/line-pos? oline-stack e-line e-column
+							npos: lexer/line-pos? oline-stack npc/1/range/2/x npc/1/range/2/y
+							tail-str: copy/part epos npos
+						]
+						last [
+							if epc <> npc [return false]
+						]
+						insert [
+							unless any [
+								epc = npc
+								epc = pc
+							][return false]
+							if epc = pc [
+								upper: pc/1/upper
+								write-log rejoin ["transcode: " text]
+								ntop: lexer/transcode text
+								unless nested: ntop/1/nested [
+									write-log "remove/insert spaces"
+									update-range next pc nlines end-chars s-line s-column e-line e-column
+									return true
+								]
+								if 1 <> length? nested [return false]
+								if nested/1/type = 'comment [
+									if all [
+										(length? ntop/1/lines) - 1 = nested/1/range/1/x
+										e-line = upper/1/range/2/x
+									][return false]
+								]
+								do rebuild
+								insert/only next pc nested/1
+								pc/2/upper: upper
+								if nn: pc/2/nested [
+									forall nn [
+										nn/1/upper: next pc
+									]
+								]
+								write-log "insert new token"
+								update-upper npc: skip pc 2
+								update-range npc nlines end-chars s-line s-column e-line e-column
+								return true
+							]
+						]
+						tail [
+							if epc <> npc [return false]
+						]
+						mid [
+							if npc <> epc [return false]
+							unless parse text [any ws] [return false]
+							write-log "remove token"
+							update-upper/remove? next npc
+							update-range next npc nlines end-chars s-line s-column e-line e-column
+							remove-node npc
+							return true
+						]
+						empty [return false]
+					]
+				]
+				do replace-node
+				return true
+			]
+			;-- switch tag
+			tail [
+				if etag <> 'tail [return false]
+				if epc <> pc [return false]
+				upper: pc/1/upper
+				write-log rejoin ["transcode: " text]
+				ntop: lexer/transcode text
+				unless nested: ntop/1/nested [
+					write-log "remove/insert spaces"
+					update-range next pc nlines end-chars s-line s-column e-line e-column
+					return true
+				]
+				if 1 <> length? nested [return false]
+				if nested/1/type = 'comment [
+					if all [
+						(length? ntop/1/lines) - 1 = nested/1/range/1/x
+						e-line = upper/1/range/2/x
+					][return false]
+				]
+				do rebuild
+				append/only pc nested/1
+				pc/2/upper: upper
+				if nn: pc/2/nested [
+					forall nn [
+						nn/1/upper: next pc
+					]
+				]
+				write-log "append new token"
+				update-range skip pc 2 nlines end-chars s-line s-column e-line e-column
+				return true
+			]
+			empty [
+				if etag <> 'empty [return false]
+				if pc <> epc [return flase]
+				write-log rejoin ["transcode: " text]
+				ntop: lexer/transcode text
+				unless nested: ntop/1/nested [
+					write-log "remove/insert spaces"
+					update-range next wpc nlines end-chars s-line s-column e-line e-column
+					update-range/only wpc nlines end-chars s-line s-column e-line e-column
+					return true
+				]
+				if 1 <> length? nested [return false]
+				if nested/1/type = 'comment [
+					if all [
+						(length? ntop/1/lines) - 1 = nested/1/range/1/x
+						e-line = wpc/1/range/1/x
+					][return false]
+				]
+				do rebuild
+				either find wpc/1 'nested [
+					wpc/1/nested: reduce [nested/1]
+				][
+					repend/only wpc/1 ['nested reduce [nested/1]]
+				]
+				wnested: wpc/1/nested
+				wnested/1/upper: wpc
+				if nn: wnested/1/nested [
+					forall nn [
+						nn/1/upper: wnested
+					]
+				]
+				write-log "insert new token"
+				update-range next wpc nlines end-chars s-line s-column e-line e-column
+				update-range/only wpc nlines end-chars s-line s-column e-line e-column
+				return true
+			]
+		]
+		false
+	]
+
+	tags: [head first one last mid insert tail empty]
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
 		switch/default find/last uri "." [
@@ -581,17 +1300,15 @@ semantic: context [
 			;".reds"	[system?: yes]
 		][return false]
 		clear diagnostics
-		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/%.+-_=?*&~?`"
+		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%.+-_=?*&~?`"
 		;write-log mold changes
+		unless top: find-top uri [
+			return false
+		]
 		forall changes [
-			unless top: find-top uri [
-				return false
-			]
-			;write %f-log1.txt top/1/source
-			;write/append %f-log1.txt "^/"
-			;write/append %f-log1.txt lexer/format top
+			;write-log lexer/sformat top
 			code: top/1/source
-			line-stack: top/1/lines
+			oline-stack: top/1/lines
 			range: changes/1/range
 			text: changes/1/text
 			rangeLength: changes/1/rangeLength
@@ -599,21 +1316,25 @@ semantic: context [
 			s-column: range/start/character + 1
 			e-line: range/end/line + 1
 			e-column: range/end/character + 1
-			spos: lexer/line-pos? line-stack s-line s-column
-			epos: lexer/line-pos? line-stack e-line e-column
+			spos: lexer/line-pos? oline-stack s-line s-column
+			epos: lexer/line-pos? oline-stack e-line e-column
 			otext: copy/part spos epos
 			ncode: copy/part code spos
 			append ncode text
 			append ncode epos
-			line-stack: make block! 1000
+			line-stack: make block! 100
 			lexer/parse-line line-stack ncode
-			top/1/source: ncode
-			top/1/lines: line-stack
-			otext-ws?: parse otext [some ws]
-			text-ws?: parse text [some ws]
+			if all [
+				empty? otext
+				empty? text
+			][continue]
+			write-log mold reduce [s-line s-column e-line e-column]
+			write-log rejoin ["remove: " mold otext]
+			write-log rejoin ["add: " mold text]
+			if otext = text [continue]
 			if top/1/nested [
 				spcs: epcs: position? top s-line s-column
-				if all [
+				if any [
 					s-line <> e-line
 					s-column <> e-column
 				][
@@ -624,177 +1345,31 @@ semantic: context [
 					none? epcs
 				][
 					write-log "position failed"
-					add-source* uri ncode
+					top: add-source*/force uri ncode
 					continue
 				]
-				pc: spcs/2
-				epc: epcs/2
-				;-- insert/remove spaces in spaces or string!
-				if all [
-					any [
-						epcs/1 <> 'one
-						string? epc/1/expr/1
-					]
-					all [
-						any [
-							empty? text
-							text-ws?
-						]
-						any [
-							empty? otext
-							otext-ws?
-						]
-					]
+				write-log mold reduce [spcs/1 epcs/1]
+				unless all [
+					find tags spcs/1
+					find tags epcs/1
 				][
-					unless update-ws system? epcs s-line s-column e-line e-column otext text line-stack [
-						write-log "update-ws failed"
-						add-source* uri ncode
-					]
+					write-log "position failed 2"
+					top: add-source*/force uri ncode
 					continue
 				]
-				;-- token internal
-				if all [
-					any [
-						all [
-							find [first last one] spcs/1
-							find [first last one] epcs/1
-							spcs/2 = epcs/2
-							not find reduce [block! map! paren!] pc/1/expr/1
-						]
-						all [
-							spcs <> epcs
-							spcs/1 = 'mid
-							epcs/1 = 'mid
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] epc/1/expr/1
-						]
-						all [
-							spcs <> epcs
-							spcs/1 = 'mid
-							find [last one] epcs/1
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] epc/1/expr/1
-						]
-						all [
-							spcs <> epcs
-							epcs/1 = 'mid
-							find [first one] spcs/1
-							epcs/2 = next spcs/2
-							not find reduce [block! map! paren!] pc/1/expr/1
-							epcs: spcs
-						]
-					]
-					any [
-						empty? text
-						not find text not-trigger-charset
-					]
-					any [
-						empty? otext
-						not find otext not-trigger-charset
-					]
-				][
-					unless update-one system? epcs s-line s-column e-line e-column otext text line-stack [
-						write-log "update-one failed"
-						add-source* uri ncode
-					]
+
+				if update-token spcs/1 spcs/2 epcs/1 epcs/2
+								otext text oline-stack line-stack
+								s-line s-column e-line e-column [
+					top/1/source: ncode
+					top/1/lines: line-stack
 					continue
-				]
-				;-- insert a new token
-				if all [
-					spcs = epcs
-					empty? otext
-					any [
-						not find text not-trigger-charset
-						text = "[]"
-						text = "()"
-						text = "{}"
-						text = {""}
-					]
-				][
-					;write-log text
-					;write-log mold spcs/1
-					;write-log mold spcs/2/1/range
-					if any [
-						spcs/1 = 'head
-						all [
-							spcs/1 = 'tail
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'insert
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'first
-							find reduce [block! paren!] pc/1/expr/1
-						]
-						all [
-							spcs/1 = 'last
-							find reduce [block! paren!] pc/1/expr/1
-							(pc: next pc true)
-						]
-						all [
-							spcs/1 = 'mid
-							find reduce [block! paren!] pc/1/expr/1
-							pc: next pc
-							find reduce [block! paren!] pc/1/expr/1
-						]
-						spcs/1 = 'empty
-					][
-						end-chars: length? text
-						if spcs/1 = 'empty [
-							update-range next pc 0 end-chars s-line s-column e-line e-column
-							update-range/only pc 0 end-chars s-line s-column e-line e-column
-							repend pc/1 ['nested make block! 1]
-							npc: pc/1/nested
-							range: reduce [s-line s-column e-line e-column + end-chars]
-							write-log "empty insert npc: "
-							write-log mold range
-							if any [
-								not top: lexer/transcode text system?
-								none? nested: top/1/nested
-								1 < length? nested
-							][
-								write-log "empty insert failed"
-								add-source* uri ncode
-								ncode: ncode
-								continue
-							]
-							append/only npc reduce ['expr nested/1/expr 'range range 'upper pc 'error nested/1/error]
-							continue
-						]
-						update-range pc 0 end-chars s-line s-column e-line e-column
-						update-upper pc
-						range: reduce [s-line s-column e-line e-column + end-chars]
-						write-log "insert pc: "
-						write-log mold range
-						if any [
-							not top: lexer/transcode text system?
-							none? nested: top/1/nested
-							1 < length? nested
-						][
-							write-log "insert failed"
-							add-source* uri ncode
-							continue
-						]
-						either pc/1 [upper: pc/1/upper][
-							upper: pc/-1/upper
-						]
-						insert/only pc reduce ['expr nested/1/expr 'range range 'upper upper 'error nested/1/error]
-						ncode: ncode
-						continue
-					]
 				]
 			]
 			write-log "diff failed"
-			add-source* uri ncode
+			top: add-source*/force uri ncode
 		]
-		unless top: find-top uri [
-			return false
-		]
-		;write %f-log2.txt top/1/source
-		;write/append %f-log2.txt "^/"
-		;write/append %f-log2.txt lexer/format top
+		;write-log lexer/sformat top
 		unless empty? errors: collect-errors top [
 			append diagnostics make map! reduce [
 				'uri uri
@@ -810,7 +1385,6 @@ completion: context [
 
 	complete-file: function [top [block!] pc [block!] comps [block!]][
 		range: lexer/form-range pc/1/range
-		str: to string! pc/1/expr/1
 		insert str: to string! file: pc/1/expr/1 "%"
 		if error? result: try [red-complete-ctx/red-complete-file str no][
 			exit
@@ -902,36 +1476,39 @@ completion: context [
 			]
 			until [
 				case [
-					set-word? npc/1/expr/1 [
+					set-word! = npc/1/type [
 						collect* to word! npc/1/expr/1 npc
 					]
 					all [
-						npc/1/expr/1 = to issue! 'define
+						npc/1/type = issue!
+						'define = to word! npc/1/expr/1
 						npc/2
-						word? npc/2/expr/1
+						word! = npc/2/type
 					][
 						collect* npc/2/expr/1 next npc
 					]
 					all [
-						npc/1/expr/1 = to issue! 'enum
+						npc/1/type = issue!
+						'enum = to word! npc/1/expr/1
 						npc/2
-						word? npc/2/expr/1
+						word! = npc/2/type
 						npc/3
-						npc/3/expr/1 = block!
+						block! = npc/3/type
 						epc: npc/3/nested
 					][
 						collect* to word! npc/2/expr/1 next npc
 						forall epc [
 							if any [
-								word? epc/1/expr/1
-								set-word? epc/1/expr/1
+								word! = epc/1/type
+								set-word! = epc/1/type
 							][
 								collect* to word! epc/1/expr/1 epc
 							]
 						]
 					]
 					all [
-						npc/1/expr/1 = to issue! 'if
+						npc/1/type = issue!
+						'if = to word! npc/1/expr/1
 						npc/2
 						npc/3
 					][
@@ -939,7 +1516,7 @@ completion: context [
 						while [
 							all [
 								not tail? npc2: next npc2
-								npc2/1/expr/1 <> block!
+								npc2/1/type <> block!
 							]
 						][]
 						if all [
@@ -954,7 +1531,8 @@ completion: context [
 						]
 					]
 					all [
-						npc/1/expr/1 = to issue! 'either
+						npc/1/type = issue!
+						'either = to word! npc/1/expr/1
 						npc/2
 						npc/3
 						npc/4
@@ -964,7 +1542,7 @@ completion: context [
 							while [
 								all [
 									not tail? npc2: next npc2
-									npc2/1/expr/1 <> block!
+									npc2/1/type <> block!
 								]
 							][]
 							if all [
@@ -980,7 +1558,8 @@ completion: context [
 						]
 					]
 					all [
-						npc/1/expr/1 = to issue! 'switch
+						npc/1/type = issue!
+						'switch = to word! npc/1/expr/1
 						npc/2
 						npc/3
 					][
@@ -988,7 +1567,7 @@ completion: context [
 						while [
 							all [
 								not tail? npc2: next npc2
-								npc2/1/expr/1 <> block!
+								npc2/1/type <> block!
 							]
 						][]
 						if all [
@@ -997,7 +1576,7 @@ completion: context [
 						][
 							forall nested [
 								if all [
-									nested/1/expr/1 = block!
+									nested/1/type = block!
 									n2: nested/1/nested
 								][
 									collect*-set/back? back tail n2
@@ -1006,14 +1585,15 @@ completion: context [
 						]
 					]
 					all [
-						npc/1/expr/1 = to issue! 'import
+						npc/1/type = issue!
+						'import = to word! npc/1/expr/1
 						npc/2
-						npc/2/expr/1 = block!
+						npc/2/type = block!
 						nested: npc/2/nested
 					][
 						forall nested [
 							if all [
-								nested/1/expr/1 = block!
+								nested/1/type = block!
 								n2: nested/1/nested
 							][
 								collect*-set/back? back tail n2
@@ -1037,7 +1617,7 @@ completion: context [
 		collect*-func: function [npc [block!]][
 			forall npc [
 				if all [
-					find [word! lit-word! refinement!] type?/word npc/1/expr/1
+					find [word! lit-word! refinement!] to word! npc/1/type
 					npc/1/expr <> [/local]
 				][
 					collect* to word! npc/1/expr/1 npc
@@ -1053,7 +1633,7 @@ completion: context [
 			][
 				if all [
 					par/-1
-					block! = par/-1/expr/1
+					block! = par/-1/type
 					spec: par/-1/nested
 					par/-2
 					find [func function has] par/-2/expr/1
@@ -1101,19 +1681,24 @@ completion: context [
 			pc/2
 			any [
 				all [
+					word! = pc/1/type
 					find [context object] pc/1/expr/1
-					block! = pc/2/expr/1
+					block! = pc/2/type
 					spec: pc/2
 				]
 				all [
+					word! = pc/1/type
 					pc/1/expr/1 = 'make
 					pc/3
-					block! = pc/3/expr/1
+					block! = pc/3/type
 					spec: pc/3
 					any [
-						pc/2/expr/1 = 'object!
 						all [
-							word? pc/2/expr/1
+							word! = pc/2/type
+							pc/2/expr/1 = 'object!
+						]
+						all [
+							word! = pc/2/type
 							pc/2/expr/1 <> to word! opc/1/expr/1
 							res: find-set?/*context? next pc pc/2/expr/1 upper no
 							not empty? res
@@ -1140,7 +1725,7 @@ completion: context [
 		spec: none
 		if all [
 			pc/1
-			block! = pc/1/expr/1
+			block! = pc/1/type
 		][
 			if all [
 				specs
@@ -1158,20 +1743,21 @@ completion: context [
 		if all [
 			pc/1
 			pc/2
+			word! = pc/1/type
 			find [func function has does] pc/1/expr/1
-			block! = pc/2/expr/1
+			block! = pc/2/type
 			any [
 				all [
 					find [func function] pc/1/expr/1
 					pc/3
-					block! = pc/3/expr/1
+					block! = pc/3/type
 					spec: pc/2
 				]
 				pc/1/expr/1 = 'does
 				all [
 					pc/1/expr/1 = 'has
 					pc/3
-					block! = pc/3/expr/1
+					block! = pc/3/type
 				]
 			]
 		][
@@ -1194,14 +1780,14 @@ completion: context [
 		result: make block! 4
 		check-set?: function [npc [block!]][
 			if all [
-				set-word? npc/1/expr/1
+				set-word! = npc/1/type
 				word = to word! npc/1/expr/1
 			][
 				npc2: npc
 				while [
 					all [
 						not tail? npc2: next npc2
-						set-word? npc2/1/expr/1
+						set-word! = npc2/1/type
 					]
 				][]
 				either tail? npc2 [
@@ -1251,7 +1837,8 @@ completion: context [
 				return none
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'if
+				npc/1/type = issue!
+				'if = to word! npc/1/expr/1
 				npc/2
 				npc/3
 			][
@@ -1259,7 +1846,7 @@ completion: context [
 				while [
 					all [
 						not tail? npc2: next npc2
-						npc2/1/expr/1 <> block!
+						npc2/1/type <> block!
 					]
 				][]
 				if all [
@@ -1273,7 +1860,8 @@ completion: context [
 				return none
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'either
+				npc/1/type = issue!
+				'either = to word! npc/1/expr/1
 				npc/2
 				npc/3
 				npc/4
@@ -1284,7 +1872,7 @@ completion: context [
 				while [
 					all [
 						not tail? npc2: next npc2
-						npc2/1/expr/1 <> block!
+						npc2/1/type <> block!
 					]
 				][]
 				if all [
@@ -1296,7 +1884,7 @@ completion: context [
 				while [
 					all [
 						not tail? npc2: next npc2
-						npc2/1/expr/1 <> block!
+						npc2/1/type <> block!
 					]
 				][]
 				if all [
@@ -1310,7 +1898,8 @@ completion: context [
 				return none
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'switch
+				npc/1/type = issue!
+				'switch = to word! npc/1/expr/1
 				npc/2
 				npc/3
 			][
@@ -1318,7 +1907,7 @@ completion: context [
 				while [
 					all [
 						not tail? npc2: next npc2
-						npc2/1/expr/1 <> block!
+						npc2/1/type <> block!
 					]
 				][]
 				if all [
@@ -1329,7 +1918,7 @@ completion: context [
 					ret2: none
 					forall nested [
 						if all [
-							nested/1/expr/1 = block!
+							nested/1/type = block!
 							n2: nested/1/nested
 						][
 							ret2: find-set?* back tail n2
@@ -1341,16 +1930,17 @@ completion: context [
 				return none
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'import
+				npc/1/type = issue!
+				'import = to word! npc/1/expr/1
 				npc/2
-				npc/2/expr/1 = block!
+				npc/2/type = block!
 				nested: npc/2/nested
 			][
 				ret: none
 				ret2: none
 				forall nested [
 					if all [
-						nested/1/expr/1 = block!
+						nested/1/type = block!
 						n2: nested/1/nested
 					][
 						ret2: find-set?* back tail n2
@@ -1360,9 +1950,10 @@ completion: context [
 				return ret
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'define
+				npc/1/type = issue!
+				'define = to word! npc/1/expr/1
 				npc/2
-				word? npc/2/expr/1
+				word! = npc/2/type
 				word = npc/2/expr/1
 			][
 				if any [*define? *any?][
@@ -1374,11 +1965,12 @@ completion: context [
 				return none
 			]
 			if all [
-				npc/1/expr/1 = to issue! 'enum
+				npc/1/type = issue!
+				'enum = to word! npc/1/expr/1
 				npc/2
-				word? npc/2/expr/1
+				word! = npc/2/type
 				npc/3
-				npc/3/expr/1 = block!
+				npc/3/type = block!
 				nested: npc/3/nested
 			][
 				if word = npc/2/expr/1 [
@@ -1393,11 +1985,11 @@ completion: context [
 				forall nested [
 					if any [
 						all [
-							word? nested/1/expr/1
+							word! = nested/1/type
 							word = nested/1/expr/1
 						]
 						all [
-							set-word? nested/1/expr/1
+							set-word! = nested/1/type
 							word = to word! nested/1/expr/1
 						]
 					][
@@ -1498,7 +2090,7 @@ completion: context [
 		]
 		complete-snippet: function [system? [logic!]][
 			nsnippets: either system? [snippets-sys][snippets]
-			if word? pc/1/expr/1 [
+			if word! = pc/1/type [
 				len: (length? nsnippets) / 3
 				repeat i len [
 					if find/match nsnippets/(i * 3 - 2) string [
@@ -1523,8 +2115,8 @@ completion: context [
 		]
 		range: lexer/form-range pc/1/range
 		if any [
-			lit-word? pc/1/expr/1
-			get-word? pc/1/expr/1
+			lit-word! = pc/1/type
+			get-word! = pc/1/type
 		][
 			range/start/character: range/start/character + 1
 		]
@@ -1537,13 +2129,13 @@ completion: context [
 			top: rpc
 			while [par: top/1/upper][top: par]
 			kind: CompletionItemKind/Variable
-			type: type?/word rpc/1/expr/1
+			type: rpc/1/type
 			rstring: to string! to word! rpc/1/expr/1
 			case [
-				find [word! lit-word! refinement!] type [
+				find [word! lit-word! refinement!] to word! type [
 					kind: CompletionItemKind/Field
 				]
-				type = 'set-word! [
+				type = set-word! [
 					ret: find-set?/*any? rpc to word! rpc/1/expr/1 no no
 					unless empty? ret [
 						switch ret/1/1 [
@@ -1554,11 +2146,12 @@ completion: context [
 								npc: ret/1/2
 								if all [
 									npc/2
-									string? npc/2/expr/1
+									string! = npc/2/type
 									par1: npc/1/upper
 									par2: par1/1/upper
 									par2/-1
-									par2/-1/expr/1 = to issue! 'import
+									issue! = par2/-1/type
+									'import = to word! par2/-1/expr/1
 								][
 									kind: CompletionItemKind/Module
 								]
@@ -1566,7 +2159,7 @@ completion: context [
 						]
 					]
 				]
-				type = 'word! [
+				type = word! [
 					kind: CompletionItemKind/Constant
 				]
 			]
@@ -1617,13 +2210,13 @@ completion: context [
 			npc: specs/1
 			forall npc [
 				if all [
-					refinement? npc/1/expr/1
+					refinement! = npc/1/type
 					any [
 						*all?
 						unique2? result to word! npc/1/expr/1
 					]
 				][
-					if npc/1/expr = [/local][break]
+					if 'local = to word! npc/1/expr/1 [break]
 					repend/only result ['ref npc make block! 1]
 				]
 			]
@@ -1636,7 +2229,7 @@ completion: context [
 			npc: back tail specs/1
 			until [
 				if all [
-					set-word? npc/1/expr/1
+					set-word! = npc/1/type
 					any [
 						*all?
 						unique2? result to word! npc/1/expr/1
@@ -1659,6 +2252,7 @@ completion: context [
 			npc: specs/1
 			forall npc [
 				if all [
+					npc/1/expr
 					any-word? npc/1/expr/1
 					any [
 						*all?
@@ -1667,7 +2261,7 @@ completion: context [
 				][
 					either all [
 						npc/2
-						block! = npc/2/expr/1
+						block! = npc/2/type
 						spec: npc/2/nested
 					][
 						repend/only result ['block npc reduce [spec]]
@@ -1686,6 +2280,7 @@ completion: context [
 		collect*: function [npc [block!]][
 			until [
 				if all [
+					npc/1/expr
 					set-word? npc/1/expr/1
 					any [
 						*all?
@@ -1779,7 +2374,7 @@ completion: context [
 							]
 						][
 							either all [
-								block! = npc/1/expr/1
+								block! = npc/1/type
 								spec: npc/1/nested
 							][
 								repend/only result ['block npc reduce [spec]]
@@ -1789,7 +2384,7 @@ completion: context [
 							return result
 						]
 						either all [
-							block! = npc/1/expr/1
+							block! = npc/1/type
 							spec: npc/1/nested
 						][
 							either slash-end? [
@@ -1807,6 +2402,7 @@ completion: context [
 					]
 				][
 					if all [
+						npc/1/expr
 						any-word? npc/1/expr/1
 						any [
 							*all?
@@ -1826,7 +2422,7 @@ completion: context [
 							if word = to word! npc/1/expr/1 [
 								either all [
 									npc/2
-									block! = npc/2/expr/1
+									block! = npc/2/type
 									spec: npc/2/nested
 								][
 									repend/only result ['block npc reduce [spec]]
@@ -1843,7 +2439,7 @@ completion: context [
 						][
 							either all [
 								npc/2
-								block! = npc/2/expr/1
+								block! = npc/2/type
 								spec: npc/2/nested
 							][
 								repend/only result ['block npc reduce [spec]]
@@ -1855,7 +2451,7 @@ completion: context [
 							slash-end?
 							word = to word! npc/1/expr/1
 							npc/2
-							block! = npc/2/expr/1
+							block! = npc/2/type
 							spec: npc/2/nested
 						][
 							unless empty? ret: collect-block-word* reduce [spec] *all? [
@@ -1879,7 +2475,7 @@ completion: context [
 		collect*: function [npc [block!]][
 			forall npc [
 				if all [
-					refinement? npc/1/expr/1
+					refinement! = npc/1/type
 					any [
 						*all?
 						unique2? result to word! npc/1/expr/1
@@ -1896,19 +2492,19 @@ completion: context [
 						]
 					][
 						if word = to word! npc/1/expr/1 [
-							if npc/1/expr = [/local][exit]
+							if npc/1/expr = [/local] [exit]
 							repend/only result ['ref npc make block! 1]
 							unless *all? [return result]
 						]
 						continue
 					]
 					if slash-end? [
-						if npc/1/expr = [/local][exit]
+						if 'local = to word! npc/1/expr/1 [exit]
 						repend/only result ['ref npc make block! 1]
 					]
 					if end? [
 						if find/match to string! npc/1/expr/1 string [
-							if npc/1/expr = [/local][exit]
+							if npc/1/expr = [/local] [exit]
 							repend/only result ['ref npc make block! 1]
 						]
 					]
@@ -1926,7 +2522,7 @@ completion: context [
 			return make block! 1
 		]
 		if empty? specs [return specs]
-		if empty? path/2 [
+		if path/2 = '/ [
 			nspecs: make block! 4
 			forall specs [
 				switch specs/1/1 [
@@ -1955,7 +2551,7 @@ completion: context [
 			slash-end?: no
 			either path/2 [
 				end?: no
-				if empty? path/2 [
+				if path/2 = '/ [
 					slash-end?: yes
 				]
 			][
@@ -2001,7 +2597,7 @@ completion: context [
 			specs: nspecs
 			any [
 				tail? path: next path
-				empty? path/1
+				path/1 = '/
 			]
 		]
 		specs
@@ -2042,9 +2638,17 @@ completion: context [
 			;".reds"	[system?: yes]
 		][exit]
 		complete-sys-path: function [][
-			tstr: find/tail/last pure-path "/"
-			tstr: copy/part pure-path tstr
 			unless system-words/keyword? no fword [exit]
+			pure-path: to string! to path! path
+			either slash-end? [
+				append pure-path "/"
+				tstr: copy pure-path
+			][
+				npath: copy path
+				remove back tail npath
+				tstr: to string! to path! npath
+				append tstr "/"
+			]
 			if error? result: try [red-complete-ctx/red-complete-path pure-path no][
 				exit
 			]
@@ -2063,35 +2667,31 @@ completion: context [
 						'newText nstring
 					]
 					'data make map! reduce [
-						'path append copy tstr nstring
+						'path rejoin [tstr nstring]
 						'type "keypath"
 					]
 				]
 			]
 		]
-		spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
-		epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
-		path-str: copy/part spos epos
-		paths: split path-str "/"
-		fword: to word! paths/1
-		filter: last paths
-		pure-path: path-str
-		if any [
-			pure-path/1 = #"'"
-			pure-path/1 = #":"
+
+		unless path: gain-path pc [exit]
+		paths: copy path
+		upper: pc/1/upper
+		range: lexer/form-range upper/1/range
+		either all [
+			upper/1/error
+			upper/1/error/code = 'slash
 		][
-			pure-path: next pure-path
-		]
-		slash-end?: no
-		if empty? filter [
 			slash-end?: yes
-		]
-		range: lexer/form-range pc/1/range
-		either slash-end? [
+			append paths '/
 			range/start/character: range/end/character
 		][
-			range/start/character: range/end/character - length? filter
+			slash-end?: no
+			range/start/character: range/end/character - (pc/1/range/2/y - pc/1/range/1/y)
 		]
+		fword: to word! paths/1
+		filter: to string! last paths
+
 		pcs: collect-path top pc paths no no system?
 		forall pcs [
 			type: pcs/1/1
@@ -2141,70 +2741,35 @@ completion: context [
 
 	complete: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
-		unless pcs: semantic/position? top line column [
-			return none
-		]
+		unless pcs: semantic/position? top line column [return none]
+		if pcs/1 <> 'last [return none]
 		pc: pcs/2
-		switch/default pcs/1 [
-			one		[]
-			last	[]
-			mid		[
-				type: type?/word pc/1/expr/1
-				lstr: pick lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4 - 1 1
-				unless any [
-					find [word! lit-word! get-word! path! lit-path! get-path! file!] type
-					all [
-						any [
-							pc/1/expr/1 = path!
-							pc/1/expr/1 = lit-path!
-							pc/1/expr/1 = get-path!
-						]
-						#"/" = lstr
-					]
-				][
-					pc: next pc
-				]
-			]
-		][return none]
-		type: type?/word pc/1/expr/1
-		lstr: pick lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4 - 1 1
-		unless any [
-			find [word! lit-word! get-word! path! lit-path! get-path! file!] type
-			all [
-				any [
-					pc/1/expr/1 = path!
-					pc/1/expr/1 = lit-path!
-					pc/1/expr/1 = get-path!
-				]
-				#"/" = lstr
-			]
-		][
-			return none
-		]
+		if pc/1/type = 'comment [return none]
 		comps: clear last-comps
-		if type = 'file! [
-			complete-file top pc comps
+		if find [path! lit-path! get-path!] to word! pc/1/type [
+			unless all [
+				pc/1/error
+				pc/1/error/code = 'slash
+			][return none]
+			complete-path top back tail pc/1/nested comps
 			return comps
 		]
-		if find [word! lit-word! get-word!] type [
-			complete-word top pc comps
-			return comps
+		upper: pc/1/upper
+		type: upper/1/type
+		in-path?: no
+		if all [upper type][
+			in-path?: find [path! lit-path! get-path!] to word! type
 		]
-		if any [
-			find [path! lit-path! get-path!] type
-			all [
-				any [
-					pc/1/expr/1 = path!
-					pc/1/expr/1 = lit-path!
-					pc/1/expr/1 = get-path!
-				]
-				#"/" = lstr
-			]
-		][
+		if in-path? [
 			complete-path top pc comps
 			return comps
 		]
-		none
+		if pc/1/type = file! [
+			complete-file top pc comps
+			return comps
+		]
+		complete-word top pc comps
+		comps
 	]
 
 	form-func-spec: function [spec [block! none!]][
@@ -2255,8 +2820,8 @@ completion: context [
 	get-block: function [pc [block!]][
 		ret: make block! 4
 		forall pc [
-			if find reduce [block! map! paren!] pc/1/expr/1 [
-				append/only ret make pc/1/expr/1
+			if find [block! map! paren!] to word! pc/1/type [
+				append/only ret make pc/1/type
 					either pc/1/nested [
 						get-block pc/1/nested
 					][[]]
@@ -2271,16 +2836,18 @@ completion: context [
 		get-func-block: function [pc [block!]][
 			ret: make block! 4
 			forall pc [
-				if pc/1/expr = [/local][return ret]
-				expr: pc/1/expr/1
-				if find reduce [block! map! paren!] expr [
-					append/only ret make expr
+				if all [
+					refinement! = pc/1/type
+					pc/1/expr = [/local]
+				][return ret]
+				if find [block! map! paren!] to word! pc/1/type [
+					append/only ret make pc/1/type
 						either pc/1/nested [
 							get-func-block pc/1/nested
 						][[]]
 					continue
 				]
-				append ret expr
+				append ret pc/1/expr/1
 			]
 			ret
 		]
@@ -2315,7 +2882,7 @@ completion: context [
 		][return none]
 		resolve-word*: function [][
 			if all [
-				set-word? pc/1/expr/1
+				set-word! = pc/1/type
 				pc/2
 			][
 				unless ret: find-set?/*any? pc to word! pc/1/expr/1 no no [
@@ -2330,8 +2897,8 @@ completion: context [
 								not empty? specs
 								upper: specs/1/1/upper
 								upper/-1
-								word? fn: upper/-1/expr/1
-								find [func function] fn
+								word! = upper/-1/type
+								find [func function] fn: upper/-1/expr/1
 							][
 								ret: rejoin [string " is a function!^/" to string! fn " "]
 								append ret form-func-spec get-func-spec upper/1/nested
@@ -2343,8 +2910,8 @@ completion: context [
 							not empty? specs
 							upper: specs/1/1/upper
 							upper/-1
-							word? fn: upper/-1/expr/1
-							find [func function] fn
+							word! = upper/-1/type
+							find [func function] fn: upper/-1/expr/1
 						][
 							return func-info fn get-func-spec upper/1/nested to string! pc/1/expr/1
 						]
@@ -2357,7 +2924,7 @@ completion: context [
 						npc: ret/1/2
 						if all [
 							npc/2
-							string? npc/2/expr/1
+							string! = npc/2/type
 							par1: npc/1/upper
 							par2: par1/1/upper
 							par2/-1
@@ -2366,7 +2933,7 @@ completion: context [
 							desc: none
 							if all [
 								npc/3
-								npc/3/expr/1 = block!
+								npc/3/type = block!
 								nested: npc/3/nested
 							][
 								desc: get-block nested
@@ -2380,32 +2947,29 @@ completion: context [
 							]
 							return ret
 						]
-						if word? expr: specs/1/1/expr/1 [
-							return rejoin [string ": " mold expr]
+						if word! = specs/1/1/type [
+							return rejoin [string ": " mold specs/1/1/expr/1]
 						]
-						if datatype? expr [
-							return rejoin [string " is a " mold expr " variable."]
-						]
-						return rejoin [string " is a " mold type?/word expr " variable."]
+						return rejoin [string " is a " mold specs/1/1/type " variable."]
 					]
 				]
 			]
 			if all [
-				word? pc/1/expr/1
+				word! = pc/1/type
 				pc/-1
 				pc/-1/expr/1 = to issue! 'define
 			][
 				return rejoin [string " is a #define macro."]
 			]
 			if all [
-				word? pc/1/expr/1
+				word! = pc/1/type
 				pc/-1
 				pc/-1/expr/1 = to issue! 'enum
 			][
 				return rejoin [string " is a #enum type."]
 			]
 			if all [
-				word? pc/1/expr/1
+				word! = pc/1/type
 				upper: pc/1/upper
 				upper/-2
 				upper/-2/expr/1 = to issue! 'enum
@@ -2416,18 +2980,19 @@ completion: context [
 				none? itype
 				upper: pc/1/upper
 				upper/-1
+				upper/-1/type = word!
 				find [func function has] upper/-1/expr/1
 			][
 				if upper/-1/expr/1 = 'has [
 					return rejoin [string " is a local variable."]
 				]
-				if refinement? pc/1/expr/1 [
+				if refinement! = pc/1/type [
 					return rejoin [string " is a function refinement!"]
 				]
 				ret: rejoin [string " is a function argument or local variable!"]
 				if all [
 					pc/2
-					block! = pc/2/expr/1
+					block! = pc/2/type
 					pc/2/nested
 				][
 					return rejoin [ret "^/type: " mold get-block pc/2/nested]
@@ -2556,7 +3121,7 @@ completion: context [
 		result: hover-word* top pc word no
 		if 0 = length? result [return none]
 		forall result [
-			unless set-word? result/1/1/expr/1 [
+			unless set-word! = result/1/1/type [
 				pc: result/1
 				top: get-top pc
 				return resolve-word top pc to string! pc/1/expr/1 none
@@ -2579,8 +3144,6 @@ completion: context [
 		resolve-word top pc to string! pc/1/expr/1 result/1/1
 	]
 
-	hover-types: [word! lit-word! get-word! set-word! path! lit-path! get-path! set-path! integer! float! pair! binary! char! email! logic! percent! tuple! time! date! file! url! string! refinement! issue!]
-	literal-disp: skip hover-types 8
 	get-pos-info: function [uri [string!] line [integer!] column [integer!]][
 		unless top: semantic/find-top uri [return none]
 		unless pcs: semantic/position? top line column [
@@ -2588,58 +3151,7 @@ completion: context [
 		]
 		pc: pcs/2
 		unless find [one first last mid] pcs/1 [return none]
-		if find [one first last] pcs/1 [
-			type: type?/word pc/1/expr/1
-			unless find hover-types type [
-				return none
-			]
-		]
-		path: none
-		if any-path? pc/1/expr/1 [
-			pos: lexer/line-pos? top/1/lines line column
-			spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
-			epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
-			path: copy/part spos epos
-		]
-		switch pcs/1 [
-			one		[
-				if all [
-					any-path? pc/1/expr/1
-					npos: find/part pos "/" pc/1/range/4 - column
-				][
-					path: copy/part spos npos
-				]
-			]
-			first	[
-				if all [
-					any-path? pc/1/expr/1
-					npos: find path "/"
-				][
-					path: copy/part path npos
-				]
-			]
-			last	[]
-			mid		[
-				type: type?/word pc/1/expr/1
-				unless find hover-types type [
-					pc: next pc
-					type: type?/word pc/1/expr/1
-					unless find hover-types type [
-						return none
-					]
-					if any-path? pc/1/expr/1 [
-						spos: lexer/line-pos? top/1/lines pc/1/range/1 pc/1/range/2
-						epos: lexer/line-pos? top/1/lines pc/1/range/3 pc/1/range/4
-						path: copy/part spos epos
-						if npos: find path "/" [
-							path: copy/part path npos
-						]
-					]
-				]
-			]
-		]
-		if path [path: split path "/"]
-		return reduce [top pc path]
+		return reduce [top pc]
 	]
 
 	hover-keyword: function [word [word!]][
@@ -2653,31 +3165,51 @@ completion: context [
 	]
 
 	hover-keypath: function [path [block!]][
-		forall path [
-			if error? word: try [to word! path/1][
-				return none
-			]
-			path/1: word
+		if error? path: try [to path! path][return none]
+		system-words/get-path-info no path
+	]
+
+	gain-path: function [pc [block!]][
+		res: make block! 4
+		forever [
+			unless pc/1/expr [return none]
+			insert res pc/1/expr/1
+			if head? pc [break]
+			pc: back pc
 		]
-		system-words/get-path-info no to path! path
+		res
 	]
 
 	hover: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
-		top: ret/1 pc: ret/2 path: ret/3
-		if find literal-disp type: type?/word pc/1/expr/1 [
-			if file? pc/1/expr/1 [
-				return rejoin [mold type " : " form/part pc/1/expr/1 60]
+		top: ret/1 pc: ret/2
+		upper: pc/1/upper
+		in-path?: no
+		if upper/1/type [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
+		]
+		if in-path? [
+			unless path: gain-path pc [return none]
+			if 1 = length? path [
+				if ret: hover-word top pc word: to word! path/1 [return ret]
+				return hover-keyword word
 			]
-			return rejoin [mold type " : " mold/part pc/1/expr/1 60]
-		]
-		if 1 = length? path [
-			if ret: hover-word top pc word: to word! path/1 [return ret]
-			return hover-keyword word
-		]
-		if any-path? pc/1/expr/1 [
 			if ret: hover-path top pc path [return ret]
 			return hover-keypath path
+		]
+		type: pc/1/type
+		if type = 'comment [
+			return "comment!"
+		]
+		if type = file! [
+			return rejoin [mold type " : " form/part pc/1/expr/1 60]
+		]
+		wtype: to word! type
+		if find [block! paren! map! path! lit-path! get-path! set-path!] wtype [
+			return mold type
+		]
+		unless find [word! get-word! set-word!] wtype [
+			return rejoin [mold type " : " mold/part pc/1/expr/1 60]
 		]
 		if ret: hover-word top pc word: to word! pc/1/expr/1 [return ret]
 		hover-keyword word
@@ -2717,17 +3249,28 @@ completion: context [
 
 	definition: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
-		top: ret/1 pc: ret/2 path: ret/3
-		if find literal-disp type: type?/word pc/1/expr/1 [
-			return none
+		top: ret/1 pc: ret/2
+		upper: pc/1/upper
+		in-path?: no
+		if upper/1/type [
+			in-path?: find [path! lit-path! get-path! set-path!] to word! upper/1/type
 		]
-		if 1 = length? path [
-			return definition-word top pc to word! path/1
-		]
-		if any-path? pc/1/expr/1 [
+		if in-path? [
+			unless path: gain-path pc [return none]
+			if 1 = length? path [
+				return definition-word top pc to word! path/1
+			]
 			return definition-path top pc path
 		]
-		definition-word top pc to word! pc/1/expr/1
+		type: pc/1/type
+		wtype: to word! type
+		if find [block! paren! map! path! lit-path! get-path! set-path!] wtype [
+			return none
+		]
+		if find [word! get-word! set-word!] wtype [
+			return definition-word top pc to word! pc/1/expr/1
+		]
+		none
 	]
 
 	unique3?: function [specs [block!] str [string!]][
@@ -2739,12 +3282,12 @@ completion: context [
 
 	symbols: function [uri [string!]][
 		unless top: semantic/find-top uri [return none]
-		unless pc: top/1/nested [return none]
+		unless nested: top/1/nested [return none]
 		symbols*: function [npc [block!] depth [integer!]][
 			result: make block! 4
 			until [
 				if all [
-					set-word? npc/1/expr/1
+					set-word! = npc/1/type
 					specs: find-set?/*any? npc to word! npc/1/expr/1 no no
 					not empty? specs
 					unique3? result to string! npc/1/expr/1
@@ -2759,7 +3302,8 @@ completion: context [
 								either empty? first-spec [
 									range: pc/1/range
 								][
-									range: reduce [pc/1/range/1 pc/1/range/2 first-spec/1/range/3 first-spec/1/range/4]
+									upper: first-spec/1/upper
+									range: reduce [pc/1/range/1 upper/1/range/2]
 								]
 								append result last-symbol: make map! reduce [
 									'name		to string! pc/1/expr/1
@@ -2780,7 +3324,7 @@ completion: context [
 									range: pc/1/range
 								][
 									upper: first-spec/1/upper
-									range: reduce [pc/1/range/1 pc/1/range/2 upper/1/range/3 upper/1/range/4]
+									range: reduce [pc/1/range/1 upper/1/range/2]
 								]
 								append result last-symbol: make map! reduce [
 									'name		to string! pc/1/expr/1
@@ -2794,7 +3338,8 @@ completion: context [
 							either empty? first-spec [
 								range: pc/1/range
 							][
-								range: reduce [pc/1/range/1 pc/1/range/2 first-spec/1/range/3 first-spec/1/range/4]
+								upper: first-spec/1/upper
+								range: reduce [pc/1/range/1 upper/1/range/2]
 							]
 							append result last-symbol: make map! reduce [
 								'name		to string! pc/1/expr/1
@@ -2812,6 +3357,6 @@ completion: context [
 			]
 			result
 		]
-		symbols* back tail top/1/nested 0
+		symbols* back tail nested 0
 	]
 ]

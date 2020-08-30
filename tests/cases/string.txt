@@ -1,0 +1,9 @@
+"this is a string!"
+"中文字符"
+"hello ^/^(31) world!"
+"^"ha ha^""
+"test open {[(<"
+"test close }])>"
+"test ^(unknown)"
+"with 
+newline"

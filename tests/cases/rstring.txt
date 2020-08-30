@@ -1,0 +1,11 @@
+%{
+	{^any string! is allowed ^" ^/ ^@}
+}%
+%%{haha}%%
+%%{
+	match 1
+}%%%
+
+%%{
+	match 2
+}%

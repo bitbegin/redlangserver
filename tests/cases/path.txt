@@ -1,0 +1,24 @@
+a/b/c
+'a/bc/def
+:abc/de/f
+abc/def/ghi:
+a^b/c^^d/e^^^f
+a/b/(var)
+a/b/(1 + 2)
+a/b/(1 + 2):
+:a/b/(1 + 2)
+'a/b/(1 + 2)
+a/b/(var)/1
+a/b/(a + b/(c [e f]))
+a/b/2.34
+a/'b
+a/:b
+
+a/b/[]
+a/b/
+'a/bc/
+:abc/de/
+abc/def/:
+a/b/c:d
+a/b/1:2
+abc/def/'
