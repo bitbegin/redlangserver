@@ -159,12 +159,13 @@ on-initialize: function [params [map!]][
 		]
 	put caps 'definitionProvider true
 	put caps 'documentSymbolProvider true
-	put caps 'workspace make map! reduce [
-		'workspaceFolders make map! reduce [
-			'supported true
-			'changeNotifications true
-		]
-	]
+	;-- slow for now
+	;put caps 'workspace make map! reduce [
+	;	'workspaceFolders make map! reduce [
+	;		'supported true
+	;		'changeNotifications true
+	;	]
+	;]
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -225,6 +226,7 @@ register-watched-files: function [][
 ]
 
 on-initialized: function [params [map! none!]][
+	exit			;-- slow for now
 	diags: semantic/add-folder workspace-folder excluded-folder
 	if empty? diags [
 		exit
@@ -248,7 +250,8 @@ on-didChangeConfiguration: function [params [map! none!]][
 			]
 		]
 	]
-	register-watched-files
+	;-- slow for now
+	;register-watched-files
 ]
 
 on-didChangeWorkspaceFolders: function [params [map! none!]][
