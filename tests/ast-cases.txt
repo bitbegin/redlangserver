@@ -1,4 +1,4 @@
-21-Aug-2020/14:30:43+08:00
+31-Aug-2020/18:55:23+08:00
 begin %binary.txt
 ================================================
 
@@ -180,18 +180,22 @@ begin %block.txt
         upper: [1x1 16x1]
       ]
       [
-        range: [6x1 6x4]
+        range: [6x1 6x3]
         type: block!
-        nested: 
-        [
-          [
-            range: [6x2 6x3]
-            type: string!
-            upper: [6x1 6x4]
-            error: [code only-closed]
-          ]
-        ]
         upper: [1x1 16x1]
+        error: [code only-opened]
+      ]
+      [
+        range: [6x2 6x3]
+        type: string!
+        upper: [1x1 16x1]
+        error: [code only-closed]
+      ]
+      [
+        range: [6x3 6x4]
+        type: block!
+        upper: [1x1 16x1]
+        error: [code only-closed]
       ]
       [
         range: [8x1 8x21]
@@ -1398,6 +1402,11 @@ begin %mixure.red
                 upper: [42x10 42x18]
               ]
             ]
+            upper: [38x9 44x2]
+          ]
+          [
+            range: [42x19 42x27]
+            type: comment
             upper: [38x9 44x2]
           ]
           [
@@ -3094,7 +3103,7 @@ begin %path.txt
           ]
         ]
         upper: [1x1 25x1]
-        error: [code slash-get]
+        error: [code word! expr ":"]
       ]
       [
         range: [22x1 22x6]
@@ -3115,13 +3124,7 @@ begin %path.txt
           ]
         ]
         upper: [1x1 25x1]
-        error: [code only-opened]
-      ]
-      [
-        range: [22x5 22x6]
-        type: word!
-        upper: [1x1 25x1]
-        error: [code only-closed]
+        error: [code word! expr "c"]
       ]
       [
         expr: :d
@@ -3180,7 +3183,7 @@ begin %path.txt
           ]
         ]
         upper: [1x1 25x1]
-        error: [code slash-lit]
+        error: [code word! expr "'"]
       ]
     ]
     source: {a/b/c^/'a/
