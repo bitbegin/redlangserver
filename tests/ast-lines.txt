@@ -1,4 +1,4 @@
-30-Aug-2020/17:35:19+08:00
+31-Aug-2020/18:58:03+08:00
 begin {"}
 ================================================
 
@@ -762,12 +762,6 @@ begin "{{}"
         upper: [1x1 1x4]
         error: [code only-opened at 2]
       ]
-      [
-        range: [1x3 1x4]
-        type: string!
-        upper: [1x1 1x4]
-        error: [code only-closed]
-      ]
     ]
     source: "{{}"
     lines: [
@@ -1167,7 +1161,7 @@ begin "a/b/:"
           ]
         ]
         upper: [1x1 1x6]
-        error: [code slash-get]
+        error: [code word! expr ":"]
       ]
     ]
     source: "a/b/:"
@@ -1206,7 +1200,7 @@ begin "a/b/: "
           ]
         ]
         upper: [1x1 1x7]
-        error: [code slash-get]
+        error: [code word! expr ":"]
       ]
     ]
     source: "a/b/: "
@@ -1245,7 +1239,7 @@ begin "a/b/'"
           ]
         ]
         upper: [1x1 1x6]
-        error: [code slash-lit]
+        error: [code word! expr "'"]
       ]
     ]
     source: "a/b/'"
@@ -1284,7 +1278,7 @@ begin "a/b/' "
           ]
         ]
         upper: [1x1 1x7]
-        error: [code slash-lit]
+        error: [code word! expr "'"]
       ]
     ]
     source: "a/b/' "
@@ -1362,13 +1356,7 @@ begin {a/"b}
           ]
         ]
         upper: [1x1 1x5]
-        error: [code only-opened]
-      ]
-      [
-        range: [1x3 1x5]
-        type: string!
-        upper: [1x1 1x5]
-        error: [code only-closed]
+        error: [code string! expr {"b}]
       ]
     ]
     source: {a/"b}
@@ -1401,13 +1389,7 @@ begin {a/"b }
           ]
         ]
         upper: [1x1 1x6]
-        error: [code only-opened]
-      ]
-      [
-        range: [1x3 1x6]
-        type: string!
-        upper: [1x1 1x6]
-        error: [code only-closed]
+        error: [code string! expr {"b }]
       ]
     ]
     source: {a/"b }

@@ -2957,6 +2957,7 @@ completion: context [
 			if all [
 				word! = pc/1/type
 				pc/-1
+				pc/-1/expr
 				pc/-1/expr/1 = to issue! 'define
 			][
 				return rejoin [string " is a #define macro."]
@@ -2964,6 +2965,7 @@ completion: context [
 			if all [
 				word! = pc/1/type
 				pc/-1
+				pc/-1/expr
 				pc/-1/expr/1 = to issue! 'enum
 			][
 				return rejoin [string " is a #enum type."]
@@ -3247,6 +3249,35 @@ completion: context [
 		ret
 	]
 
+	definition-file: function [top [block!] file [file!]][
+		ret: make block! 2
+		if #"/" = first file [
+			unless exists? file [return none]
+			if dir? file [return none]
+			append ret make map! reduce [
+				'uri lexer/file-to-uri file
+				'range lexer/form-range [1x1 1x1]
+			]
+			return ret
+		]
+		origin-file: lexer/uri-to-file top/1/uri
+		tfile: find/tail/last origin-file "/"
+		origin-dir: copy/part origin-file tfile
+		nfile: semantic/related-file origin-dir file
+		if all [
+			nfile
+			exists? nfile
+			not dir? nfile
+		][
+			append ret make map! reduce [
+				'uri lexer/file-to-uri nfile
+				'range lexer/form-range [1x1 1x1]
+			]
+			return ret
+		]
+		ret
+	]
+
 	definition: function [uri [string!] line [integer!] column [integer!]][
 		unless ret: get-pos-info uri line column [return none]
 		top: ret/1 pc: ret/2
@@ -3263,6 +3294,9 @@ completion: context [
 			return definition-path top pc path
 		]
 		type: pc/1/type
+		if type = file! [
+			return definition-file top pc/1/expr/1
+		]
 		wtype: to word! type
 		if find [block! paren! map! path! lit-path! get-path! set-path!] wtype [
 			return none

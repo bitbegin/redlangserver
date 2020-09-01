@@ -13,7 +13,6 @@ Red [
 #include %semantic.red
 
 logger: none
-auto-complete?: false
 open-logger?: false
 debug-on?: false
 
@@ -138,11 +137,8 @@ forall trigger-string [
 ]
 on-initialize: function [params [map!]][
 	set 'client-caps params
-	either params/initializationOptions [
-		set 'auto-complete? params/initializationOptions/autoComplete
+	if params/initializationOptions [
 		set 'excluded-folder params/initializationOptions/excludedPath
-	][
-		set 'auto-complete? true
 	]
 	if ws: params/workspaceFolders [
 		forall ws [
@@ -159,12 +155,13 @@ on-initialize: function [params [map!]][
 		]
 	put caps 'definitionProvider true
 	put caps 'documentSymbolProvider true
-	put caps 'workspace make map! reduce [
-		'workspaceFolders make map! reduce [
-			'supported true
-			'changeNotifications true
-		]
-	]
+	;-- slow for now
+	;put caps 'workspace make map! reduce [
+	;	'workspaceFolders make map! reduce [
+	;		'supported true
+	;		'changeNotifications true
+	;	]
+	;]
 
 	json-body/result: make map! reduce [
 		'capabilities caps
@@ -225,6 +222,7 @@ register-watched-files: function [][
 ]
 
 on-initialized: function [params [map! none!]][
+	exit			;-- slow for now
 	diags: semantic/add-folder workspace-folder excluded-folder
 	if empty? diags [
 		exit
@@ -237,7 +235,6 @@ on-initialized: function [params [map! none!]][
 ]
 
 on-didChangeConfiguration: function [params [map! none!]][
-	set 'auto-complete? params/settings/red/autoComplete
 	if open-logger? <> params/settings/red/rls-debug [
 		open-logger?: params/settings/red/rls-debug
 		unless debug-on? [
@@ -248,7 +245,8 @@ on-didChangeConfiguration: function [params [map! none!]][
 			]
 		]
 	]
-	register-watched-files
+	;-- slow for now
+	;register-watched-files
 ]
 
 on-didChangeWorkspaceFolders: function [params [map! none!]][
@@ -427,11 +425,6 @@ on-textDocument-didSave: function [params [map!]][
 ]
 
 on-textDocument-completion: function [params [map!]][
-	unless auto-complete? [
-		json-body/result: ""
-		response
-		exit
-	]
 	uri: params/textDocument/uri
 	line: params/position/line
 	column: params/position/character

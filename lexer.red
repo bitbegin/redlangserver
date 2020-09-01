@@ -7,6 +7,11 @@ Red [
 ]
 
 lexer: context [
+	all-path!: reduce [path! lit-path! get-path! set-path!]
+	noset-path!: reduce [path! lit-path! get-path!]
+	all-pair!: reduce [block! paren! map!]
+	pre-path!: reduce [lit-path! get-path!]
+
 	uri-to-file: function [uri [string!] return: [file!]][
 		src: copy find/tail uri "file:///"
 		to-red-file dehex src
@@ -90,7 +95,6 @@ lexer: context [
 		return:		[block!]
 	][
 		add-node: func [
-			base	[integer!]
 			x		[integer!]
 			y		[integer!]
 			type	[datatype! word!]
@@ -100,7 +104,7 @@ lexer: context [
 		][
 			nested: select last stack 'nested
 			repend/only nested [
-				'range reduce [index-line? lines base + x index-line? lines base + y]
+				'range reduce [index-line? lines x index-line? lines y]
 				'type  type
 				'upper back tail stack
 			]
@@ -112,7 +116,6 @@ lexer: context [
 			]
 		]
 		push-node: func [
-			base	[integer!]
 			x		[integer!]
 			type	[datatype!]
 			return:	[block!]
@@ -120,7 +123,7 @@ lexer: context [
 		][
 			nested: select last stack 'nested
 			repend/only nested [
-				'range reduce [index-line? lines base + x]
+				'range reduce [index-line? lines x]
 				'type  type
 				'upper back tail stack
 			]
@@ -137,86 +140,68 @@ lexer: context [
 			/local ltype x y err str
 		][
 			[prescan scan load open close error]
+			close-path: func [
+				y	[integer!]
+				err	[block!]
+				/local item
+			][
+				item: last stack
+				append item/range index-line? lines y
+				repend item ['error err]
+				stack: item/upper
+			]
 			match-pair: func [
 				x	[integer!]
 				y	[integer!]
-				p?	[logic!]
-				err
-				/local ntype wtype range nstop item
+				/local ltype item nstop
 			][
-				nstop: none
 				forever [
-					unless ntype: select last stack 'type [				;-- check if top
-						add-node base x y type none [code only-closed]
+					unless ltype: select last stack 'type [				;-- check if top
+						add-node x y type none [code only-closed]
 						break
 					]
-					wtype: to word! ntype
+					unless nstop [
+						nstop: index-line? lines y
+					]
 					if any [											;-- match the upper's type
-						ntype = type
+						ltype = type
 						all [
-							ntype = path!
+							find noset-path! ltype
 							type = set-path!
 						]
 						all [
-							ntype = map!
+							ltype = map!
 							type = paren!
-						]
-						all [
-							find [path! lit-path! get-path!] wtype
-							type = path!
 						]
 					][
 						item: last stack
 						if type = set-path! [
 							item/type: type
 						]
-						if all [
-							p?
-							find [path! lit-path! get-path!] wtype
-						][
-							unless err [err: [code unknown]]
-							either item/error [
-								item/error: err
-							][
-								repend item ['error err]
-							]
-						]
-						append item/range index-line? lines base + y
+						append item/range nstop
 						remove-last-empty-nested item
 						stack: item/upper
 						break
 					]
-					unless nstop [
-						nstop: index-line? lines base + y
-					]
 					item: last stack
 					append item/range nstop
-					either item/error [
-						item/error/code: 'only-opened
-					][
-						repend item ['error [code only-opened]]
-					]
+					repend item ['error [code only-opened]]
 					remove-last-empty-nested item
 					stack: item/upper
 				]
 			]
+
 			in-path?: func [
-				/local p? nstack ltype
+				/local p? ltype
 			][
 				p?: no
-				nstack: stack
-				while [
-					all [
-						nstack
-						ltype: select last nstack 'type
-						ltype
-					]
+				if all [
+					ltype: select last stack 'type
+					ltype
 				][
-					if find [path! lit-path! get-path!] to word! ltype [
+					if find noset-path! ltype [
 						p?: yes
-						break
 					]
-					nstack: select last nstack 'upper
 				]
 				p?
 			]
@@ -229,8 +214,7 @@ lexer: context [
 						type = 'eof
 						input/1 = #";"
 					][
-						add-node base token/x token/y 'comment none none
-						throw token/y - 1
+						add-node token/x token/y 'comment none none
 					]
 					true
 				]
@@ -239,126 +223,114 @@ lexer: context [
 						as-pair start stop
 					][token]
 					stype: type
-					either stype = 'comment [
-						add-node base stoken/x stoken/y stype none none
-						either in-path? [
-							true
-						][
-							throw stoken/y - 1
-						]
-					][
-						true
+					if stype = 'comment [
+						add-node stoken/x stoken/y stype none none
 					]
+					true
 				]
 				load [
-					add-node base stoken/x stoken/y stype token none
-					start: stop: none
-					either in-path? [
-						true
-					][
-						throw stoken/y - 1
-					]
+					add-node stoken/x stoken/y stype token none
+					start: stop: none stoken: none
+					true
 				]
 				open [
 					either type = string! [
 						if none? start [
 							start: token/x
 						]
-						true
 					][
-						push-node base token/x type
-						either in-path? [
-							true
-						][
-							throw token/y
-						]
+						push-node token/x type
 					]
+					true
 				]
 				close [
 					either type = string! [
 						stop: token/y + 1
-						true
 					][
 						nstop: none
 						x: token/x
-						either find [path! lit-path! get-path!] to word! type [
+						either find noset-path! type [
 							y: token/y
 						][
+							switch input/1 [
+								#")" [type: paren!]
+								#"]" [type: block!]
+								#"}" [type: string!]
+							]
 							y: token/y + 1
+							input: next input
 						]
-						match-pair x y no none
-						either in-path? [
-							true
-						][
-							throw y - 1
-						]
+						close-y: token/y
+						match-pair x y
 					]
+					true
 				]
 				error [
-					if find [path! lit-path! get-path!] to word! type [
-						case [
-							input/1 = #"/" [			;-- eof after /
-								y: token/y + 1
-								err: [code slash]
-							]
-							#"/" = input/-1 [			;-- slash
-								y: token/y
-								err: [code slash]
-							]
-							true [
-								y: token/y + 1
-								err: [code unknown]
-							]
-						]
-						match-pair token/x y yes err
-						throw y - 1
-					]
-					if in-path? [
-						either all [					;-- path! like a/:
-							token/x + 1 = token/y
-							#"/" = input/-2
-							any [
-								#":" = input/-1
-								#"'" = input/-1
-							]
-						][
-							either #":" = input/-1 [
-								err: [code slash-get]
-							][
-								err: [code slash-lit]
-							]
-							type: path!
-						][
-							err: [code unknown]
-						]
-						match-pair token/x token/y yes err
-						throw token/y - 1
-					]
-					
 					case [
+						find noset-path! type [
+							case [
+								input/1 = #"/" [			;-- eof after /
+									y: token/y + 1
+									input: next input
+									err: [code slash]
+								]
+								input/-1 = #"/" [			;-- slash
+									y: token/y
+									err: [code slash]
+								]
+								true [
+									y: token/y + 1
+									input: next input
+									err: [code unknown]
+								]
+							]
+							close-path y err
+						]
+						find all-pair! type [
+							if all [
+								token/y > close-y
+								find ")]}" input/1
+							][
+								switch input/1 [
+									#")" [type: paren!]
+									#"]" [type: block!]
+									#"}" [type: string!]
+								]
+								match-pair token/x token/y + 1
+							]
+							input: next input
+						]
+						in-path? [
+							s: skip input token/x - token/y
+							err: reduce ['code type 'expr copy/part s input]
+							close-path token/y err
+						]
 						type = string! [
 							;-- multiline
 							either start [
 								x: start
 								y: token/y
+								input: next input
 							][
 								;-- have scaned
 								either stoken [
 									x: pretoken/x
 									y: pretoken/y + 1
+									input: next input
 								][
 									either input/1 = #"^"" [
 										x: pretoken/x
 										y: pretoken/y + 1
+										input: next input
 									][
 										x: pretoken/x
 										y: pretoken/y
 									]
 								]
 							]
+							stoken: none
 							err: reduce ['code 'only-opened 'at token/x - x]
-							add-node base x y type none err
-							throw y - 1
+							add-node x y type none err
 						]
 						type = error! [
 							either input/1 = #"}" [
@@ -367,53 +339,49 @@ lexer: context [
 							][
 								err: [code only-opened]
 							]
-							add-node base token/x token/y + 1 type none err
-							throw token/y
+							input: next input
+							add-node token/x token/y + 1 type none err
 						]
 						type = char! [
 							either input/1 = #"^"" [
 								y: token/y + 1
+								input: next input
 								err: [code invalid]
 							][
 								y: token/y
 								err: [code not-closed]
 							]
-							add-node base token/x y type none err
-							throw y - 1
+							add-node token/x y type none err
 						]
 						type = binary! [
 							either input/1 = #"}" [
 								y: token/y + 1
+								input: next input
 								err: [code invalid]
 							][
 								y: token/y
 								err: [code not-closed]
 							]
-							add-node base token/x y type none err
-							throw y - 1
+							add-node token/x y type none err
 						]
 						true [
-							add-node base token/x token/y type none [code unknown]
-							throw token/y - 1
+							add-node token/x token/y type none [code unknown]
 						]
 					]
+					false
 				]
 			]
 		]
 
 		top: stack
-		forever [
-			pretoken: none										;-- used for store prescan token
-			start: none											;-- used for mark the begin of string!
-			stop: none											;-- used for mark the end of string!
-			stoken: none										;-- used for store scan token
-			stype: none											;-- used for store scan type
-			base: (index? src) - 1
-			pos: catch [system/words/transcode/trace src :lex]
-			if block? pos [break]
-			;probe pos
-			src: skip src pos
-		]
+
+		pretoken: none										;-- used for store prescan token
+		start: none											;-- used for mark the begin of string!
+		stop: none											;-- used for mark the end of string!
+		stoken: none										;-- used for store scan token
+		stype: none											;-- used for store scan type
+		close-y: 0
+		system/words/transcode/trace src :lex
 
 		stop: none
 		while [stack <> top][
