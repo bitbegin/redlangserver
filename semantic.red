@@ -1659,10 +1659,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				switch/default find/last sources/1/1/uri "." [
-					".red"	[nsystem?: no]
-					;".reds"	[nsystem?: yes]
-				][continue]
+				nsystem?: no
 				if all [
 					nsystem? = system?
 					nested: sources/1/1/nested
@@ -2061,10 +2058,7 @@ completion: context [
 	]
 
 	complete-word: function [top [block!] pc [block!] comps [block!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][exit]
+		system?: no
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -2613,10 +2607,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				switch/default find/last sources/1/1/uri "." [
-					".red"	[nsystem?: no]
-					;".reds"	[nsystem?: yes]
-				][continue]
+				nsystem?: no
 				if all [
 					nsystem? = system?
 					nested: sources/1/1/nested
@@ -2633,10 +2624,7 @@ completion: context [
 	]
 
 	complete-path: function [top [block!] pc [block!] comps [block!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][exit]
+		system?: no
 		complete-sys-path: function [][
 			unless system-words/keyword? no fword [exit]
 			pure-path: to string! to path! path
@@ -2876,10 +2864,7 @@ completion: context [
 	]
 
 	resolve-word: function [top [block!] pc [block!] string [string!] itype [word! none!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][return none]
+		system?: no
 		resolve-word*: function [][
 			if all [
 				set-word! = pc/1/type
@@ -3086,10 +3071,7 @@ completion: context [
 	]
 
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][return make block! 1]
+		system?: no
 		result: make block! 4
 		collect-word*/match? pc word result *all?
 		if all [
@@ -3099,10 +3081,7 @@ completion: context [
 		sources: semantic/sources
 		forall sources [
 			if sources/1 <> top [
-				switch/default find/last sources/1/1/uri "." [
-					".red"	[nsystem?: no]
-					;".reds"	[nsystem?: yes]
-				][continue]
+				nsystem?: no
 				if all [
 					nsystem? = system?
 					nested: sources/1/1/nested
@@ -3135,10 +3114,7 @@ completion: context [
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][return none]
+		system?: no
 		result: collect-path top pc path no yes system?
 		if 0 = length? result [return none]
 		pc: result/1/2
@@ -3232,10 +3208,7 @@ completion: context [
 	]
 
 	definition-path: function [top [block!] pc [block!] path [block!]][
-		switch/default find/last top/1/uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][return make block! 1]
+		system?: no
 		result: collect-path top pc path yes yes system?
 		if 0 = length? result [return none]
 		ret: make block! 4
