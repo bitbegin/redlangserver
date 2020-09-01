@@ -2957,6 +2957,7 @@ completion: context [
 			if all [
 				word! = pc/1/type
 				pc/-1
+				pc/-1/expr
 				pc/-1/expr/1 = to issue! 'define
 			][
 				return rejoin [string " is a #define macro."]
@@ -2964,6 +2965,7 @@ completion: context [
 			if all [
 				word! = pc/1/type
 				pc/-1
+				pc/-1/expr
 				pc/-1/expr/1 = to issue! 'enum
 			][
 				return rejoin [string " is a #enum type."]
