@@ -195,7 +195,6 @@ semantic: context [
 	]
 
 	add-source-to-table: function [uri [string!] syntax [block!]][
-		repend syntax/1 ['uri uri]
 		either item: find-source uri [
 			item/1: syntax
 		][
@@ -271,7 +270,8 @@ semantic: context [
 		none
 	]
 
-	add-include-file: function [top [block!]][
+	add-include-file: function [top [block!] depth [integer!]][
+		if depth <= 0 [exit]
 		include-file: function [file [file!]][
 			if all [
 				exists? file
@@ -279,7 +279,7 @@ semantic: context [
 			][
 				uri: lexer/file-to-uri file
 				write-log rejoin ["include: " uri]
-				add-source* uri code
+				add-source* uri code depth - 1
 			]
 		]
 
@@ -343,27 +343,36 @@ semantic: context [
 		]
 	]
 
-	add-source*: function [uri [string!] code [string!] /force return: [block!]][
-		either any [
-			force
+	add-source-force: function [uri [string!] code [string!] return: [block!]][
+		unless ext: find/last/tail uri "." [exit]
+		case [
+			ext = "red" [ftype: 'red]
+			ext = "reds" [ftype: 'reds]
+			true [exit]
+		]
+		write-log rejoin ["parse uri: " uri]
+		top: lexer/transcode code
+		repend top ['uri uri 'ftype ftype]
+		add-source-to-table uri top
+		top
+	]
+
+	add-source*: function [uri [string!] code [string!] depth [integer!] return: [block!]][
+		if any [
 			not top: find-top uri
 			top/1/source <> code
 		][
-			write-log rejoin ["parse uri: " uri]
-			top: lexer/transcode code
-			update-diags top uri
-			add-source-to-table uri top
-			add-include-file top
-		][
-			update-diags top uri
+			top: add-source-force uri code
+			add-include-file top depth
 		]
+		update-diags top uri
 		top
 	]
 
 	add-source: function [uri [string!] code [string!]][
 		clear diagnostics
 		write-log rejoin ["add source: " uri]
-		add-source* uri code
+		add-source* uri code 1
 		diagnostics
 	]
 
@@ -377,13 +386,7 @@ semantic: context [
 				add-folder* file
 				continue
 			]
-			ext: find/last file "."
-			if any [
-				%.red = ext
-				;%.reds = ext
-			][
-				add-source* lexer/file-to-uri file read-file file
-			]
+			add-source* lexer/file-to-uri file read-file file 1
 		]
 	]
 
@@ -1295,13 +1298,9 @@ semantic: context [
 	tags: [head first one last mid insert tail empty]
 	ws: charset " ^M^/^-"
 	update-source: function [uri [string!] changes [block!]][
-		switch/default find/last uri "." [
-			".red"	[system?: no]
-			;".reds"	[system?: yes]
-		][return false]
+		unless ext: find/last/tail uri "." [return false]
+		unless any [ext = "red" ext = "reds"][return false]
 		clear diagnostics
-		not-trigger-charset: complement charset "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%.+-_=?*&~?`"
-		;write-log mold changes
 		unless top: find-top uri [
 			return false
 		]
@@ -1345,7 +1344,8 @@ semantic: context [
 					none? epcs
 				][
 					write-log "position failed"
-					top: add-source*/force uri ncode
+					top: add-source-force uri ncode
+					add-include-file top 1
 					continue
 				]
 				write-log mold reduce [spcs/1 epcs/1]
@@ -1354,7 +1354,8 @@ semantic: context [
 					find tags epcs/1
 				][
 					write-log "position failed 2"
-					top: add-source*/force uri ncode
+					top: add-source-force uri ncode
+					add-include-file top 1
 					continue
 				]
 
@@ -1367,7 +1368,8 @@ semantic: context [
 				]
 			]
 			write-log "diff failed"
-			top: add-source*/force uri ncode
+			top: add-source-force uri ncode
+			add-include-file top 1
 		]
 		;write-log lexer/sformat top
 		unless empty? errors: collect-errors top [
