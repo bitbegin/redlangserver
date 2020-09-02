@@ -601,6 +601,14 @@ semantic: context [
 					if nested/1/error [return false]
 					write-log "empty pair"
 				]
+				type = string! [
+					if nested/1/error [return false]
+					write-log "string"
+				]
+				type = file! [
+					if nested/1/error [return false]
+					write-log "file"
+				]
 				find all-path! type [
 					start: nested/1/range/1
 					nnested: nested/1/nested
@@ -2754,7 +2762,10 @@ completion: context [
 			complete-file top pc comps
 			return comps
 		]
-		complete-word top pc comps
+		if find [word! lit-word! get-word!] to word! pc/1/type [
+			complete-word top pc comps
+			return comps
+		]
 		comps
 	]
 
