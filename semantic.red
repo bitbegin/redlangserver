@@ -271,6 +271,7 @@ semantic: context [
 	]
 
 	add-include-file: function [top [block!] depth [integer!]][
+		unless top [exit]
 		if depth <= 0 [exit]
 		include-file: function [file [file!]][
 			if all [
@@ -352,7 +353,7 @@ semantic: context [
 		]
 		write-log rejoin ["parse uri: " uri]
 		top: lexer/transcode code
-		repend top ['uri uri 'ftype ftype]
+		repend top/1 ['uri uri 'ftype ftype]
 		add-source-to-table uri top
 		top
 	]
@@ -1654,20 +1655,18 @@ completion: context [
 		]
 	]
 
-	collect-word: function [top [block!] pc [block!] system? [logic!]][
+	collect-word: function [top [block!] pc [block!]][
 		result: make block! 4
 		word: to word! pc/1/expr/1
 		collect-word* pc word result no
 		sources: semantic/sources
 		forall sources [
-			if sources/1 <> top [
-				nsystem?: no
-				if all [
-					nsystem? = system?
-					nested: sources/1/1/nested
-				][
-					collect-word* back tail nested word result no
-				]
+			if all [
+				sources/1 <> top
+				sources/1/1/ftype = top/1/ftype
+				nested: sources/1/1/nested
+			][
+				collect-word* back tail nested word result no
 			]
 		]
 		result
@@ -2060,7 +2059,7 @@ completion: context [
 	]
 
 	complete-word: function [top [block!] pc [block!] comps [block!]][
-		system?: no
+		system?: top/1/ftype = 'reds
 		system-completion-kind: function [word [word!]][
 			type: type?/word get word
 			kind: case [
@@ -2119,7 +2118,7 @@ completion: context [
 		if empty? string: to string! to word! pc/1/expr/1 [
 			exit
 		]
-		result: collect-word top pc system?
+		result: collect-word top pc
 		forall result [
 			rpc: result/1
 			top: rpc
@@ -2599,7 +2598,7 @@ completion: context [
 		specs
 	]
 
-	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!] system? [logic!]][
+	collect-path: function [top [block!] pc [block!] path [block!] *all? [logic!] match? [logic!]][
 		specs: make block! 8
 		ret: collect-path* pc path *all? match?
 		if 0 < length? ret [
@@ -2608,17 +2607,15 @@ completion: context [
 		]
 		sources: semantic/sources
 		forall sources [
-			if sources/1 <> top [
-				nsystem?: no
-				if all [
-					nsystem? = system?
-					nested: sources/1/1/nested
-				][
-					ret: collect-path* back tail nested path *all? match?
-					if 0 < length? ret [
-						append specs ret
-						unless *all? [return specs]
-					]
+			if all [
+				sources/1 <> top
+				sources/1/1/ftype = top/1/ftype
+				nested: sources/1/1/nested
+			][
+				ret: collect-path* back tail nested path *all? match?
+				if 0 < length? ret [
+					append specs ret
+					unless *all? [return specs]
 				]
 			]
 		]
@@ -2626,7 +2623,6 @@ completion: context [
 	]
 
 	complete-path: function [top [block!] pc [block!] comps [block!]][
-		system?: no
 		complete-sys-path: function [][
 			unless system-words/keyword? no fword [exit]
 			pure-path: to string! to path! path
@@ -2682,7 +2678,7 @@ completion: context [
 		fword: to word! paths/1
 		filter: to string! last paths
 
-		pcs: collect-path top pc paths no no system?
+		pcs: collect-path top pc paths no no
 		forall pcs [
 			type: pcs/1/1
 			npc: pcs/1/2
@@ -2866,7 +2862,7 @@ completion: context [
 	]
 
 	resolve-word: function [top [block!] pc [block!] string [string!] itype [word! none!]][
-		system?: no
+		system?: top/1/ftype = 'reds
 		resolve-word*: function [][
 			if all [
 				set-word! = pc/1/type
@@ -3073,7 +3069,6 @@ completion: context [
 	]
 
 	hover-word*: function [top [block!] pc [block!] word [word!] *all? [logic!]][
-		system?: no
 		result: make block! 4
 		collect-word*/match? pc word result *all?
 		if all [
@@ -3082,19 +3077,17 @@ completion: context [
 		][return result]
 		sources: semantic/sources
 		forall sources [
-			if sources/1 <> top [
-				nsystem?: no
+			if all [
+				sources/1 <> top
+				sources/1/1/ftype = top/1/ftype
+				nested: sources/1/1/nested
+			][
+				npc: back tail nested
+				collect-word*/match? npc word result *all?
 				if all [
-					nsystem? = system?
-					nested: sources/1/1/nested
-				][
-					npc: back tail nested
-					collect-word*/match? npc word result *all?
-					if all [
-						not *all?
-						0 < length? result
-					][return result]
-				]
+					not *all?
+					0 < length? result
+				][return result]
 			]
 		]
 		result
@@ -3116,8 +3109,7 @@ completion: context [
 	]
 
 	hover-path: function [top [block!] pc [block!] path [block!]][
-		system?: no
-		result: collect-path top pc path no yes system?
+		result: collect-path top pc path no yes
 		if 0 = length? result [return none]
 		pc: result/1/2
 		top: get-top pc
@@ -3210,8 +3202,7 @@ completion: context [
 	]
 
 	definition-path: function [top [block!] pc [block!] path [block!]][
-		system?: no
-		result: collect-path top pc path yes yes system?
+		result: collect-path top pc path yes yes
 		if 0 = length? result [return none]
 		ret: make block! 4
 		forall result [
